@@ -1,0 +1,4 @@
+Another implementation of TT3!  This time I'm starting with a fresh
+Badger base (0.7), and working upwards from the Template::Variable/Type
+objects that implement the dotops.  See test implementation 
+Template-Variable/TTV
