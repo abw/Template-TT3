@@ -5,30 +5,31 @@ use Badger::Class
     base     => 'Badger::Constants',
     constant => {
         # chomp flags for removing whitespace around tags
-        CHOMP_NONE      => 0,            # do not remove whitespace
-        CHOMP_ONE       => 1,            # remove one line of whitespace
-        CHOMP_COLLAPSE  => 2,            # collapse all whitespace to a single space
-        CHOMP_ALL       => 3,            # remove all whitespace including newlines
+        CHOMP_NONE      => 0,           # do not remove whitespace
+        CHOMP_ONE       => 1,           # remove one line of whitespace
+        CHOMP_COLLAPSE  => 2,           # collapse all whitespace to a single space
+        CHOMP_ALL       => 3,           # remove all whitespace including newlines
     
         # parser flags
-        NO_WHITESPACE   => 0,            # don't skip leading whitespace 
-        SKIP_WHITESPACE => 1,            # skip leading whitespace
-        
-        VARIABLES_SLOT  => 0,
-        METHODS_SLOT    => 1,
-        CONFIG_SLOT     => 2,
-        NAME_SLOT       => 3,
-        VALUE_SLOT      => 4,
-        PARENT_SLOT     => 5,
-        ARGS_SLOT       => 6,
+        NO_WHITESPACE   => 0,           # don't skip leading whitespace 
+        SKIP_WHITESPACE => 1,           # skip leading whitespace
     },
     exports => {
         any  => 'PRESENT',
         tags => {
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_COLLAPSE CHOMP_ALL',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
-            type_slots  => 'VARIABLES_SLOT METHODS_SLOT CONFIG_SLOT
-                            NAME_SLOT VALUE_SLOT ARGS_SLOT PARENT_SLOT',
+            type_slots  => {
+                # variable slots
+                META    => '=0',
+                NAME    => '=1',
+                VALUE   => '=2',
+                PARENT  => '=3',
+                # variable metadata slots
+                CONFIG  => '=0',
+                VARS    => '=1',
+                METHODS => '=2',
+            }
         },
     };
 

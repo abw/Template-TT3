@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    tests => 7,
+    tests => 8,
     debug => 'Template::TT3::Variables',
     args  => \@ARGV;
 
@@ -48,5 +48,9 @@ is( $fn->apply('Badger')->value, 'Hello Badger', 'hello("Badger") => Hello Badge
 
 $fn = $vars->var('say')->dot('hello');
 is( $fn->ref, 'CODE', 'say.hello is code' );
+
 is( $fn->apply->value, 'Hello World', 'say.hello() => Hello World' );
 is( $fn->apply('Badger')->value, 'Hello Badger', 'say.hello("Badger") => Hello Badger' );
+
+my $result = $fn = $vars->var('say')->dot('hello' => ['Ferret']);
+is( $result->value, 'Hello Ferret', 'say.hello("Ferret") => Hello Ferret' );

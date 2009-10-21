@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Base',
     import    => 'class',
-    slots     => 'variables methods config name value parent args',
+    slots     => 'meta name value parent args',
     constants => ':type_slots',
     utils     => 'self_params',
     messages  => {
@@ -18,14 +18,15 @@ use Template::TT3::Class
 
 sub constructor {
     my ($self, $params) = self_params(@_);
-    my $config  = $self->configuration($params);
     my $class   = ref $self || $self;
+    my $config  = $self->configuration($params);
     my $vars    = $config->{ variables };       # TODO: or barf?  or use a proto?
     my $methods = $self->class->hash_vars( METHODS => $config->{ methods } );
+    my $meta    = [$config, $vars, $methods];
     
     return sub {
 #        $self->debug("args: ", $self->dump_data(\@_));
-        bless [$vars, $methods, $config, @_], $class;
+        bless [$meta, @_], $class;
     };
 }
 
@@ -39,12 +40,12 @@ sub new {
 }
 
 sub get {
-    return $_[0]->[VALUE_SLOT];
+    return $_[0]->[VALUE];
 }
 
 sub text {
     my $self  = shift;
-    my $value = $self->[VALUE_SLOT];
+    my $value = $self->[VALUE];
 
     # NOTE: we shouldn't have to do this if undefined values are always
     # handled by T::TT3::Variable::Undef.  What about values that have been
@@ -60,7 +61,7 @@ sub text {
 }
 
 sub ref {
-    ref $_[0]->[VALUE_SLOT];
+    ref $_[0]->[VALUE];
 }
 
 sub dot {
@@ -73,9 +74,9 @@ sub apply {
 
 sub names {
     my $self  = shift;
-    my @names = $self->[PARENT_SLOT]
-        ? ($self->[PARENT_SLOT]->names, $self->[NAME_SLOT])
-        : ($self->[NAME_SLOT]);
+    my @names = $self->[PARENT]
+        ? ($self->[PARENT]->names, $self->[NAME])
+        : ($self->[NAME]);
 
     return wantarray
         ?  @names
@@ -85,5 +86,18 @@ sub names {
 sub fullname {
     join('.', shift->names);
 }
+
+sub variables {
+    shift->[META]->[VARS];
+}
+
+sub methods {
+    shift->[META]->[METHODS];
+}
+
+sub config {
+    shift->[META]->[CONFIG];
+}
+
 
 1;

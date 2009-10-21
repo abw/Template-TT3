@@ -15,9 +15,9 @@ sub dot {
     return $self->error_msg( bad_index => $self->fullname, $name )
         unless numlike $name;
         
-    $self->[VARIABLES_SLOT]->use_var( 
+    $self->[META]->[VARS]->use_var( 
         $name,
-        $self->[VALUE_SLOT]->[$name], 
+        $self->[VALUE]->[$name], 
         $self, 
         $args
     );

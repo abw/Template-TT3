@@ -43,17 +43,17 @@ sub dot {
     my ($self, $name, $args) = @_;
 
     my $method 
-        = $self->[METHODS_SLOT]->{ $name }
-       || $self->[METHODS_SLOT]->{ 
-            $name =~ $self->[CONFIG_SLOT]->{ private } ? PRIVATE : PUBLIC
+        = $self->[META]->[METHODS]->{ $name }
+       || $self->[META]->[METHODS]->{ 
+            $name =~ $self->[META]->[CONFIG]->{ private } ? PRIVATE : PUBLIC
           }
-       || return $self->error_msg( denied => $self->[NAME_SLOT], $name );
+       || return $self->error_msg( denied => $self->[NAME], $name );
               
     $method = $name if $method eq '1';
 
-    $self->[VARIABLES_SLOT]->use_var( 
+    $self->[META]->[VARS]->use_var( 
         $name,
-        $self->[VALUE_SLOT]->$method($args ? @$args : ()),
+        $self->[VALUE]->$method($args ? @$args : ()),
         $self, 
     );
 }

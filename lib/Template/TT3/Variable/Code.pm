@@ -10,9 +10,9 @@ use Template::TT3::Class
 sub apply {
     my $self = shift;
         
-    $self->[VARIABLES_SLOT]->use_var( 
-        $self->[NAME_SLOT], 
-        $self->[VALUE_SLOT]->(@_), 
+    $self->[META]->[VARS]->use_var( 
+        $self->[NAME], 
+        $self->[VALUE]->(@_), 
         $self,
     );
 }

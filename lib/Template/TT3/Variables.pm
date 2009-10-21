@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     import    => 'class',
     base      => 'Template::TT3::Base',
-    constants => 'HASH',
+    constants => 'HASH CODE',
     messages  => {
         bad_type  => 'Invalid variable type for %s: %s',
         no_module => 'No module defined for variable type: %s',
@@ -70,27 +70,39 @@ sub var {
 }
 
 sub use_var {
-    my ($self, $name, $value, @more) = @_;
+    my ($self, $name, $value, $parent, $args, @more) = @_;
     my $ctor;
 
-    if (! defined $value) {
-        $ctor = $self->{ ctors }->{ UNDEF }
-            || return $self->error_msg( bad_type => $name, 'undef' );
-    }
-    elsif (ref $value) {
-        # TODO: handle CODE, calling it if args exist
-        $ctor = $self->{ ctors }->{ ref $value } 
-             || $self->{ ctors }->{ OBJECT }
-             || return $self->error_msg( bad_type => $name, ref $value );
-    }
-    else {
-        $ctor = $self->{ ctors }->{ VALUE }
-             || return $self->error_msg( bad_type => $name, 'value' );
+    TYPE_SWITCH: {
+        if (! defined $value) {
+            $ctor = $self->{ ctors }->{ UNDEF }
+                || return $self->error_msg( bad_type => $name, 'undef' );
+        }
+        elsif ($args && ref $value eq CODE) {
+            $value = $value->(@$args);
+            $self->debug(
+                "evaluated CODE with args ", 
+                $self->dump_data($args), 
+                " => $value"
+            ) if DEBUG;
+            $args = undef;
+            redo TYPE_SWITCH;
+        }
+        elsif (ref $value) {
+            # TODO: handle CODE, calling it if args exist
+            $ctor = $self->{ ctors }->{ ref $value } 
+                 || $self->{ ctors }->{ OBJECT }
+                 || return $self->error_msg( bad_type => $name, ref $value );
+        }
+        else {
+            $ctor = $self->{ ctors }->{ VALUE }
+                 || return $self->error_msg( bad_type => $name, 'value' );
+        }
     }
     
     $self->debug("use_var [$name] [$value]") if DEBUG;
     
-    return $ctor->($name, $value, @more);
+    return $ctor->($name, $value, $parent, $args, @more);
 }
 
 sub reset {
