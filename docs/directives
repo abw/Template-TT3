@@ -1,0 +1,51 @@
+for - loop through lists
+
+    for a in b;         # iterate over contents of list b, or just b if not a list
+        ...;
+    end
+    
+    for a in [b,c,d];   # inline list definition
+        ...;
+    end
+    
+    for a in 1..10;     # ranges generate lists to iterate over
+        ...;
+    end;
+    
+    for a in 1 to 10;   # 'to' is an alias for '..'
+        ...;
+    end
+    
+    for a in 10 to 20 by 2;     # 'by' allows you to specify step
+        ...;
+    end
+
+if / elsif / else - conditional branches
+
+    if a;                       # simple test
+       ...;
+    end
+    
+    if a < 10 and b > 20;       # arbitrarily complex expression
+       ...;
+    end
+    
+    if a;
+        ...;
+    elsif b;
+        ...;
+    else;
+        ...;
+    end;
+
+fill - the new name for PROCESS
+
+    fill template.html
+
+with - create local variables
+
+    # this emulates INCLUDE 
+    with x=0
+
+
+
