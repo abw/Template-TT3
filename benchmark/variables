@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+#
+# Perl script to benchmark test implementation against TT2.
+#
+# Written by Andy Wardley http://wardley.org/
+#
+# 12 October 2009
+#
+
+use Badger
+    lib   => '../lib';
+
+use Template::Stash;
+use Template::Stash::XS;
+use Template::TT3::Variables;
+use Benchmark qw(timethese cmpthese);
+
+my $iters = 100_000;
+#my $iters = 1;
+my $data = {
+    a => { 
+        b => { 
+            c => { 
+                d => [1.618, 2.718, 3.142],
+            } ,
+        } ,
+    },
+};
+
+my $perl_stash = Template::Stash->new($data);
+my $xs_stash   = Template::Stash::XS->new($data);
+my $tt3_stash  = Template::TT3::Variables->new( data => $data );
+my $results    = timethese(
+    $iters => {
+        tt2_perl   => \&tt2_perl,
+        tt2_xs     => \&tt2_xs,
+        tt3_perl   => \&tt3_perl,
+#       perl       => \&perl,
+    },
+);
+
+print "\n";
+
+cmpthese($results);
+
+sub tt2_perl {
+    my $a = $perl_stash->get([ a => undef, b => undef, c => undef, d => undef, 0 => undef ]);
+#    print "tt2 perl: $a\n";
+}
+
+sub tt2_xs {
+    my $a = $xs_stash->get([ a => undef, b => undef, c => undef, d => undef, 0 => undef ]);
+#    print "tt2 xs: $a\n";
+}
+
+sub tt3_perl {
+    my $a = $tt3_stash->var('a')->dot('b')->dot('c')->dot('d')->dot(0)->get;
+#    print "ttv: $a\n";
+}
+
+sub perl {
+    my $a = $data->{a}->{b}->{c}->{d}->[0];
+#    print "perl: $a\n";
+}
+
