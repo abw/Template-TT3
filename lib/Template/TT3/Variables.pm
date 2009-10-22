@@ -89,7 +89,6 @@ sub use_var {
             redo TYPE_SWITCH;
         }
         elsif (ref $value) {
-            # TODO: handle CODE, calling it if args exist
             $ctor = $self->{ ctors }->{ ref $value } 
                  || $self->{ ctors }->{ OBJECT }
                  || return $self->error_msg( bad_type => $name, ref $value );

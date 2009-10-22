@@ -33,7 +33,7 @@ sub base_id {
 #-----------------------------------------------------------------------
 # patterns(@symbols)
 #
-# Method to import symbols from Template::Patterns
+# Method to import symbols from Template::TT3::Patterns
 #-----------------------------------------------------------------------
 
 sub patterns {
