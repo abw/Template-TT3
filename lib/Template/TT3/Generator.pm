@@ -3,9 +3,13 @@
 package Template::TT3::Generator;
 
 use Template::TT3::Class
-    version => 2.7,
-    debug   => 0,
-    base    => 'Template::TT3::Base';
+    version  => 2.7,
+    debug    => 0,
+    base     => 'Template::TT3::Base',
+    utils    => 'is_object',
+    constant => {
+        OP => 'Template::TT3::Op',
+    };
 
 our $NUM   = 'num:';   
 our $VAR   = 'var:';   
@@ -16,47 +20,51 @@ our $IDENT = 'ident:';
 
 sub generate_node {
     my ($self, $node) = @_;
+    if (is_object(OP, $node)) {
+        $self->debug("got opcode") if DEBUG;
+        return $node->generate($self);
+    }
     my ($type, @args) = @$node;
-    my $method = "generate_$type";
+    my $method = 'generate_' . lc $type;
     $self->$method(@args);
 }
 
-sub generate_IDENT {
+sub generate_ident {
     my ($self, $ident) = @_;
     return $IDENT . $ident;
 }
 
-sub generate_KEYWORD {
+sub generate_keyword {
     my ($self, $key) = @_;
     return $KEY . $key;
 }
 
-sub generate_NUMBER {
+sub generate_number {
     my ($self, $num) = @_;
     return $NUM . $num;
 }
 
-sub generate_SQUOTE {
+sub generate_squote {
     my ($self, $text) = @_;
     return "'$text'";
 }
 
-sub generate_DQUOTE {
+sub generate_dquote {
     my ($self, $text) = @_;
     return qq{"$text"};
 }
 
-sub generate_TEXT {
+sub generate_text {
     my ($self, $text) = @_;
     return $text;
 }
 
-sub generate_VARIABLE {
+sub generate_variable {
     my ($self, $var) = @_;
     return $VAR . $self->generate($var);
 }
 
-sub generate_VARNODE {
+sub generate_varnode {
     my ($self, $name, $args) = @_;
     $args = $args
         ? '(' . join(', ', map { $self->generate($_) } @$args) . ')'
@@ -64,7 +72,7 @@ sub generate_VARNODE {
     return $name . $args;
 }
 
-sub generate_DOTOP {
+sub generate_dot {
     my ($self, $lhs, $rhs) = @_;
     return join(
         '.',
@@ -73,7 +81,25 @@ sub generate_DOTOP {
     );
 }
 
-sub generate_EXPRS {
+sub generate_add {
+    my ($self, $lhs, $rhs) = @_;
+    return join(
+        ' + ',
+        map { $self->generate($_) }
+        $lhs, $rhs
+    );
+}
+
+sub generate_binop {
+    my ($self, $lhs, $op, $rhs) = @_;
+    return join(
+        $op,
+        map { $self->generate($_) }
+        $lhs, $rhs
+    );
+}
+
+sub generate_exprs {
     my ($self, $exprs) = @_;
     return join(
         '; ',
@@ -82,8 +108,9 @@ sub generate_EXPRS {
     );
 }
 
-sub generate_NAMESPACE {
+sub generate_namespace {
     my ($self, $name, $space) = @_;
     return "[namespace:$name:$space]";
 }
 
+1;

@@ -100,11 +100,13 @@ sub init_patterns {
     my $patterns = {
         nothing      => qr / \G /x,
         to_eol       => qr/ \G ($eol) /x,
-        whitespace   => qr/ \G ($wspace) /sx,
+        whitespace   => qr/ \G ((?:\s+|$comment)+) /x,
+#        whitespace   => qr/ \G ($wspace) /sx,
         dotop        => qr/ \G $wspace ($DOTOP) /sx,
         separator    => qr/ \G $wspace ($SEPARATOR) /sx,
         separators   => qr/ \G (?: $wspace $SEPARATOR )* /sx,
         delimiter    => qr/ \G $wspace (?: ($DELIMITER) $wspace)+ /sx,
+        eof          => qr/ \G \z /sx,
 #       pluspath     => qr/ \G $wspace $PLUSPATH $wspace /x,
 #       assign       => qr/ \G $wspace ($ASSIGN) $wspace /x,
     };

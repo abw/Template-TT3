@@ -29,7 +29,27 @@ use Badger::Class
                 CONFIG  => '=0',
                 VARS    => '=1',
                 METHODS => '=2',
-            }
+            },
+            op_slots  => {
+                # opcode slots - the first 4 are common to all opcodes
+                META    => '=0',
+                TEXT    => '=1',
+                POS     => '=2',
+                # remaining slots have different meanings depending on 
+                # the opcode
+                EXPR    => '=3',    # unary expression
+                ARGS    => '=4',    # arguments
+                LHS     => '=3',    # binary expressions
+                RHS     => '=4',
+
+                # opcode metadata slots
+                CONFIG  => '=0',    # configuration parameters
+                OPS     => '=1',    # reference to ops factory
+                PREC    => '=2',    # precedence
+                ASSOC   => '=3',    # associativity
+                LEFT    => '=-1',   # binds left
+                RIGHT   => '=1',    # binds right
+            },
         },
     };
 

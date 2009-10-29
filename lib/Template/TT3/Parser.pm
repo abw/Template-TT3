@@ -13,15 +13,18 @@
 
 package Template::TT3::Parser;
 
-#use Template::TT3::Grammar;
+use Template::TT3::Ops;
 use Template::TT3::Class
     base      => 'Template::TT3::Tokens',
     version   => 3.00,
     debug     => 0,
     import    => 'class',
-    constants => ':whitespace REGEX',
+    constants => ':whitespace :op_slots REGEX',
     utils     => 'blessed',
     patterns  => ':all',
+    constant  => {
+        OPS_FACTORY => 'Template::TT3::Ops',
+    },
     messages  => {
         missing        => "Missing '%s' %s",
         missing_at     => "Missing '%s' at %s",
@@ -56,13 +59,17 @@ our $QUOTED_ESCAPES = {
 sub init_parser {
     my ($self, $config) = @_;
     $self->init_tokens($config);        # inherited from T::Tokens mixin
-    $self->{ keywords   } = $config->{ keywords   };
-    $self->{ namespaces } = $self->class->hash_vars( 
+    
+    $self->{ ops_factory } = $config->{ ops_factory } || $self->OPS_FACTORY;
+    $self->{ ops         } = $self->{ ops_factory }->new($config);
+    $self->{ make_op     } = $self->{ ops }->constructors;
+    $self->{ keywords    } = $config->{ keywords   };
+    $self->{ namespaces  } = $self->class->hash_vars( 
         NAMESPACES => $config->{ namespaces } 
     );
+    
     return $self;
 }
-
 
 
 #-----------------------------------------------------------------------
@@ -76,6 +83,7 @@ sub parse {
         : \$source;
     return $self->parse_exprs($text);
 }
+
 
 sub parse_exprs {
     my ($self, $text) = @_;
@@ -92,11 +100,13 @@ sub parse_exprs {
         : undef;
 }
 
+
 sub parse_expr {
     # TODO: look out for end of tag and handle rollover
     # Ha ha.  That's not easy at all.
     shift->parse_term(@_);
 }
+
     
 sub parse_term {
     my ($self, $text) = @_;
@@ -138,25 +148,35 @@ sub parse_term {
     }
 }    
 
+
 sub parse_variable {
     my $self = shift;
     my $text = $_[0];
+    my ($dot, $dotter);
     
     $self->debug_parse($text, 'parse_variable()') if DEBUG;
 
     my $first = $self->parse_varnode(@_) 
         || return;
 
-    $first = [ VARIABLE => $first ];
+#    $first = [ VARIABLE => $first ];
+
+    $first = $self->{ make_op }->{ variable }->(
+        $first->[TEXT], $first->[POS], $first
+    );
     
     while ($$text =~ /$self->{ match_dotop }/cg) {
-        $self->debug("got dotop") if DEBUG;
         my $next = $self->parse_varnode($text);
-        $first = [ DOTOP => $first, $next ];
+        
+        # we should call $first->dot_op($right)
+        $dotter ||= $self->{ make_op }->{ dot };
+        $first = $dotter->( '.', pos($$text) - 1, $first, $next );
+#       $first = [ DOTOP => $first, $next ];
     }
     
     return $first;
 }
+
 
 sub parse_varnode {
     my ($self, $text, $name, $pos) = @_;
@@ -186,8 +206,13 @@ sub parse_varnode {
         $self->debug("no parens, returning $name") if DEBUG;
     }
 
-    return [ VARNODE => $name, $args ];
+    return $self->{ make_op }->{ var_node }->(
+        $name, $pos, $name, $args
+    );
+
+#    return [ VARNODE => $name, $args ];
 }
+
 
 sub parse_args {
     my ($self, $text) = @_;
@@ -208,9 +233,7 @@ sub parse_args {
     
     $self->debug("got ", scalar(@args), " args") if DEBUG;
 
-    return @args 
-        ? \@args 
-        : ();
+    return \@args;
 }
 
 
@@ -234,8 +257,9 @@ sub parse_namespace {
         || $self->error_msg( missing => expression => "for namespace: $name" );
 }
 
+
 sub parse_enclosed {
-    my ($self, $text) = @_;
+    my ($self, $text, $unescape) = @_;
     $self->debug_parse($text, 'parse_enclosed()') if DEBUG;
     
     if ($$text =~ /$LGROUP/cog) {
@@ -244,15 +268,30 @@ sub parse_enclosed {
             || return $self->error("No right paren match for '$left'");
         $$text =~ /$match/cg
             || return $self->error_msg( missing => $GROUPS->{ $left } );
-        return $self->unescape($1, $GROUPS->{ $left });
+            
+        return $unescape
+            ? $self->unescape($1, $GROUPS->{ $left })
+            : $1;
     }
     
     return undef;
 }
 
+
 sub parse_q {
     my ($self, $text) = @_;
+    my $term = $self->parse_enclosed($text, 1);
+    return defined $term
+        ? $self->parsed_text($text, $term)
+        : undef;
+}
+
+
+sub parse_qq {
+    my ($self, $text) = @_;
     my $term = $self->parse_enclosed($text);
+    $term =~ s/\\([nrt])/$QUOTED_ESCAPES->{$1}/ge;
+
     return defined $term
         ? $self->parsed_text($text, $term)
         : undef;
@@ -264,43 +303,51 @@ sub parse_q {
 #-----------------------------------------------------------------------
 
 sub unescape {
-    my ($self, $text, $match) = @_;
+    my ($self, $text, $match, $replace) = @_;
     
     $match = quotemeta $match
         unless ref $match eq REGEX;
 
-    $match = qr/\\(\\|$match)/;
+#    $match = qr/\\(\\|$match)/;
+    $match = qr/\\($match)/;
 #    $self->debug(" pre: $text");
 #    $self->debug("  qm: $match");
-    $text =~ s/$match/$1/g;
+    $text =~ s/$match/($replace && $replace->{ $1 }) || $1/ge;
 #    $self->debug("post: $text");
     return $text;
 }
 
 sub parsed_number {
-    return [ NUMBER => $_[2] ];
+    my ($self, $text, $num, $pos) = @_;
+    return $self->{ make_op }->{ number }->($num, $pos);
+#   return [ NUMBER => $_[2] ];
 }
 
 sub parsed_text {
     my ($self, $text, $chunk, $pos) = @_;
-    return [ TEXT => $chunk ];
+    return $self->{ make_op }->{ text }->($chunk, $pos);
+#    return [ TEXT => $chunk ];
 }
     
 sub parsed_squote {
     my ($self, $text, $quoted, $pos) = @_;
-    return $self->parsed_text($text, $self->unescape($quoted, "'"), $pos);
-#    return [ SQUOTE => $quoted ];
+    return $self->parsed_text($text, $self->unescape($quoted, qr/[\\']/), $pos);
+#   return [ SQUOTE => $quoted ];
 }
 
 sub parsed_dquote {
     my ($self, $text, $quoted, $pos) = @_;
-    $self->debug("  dquoted: $quoted");
+    $self->debug("  dquoted: $quoted") if DEBUG;
     $quoted =~ s/\\([\\nrt"])/$QUOTED_ESCAPES->{$1}/ge;
-    $self->debug("unescaped: $quoted");
+    $self->debug("unescaped: $quoted") if DEBUG;
 
-    # TODO: look for '$' and expand
-    return [ DQUOTE => $quoted, $pos ];
-#    return [ DQUOTE => $self->parse_string($quote), $pos ];
+    if ($quoted =~ /\$/) {
+        # TODO: look for '$' and expand
+        return [ DQUOTE => $quoted, $pos ];
+    }
+    else {
+        return $self->parsed_text($text, $quoted, $pos);
+    }
 }
 
 sub parsed_ident {
