@@ -5,12 +5,13 @@ use Badger::Class
     debug     => 0,
     uber      => 'Badger::Class',
     utils     => 'self_params',
-    constants => 'ARRAY HASH CODE DELIMITER',
+    constants => 'ARRAY HASH CODE DELIMITER PKG',
     constant  => {
         CONSTANTS => 'Template::TT3::Constants',
         PATTERNS  => 'Template::TT3::Patterns',
 #        CONFIG    => 'Template::TT3::Config',
         UTILS     => 'Template::TT3::Utils',
+        OP_BASE   => 'Template::TT3::Element::Operator',
     },
     hooks => {
         patterns => \&patterns,
@@ -117,14 +118,62 @@ sub subclass {
             unshift(@$spec, base => $base);
         }
         elsif (ref $spec eq HASH) {
-            $spec->{ base } = $base;
-            $spec = [%$spec];
+            $spec = [base => $base, %$spec];
         }
         else {
             die "Invalid subclass specification for $pkg: $spec\n";
         }
-#        _debug("Generating subclass $pkg as { ", join(', ', @$spec), " }\n");
+
+        
+        if ($pkg =~ s/^_//) {
+            $pkg = $self.PKG.$pkg;
+            _debug("found '_' at start, made it $pkg\n");
+        }
+        _debug("Generating subclass $pkg as { ", join(', ', @$spec), " }\n");
         $self->generate($pkg => $spec);
+    }
+    
+    return $self;
+}
+
+sub op_subclass {
+    my ($self, $classes) = self_params(@_);
+    my ($method, $methods, $name, $base);
+
+    while (my ($n, $spec) = each %$classes) {
+        $name = $n;     # curse aliasing!
+        $name = $self->{ name }.PKG.$name
+            if $name =~ s/^_//;
+        
+        my @bases = ($self->{ name });
+        
+        # any declared base goes before self
+        unshift(@bases, $spec->{ base }) if $spec->{ base };
+        
+        # op_base mixin goes in before that as it's the most see-through
+        if ($base = delete $spec->{ op_base }) {
+            $base = OP_BASE.PKG.$base
+                if $base =~ s/^_//;
+            unshift(@bases, $base);
+        }
+        $spec->{ base } = $base = join(' ', @bases);
+#        _debug("Generating subclass [$name] with base [$base]\n");
+        
+        # create/augment the methods
+        $methods = $spec->{ methods } ||= { };
+        
+        if ($method = delete $spec->{ value }) {
+            # single value method should be aliased as values
+            $methods->{ value  } ||= $method;
+            $methods->{ values } ||= $method;
+        }
+#        _debug("Generating subclass $name with methods: ", join(', ', keys %$methods), "\n");
+#        _debug("Generating subclass $name as ", join(', ', %$spec), " }\n");
+
+        class->export(
+            $name => %$spec
+        );
+
     }
     
     return $self;
