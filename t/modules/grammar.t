@@ -12,6 +12,7 @@
 #========================================================================
 
 #use Badger::Debug modules => 'Template::TT3::Grammar';
+#use Badger::Debug modules => 'Badger::Factory';
 use Badger lib => '../../lib';
 use Template::TT3::Test 
     tests => 2,
@@ -32,4 +33,9 @@ my $tt3 = TT3->new;
 ok( $tt3, 'created TT3 grammar' );
 #print "regex: ", $tt3->nonword_regex, "\n";
 
+ok( $tt3->constructor('<'), 'fetched constructor for <' );
+ok( $tt3->constructor('>'), 'fetched constructor for >' );
+ok( $tt3->constructor('>='), 'fetched constructor for >=' );
+ok( $tt3->constructor('<='), 'fetched constructor for <=' );
 
+# ...and more...
