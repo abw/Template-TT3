@@ -1,25 +1,30 @@
 package Template::TT3::Scanner;
 
+use Template::TT3::Tokens;
 use Template::TT3::Class
-    version   => 3.00,
-    debug     => 0,
-    base      => 'Template::TT3::Base',
-    constants => 'REGEX',
-    messages  => { 
+    version    => 3.00,
+    debug      => 0,
+    base       => 'Template::TT3::Base',
+    config     => 'tokens|class:TOKENS|method:TOKENS',
+    constants  => 'REGEX',
+    constant   => {
+        TOKENS => 'Template::TT3::Tokens',
+    },
+    messages   => { 
         no_tag => 'No tag found matching start token: %s',
     };
 
-*init = \&init_scanner;
 
-
-sub init_scanner {
+sub init {
     my ($self, $config) = @_;
-    $self->init_tags($config);
+    $self->configure($config);
+    $self->init_scanner($config);
+    $self->{ config } = $config;
     return $self;
 }
 
 
-sub init_tags {
+sub init_scanner {
     my $self    = shift;
     my $config  = shift || $self->{ config };
     my $tags    = $config->{ tags } || $self->class->list_vars('TAGS');
@@ -65,37 +70,40 @@ sub init_tags {
 
 
 sub scan {
-    my ($self, $source) = @_;
-    my $text = ref $source 
-        ?  $source
-        : \$source;
-    return $self->tokens($text);
+    my ($self, $input, $output) = @_;
+    return $self->tokens(
+        ref $input ? $input : \$input,
+        $output || $self->{ tokens }->new( $self->{ config } ),
+    );
 }
 
 
 sub tokens {
-    my $self = shift;
-    my $text = shift;
-    my (@tokens, $token, $type, $pos, $pretext, $start, $tag);
+    my ($self, $input, $output) = @_;
+    my ($pos, $text, $start, $tag);
     
     while (1) {
-        $pos = pos $$text;
+        $pos = pos $$input;
         
-        if ($$text =~ /$self->{ match_to_tag }/gc) {
+        if ($$input =~ /$self->{ match_to_tag }/gc) {
             # We've matched a chunk of text up to the next tag start token.
-            $pretext = [text => $1];
-            $self->debug("text: $1") if DEBUG;
-            $start   = $2;
+            # We find the tag object corresponding to the tag start token 
+            # and call its tokens() method.  We pass the preceeding text
+            # in case the tag wants to modify it (e.g. pre-chomping) before
+            # committing it to the output stream.
+            ($text, $start) = ($1, $2);
+            
             $tag = $self->{ tag_map }->{ fixed }->{ $2 }
                ||= $self->match_regex_tag($2)
                ||  return $self->error_msg( invalid => tag => $start );
-            push(@tokens, $pretext, $tag->tokens($text, $pretext, $start));
+               
+            # should we call ->scan($scanner, $input, $output, ...) instead?
+            $tag->tokens($input, $output, $text, $start, $pos, $self);
         }
-        elsif ($$text =~ /$self->{ match_to_end }/gc) {
+        elsif ($$input =~ /$self->{ match_to_end }/gc) {
             # We've matched the rest of the text after the last tag (or the 
-            # entire file if there weren't any tags embedded.
-            push(@tokens, [text => $1]);
-            $self->debug("text: $1") if DEBUG;
+            # entire file if there weren't any tags embedded).
+            $output->text_token($1, $pos);
             last;
         }
         else {
@@ -103,9 +111,8 @@ sub tokens {
         }
     }
 
-    return return wantarray
-        ?  @tokens
-        : \@tokens;
+    $output->eof_token();
+    return $output->finish;
 }
 
 

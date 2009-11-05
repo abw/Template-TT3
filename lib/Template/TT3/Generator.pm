@@ -24,9 +24,22 @@ sub generate_node {
         $self->debug("got opcode") if DEBUG;
         return $node->generate($self);
     }
+    unless (ref $node eq 'ARRAY') {
+        die "invalid node: $node\n";
+    }
     my ($type, @args) = @$node;
     my $method = 'generate_' . lc $type;
+    $self->debug("METHOD: $method\n");
     $self->$method(@args);
+}
+
+sub generate_tokens {
+    my ($self, $tokens) = @_;
+    return join(
+        '',
+        map { $_->generate($self) }
+        @$tokens
+    );
 }
 
 sub generate_ident {
@@ -59,6 +72,26 @@ sub generate_text {
     return $text;
 }
 
+sub generate_whitespace {
+    my ($self, $text) = @_;
+    return "<WS>$text</WS>";
+}
+
+sub generate_tag_start {
+    my ($self, $text) = @_;
+    return "<TAG_START>$text</TAG_START>";
+}
+
+sub generate_tag_end {
+    my ($self, $text) = @_;
+    return "<TAG_END>$text</TAG_END>";
+}
+
+sub generate_word {
+    my ($self, $text) = @_;
+    return "<WORD>$text</WORD>";
+}
+
 sub generate_variable {
     my ($self, $var) = @_;
     return $VAR . $self->generate($var);
@@ -72,16 +105,17 @@ sub generate_varnode {
     return $name . $args;
 }
 
-sub generate_dot {
-    my ($self, $lhs, $rhs) = @_;
+sub OLD_generate_dot {
+    my ($self, $dot, $lhs, $rhs) = @_;
+    $self->debug("DOT: [$lhs] [$rhs]");
     return join(
-        '.',
+        $dot,
         map { $self->generate($_) }
         $lhs, $rhs
     );
 }
 
-sub generate_add {
+sub OLD_generate_add {
     my ($self, $lhs, $rhs) = @_;
     return join(
         ' + ',
@@ -91,7 +125,7 @@ sub generate_add {
 }
 
 sub generate_binop {
-    my ($self, $lhs, $op, $rhs) = @_;
+    my ($self, $op, $lhs, $rhs) = @_;
     return join(
         $op,
         map { $self->generate($_) }

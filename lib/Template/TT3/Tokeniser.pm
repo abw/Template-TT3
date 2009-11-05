@@ -1,3 +1,5 @@
+# deprecated
+
 package Template::TT3::Tokeniser;
 
 use Template::TT3::Class
