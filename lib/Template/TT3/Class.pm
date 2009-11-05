@@ -4,17 +4,19 @@ use Badger::Class
     version   => 3.00,
     debug     => 0,
     uber      => 'Badger::Class',
-    constants => 'ARRAY HASH DELIMITER',
+    utils     => 'self_params',
+    constants => 'ARRAY HASH CODE DELIMITER',
     constant  => {
         CONSTANTS => 'Template::TT3::Constants',
         PATTERNS  => 'Template::TT3::Patterns',
-        CONFIG    => 'Template::TT3::Config',
+#        CONFIG    => 'Template::TT3::Config',
         UTILS     => 'Template::TT3::Utils',
     },
     hooks => {
         patterns => \&patterns,
         generate => \&generate,
         subclass => \&subclass,
+        alias    => \&alias,
     };
 
 
@@ -28,6 +30,20 @@ sub base_id {
     shift->{ name }->base_id;
 }
 
+
+
+sub alias {
+    my ($self, $params) = self_params(@_);
+    
+    while (my ($key, $value) = each %$params) {
+        my $method = ref $value eq CODE
+            ? $value
+            : $self->method($value)
+           || die "Invalid method specified for '$key' alias: $value";
+        $self->method( $key => $method );
+    }
+    return $self;
+}
 
 
 #-----------------------------------------------------------------------
