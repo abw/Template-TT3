@@ -30,25 +30,28 @@ use Badger::Class
                 VARS    => '=1',
                 METHODS => '=2',
             },
-            op_slots  => {
-                # opcode slots - the first 4 are common to all opcodes
+            elem_slots  => {
+                # element slots - the first 4 are common to all elements
                 META    => '=0',
                 TEXT    => '=1',
                 POS     => '=2',
-                # remaining slots have different meanings depending on 
-                # the opcode
-                EXPR    => '=3',    # unary expression
-                ARGS    => '=4',    # arguments
-                LHS     => '=3',    # binary expressions
-                RHS     => '=4',
+                NEXT    => '=3',
 
-                # opcode metadata slots
+                # remaining slots have different meanings depending on 
+                # the element type
+                EXPR    => '=4',    # unary expression
+                ARGS    => '=5',    # arguments
+                LHS     => '=4',    # binary expressions
+                RHS     => '=5',
+                GOTO    => '=4',    # used to skip over compile time control tags
+
+                # element metadata slots
                 CONFIG  => '=0',    # configuration parameters
-                OPS     => '=1',    # reference to ops factory
-                PREC    => '=2',    # precedence
-                ASSOC   => '=3',    # associativity
-                LEFT    => '=-1',   # binds left
-                RIGHT   => '=1',    # binds right
+                ELEMS   => '=1',    # reference to elements factory
+                LPREC   => '=2',    # leftward precedence
+                RPREC   => '=3',    # rightward precedence
+                LEFT    => '=-1',   # binds left    # NOT USED?
+                RIGHT   => '=1',    # binds right   # NOT USED?
             },
         },
     };
