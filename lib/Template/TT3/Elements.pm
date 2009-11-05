@@ -10,52 +10,28 @@ use Badger::Factory::Class
     constants => 'PKG';
 
 
-# TODO: Add constructor() and construct() methods and cache constructors
-# internally.  The elements object needs to be able to create new elements
-# so that element objects can call it to upgrade themselves to new elements
-# (e.g. a word calling $self->[META]->{ elements }->construct(var => $self) )
+*init = \&init_elements;
 
-# TODO: Fuckola!  The construct() method inherited from Badger::Factory
-# conflicts with the construct() method that we want to add to construct
-# a new element
 
-sub OLD_found_module {
-    my ($self, $type, $module, $args) = @_;
-    my $params = params(@$args);
-    $params->{ elements } = $self;
-    $self->{ class }->{ $type } = $module;
-    $self->debug("Found module: $type => $module") if DEBUG;
-    return $module->constructor($params);
+sub init_elements {
+    my ($self, $config) = @_;
+    $self->init_factory($config);
+    $self->{ prefixes } = $self->class->hash_vars( 
+        PREFIXES => $config->{ prefixes }
+    );
+    $self->debug("prefixes: ", $self->dump_data($self->{ prefixes })) if DEBUG;
+    return $self;
 }
 
-sub found_array_NOT_NEEDED {
-    my ($self, $type, $array, $args) = @_;
-    my $params = params(@$args);
-    my ($module, $cfg) = @$array;
-    $params = { %$cfg, %$params, elements => $self };
-    $self->{ class }->{ $type } = $module;
-    $self->debug("Found module array: $type => $module") if DEBUG;
-    return $module->constructor($params);
+
+sub construct {
+    shift->constructor(shift)->(@_);
 }
 
-sub OLD_construct {
-    my ($self, $type, $class, $args) = @_;
-    $self->debug("constructing class: $type => $class") if DEBUG;
-#    return $class->constructor(elements => $self->{ elements });
-    return $class;
-#    return $class->new(@$args);
-}
-
-sub element_class {
-    my ($self, $type) = @_;
-    return $self->{ elements }->{ $type }
-        || $self->find($type)
-        || $self->not_found($type);
-}
 
 sub constructor {
-    my $self = shift;
-    my $type = shift;
+    my $self   = shift;
+    my $type   = shift;
     my $params = params(@_);
 
     # add backref to this factory for element instances to use
@@ -63,22 +39,22 @@ sub constructor {
     $params->{ elements } = $self;
 
     return $self->{ constructors }->{ $type } 
-       ||= $self->element_class($type)->constructor($params);
+       ||= $self->element_class($type)
+                ->constructor($params);
 }
 
-sub construct {
-    shift->constructor(shift)->(@_);
+
+sub element_class {
+    my ($self, $type) = @_;
+
+    # expand any prefix_
+    $type =~ s/^([^\W_]+_)/$self->{ prefixes }->{ $1 } || $1/e;
+    
+    return $self->{ elements }->{ $type }
+        || $self->find($type)
+        || $self->not_found($type);
 }
 
-#sub element_class {
-#    my ($self, $type) = @_;
-#    # we might have the class name cached, otherwise we need to load the 
-#    # element first and then it should appear in $self->{ class }
-#    return $self->{ class }->{ $type }
-#        || $self->element($type)
-#        && $self->{ class }->{ $type };
-##        || $self->error_msg( invalid => element => $type );
-#}
 
 sub not_found {
     shift->error_msg( invalid => element => @_ );

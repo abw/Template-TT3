@@ -169,6 +169,9 @@ sub token {
         if @$tokens;
 
     # push the token onto the end of the list
+    # NOTE: this causes Perl to segfault with a blown stack at cleanup with 
+    # large lists (upwards of ~30k tokens).  
+    # See http://rt.perl.org/rt3/Ticket/Display.html?id=70253
     push(@$tokens, $token);
         
     return $token;

@@ -20,12 +20,13 @@ use Template::TT3::Class
     };
 
 
+
 #*init = \&init_grammar;
 
 
 sub init {
     my ($self, $config) = @_;
-    $self->init_factory($config);
+    $self->init_elements($config);
     $self->init_grammar($config);
     return $self;
 }
@@ -96,9 +97,11 @@ sub symbols {
             );
         }
 
+        # stash the symbol away by both token and element name
         $names->{ $name } = $symbol;
         $symbols->{ $token } = $symbol;
 
+        # words go in keywords, non-words go in nonwords
         if ($token =~ /\W/) {
             $self->debug("nonword: $token") if DEBUG;
             $nonwords->{ $token } = $symbol;
@@ -146,8 +149,11 @@ sub nonword_regex {
         # single character operators can be put in a character class: [\!\-\+]
         push(@multiple, '[' . join('', @single) . ']') if @single;
 
+        # glue it all together
         $regex = join('|', @multiple);
+        
         $self->debug("initialised symbol matching regex: / \\G $regex /\n") if DEBUG;
+        
         qr/ \G ($regex)/sx;
     };
 }
@@ -185,8 +191,10 @@ sub match_nonword {
 
 sub matched {
     my ($self, $input, $output, $pos, $token) = @_;
+
     return $output->token( 
-        $self->constructor($token)->($token, $pos) 
+        ( $self->{ constructor }->{ $token } || $self->constructor($token) )
+            ->($token, $pos) 
     );
 }
 

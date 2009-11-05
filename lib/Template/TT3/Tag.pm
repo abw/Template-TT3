@@ -211,44 +211,62 @@ sub tokens {
     my ($self, $input, $output, $text, $start, $pos) = @_;
     my ($token, $type);
 
-    $self->debug("pre-text: <$text>") if DEBUG;
-    $output->text_token($text, $pos);
+    $self->debug("pre-text: <$text>") if DEBUG && $text;
+    $output->text_token($text, $pos)
+        if defined $text && length $text;
     
-    $self->debug("tag starting: <$start>") if DEBUG;
+    $self->debug("tag starting: <$start>") if DEBUG && $start;
     $pos = pos $$input;
-    $token = $output->tag_start_token($start, $pos - length($start));
+    $token = $output->tag_start_token($start, $pos - length($start))
+        if defined $start && length $start;
     
     while (1) {
-        $self->debug("\@$pos: ", $self->peek_to_end($input)) if DEBUG;
+        $self->debug("SCAN \@$pos: ", $self->peek_to_end($input)) if DEBUG;
         
+        # TODO: consider generating the tokens in here and calling
+        # $output->token($token)
+
         if ($$input =~ /$NAMESPACE/cog) {
             $self->namespace_token($input, $output, $1, $pos);
         }
         elsif ($$input =~ /$IDENT/cog) {
             if ($type = $self->{ keywords }->{ $1 }) {
                 $self->{ grammar }->matched($input, $output, $pos, $1);
+                # TMP HACK
+                # $output->keyword_token($1, $pos);
+                # TODO:
+                # $type = "${type}_token";
+                # $output->$type($1, $pos);
             }
             else {
                 $output->word_token($1, $pos);
             }
         }
-        elsif ($$input =~ /$NUMBER/cog) {
-            $output->number_token($1, $pos);
-        }
         elsif ($$input =~ /$SQUOTE/cog) {
+            $self->debug("matched single quote: $1") if DEBUG;
             $output->squote_token($1, $pos);
         }
         elsif ($$input =~ /$DQUOTE/cog) {
+            $self->debug("matched double quote: $1") if DEBUG;
             $output->dquote_token($1, $pos);
         }
         elsif ($$input =~ /$self->{ match_at_end }/cg) {
-            $self->debug("matched END: $1") if DEBUG;
-            $output->tag_end_token($1, $pos);
+            $self->debug("matched end of tag: $1") if DEBUG;
+            $output->tag_end_token($1, $pos) 
+                if defined $1 && length $1;
             last;
         }
-        elsif ($self->{ grammar }->match_nonword($input, $output, $pos)) {
-            # OK
+        elsif ($$input =~ /$self->{ match_nw }/cg) {
+            $self->{ grammar }->matched($input, $output, $pos, $1);
         }
+        elsif ($$input =~ /$NUMBER/cog) {
+            $self->debug("matched number: $1") if DEBUG;
+            $output->number_token($1, $pos);
+        }
+
+#        elsif ($self->{ grammar }->match_nonword($input, $output, $pos)) {
+            # OK
+#        }
 #        elsif ($$input =~ /$self->{ match_nw }/cg) {
 #            $type = $self->{ nonwords }->{ $1 }
 #                || return $self->error_msg( invalid => token => $1 );

@@ -130,47 +130,6 @@ sub generate {
 }
 
 
-#-----------------------------------------------------------------------
-# Template::TT3::Element::Number - literal number elements
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Number;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Literal',
-    constants => ':elem_slots';
-
-
-sub as_expr {
-    my ($self, $token, $scope, $prec) = @_;
-    # advance token
-    $$token = $self->[NEXT];
-    
-    # variables can be followed by postops (postfix and infix operators)
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
-}
-
-sub number_element {
-    $_[0];
-}
-
-# numerical_binary_op() / num_bin_op()
-
-sub numerical_op {
-    my ($self, $type, $text, $pos, $rhs) = @_;
-    $self->[META]->[ELEMS]->op(
-        $type, $text, $pos, $self, $rhs->number_op
-    );
-}
-
-sub generate {
-    $_[1]->generate_number(
-        $_[0]->[TEXT]
-    );
-}
-
-
 package Template::TT3::Element::Punctuation;
 
 use Template::TT3::Class 

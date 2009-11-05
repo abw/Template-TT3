@@ -20,22 +20,9 @@ use Template::TT3::Class
 
 sub as_expr {
     # we can always skip whitespace to get to an expression
-#    my ($self, $token) = @_;
-#    $_[0]->debug("as_expr($$token)");
-#    return undef;
-#    my $next = $self->next_skip_ws($token);
-#    $self->debug("\n<<< as_expr() skipped to $next ($$token)");
-#    my $result = $next->as_expr($token);
-#    $self->debug("\n>>> as_expr() got next as_expr() => $result ($$token)");
-#    return $result;
     shift->next_skip_ws($_[0])->as_expr(@_);
 }
 
-#sub skip_ws {
-#    my ($self, $token) = @_;
-#    # we can always skip whitespace to get to an expression
-#    $self->[NEXT] && $self->[NEXT]->skip_ws($token);
-#}
 
 sub as_block {
     # same for a block

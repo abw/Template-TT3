@@ -1,18 +1,24 @@
 #-----------------------------------------------------------------------
-# base clas for all operators
+# Template::TT3::Element::Operator;
+#
+# Base class for operator mixins.  Not that this is NOT a subclass of
+# Template::TT3::Element as we don't want to inherit all the default 
+# methods.  This allows us to put an operator mixin at the start of the
+# base path (@ISA) for a subclass.  This will add the methods defined
+# below, but leave any other methods to be inherited from subsequent 
+# base classes in the @ISA list.
 #-----------------------------------------------------------------------
 
 package Template::TT3::Element::Operator;
 
 use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element',
-    constants => ':elem_slots';
-
+    version   => 3.00;
 
 
 #-----------------------------------------------------------------------
-# base class for unary operators
+# Template::TT3::Element::Operator::Unary;
+#
+# Mixin class for unary operators.
 #-----------------------------------------------------------------------
 
 package Template::TT3::Element::Operator::Unary;
@@ -20,7 +26,12 @@ package Template::TT3::Element::Operator::Unary;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
-    constants => ':elem_slots';
+    constants => ':elem_slots',
+    constant  => {
+        SEXPR_FORMAT  => '<unary:<op:%s>%s>', 
+        SOURCE_FORMAT => '%s%s', 
+    };
+
 
 sub as_expr_prefix {
     my ($self, $token, $scope, $prec) = @_;
@@ -61,12 +72,25 @@ sub as_postop_postfix {
 }
 
 
+sub sexpr {
+    sprintf(
+        $_[0]->SEXPR_FORMAT, 
+        $_[0]->[TEXT],
+        $_[0]->[LHS]
+            ? $_[0]->[LHS]->sexpr
+            : $_[0]->[RHS]->sexpr
+    );
+}
+
+
 
 #-----------------------------------------------------------------------
-# base class for unary prefix operators
+# Template::TT3::Element::Operator::Prefix;
+#
+# Mixin class for unary prefix operators
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Operator::Unary::Prefix;
+package Template::TT3::Element::Operator::Prefix;
 
 use Template::TT3::Class 
     version   => 3.00,
@@ -74,23 +98,46 @@ use Template::TT3::Class
     constants => ':elem_slots',
     alias     => {
         as_expr => 'as_expr_prefix',
+    },
+    constant  => {
+        SEXPR_FORMAT => '<prefix:<op:%s>%s>', 
     };
+
+
+sub source {
+    sprintf(
+        $_[0]->SOURCE_FORMAT, 
+        $_[0]->[TEXT],
+        $_[0]->[RHS]->source
+    );
+}
+
+
+sub sexpr {
+    sprintf(
+        $_[0]->SEXPR_FORMAT, 
+        $_[0]->[TEXT],
+        $_[0]->[RHS]->sexpr
+    );
+}
 
 
 sub generate {
     $_[1]->generate_prefix(
         $_[0]->[TEXT],
-        $_[0]->[RHS],
+        $_[0]->[RHS],    # ->generate($_[1]),
     );
 }
 
 
 
 #-----------------------------------------------------------------------
-# base class for unary postfix operators
+# Template::TT3::Element::Operator::Postfix;
+#
+# Mixin class for unary postfix operators
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Operator::Unary::Postfix;
+package Template::TT3::Element::Operator::Postfix;
 
 use Template::TT3::Class 
     version   => 3.00,
@@ -98,81 +145,43 @@ use Template::TT3::Class
     constants => ':elem_slots',
     alias     => {
         as_postop => 'as_postop_postfix',
+    },
+    constant  => {
+        SEXPR_FORMAT => '<postfix:<op:%s>%s>', 
     };
+
+
+sub source {
+    sprintf(
+        $_[0]->SOURCE_FORMAT, 
+        $_[0]->[LHS]->source,
+        $_[0]->[TEXT],
+    );
+}
+
+
+sub sexpr {
+    sprintf(
+        $_[0]->SEXPR_FORMAT, 
+        $_[0]->[TEXT],
+        $_[0]->[LHS]->sexpr
+    );
+}
+
 
 sub generate {
     $_[1]->generate_postfix(
         $_[0]->[TEXT],
-        $_[0]->[LHS],
+        $_[0]->[LHS],   #->generate($_[1]),
     );
 }
 
 
 
 #-----------------------------------------------------------------------
-# base class for unary operators that are either prefix or postfix
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Operator::Unary::PrePostfix;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Unary',
-    constants => ':elem_slots',
-    alias     => {
-        as_expr   => 'as_expr_prefix',
-        as_postop => 'as_postop_postfix',
-    };
-
-
-
-sub generate {
-#    $_[0]->debug("\nOP $_[0]->[TEXT]   lhs [$_[0]->[LHS]]  rhs [$_[0]->[RHS]]");
-    $_[0]->[RHS]
-        ? $_[1]->generate_prefix(
-            $_[0]->[TEXT],
-            $_[0]->[RHS],
-          )
-        : $_[1]->generate_postfix(
-            $_[0]->[TEXT],
-            $_[0]->[LHS],
-          );
-}
-
-
-#-----------------------------------------------------------------------
-# unary operators
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Not;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Unary::Prefix';
-
-package Template::TT3::Element::NotLo;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Not';
-
-
-package Template::TT3::Element::Inc;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Unary::PrePostfix';
-
-package Template::TT3::Element::Dec;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Unary::PrePostfix';
-
-
-
-#-----------------------------------------------------------------------
-# base class for binary operators
+# Template::TT3::Element::Operator::Binary;
+#
+# Mixin class for binary operators
 #-----------------------------------------------------------------------
 
 package Template::TT3::Element::Operator::Binary;
@@ -180,8 +189,32 @@ package Template::TT3::Element::Operator::Binary;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
-    import    => 'class',
-    constants => ':elem_slots';
+    constants => ':elem_slots',
+    constant  => {
+        SEXPR_FORMAT  => '<binary:<op:%s>%s%s>', 
+        SOURCE_FORMAT => '%s %s %s', 
+    };
+
+
+sub source {
+    sprintf(
+        $_[0]->SOURCE_FORMAT, 
+        $_[0]->[LHS]->source,
+        $_[0]->[TEXT], 
+        $_[0]->[RHS]->source,
+    );
+}
+
+
+sub sexpr {
+    sprintf(
+        $_[0]->SEXPR_FORMAT, 
+        $_[0]->[TEXT],
+        $_[0]->[LHS]->sexpr,
+        $_[0]->[RHS]->sexpr,
+    );
+}
+
 
 sub generate {
     $_[1]->generate_binop(
@@ -191,10 +224,22 @@ sub generate {
     );
 }
 
+
+sub left_edge {
+    $_[0]->[LHS]->left_edge;
+}
+
+
+sub right_edge {
+    $_[0]->[RHS]->right_edge;
+}
+
+
 sub as_expr {
     my ($self, $token, $scope) = @_;
     return undef;
 }
+
 
 sub as_postop_left {
     my ($self, $lhs, $token, $scope, $prec) = @_;
@@ -253,10 +298,12 @@ sub as_postop_right {
 
 
 #-----------------------------------------------------------------------
-# base class for binary operators with left associativity
+# Template::TT3::Element::Operator::InfixLeft;
+#
+# Mixin class for binary operators with left associativity
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Operator::Binary::Left;
+package Template::TT3::Element::Operator::InfixLeft;
 
 use Template::TT3::Class 
     version   => 3.00,
@@ -267,10 +314,12 @@ use Template::TT3::Class
 
 
 #-----------------------------------------------------------------------
-# base class for binary operators with right associativity
+# Template::TT3::Element::Operator::InfixLeft;
+#
+# Mixin class for binary operators with right associativity
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Operator::Binary::Right;
+package Template::TT3::Element::Operator::InfixRight;
 
 use Template::TT3::Class 
     version   => 3.00,
@@ -278,6 +327,81 @@ use Template::TT3::Class
     alias     => {
         as_postop => 'as_postop_right',
     };
+
+
+
+1;
+
+__END__
+
+
+
+#=======================================================================
+# stuff below to be assimilated
+#=======================================================================
+
+
+#-----------------------------------------------------------------------
+# base class for unary operators that are either prefix or postfix
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::Operator::Unary::PrePostfix;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Operator::Unary',
+    constants => ':elem_slots',
+    alias     => {
+        as_expr   => 'as_expr_prefix',
+        as_postop => 'as_postop_postfix',
+    };
+
+
+
+sub generate {
+#    $_[0]->debug("\nOP $_[0]->[TEXT]   lhs [$_[0]->[LHS]]  rhs [$_[0]->[RHS]]");
+    $_[0]->[RHS]
+        ? $_[1]->generate_prefix(
+            $_[0]->[TEXT],
+            $_[0]->[RHS],
+          )
+        : $_[1]->generate_postfix(
+            $_[0]->[TEXT],
+            $_[0]->[LHS],
+          );
+}
+
+
+
+#-----------------------------------------------------------------------
+# unary operators
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::Not;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Operator::Unary::Prefix';
+
+package Template::TT3::Element::NotLo;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Not';
+
+
+package Template::TT3::Element::Inc;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Operator::Unary::PrePostfix';
+
+package Template::TT3::Element::Dec;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Operator::Unary::PrePostfix';
+
 
 
 
@@ -293,23 +417,7 @@ use Template::TT3::Class
     constants => ':elem_slots';
 
 
-package Template::TT3::Element::Plus;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Left',
-    constants => ':elem_slots';
-
-
 package Template::TT3::Element::Star;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Left',
-    constants => ':elem_slots';
-
-
-package Template::TT3::Element::NumLt;
 
 use Template::TT3::Class 
     version   => 3.00,
