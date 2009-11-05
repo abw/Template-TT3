@@ -1,3 +1,5 @@
+die "Template::TT3::Ops is deprecated.... use Template::TT3::Elements instead";
+
 #========================================================================
 #
 # Template::TT3::Ops
@@ -26,13 +28,18 @@ use Template::TT3::Class
     };
 
 our $OPS = {
-    text     => 'Template::TT3::Op::Text',
-    number   => 'Template::TT3::Op::Number',
-    add      => 'Template::TT3::Op::Add',
-    subtract => 'Template::TT3::Op::Subtract',
-    var_node => 'Template::TT3::Op::VarNode',
-    variable => 'Template::TT3::Op::Variable',
-    dot      => 'Template::TT3::Op::Dot',
+    text        => 'Template::TT3::Op::Text',
+    whitespace  => 'Template::TT3::Op::Whitespace',
+    tag_start   => 'Template::TT3::Op::TagStart',
+    tag_end     => 'Template::TT3::Op::TagEnd',
+    number      => 'Template::TT3::Op::Number',
+    add         => 'Template::TT3::Op::Add',
+    subtract    => 'Template::TT3::Op::Subtract',
+    word        => 'Template::TT3::Op::Word',
+    keyword     => 'Template::TT3::Op::Keyword',
+    var_node    => 'Template::TT3::Op::VarNode',
+    variable    => 'Template::TT3::Op::Variable',
+    dot         => 'Template::TT3::Op::Dot',
 };
 
 
