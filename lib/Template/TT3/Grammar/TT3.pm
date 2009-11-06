@@ -50,8 +50,8 @@ our $SYMBOLS  = [
     [ '*'  => star              => 280,   0 ],      # foo * bar
     [ '/'  => slash             => 280,   0 ],      # foo / bar
     [ '%'  => percent           => 280, 350 ],      # foo % bar, %bar
-    [ div  => div               => 280,   0 ],      # foo div bar
-    [ mod  => mod               => 280,   0 ],      # foo mod bar
+    [ div  => num_div_int       => 280,   0 ],      # foo div bar
+    [ mod  => num_modulus       => 280,   0 ],      # foo mod bar
     
     # text concatentation operator
     [ '~'  => txt_append        => 270,   0 ],      # foo ~ bar

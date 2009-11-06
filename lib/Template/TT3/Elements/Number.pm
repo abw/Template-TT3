@@ -264,32 +264,45 @@ package Template::TT3::Element::Star;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
-
-sub as_expr {
-    shift->not_implemented;
-#    shift->become('num_positive')->as_expr(@_);
-}
-
-sub as_postop {
-    shift->become('num_multiply')->as_postop(@_);
-}
+    base      => 'Template::TT3::Element',
+    methods   => {
+        as_expr => sub {
+            shift->not_implemented;
+        },
+        as_postop => sub {
+            shift->become('num_multiply')->as_postop(@_);
+        },
+    };
 
 
 package Template::TT3::Element::Slash;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
+    base      => 'Template::TT3::Element',
+    methods   => {
+        as_expr => sub {
+            shift->not_implemented;
+        },
+        as_postop => sub {
+            shift->become('num_divide')->as_postop(@_);
+        },
+    };
 
-sub as_expr {
-    shift->not_implemented;
-#    shift->become('num_positive')->as_expr(@_);
-}
 
-sub as_postop {
-    shift->become('num_divide')->as_postop(@_);
-}
+package Template::TT3::Element::Percent;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element',
+    methods   => {
+        as_expr => sub {
+            shift->not_implemented;
+        },
+        as_postop => sub {
+            shift->become('num_divide')->as_postop(@_);
+        }
+    };
 
 
 

@@ -5,9 +5,9 @@ use Badger::Class
     debug     => 0,
     base      => 'Badger::Utils',
     exports   => {
-        any   => '',
+        # add any here
     };
 
-# stub for later
+# just a stub for now
 
 1;

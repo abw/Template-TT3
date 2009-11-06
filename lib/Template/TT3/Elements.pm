@@ -25,7 +25,9 @@ sub init_elements {
 
 
 sub construct {
-    shift->constructor(shift)->(@_);
+    my $self = shift;
+    my $type = shift;
+    $self->constructor($type)->(@_);
 }
 
 
