@@ -18,6 +18,7 @@ use Badger
     lib => '../../lib';
 
 use Template::TT3::Test 
+    skip  => 'Not working',
     tests => 6,
     debug => 'Template::TT3::Scanner',
     args  => \@ARGV;

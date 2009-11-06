@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test::Parser 
-    tests  => 31,
+    tests  => 34,
     debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
     args   => \@ARGV,
     import => 'test_parser';
@@ -185,10 +185,22 @@ __DATA__
 <prefix:<op:+><prefix:<op:-><number:20>>>
 
 
+#-----------------------------------------------------------------------
+# TODO: unary auto increment/decrement operators: a++, ++a, a--, --a, etc.
+#-----------------------------------------------------------------------
+
+
 
 #-----------------------------------------------------------------------
 # numerical binary operators
 #-----------------------------------------------------------------------
+
+-- test exponents - I have the power! -- 
+10**2
+30**3**2
+-- expect --
+<binary:<op:**><number:10><number:2>>
+<binary:<op:**><number:30><binary:<op:**><number:3><number:2>>>
 
 -- test addition -- 
 10+20
@@ -259,6 +271,36 @@ __DATA__
 -10 / -20
 -- expect --
 <binary:<op:/><prefix:<op:-><number:10>><prefix:<op:-><number:20>>>
+
+-- test integer division -- 
+10 div 20
+1.2 div 3.4
+4e5 div 5e6
+-- expect --
+<binary:<op:div><number:10><number:20>>
+<binary:<op:div><number:1.2><number:3.4>>
+<binary:<op:div><number:4e5><number:5e6>>
+
+-- test integer modulus: % -- 
+10%20
+11 % 21
+1.2 % 3.4
+4e5 % 5e6
+-- expect --
+<binary:<op:%><number:10><number:20>>
+<binary:<op:%><number:11><number:21>>
+<binary:<op:%><number:1.2><number:3.4>>
+<binary:<op:%><number:4e5><number:5e6>>
+
+-- test integer modulus: mod -- 
+10 mod 20
+1.2 mod 3.4
+4e5 mod 5e6
+-- expect --
+<binary:<op:mod><number:10><number:20>>
+<binary:<op:mod><number:1.2><number:3.4>>
+<binary:<op:mod><number:4e5><number:5e6>>
+
 
 
 #-----------------------------------------------------------------------

@@ -15,7 +15,7 @@
 #use Badger::Debug modules => 'Badger::Factory';
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    tests => 2,
+    tests => 6,
     debug => 'Template::TT3::Grammar',
     args  => \@ARGV;
 
