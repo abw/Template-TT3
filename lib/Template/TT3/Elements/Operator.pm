@@ -29,13 +29,13 @@ sub no_rhs_expr {
     # parse_error element containing information about the error.  But for
     # now, we'll just throw an error.
     my $next = $token 
-        && $$token->skip_ws->[TEXT]
+        && $$token->skip_ws->[TOKEN]
         || '';
     
     $self->error_msg( 
         length $next
-            ? ( no_rhs_expr_got => $self->[TEXT], $next )
-            : ( no_rhs_expr     => $self->[TEXT] )
+            ? ( no_rhs_expr_got => $self->[TOKEN], $next )
+            : ( no_rhs_expr     => $self->[TOKEN] )
     );
 }
 
@@ -62,7 +62,7 @@ use Template::TT3::Class
 sub sexpr {
     sprintf(
         $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[LHS]
             ? $_[0]->[LHS]->sexpr
             : $_[0]->[RHS]->sexpr
@@ -111,7 +111,7 @@ sub as_expr {
 sub source {
     sprintf(
         $_[0]->SOURCE_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[RHS]->source
     );
 }
@@ -120,7 +120,7 @@ sub source {
 sub sexpr {
     sprintf(
         $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[RHS]->sexpr
     );
 }
@@ -128,7 +128,7 @@ sub sexpr {
 
 sub generate {
     $_[1]->generate_prefix(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[RHS],    # ->generate($_[1]),
     );
 }
@@ -174,7 +174,7 @@ sub source {
     sprintf(
         $_[0]->SOURCE_FORMAT, 
         $_[0]->[LHS]->source,
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 
@@ -182,7 +182,7 @@ sub source {
 sub sexpr {
     sprintf(
         $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[LHS]->sexpr
     );
 }
@@ -190,7 +190,7 @@ sub sexpr {
 
 sub generate {
     $_[1]->generate_postfix(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[LHS],   #->generate($_[1]),
     );
 }
@@ -219,7 +219,7 @@ sub source {
     sprintf(
         $_[0]->SOURCE_FORMAT, 
         $_[0]->[LHS]->source,
-        $_[0]->[TEXT], 
+        $_[0]->[TOKEN], 
         $_[0]->[RHS]->source,
     );
 }
@@ -228,7 +228,7 @@ sub source {
 sub sexpr {
     sprintf(
         $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[LHS]->sexpr,
         $_[0]->[RHS]->sexpr,
     );
@@ -237,7 +237,7 @@ sub sexpr {
 
 sub generate {
     $_[1]->generate_binop(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[LHS],
         $_[0]->[RHS],
     );
@@ -293,7 +293,7 @@ sub as_postop {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
     $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->error("Missing expression after operator: $self->[TEXT]");
+        || return $self->error("Missing expression after operator: $self->[TOKEN]");
     
     # non-chaining infix operators always return at this point
     return $self;
@@ -334,7 +334,7 @@ sub as_postop {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
     $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->error("Missing expression after operator: $self->[TEXT]");
+        || return $self->error("Missing expression after operator: $self->[TOKEN]");
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
@@ -378,7 +378,7 @@ sub as_postop {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
     $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->error_msg( no_rhs_expr => $self->[TEXT] );
+        || return $self->error_msg( no_rhs_expr => $self->[TOKEN] );
     
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
@@ -417,14 +417,14 @@ use Template::TT3::Class
 
 
 sub generate {
-#    $_[0]->debug("\nOP $_[0]->[TEXT]   lhs [$_[0]->[LHS]]  rhs [$_[0]->[RHS]]");
+#    $_[0]->debug("\nOP $_[0]->[TOKEN]   lhs [$_[0]->[LHS]]  rhs [$_[0]->[RHS]]");
     $_[0]->[RHS]
         ? $_[1]->generate_prefix(
-            $_[0]->[TEXT],
+            $_[0]->[TOKEN],
             $_[0]->[RHS],
           )
         : $_[1]->generate_postfix(
-            $_[0]->[TEXT],
+            $_[0]->[TOKEN],
             $_[0]->[LHS],
           );
 }
@@ -483,9 +483,9 @@ use Template::TT3::Class
     constants => ':elem_slots';
 
 sub generate {
-    $_[0]->debug("arrows [$_[0]->[TEXT]] [$_[0]->[LHS]] [$_[0]->[RHS]]");
+    $_[0]->debug("arrows [$_[0]->[TOKEN]] [$_[0]->[LHS]] [$_[0]->[RHS]]");
     $_[1]->generate_binop(
-        ' "' . $_[0]->[TEXT] . '" ',    # for debugging
+        ' "' . $_[0]->[TOKEN] . '" ',    # for debugging
         $_[0]->[LHS],
         $_[0]->[RHS],
     );
@@ -501,7 +501,7 @@ use Template::TT3::Class
 
 sub TMP_generate {
     $_[1]->generate_if_then(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
         $_[0]->[LHS],
         $_[0]->[RHS],
     );

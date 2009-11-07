@@ -32,7 +32,7 @@ sub as_block {
 
 sub generate {
     $_[1]->generate_whitespace(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 
@@ -72,7 +72,7 @@ sub next_skip_ws {
 
 sub generate {
     $_[1]->generate_tag_start(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 
@@ -91,7 +91,7 @@ use Template::TT3::Class
     
 sub generate {
     $_[1]->generate_tag_end(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 

@@ -4,7 +4,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Base',
     version   => 3.00,
     utils     => 'self_params',
-    slots     => 'meta text pos next',
+    slots     => 'meta next token pos',
     import    => 'class',
     constants => ':elem_slots CODE ARRAY HASH',
     constant  => {   
@@ -55,7 +55,7 @@ sub constructor {
     my $class = ref $self || $self;
     my $meta  = $self->init_meta($params);
     return sub {
-        bless [$meta, @_], $class;
+        bless [$meta, undef, @_], $class;
     };
 }
 
@@ -138,14 +138,14 @@ sub as_block {
 #    }
 #    
 #    return $self->[META]->[ELEMS]->construct(
-#        block => $self->[TEXT], $self->[POS], \@exprs
+#        block => $self->[TOKEN], $self->[POS], \@exprs
 #    )
 #    if @exprs;
 }
     
 
 sub is {
-    $_[0]->[TEXT] && $_[0]->[TEXT] eq $_[1];
+    $_[0]->[TOKEN] && $_[0]->[TOKEN] eq $_[1];
 }
 
 
@@ -167,7 +167,7 @@ __END__
 # default methods to access other items in a token instance or generate
 # view of it
 sub self    { $_[0] }
-sub source  { $_[0]->[TEXT] }
+sub source  { $_[0]->[TOKEN] }
 sub sexpr   { '<' . $_[0]->type . ':' . $_[0]->text . '>' }
 
 

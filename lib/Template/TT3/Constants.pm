@@ -33,9 +33,9 @@ use Badger::Class
             elem_slots  => {
                 # element slots - the first 4 are common to all elements
                 META    => '=0',
-                TEXT    => '=1',
-                POS     => '=2',
-                NEXT    => '=3',
+                NEXT    => '=1',
+                TOKEN   => '=2',
+                POS     => '=3',
 
                 # remaining slots have different meanings depending on 
                 # the element type

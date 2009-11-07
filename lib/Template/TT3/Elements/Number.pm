@@ -30,19 +30,19 @@ sub as_expr {
 sub sexpr {
     sprintf(
         $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 
 
 sub source {
-    $_[0]->[TEXT];
+    $_[0]->[TOKEN];
 }
 
 
 sub generate {
     $_[1]->generate_number(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 

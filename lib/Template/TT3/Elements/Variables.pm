@@ -9,7 +9,7 @@ use Template::TT3::Class
 sub as_expr {
     my ($self, $token, $scope, $prec) = @_;
 #    $prec ||= 0;
-#    $self->debug("variable $self->[TEXT] as_expr($prec)");
+#    $self->debug("variable $self->[TOKEN] as_expr($prec)");
 
     # TODO: allow () [] {} following variable word
     
@@ -22,7 +22,7 @@ sub as_expr {
 
 sub generate {
     $_[1]->generate_variable(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 

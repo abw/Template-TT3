@@ -32,19 +32,19 @@ sub as_number {
 sub sexpr {
     sprintf(
         $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 
 
 sub source {
-    $_[0]->[TEXT];
+    $_[0]->[TOKEN];
 }
 
 
 sub generate {
     $_[1]->generate_text(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 
@@ -147,7 +147,7 @@ use Template::TT3::Class
 
 sub generate {
     $_[1]->generate_squote(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 
@@ -161,7 +161,7 @@ use Template::TT3::Class
 
 sub generate {
     $_[1]->generate_dquote(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 

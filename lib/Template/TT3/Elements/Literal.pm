@@ -11,15 +11,15 @@ use Template::TT3::Class
 
 
 sub text {
-    $_[0]->[TEXT];
+    $_[0]->[TOKEN];
 }
 
 sub value {
-    $_[0]->[TEXT];
+    $_[0]->[TOKEN];
 }
 
 sub values {
-    $_[0]->[TEXT];
+    $_[0]->[TOKEN];
 }
 
 sub text_element {
@@ -28,7 +28,7 @@ sub text_element {
 
 sub generate {
     $_[1]->generate_literal(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 
@@ -57,7 +57,7 @@ use Template::TT3::Class
 
 sub generate {
     $_[1]->generate_word(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 
@@ -84,7 +84,7 @@ use Template::TT3::Class
 
 sub generate {
     $_[1]->generate_keyword(
-        $_[0]->[TEXT],
+        $_[0]->[TOKEN],
     );
 }
 
@@ -102,7 +102,7 @@ sub as_expr {
 
 sub generate {
     $_[1]->generate_punctuation(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
 
@@ -140,7 +140,7 @@ sub as_block {
     $$token = $$token->next;
 
     return $self->[META]->[ELEMS]->construct(
-        block => $self->[TEXT], $self->[POS], undef, \@exprs
+        block => $self->[TOKEN], $self->[POS], undef, \@exprs
     );
 
 #    return undef;
@@ -182,7 +182,7 @@ sub as_block {
     $$token = $$token->next;
 
     return $self->[META]->[ELEMS]->construct(
-        block => $self->[TEXT], $self->[POS], undef, \@exprs
+        block => $self->[TOKEN], $self->[POS], undef, \@exprs
     );
 }
 
@@ -207,7 +207,7 @@ sub as_expr {
 
 sub generate {
     $_[1]->generate_keyword(
-        $_[0]->[TEXT]
+        $_[0]->[TOKEN]
     );
 }
     

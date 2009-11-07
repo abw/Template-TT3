@@ -37,9 +37,9 @@ is( $n1->value, 42, 'n1 value is 42' );
 my $n2 = $elems->construct( number => 69 );
 is( $n2->value, 69, 'n2 value is 69' );
 
-my $add = $elems->construct('number.add' => '+', 3, undef, $n1, $n2 );
+my $add = $elems->construct('number.add' => '+', 3, $n1, $n2 );
 is( $add->value, 111, 'addition: 42 + 69 = 111' );
 
-my $sub = $elems->construct('number.subtract' => '-', 4, undef, $n2, $n1 );
+my $sub = $elems->construct('number.subtract' => '-', 4, $n2, $n1 );
 is( $sub->value, 27, 'subtraction: 69 - 42 = 27' );
 
