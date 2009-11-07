@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test::Parser 
-    tests  => 11,
+    tests  => 12,
     debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
     args   => \@ARGV,
     import => 'test_parser';
@@ -65,6 +65,20 @@ __DATA__
 4 ~= 2
 -- expect --
 <binary:<op:~=><number:4><number:2>>
+
+-- test append equal: a ~= b ~= c --
+4 ~= 2 ~= 0
+-- expect --
+-- collapse --
+<binary:
+  <op:~=>
+  <number:4>
+  <binary:
+    <op:~=>
+    <number:2>
+    <number:0>
+  >
+>
 
 
 #-----------------------------------------------------------------------

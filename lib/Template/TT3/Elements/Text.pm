@@ -104,7 +104,7 @@ class->generate_text_ops(
         return $_[0]->[LHS]->text($_[1])
            cmp $_[0]->[RHS]->text($_[1])
     },
-    combine_set => infix_left => sub {                      # a ~= b
+    combine_set => infix_right => sub {                     # a ~= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->text($_[1])

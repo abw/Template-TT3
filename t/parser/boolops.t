@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test::Parser 
-    tests  => 12,
+    tests  => 22,
     debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
     args   => \@ARGV,
     import => 'test_parser';
@@ -65,6 +65,16 @@ not 10 + 20
 10 or 20
 -- expect --
 <binary:<op:or><number:10><number:20>>
+
+-- test infix: !! --
+10 !! 20
+-- expect --
+<binary:<op:!!><number:10><number:20>>
+
+-- test infix: nor --
+10 nor 20
+-- expect --
+<binary:<op:nor><number:10><number:20>>
 
 -- test infix precedence: && --
 10 + 20 && 30 + 40 
@@ -138,6 +148,99 @@ not 10 + 20
   >
 >
 
+-- test infix precedence: !! --
+10 + 20 !! 30 + 40 
+-- expect --
+-- collapse --
+<binary:
+  <op:!!>
+  <binary:
+    <op:+>
+    <number:10>
+    <number:20>
+  >
+  <binary:
+    <op:+>
+    <number:30>
+    <number:40>
+  >
+>
+
+-- test infix precedence: nor --
+10 + 20 nor 30 + 40 
+-- expect --
+-- collapse --
+<binary:
+  <op:nor>
+  <binary:
+    <op:+>
+    <number:10>
+    <number:20>
+  >
+  <binary:
+    <op:+>
+    <number:30>
+    <number:40>
+  >
+>
+
+-- test infix: &&= --
+10 &&= 20
+-- expect --
+<binary:<op:&&=><number:10><number:20>>
+
+-- test infix right: &&= --
+10 &&= 20 &&= 30
+-- expect --
+-- collapse --
+<binary:
+  <op:&&=>
+  <number:10>
+  <binary:
+    <op:&&=>
+    <number:20>
+    <number:30>
+  >
+>
+
+
+-- test infix: ||= --
+10 ||= 20
+-- expect --
+<binary:<op:||=><number:10><number:20>>
+
+-- test infix right: ||= --
+10 ||= 20 ||= 30
+-- expect --
+-- collapse --
+<binary:
+  <op:||=>
+  <number:10>
+  <binary:
+    <op:||=>
+    <number:20>
+    <number:30>
+  >
+>
+
+-- test infix: !!= --
+10 !!= 20
+-- expect --
+<binary:<op:!!=><number:10><number:20>>
+
+-- test infix right: !!= --
+10 !!= 20 !!= 30
+-- expect --
+-- collapse --
+<binary:
+  <op:!!=>
+  <number:10>
+  <binary:
+    <op:!!=>
+    <number:20>
+    <number:30>
+  >
+>
 
 
 __END__

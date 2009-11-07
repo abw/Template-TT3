@@ -164,28 +164,28 @@ class->generate_number_ops(
         return $_[0]->[LHS]->number($_[1])
            <=> $_[0]->[RHS]->number($_[1]);
     },
-    add_set => infix => sub {                               # a += b
+    add_set => infix_right => sub {                         # a += b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->number($_[1])
           + $_[0]->[RHS]->number($_[1])
         );
     },
-    sub_set => infix => sub {                               # a -= b
+    sub_set => infix_right => sub {                         # a -= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->number($_[1])
           - $_[0]->[RHS]->number($_[1])
         );
     },
-    mul_set => infix => sub {                               # a *= b
+    mul_set => infix_right => sub {                         # a *= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->number($_[1])
           * $_[0]->[RHS]->number($_[1])
         );
     },
-    div_set => infix => sub {                               # a /= b
+    div_set => infix_right => sub {                         # a /= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->number($_[1])
