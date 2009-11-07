@@ -190,6 +190,14 @@ sub generate_text_ops {
 }
 
 
+sub generate_boolean_ops {
+    shift->generate_ops(
+        { methods => 'value values' },
+        @_
+    );
+}
+
+
 sub _debug {
     print STDERR @_;
 }
