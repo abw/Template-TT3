@@ -32,29 +32,29 @@ our $SYMBOLS  = [
     # [ $token, $name, $left_precedence, $right_precedence ]
 
     # variable sigils
-    [ '$'   => dollar       =>   0, 350 ],      # $foo
-    [ '@'   => at           =>   0, 350 ],      # @foo
-#   [ '%'   => percent      =>   0, 350 ],      # %foo
-    [ '.'   => dot          => 340,   0 ],      # foo.bar
+    [ '$'   => dollar           =>   0, 350 ],      # $foo
+    [ '@'   => at               =>   0, 350 ],      # @foo
+#   [ '%'   => percent          =>   0, 350 ],      # %foo
+    [ '.'   => dot              => 340,   0 ],      # foo.bar
     
     # ++/-- unary prefix/postfix self-modification operators
-    [ '++' => num_inc           => 295, 295 ],      # foo++, ++foo
-    [ '--' => num_dec           => 295, 295 ],      # foo--, --foo
+    [ '++'  => num_inc          => 295, 295 ],      # foo++, ++foo
+    [ '--'  => num_dec          => 295, 295 ],      # foo--, --foo
     
     # ** binary power operator binds very tight
-    [ '**' => num_power         => 290,   0 ],      # foo ** 3
+    [ '**'  => num_power        => 290,   0 ],      # foo ** 3
 
     # other mathematical operators
-    [ '+'  => num_plus          => 275, 285 ],      # foo + bar, +foo
-    [ '-'  => num_minus         => 275, 285 ],      # foo - bar, -foo
-    [ '*'  => star              => 280,   0 ],      # foo * bar
-    [ '/'  => slash             => 280,   0 ],      # foo / bar
-    [ '%'  => percent           => 280, 350 ],      # foo % bar, %bar
-    [ div  => num_div_int       => 280,   0 ],      # foo div bar
-    [ mod  => num_modulus       => 280,   0 ],      # foo mod bar
+    [ '+'   => num_plus         => 275, 285 ],      # foo + bar, +foo
+    [ '-'   => num_minus        => 275, 285 ],      # foo - bar, -foo
+    [ '*'   => star             => 280,   0 ],      # foo * bar
+    [ '/'   => slash            => 280,   0 ],      # foo / bar
+    [ '%'   => percent          => 280, 350 ],      # foo % bar, %bar
+    [ div   => num_div_int      => 280,   0 ],      # foo div bar
+    [ mod   => num_modulus      => 280,   0 ],      # foo mod bar
     
-    # text concatentation operator
-    [ '~'  => txt_append        => 270,   0 ],      # foo ~ bar
+    # text concatentation operator: TODO add as prefix op
+    [ '~'   => txt_squiggle     => 270, 270 ],      # foo ~ bar, ~ foo
 
     # NOTE: Perl6 has cmp and <=> here
 
@@ -101,14 +101,14 @@ our $SYMBOLS  = [
     # binary assignment operators
     [ '='   => assign           => 220,   0 ],      # foo = bar
     [ '=>'  => fat_arrow        => 220,   0 ],      # foo => bar
-    [ '~='  => append_to        => 220,   0 ],      # foo ~= bar
-    [ '+='  => num_add_eq       => 220,   0 ],      # foo += bar
-    [ '-='  => num_sub_eq       => 220,   0 ],      # foo -= bar
-    [ '*='  => num_mul_eq       => 220,   0 ],      # foo *= bar
-    [ '/='  => num_div_eq       => 220,   0 ],      # foo /= bar
-    [ '&&=' => bool_and_eq      => 220,   0 ],      # foo &&= bar
-    [ '||=' => bool_or_eq       => 220,   0 ],      # foo ||= bar
-    [ '!!=' => bool_nor_eq      => 220,   0 ],      # foo !!= bar
+    [ '~='  => txt_combine_set  => 220,   0 ],      # foo ~= bar
+    [ '+='  => num_add_set      => 220,   0 ],      # foo += bar
+    [ '-='  => num_sub_set      => 220,   0 ],      # foo -= bar
+    [ '*='  => num_mul_set      => 220,   0 ],      # foo *= bar
+    [ '/='  => num_div_set      => 220,   0 ],      # foo /= bar
+    [ '&&=' => bool_and_set     => 220,   0 ],      # foo &&= bar
+    [ '||=' => bool_or_set      => 220,   0 ],      # foo ||= bar
+    [ '!!=' => bool_nor_set     => 220,   0 ],      # foo !!= bar
                                 
     # low precedence short-circuiting logical operators
     [ 'not' => bool_not         => 0,   215 ],      # not foo

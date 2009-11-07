@@ -27,6 +27,9 @@ our $MESSAGES = {
     sign_dup_arg    => "Duplicate argument in signature for %s function: %s",
     sign_dup_sigil  => "Duplicate '%s' argument in signature for %s function: %s",
     undef_varname   => "Cannot use undefined value as a variable name: %s",
+    undefined       => "Undefined value returned by expression: <1>",
+    nan             => 'Non-numerical value "<2>" returned by expression: <1>',
+    missing_after   => 'Missing %s after %s: %s',
 };
 
 
@@ -143,6 +146,17 @@ sub as_block {
 
 sub is {
     $_[0]->[TEXT] && $_[0]->[TEXT] eq $_[1];
+}
+
+
+sub error_undef { 
+    my $self = shift;
+    $self->error_msg( undefined => $self->source, @_ );
+}
+
+sub error_nan { 
+    my $self = shift;
+    $self->error_msg( nan => $self->source, @_ );
 }
 
     
