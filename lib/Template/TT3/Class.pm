@@ -4,14 +4,15 @@ use Badger::Class
     version   => 3.00,
     debug     => 0,
     uber      => 'Badger::Class',
-    utils     => 'self_params',
-    constants => 'ARRAY HASH CODE DELIMITER PKG',
+    utils     => 'self_params camel_case',
+    constants => 'ARRAY HASH CODE DELIMITER PKG BLANK',
     constant  => {
         CONSTANTS => 'Template::TT3::Constants',
         PATTERNS  => 'Template::TT3::Patterns',
-#        CONFIG    => 'Template::TT3::Config',
+#       CONFIG    => 'Template::TT3::Config',
         UTILS     => 'Template::TT3::Utils',
-        OP_BASE   => 'Template::TT3::Element::Operator',
+        BASE_OP   => 'Template::TT3::Element::Operator',
+        VALUE
     },
     hooks => {
         patterns => \&patterns,
@@ -21,16 +22,15 @@ use Badger::Class
     };
 
 
-# Badger::Class uses this to determine what to strip off the front of the
-# class name to generate a short id for a class (e.g. Badger::Example::Foo
-# without the 'Badger' base_id ends up as example.foo).  We're going to 
-# extend that concept to allow individual modules to define a base_id method 
-# (rather than just Template::TT3::Class).  NOTE: this may change
-
 sub base_id {
     shift->{ name }->base_id;
 }
 
+
+sub patterns {
+    my $self = shift;
+    _autoload($self->PATTERNS)->export($self->{ name }, @_);
+}
 
 
 sub alias {
@@ -46,22 +46,6 @@ sub alias {
     return $self;
 }
 
-
-#-----------------------------------------------------------------------
-# patterns(@symbols)
-#
-# Method to import symbols from Template::TT3::Patterns
-#-----------------------------------------------------------------------
-
-sub patterns {
-    my $self = shift;
-    _autoload($self->PATTERNS)->export($self->{ name }, @_);
-}
-
-
-#-----------------------------------------------------------------------
-# method to generate a new class
-#-----------------------------------------------------------------------
 
 sub generate {
     my $self    = shift;
@@ -89,10 +73,6 @@ sub generate {
     return $self;
 }
 
-
-#-----------------------------------------------------------------------
-# method to generate a new subclass of the current class
-#-----------------------------------------------------------------------
 
 sub subclass {
     my $self = shift;
@@ -124,59 +104,89 @@ sub subclass {
             die "Invalid subclass specification for $pkg: $spec\n";
         }
 
-        
         if ($pkg =~ s/^_//) {
             $pkg = $self.PKG.$pkg;
             _debug("found '_' at start, made it $pkg\n");
         }
-        _debug("Generating subclass $pkg as { ", join(', ', @$spec), " }\n");
+        _debug("Generating subclass $pkg as { ", join(', ', @$spec), " }\n") if DEBUG;
         $self->generate($pkg => $spec);
     }
     
     return $self;
 }
 
-sub op_subclass {
-    my ($self, $classes) = self_params(@_);
-    my ($method, $methods, $name, $base);
 
-    while (my ($n, $spec) = each %$classes) {
-        $name = $n;     # curse aliasing!
-        $name = $self->{ name }.PKG.$name
-            if $name =~ s/^_//;
-        
-        my @bases = ($self->{ name });
-        
-        # any declared base goes before self
-        unshift(@bases, $spec->{ base }) if $spec->{ base };
-        
-        # op_base mixin goes in before that as it's the most see-through
-        if ($base = delete $spec->{ op_base }) {
-            $base = OP_BASE.PKG.$base
-                if $base =~ s/^_//;
-            unshift(@bases, $base);
-        }
-        $spec->{ base } = $base = join(' ', @bases);
-#        _debug("Generating subclass [$name] with base [$base]\n");
-        
-        # create/augment the methods
-        $methods = $spec->{ methods } ||= { };
-        
-        if ($method = delete $spec->{ value }) {
-            # single value method should be aliased as values
-            $methods->{ value  } ||= $method;
-            $methods->{ values } ||= $method;
-        }
-#        _debug("Generating subclass $name with methods: ", join(', ', keys %$methods), "\n");
-#        _debug("Generating subclass $name as ", join(', ', %$spec), " }\n");
+sub generate_ops {
+    my $self = shift;
+    my $spec = shift;
+    my $args = @_ == 1 && ref $_[0] ? shift : [ @_ ];
 
+    # methods gives us a list of method names that we want to alias to
+    my $methods = $spec->{ methods } || 'value';
+    $methods = [ split(DELIMITER, $methods) ]
+        unless ref $methods eq ARRAY;
+
+    $args = 
+        ref $args eq ARRAY ? [ @$args ]     # a copy we can mutate
+      : ref $args eq HASH  ? [ %$args ]     # flatten hash to list
+      : die "Invalid arguments provided to generate_ops() : $args";
+
+    while (@$args) {
+        # First item is name, then any mixin/base classes, followed by a
+        # CODE reference which should be installed as the value() method,
+        # with an alias of values() pointing at the same subroutine.
+        my ($name, @bases, $base, $code);
+        $name = shift @$args;
+        $name = $self->{ name }.PKG.camel_case($name);
+        
+        while (@$args && ! ref $args->[0]) {
+            $base = shift @$args;
+            push(
+                @bases,
+                $base =~ /::/
+                    ? $base
+                    : BASE_OP.PKG.camel_case($base)
+            );
+        }
+
+        push(@bases, $self->{ name });
+        
+        die "No subroutine specified for $name in generate_ops()"
+            unless @$args && ($code = shift @$args);
+
+        die "Invalid subroutine specified for $name in generate_ops(); $code"
+            unless ref $code eq CODE;
+            
+#        _debug("generate_ops() $name => ", join(', ', @bases), "\n");
+#        _debug("methods are : ", join(', ', @$methods), "\n");
+        
         class->export(
-            $name => %$spec
+            $name => [
+                base    => \@bases,
+                methods => {
+                    map { $_ => $code }
+                    @$methods
+                }
+            ]
         );
-
     }
-    
     return $self;
+}
+
+
+sub generate_number_ops {
+    shift->generate_ops(
+        { methods => 'value values number text' },
+        @_
+    );
+}
+
+
+sub generate_text_ops {
+    shift->generate_ops(
+        { methods => 'value values text' },
+        @_
+    );
 }
 
 
@@ -185,6 +195,7 @@ sub _debug {
 }
     
 1;
+
 __END__
 
 =head1 NAME
@@ -198,8 +209,8 @@ Template::TT3::Class - class metaprogramming module
     use Template::TT3::Class
         version     => 3.00,             # sets $VERSION number
         debug       => 0,                # sets $DEBUG flag
-        base        => 'Template::TT3::Base', # specify base class
-        utils       => 'blessed UTILS';  # imports from Template::TT3::Utils
+        base        => 'Template::Base', # specify base class
+        utils       => 'blessed';        # imports from Template::Utils
         # ...and more...
 
 =head1 DESCRIPTION
@@ -223,7 +234,7 @@ base class, and so on.
     class->debug(1);
     class->base('Template::TT3::Base');
 
-You can also use the import hooks to acheive the same effect.
+You can also use the import hooks to achieve the same effect.
 
     package Template::TT3::Example;
     
@@ -241,10 +252,15 @@ In addition the following methods are also defined.
 
 =head1 METHODS
 
-=head2 config()
+=head2 base_id()
 
-Method used to define a L<Template::TT3::Config> schema.  This will eventually
-be moved into L<Badger::Config>.
+L<Badger::Class> uses this to determine what to strip off the front of the
+class name to generate a short id for a class (e.g. C<Badger::Example::Foo>
+without the C<Badger> base_id ends up as C<example.foo>).  We're going to 
+extend that concept to allow individual modules to define a C<base_id()> 
+method.
+
+NOTE: this may be subject to change
 
 =head2 patterns()
 
@@ -262,52 +278,138 @@ This is typically called as an import hook.
         print "matched integer: $1\n";
     }
 
-=head2 slots()
+=head2 alias($name,$method)
 
-Method to define slot methods for list based objects.  Typically called
-as an import hook.
+Creates an alias to an existing method.  The method may be defined in the 
+current class or in a base class.
+
+    class->alias( foo => 'bar' );       # foo() is now an alias for bar()
+
+A code reference can also be passed to set a method directly.  In this case
+the method performs the same as L<method()|Badger::Class/method()> in 
+L<Badger::Class>.
+
+    class->alias( 
+        foo => sub { 
+            ... 
+        } 
+    ); 
+
+This method can be called as an export hook.
 
     package Template::TT3::Example;
     
     use Template::TT3::Class
-        slots => 'foo bar baz',
-        base  => 'Template::TT3::Base';
-    
-    sub new {
-        my $class = shift;
-        bless [@_], $class;     # list-based object
-    }
-    
-    package main;
-    
-    my $thing = Template::TT3::Example->new(10, 20, 30);
-    print $thing->foo;      # 10
-    print $thing->bar;      # 20
-    print $thing->baz;      # 30
-
-=head2 generate()
-
-Method to generate other classes.  Typically called as an import hook.
-
-    use Template::TT3::Class
-        generate => {
-            'Template::TT3::Example::One' => {
-                version => 3.00,
-                base    => 'Template::TT3::Base',
-                methods => {
-                    foo => sub { ... },
-                    bar => sub { ... },
-                },
-                # plus any other Template::TT3::Class import hooks
-            },
-            'Template::TT3::Example::Two' => {
-                ...
-            }
+        base  => 'Badger::Base',
+        alias => {
+            gen_msg => 'message',
         };
 
-=head2 subclass()
+In the above example, a C<gen_msg()> alias is created in the
+C<Template::TT3::Example> module which references the 
+L<message()|Badger::Base/message()> method defined in the L<Badger::Base>
+base class.
 
-Method to generate subclasses of the current class.  May be deprecated RSN.
+=head2 generate(%classes)
+
+This method can be called to generate other classes.
+
+    package Template::TT3::Example;
+    
+    use Template::TT3::Class
+        import => 'class';
+    
+    class->generate(
+        'Template::TT3::Example::Foo' => {
+            version => 2.718,
+            base    => 'Template::TT3::Example',
+            methods => {
+                wam => sub { ... },
+                bam => sub { ... },
+            }
+            # plus any other Template::TT3::Class import hooks
+        },
+        'Template::TT3::Example::Bar' => {
+            ...
+        }
+    );
+
+The first argument is a class name.  The second argument is a reference to
+a hash array or list of named parameters.  These can include any export 
+hooks defined by L<Template::TT3::Class> or L<Badger::Class>. 
+
+=head2 subclass(%classes)
+
+This method can be used to create subclasses of the current class.
+
+    package Template::TT3::Example;
+    
+    use Template::TT3::Class
+        import => 'class';
+    
+    class->subclass(
+        'Template::TT3::Example::Foo' => {
+            version => 2.718,
+            methods => {
+                wam => sub { ... },
+                bam => sub { ... },
+            }
+        }
+    );
+
+As per L<generate()>, the first argument is a class name and the second is a
+reference to a hash array or list of named parameters giving the class
+definition. The current class (C<Template::TT3::Example> in the example above)
+will automatically be added as a base class of the new class
+(C<Template::TT3::Example::Foo>).
+
+=head2 generate_ops($spec,%classes)
+
+This method can be used to generate a number of operator classes en masse.
+
+    class->generate_ops(
+        { 
+            methods => 'value values number text' 
+        },
+        {
+            inc => prefix => sub {
+                # code implementing 'inc' prefix operator
+            },
+            dec => prefix => sub {
+                # code implementing 'dec' prefix operator
+            }
+        }
+    );
+
+=head2 generate_number_ops(%classes)
+
+This method of convenience provides a wrapper around L<generate_ops()> to
+provide the correct specification (the first argument passed to
+L<generate_ops()>) for creating numeric operators.  
+
+    class->generate_number_ops(
+        inc => prefix => sub {
+            # code implementing 'inc' prefix operator
+        },
+        dec => prefix => sub {
+            # code implementing 'dec' prefix operator
+        }
+    );
+
+See L<Template::TT3::Elements::Number> for an example of it in use.
+
+=head2 generate_text_ops(%classes)
+
+This method of convenience provides a wrapper around L<generate_ops()> to
+provide the correct specification for creating text operators.  
+
+    class->generate_text_ops(
+        append => infix_left => sub {                           # a ~ b
+            # code implementing 'append' infix operator
+        },
+    );
+
+See L<Template::TT3::Elements::Text> for an example of it in use.
 
 =head1 AUTHOR
 
