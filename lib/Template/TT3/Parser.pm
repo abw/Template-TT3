@@ -1,3 +1,5 @@
+# NOTE: this is redundant now.  I just want to extract the quote escaping
+# subs before trashing it.
 #========================================================================
 #
 # Template::TT3::Parser

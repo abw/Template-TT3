@@ -134,7 +134,7 @@ our $BADQUOTE = qr/ \G ('|") /x;
 
 
 #-----------------------------------------------------------------------
-# Regexen to match regexen.  $RX matched the guts of a regex, $REGEX 
+# Regexen to match regexen.  $RX matches the guts of a regex, $REGEX 
 # matches a complete regex including the enclosing / / at the current 
 # position.  $REGEND matches from just inside the opening / up to and
 # including the closing / and any flags.

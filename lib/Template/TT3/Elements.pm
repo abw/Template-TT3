@@ -6,7 +6,7 @@ use Badger::Factory::Class
     item      => 'element',
     base      => 'Template::TT3::Base',
     utils     => 'params',
-    path      => ['Template::TT3::Element', 'Template::TT3::Op'],
+    path      => ['Template::TT3::Element', 'TemplateX::TT3::Element'],
     constants => 'PKG';
 
 

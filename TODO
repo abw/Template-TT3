@@ -1,0 +1,25 @@
+Elements have text() method to return $self->[TEXT] and text() method to 
+evaluate self ($self->value) and return text.  Need to change/rename one
+or other.
+
+
+OPS
+
+$   dollar
+@   at
+%   export
+.   dot
+..  num_range
+to  num_to         # not just nums: 'A' to 'Z'
+by  num_by         # ditto
+?   if_then
+:   if_else
+->  arrow
+=   assign
+=>  fat_arrow
+
+brackets: () [] {} <>
+punctuation: , ; 
+
+
+Delete position() and other source methods from T::Type::Text
