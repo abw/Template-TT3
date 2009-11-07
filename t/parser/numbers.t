@@ -2,7 +2,8 @@
 #
 # t/parser/numbers.t
 #
-# Test the Template::Parser's ability to recognise numbers.
+# Parser tests for numbers and numerical operators.  
+# Run with '-h' option for help with command line arguments.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -13,9 +14,9 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test::Parser 
-    tests  => 34,
     debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
     args   => \@ARGV,
+    tests  => 46,
     import => 'test_parser';
 
 test_parser(
@@ -90,7 +91,7 @@ __DATA__
 -- test unary no term error --
 -
 -- expect --
-<ERROR:Missing expression after operator: ->
+<ERROR:Missing expression after '-'>
 
 -- test negative integers --
 -123
@@ -128,11 +129,11 @@ __DATA__
 <prefix:<op:+><number:0.234>>
 <prefix:<op:+><number:000.345>>
 
--- test negative hex numbers --
--0x0aBd
+-- test negative hex numbers: -0xABcd --
+-0xABcd
 -0x00
 -- expect --
-<prefix:<op:-><number:0x0aBd>>
+<prefix:<op:-><number:0xABcd>>
 <prefix:<op:-><number:0x00>>
 
 -- test positive hex numbers --
@@ -300,6 +301,87 @@ __DATA__
 <binary:<op:mod><number:10><number:20>>
 <binary:<op:mod><number:1.2><number:3.4>>
 <binary:<op:mod><number:4e5><number:5e6>>
+
+
+-- test equal --
+10==20
+30 == 40
+-- expect --
+<binary:<op:==><number:10><number:20>>
+<binary:<op:==><number:30><number:40>>
+
+
+-- test not equal --
+10!=20
+30 != 40
+-- expect --
+<binary:<op:!=><number:10><number:20>>
+<binary:<op:!=><number:30><number:40>>
+
+-- test less than --
+10<20
+30 < 40
+-- expect --
+<binary:<op:<><number:10><number:20>>
+<binary:<op:<><number:30><number:40>>
+
+-- test more than --
+10>20
+30 > 40
+-- expect --
+<binary:<op:>><number:10><number:20>>
+<binary:<op:>><number:30><number:40>>
+
+-- test less equal --
+10<=20
+30 <= 40
+-- expect --
+<binary:<op:<=><number:10><number:20>>
+<binary:<op:<=><number:30><number:40>>
+
+-- test more equal --
+10>=20
+30 >= 40
+-- expect --
+<binary:<op:>=><number:10><number:20>>
+<binary:<op:>=><number:30><number:40>>
+
+-- test compare --
+10<=>20
+30 <=> 40
+-- expect --
+<binary:<op:<=>><number:10><number:20>>
+<binary:<op:<=>><number:30><number:40>>
+
+-- test add equals --
+10+=20
+30+=40
+-- expect --
+<binary:<op:+=><number:10><number:20>>
+<binary:<op:+=><number:30><number:40>>
+
+-- test subtract equals --
+10-=20
+30-=40
+-- expect --
+<binary:<op:-=><number:10><number:20>>
+<binary:<op:-=><number:30><number:40>>
+
+-- test multiply equals --
+10*=20
+30*=40
+-- expect --
+<binary:<op:*=><number:10><number:20>>
+<binary:<op:*=><number:30><number:40>>
+
+-- test divide equals --
+10/=20
+30/=40
+-- expect --
+<binary:<op:/=><number:10><number:20>>
+<binary:<op:/=><number:30><number:40>>
+
+
 
 
 
