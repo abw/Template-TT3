@@ -12,6 +12,7 @@ use Template::TT3::Class
     },
     alias     => {
         as_number => 'self',
+        number    => 'value',
     };
 
 

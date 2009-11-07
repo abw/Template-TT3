@@ -21,7 +21,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Type::Text',
     utils     => 'is_object params self_params',
     patterns  => '$LAST_LINE',
-    constants => 'HASH LAST :token_slots',
+    constants => 'HASH LAST',
     constant  => {                   
         SOURCE => __PACKAGE__,      # class name
         id     => 'Source',         # yak!   
@@ -200,59 +200,6 @@ sub debug_lookahead {
     return $extract;
 }
 
-
-sub tokens {
-    shift->metadata->{ tokens } ||= [ ];
-}
-
-
-sub token_types {
-    my $self  = shift;
-    my $meta  = $self->metadata;
-    my $types = $meta->{ token_types };
-    if (@_) {
-        my $params = params(@_);
-        if ($types) {
-            @$types{ keys %$params } = values %$params;
-        }
-        else {
-            $types = $meta->{ token_types } = $params;
-        }
-    }
-    else {
-        $types ||= $meta->{ token_types } = { };
-    }
-    return $types;       
-}
-
-
-sub new_token {
-    my $self    = shift;
-    my $type    = shift;
-    my $meta    = $self->metadata;
-    my $tokens  = $meta->{ tokens } ||= [ ];
-    my $class   = $meta->{ token_types }->{ $type }
-        || return $self->error_msg( invalid => 'token type' => $type );
-    my $start   = @$tokens 
-        ? $tokens->[LAST]->[_START] + $tokens->[LAST]->[_LENGTH]
-        : 0;
-    my $pos     = pos($$self) || 0;
-    my $token   = bless [\$$self, $start, $pos - $start], $class;
-    push(@$tokens, $token);
-    return $token;
-}
-
-
-sub scan {
-    my ($self, $params) = self_params(@_);
-    my $class = $self->class;
-    my $meta  = $self->metadata;
-    my $types = $class->hash_vars( TOKEN_TYPES => $params->{ token_types } );
-    my $tags  = $class->list_vars( TAGS        => $params->{ tags } );
-    $self->debug("scanning with tags: ", $self->dump_data($tags));
-    $self->debug("token types: ", $self->dump_data($types));
-    $meta->{ token_types } = $types;
-}
 
 1;
 

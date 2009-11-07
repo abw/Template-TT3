@@ -26,7 +26,7 @@ use Template::TT3::Class
         type => 'Hash',     # capitalised because it's a format type (of sorts)
     },
     exports  => {
-        any => 'HASH hash',
+        any => 'HASH Hash',
     };
 
 our $METHODS   = {
@@ -223,7 +223,6 @@ sub size {
 
 sub each {
     my $self = shift;
-    print "ARGS: ", @_, "\n";
     return [ %$self ] unless @_;
     my $code = shift;
     my @out;

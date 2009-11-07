@@ -12,7 +12,6 @@ use Badger::Class
 #       CONFIG    => 'Template::TT3::Config',
         UTILS     => 'Template::TT3::Utils',
         BASE_OP   => 'Template::TT3::Element::Operator',
-        VALUE
     },
     hooks => {
         patterns => \&patterns,

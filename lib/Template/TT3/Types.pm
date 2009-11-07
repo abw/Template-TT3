@@ -22,12 +22,12 @@ use Badger::Factory::Class
     types   => {
         # Perl's names, and our made-up names to map different data types
         # to method providers
-        UNDEF  => 'Template::TT3::Type::Undef',
+#        UNDEF  => 'Template::TT3::Type::Undef',
         VALUE  => 'Template::TT3::Type::Text',
         ARRAY  => 'Template::TT3::Type::List',
         HASH   => 'Template::TT3::Type::Hash',
-        CODE   => 'Template::TT3::Type::Code',
-        OBJECT => 'Template::TT3::Type::Object',
+#        CODE   => 'Template::TT3::Type::Code',
+#        OBJECT => 'Template::TT3::Type::Object',
         
 #        # lower case TT names
 #        text   => 'Template::TT3::Type::Text',
@@ -46,13 +46,20 @@ sub OLD_init {
     return $self;
 }
 
+sub TMP_init {
+    my ($self, $config) = @_;
+    $self->init_factory($config);
+#    $self->debug("types: ", $self->dump_data($self->{ types }));
+    return $self;
+}
+
 
 sub preload {
     my $self  = shift->prototype;
     my $types = $self->types;
     my $loads = { };
     
-    $self->debug("types: ", $self->dump_data($types)) if DEBUG;
+    $self->debug("preload() types: ", $self->dump_data($types)) if DEBUG;
     
     foreach my $type (keys %$types) {
         $loads->{ $type } = $self->type($type);
@@ -65,6 +72,7 @@ sub preload {
 sub vtables {
     my $self  = shift->prototype;
     my $types = $self->types;
+    $self->debug("vtables() types: ", $self->dump_data($types)) if DEBUG;
     return {
         map {
             my $k = $_;
@@ -81,6 +89,18 @@ sub found {
     return $module;
 }
 
+sub create {
+    my $self = shift;
+    my $name = shift;
+#    $self->debug("create() types: ", $self->dump_data($self->{ types }))
+#        if ref $self;
+    my $type = $self->type($name)
+        || return $self->error_msg( invalid => type => $name );
+#    $self->debug("** create $name => $type");
+    return $type->new(@_);
+}
+
+        
 1;
 
 __END__

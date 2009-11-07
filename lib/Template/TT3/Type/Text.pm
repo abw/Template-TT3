@@ -55,8 +55,8 @@ use Template::TT3::Class
         type => 'Text',             # use capitalised name 'Text' instead of 
     },                              # 'text' 'cos we're a formal type (of sorts) 
     methods  => {
-        *center    => \&centre,     # alias for folk speaking US english
-        *tt_expand => \&text,       # special method for TT to use
+        center    => \&centre,     # alias for folk speaking US english
+        tt_expand => \&text,       # special method for TT to use
     },
     exports  => {
         any  => 'TEXT Text',        # class name and constructor sub

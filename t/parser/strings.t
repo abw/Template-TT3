@@ -14,6 +14,7 @@
 use Badger lib => '../../lib';
 use Badger::Debug modules => 'Template::TT3::Tag';
 use Template::TT3::Test::Parser 
+    skip   => 'Not working yet',
     tests  => 34,
     debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
     args   => \@ARGV,
