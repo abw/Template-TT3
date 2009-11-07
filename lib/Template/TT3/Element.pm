@@ -112,6 +112,7 @@ sub skip_ws {
 #    $_[0];
 }
 
+
 sub next_skip_ws {
     # delegate to the next token's skip_ws method
 #    my ($self, $token) = @_;
@@ -127,9 +128,10 @@ sub as_postop {
     return $_[1];
 }
 
+
 sub as_block {
     return shift->as_expr(@_);
-    
+
 #    my ($self, $token, $scope, $prec) = @_;
 #    my (@exprs, $expr);
 #    
@@ -153,6 +155,7 @@ sub error_undef {
     my $self = shift;
     $self->error_msg( undefined => $self->source, @_ );
 }
+
 
 sub error_nan { 
     my $self = shift;

@@ -5,32 +5,42 @@
 package Template::TT3::Element::Literal;
 
 use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element',
-    constants => ':elem_slots';
+    version    => 3.00,
+    base       => 'Template::TT3::Element',
+    constants  => ':elem_slots',
+    alias      => {
+        value  => \&text,
+        values => \&text,
+    };
 
 
 sub text {
     $_[0]->[TOKEN];
 }
 
-sub value {
-    $_[0]->[TOKEN];
+
+sub number {
+    my $self = shift;
+    my $text = $self->value(@_);
+
+    return 
+        ! defined $text ? $self->error_undef
+      : ! numlike $text ? $self->error_nan($text)
+      : $text;
 }
 
-sub values {
-    $_[0]->[TOKEN];
-}
 
-sub text_element {
+sub OLD_text_element {
     $_[0];
 }
+
 
 sub generate {
     $_[1]->generate_literal(
         $_[0]->[TOKEN]
     );
 }
+
 
 sub dot_op {
     my ($self, $text, $pos, $rhs) = @_;

@@ -49,16 +49,6 @@ sub generate {
 }
 
 
-sub number {
-    my $self = shift;
-    my $text = $self->value(@_);
-
-    return 
-        ! defined $text ? $self->error_undef
-      : ! numlike $text ? $self->error_nan($text)
-      : $text;
-}
-
 
 #-----------------------------------------------------------------------
 # Call on generate_text_ops() (in Template::TT3::Class) to create a 
