@@ -69,7 +69,7 @@ is( $d->ref, 'ARRAY', 'd is an ARRAY ref' );
 is( $d->dot(0)->get, 1.618, 'd.0 is 1.618' );
 is( $d->dot(1)->get, 2.718, 'd.1 is 2.718' );
 ok( ! $d->try->dot('poop'), 'cannot dot poop' );
-is( $d->reason->info, 'Invalid list index: d.poop (poop is not a number)', 'got error message' );
+is( $d->reason->info, '"poop" is not a valid list method in "d.poop"', 'got error message' );
 
 
 #-----------------------------------------------------------------------

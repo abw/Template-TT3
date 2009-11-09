@@ -18,7 +18,7 @@ use Template::TT3::Test
 #    debug => 'Template::TT3::Template',
     args  => \@ARGV,
     debug => 'Template::TT3::Scanner',
-    tests => 12;
+    tests => 5;
 
 use Template::TT3::Template;
 use constant TEMPLATE => 'Template::TT3::Template';
@@ -39,15 +39,18 @@ is( $source, 'hello world', 'got template source via auto-stringification' );
 
 my $tokens = $template->tokens;
 
-print $tokens->generate($gen), "\n";
+#print $tokens->generate($gen), "\n";
 
 #$template = TEMPLATE->new( text => '[% 4 + 20; 5 + 8 * 2; 5 + 5 %]' );
 $template = TEMPLATE->new( text => 'How about a nice [% a.b.first + 20 %]?' );
 my $sexpr = $template->sexpr;
 
-print $sexpr, "\n\n";
-print "-------\n";
-print "FILL: ", $template->fill( a => { b => [400] } ), "\n";
+my $output = $template->fill( a => { b => [400] } );
+is( $output, 'How about a nice 420?', 'got template output' );
+
+#print $sexpr, "\n\n";
+#print "-------\n";
+#print "FILL: ", $template->fill( a => { b => [400] } ), "\n";
 
 #my $exprs = $template->exprs;
 

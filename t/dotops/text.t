@@ -16,7 +16,7 @@ use Badger
 
 #use Badger::Debug modules => 'Template::TT3::Variables';
 use Template::TT3::Test 
-    tests   => 27,
+    tests   => 6,
     debug   => 'Template::TT3::Template Template::TT3::Variables',
     args    => \@ARGV,
     import  => 'test_expressions';

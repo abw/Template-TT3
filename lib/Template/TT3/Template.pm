@@ -95,7 +95,7 @@ sub init_tagset {
 sub sexpr {
     my $self  = shift;
     my $exprs = $self->exprs;
-    $self->debug("exprs: $exprs");
+    $self->debug("exprs: $exprs") if DEBUG;
     $exprs->sexpr;
 #    join("\n", map { $_->sexpr } @$exprs);
 }
