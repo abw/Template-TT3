@@ -21,10 +21,7 @@ use Template::TT3::Test
 use Template::TT3::Types;
 use constant TYPES => 'Template::TT3::Types';
 
-use Template::TT3::Type::List;
-
 ok( TYPES->preload, 'preload' );
-
 
 
 #------------------------------------------------------------------------

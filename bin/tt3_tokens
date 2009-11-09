@@ -1,0 +1,93 @@
+#!/usr/bin/perl
+#
+# Command line interface to the Template Toolkit
+#
+# Written by Andy Wardley http://wardley.org/
+#
+# 09 November 2009
+#
+
+use Badger 
+    lib => '../lib';
+
+use Template::TT3::Template;
+use constant TEMPLATE => 'Template::TT3::Template';
+
+my $file     = shift || die usage();
+my $template = TEMPLATE->new( file => $file );
+my $html     = $template->tokens->html;
+my $wrapper  = TEMPLATE->new( file => \*DATA );
+
+print $wrapper->fill( 
+    content => $html,
+    name    => $file,
+);
+
+
+sub usage {
+    return <<EOF;
+Usage: $0 <filename>
+EOF
+}
+
+
+__DATA__
+<html>
+  <head>
+    <title>TT3 Template Tokens: [% name %]</title>
+    <style>
+div.template {
+    font-family: Courier, monospace;
+    font-size: 14px;
+    color: #444;
+    white-space: pre;
+    background-color: #ddd;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+span.text {
+    color: #88a;
+}
+
+span.tag {
+    font-weight: bold;
+    background-color: #f8f8f8;
+}
+
+span.keyword {
+    color: #a44;
+}
+
+span.binop {
+    color: #a44;
+}
+
+span.number,
+span.squote,
+span.dquote {
+    color: #44a;
+}
+
+span.word {
+    color: #4a4;
+/*    font-weight: bold; */
+}
+
+span.whitespace,
+span.comment {
+    color: #888;
+}
+
+span.tag_start,
+span.tag_end {
+    color: #aaa;
+}
+    </style>
+  </head>
+  <body>
+    <div class="template tt3">
+[%  content %]
+    </div>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>TT3 Template Tokens: examples/hello.tt3</title>
+    <style>
+div.template {
+    font-family: Courier, monospace;
+    font-size: 14px;
+    color: #444;
+}
+
+span.text {
+    color: #aaf;
+}
+
+span.keyword {
+    color: #a44;
+}
+
+span.word {
+    color: #4a4;
+}
+
+span.whitespace,
+span.comment {
+    color: #888;
+}
+
+span.tag_start,
+span.tag_end {
+    color: #44a;
+}
+    </style>
+  </head>
+  <body>
+    <div class="template tt3">
+<span class="text">Hello </span><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span><span class="text">!
+</span>
+    </div>
+  </body>
+</html>

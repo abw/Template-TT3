@@ -20,6 +20,8 @@ use Badger::Class
         alias    => \&alias,
     };
 
+our $DEBUG_OPS = 0;
+
 
 sub base_id {
     shift->{ name }->base_id;
@@ -119,6 +121,8 @@ sub generate_ops {
     my $self = shift;
     my $spec = shift;
     my $args = @_ == 1 && ref $_[0] ? shift : [ @_ ];
+    my $id   = $spec->{ id } || '';
+       $id   = "${id}_" if $id;
 
     # methods gives us a list of method names that we want to alias to
     my $methods = $spec->{ methods } || 'value';
@@ -155,7 +159,16 @@ sub generate_ops {
 
         die "Invalid subroutine specified for $name in generate_ops(); $code"
             unless ref $code eq CODE;
-            
+
+        if ($DEBUG_OPS) {
+            # generate wrapper that calls debug_ops() before the real sub
+            my $real = $code;
+            $code = sub {
+                $_[0]->debug_op($_[1]);
+                $real->(@_);
+            };
+        };
+
 #        _debug("generate_ops() $name => ", join(', ', @bases), "\n");
 #        _debug("methods are : ", join(', ', @$methods), "\n");
         
@@ -175,7 +188,7 @@ sub generate_ops {
 
 sub generate_number_ops {
     shift->generate_ops(
-        { methods => 'value values number text' },
+        { id => 'num', methods => 'value values number text' },
         @_
     );
 }
@@ -183,7 +196,7 @@ sub generate_number_ops {
 
 sub generate_text_ops {
     shift->generate_ops(
-        { methods => 'value values text' },
+        { id => 'txt', methods => 'value values text' },
         @_
     );
 }
@@ -191,7 +204,7 @@ sub generate_text_ops {
 
 sub generate_boolean_ops {
     shift->generate_ops(
-        { methods => 'value values' },
+        { id => 'bool', methods => 'value values' },
         @_
     );
 }

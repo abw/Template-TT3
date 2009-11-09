@@ -3,7 +3,7 @@ package Template::TT3::Element;
 use Template::TT3::Class
     base      => 'Template::TT3::Base',
     version   => 3.00,
-    utils     => 'self_params',
+    utils     => 'self_params numlike',
     slots     => 'meta next token pos',
     import    => 'class',
     constants => ':elem_slots CODE ARRAY HASH',
@@ -11,10 +11,14 @@ use Template::TT3::Class
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
         base_id       => 'Template::TT3::Element',
-        is_whitespace => 0,
-        is_terminator => 0,
+#        is_whitespace => 0,
+ #       is_terminator => 0,
         eof           => 0,
+    },
+    alias => {
+        terminator => \&null,
     };
+
 
 our $MESSAGES = {
     no_rhs_expr     => "Missing expression after '%s'",
@@ -92,6 +96,17 @@ sub null { undef }
 
 
 #-----------------------------------------------------------------------
+# other generic parse methods
+#-----------------------------------------------------------------------
+
+sub accept {
+    my ($self, $token) = @_;
+    $$token = $self->[NEXT];
+    return $self;
+}
+
+
+#-----------------------------------------------------------------------
 # whitespace handling methods
 # NOTE: we should be able to remove the $_[0]->[NEXT] check now that 
 # we have an explicit EOF token (which must handle this)
@@ -146,8 +161,58 @@ sub as_block {
 }
     
 
+sub as_exprs {
+    my ($self, $token, $scope, $prec) = @_;
+    my (@exprs, $expr);
+
+    while (1) {
+#        $self->debug("token is $$token: ", $$token->token);
+        if ($expr = $$token->as_expr($token, $scope, $prec)) {
+#            $self->debug("got expression: $expr");
+            push(@exprs, $expr);
+        }
+        elsif ($$token->terminator($token)) {
+#            $self->debug("got terminator");
+        }
+        else {
+            last;
+        }
+    }
+
+    return $self->[META]->[ELEMS]->construct(
+        block => $self->[TOKEN], $self->[POS], \@exprs
+    );
+
+#    return undef;
+#    if @exprs;
+}
+
+
 sub is {
     $_[0]->[TOKEN] && $_[0]->[TOKEN] eq $_[1];
+}
+
+
+sub value {
+    shift->not_implemented('in element base class');
+}
+
+sub variable {
+    shift->not_implemented('in element base class');
+}
+
+sub values {
+    shift->value(@_);
+}
+
+sub number {
+    my $self = shift;
+    my $text = $self->value(@_);
+
+    return 
+        ! defined $text ? $self->error_undef
+      : ! numlike $text ? $self->error_nan($text)
+      : $text;
 }
 
 

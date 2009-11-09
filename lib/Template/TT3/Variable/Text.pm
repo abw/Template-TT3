@@ -1,4 +1,4 @@
-package Template::TT3::Variable::Hash;
+package Template::TT3::Variable::Text;
 
 use Template::TT3::Class
     version   => 0.01,
@@ -6,19 +6,21 @@ use Template::TT3::Class
     base      => 'Template::TT3::Variable',
     constants => ':type_slots',
     constant  => {
-        type  => 'hash',
+        type  => 'text',
     };
+
+
 
 sub dot {
     my ($self, $name, $args) = @_;
 
     $self->debug(
-        "hash lookup $name with args [$args] => ", 
+        "text lookup $name with args [$args] => ", 
         $self->dump_data($args)
     ) if DEBUG;
 
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
-        $self->debug("hash vmethod: $name");
+        $self->debug("text vmethod: $name") if DEBUG;
         return $self->[META]->[VARS]->use_var( 
             $name,
             $method->($self->[VALUE], $args ? @$args : ()),
@@ -26,16 +28,8 @@ sub dot {
         );
     }
     else {
-        return $self->[META]->[VARS]->use_var( 
-            $name,
-            $self->[VALUE]->{$name}, 
-            $self, 
-            $args
-        );
+        return $self->no_method($name);
     }
 }
 
-
-
-    
 1;

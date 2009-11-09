@@ -5,12 +5,20 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Base',
     import    => 'class',
-    slots     => 'meta name value parent args',
+    # Slot methods are read/write, but we want to make value() read only.  
+    # So we use val() for the generated slot method and define value() below
+    slots     => 'meta name val parent args',
     constants => ':type_slots',
     utils     => 'self_params',
+    alias     => {
+        value  => \&get,
+        values => \&get,
+    },
     messages  => {
-        undefined => '%s is undefined',
+        undefined  => '%s is undefined',
+        no_vmethod => '"<2>" is not a valid <1> method in "<3>.<2>"', 
     };
+        
 
 
 # c'est n'est pas un constructor.  It *returns* a constructor, so it's a
@@ -42,6 +50,7 @@ sub new {
 sub get {
     return $_[0]->[VALUE];
 }
+
 
 sub text {
     my $self  = shift;
@@ -99,5 +108,16 @@ sub config {
     shift->[META]->[CONFIG];
 }
 
+sub method_names {
+    keys %{ $_[0]->[META]->[METHODS] };
+}
+
+sub no_method {
+    my ($self, $name) = @_;
+    return $self->error_msg( 
+        no_vmethod => $self->type => $name => $self->fullname,
+#        join(', ', sort $self->method_names)
+     );
+}
 
 1;

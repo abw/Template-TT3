@@ -14,6 +14,7 @@ package Template::TT3::Element::Operator;
 use Template::TT3::Class 
     version   => 3.00,
     constants => ':elem_slots',
+    utils     => 'xprintf',
     messages  => {
         no_rhs_expr     => "Missing expression after '%s'",
         no_rhs_expr_got => "Missing expression after '%s' (got '%s')",
@@ -38,6 +39,22 @@ sub no_rhs_expr {
             : ( no_rhs_expr     => $self->[TOKEN] )
     );
 }
+
+
+sub debug_op {
+    $_[0]->debug_at(
+        { format => '[pos:<pos>] <msg>]', pos => $_[0]->[POS] },
+        xprintf(
+            $_[0]->DEBUG_FORMAT, 
+            $_[0]->[TOKEN],
+            map { $_ ? ($_->source, $_->value($_[1])) : ('', '') }
+            $_[0]->[LHS],
+            $_[0]->[RHS],
+        )
+    );
+}
+
+
 
 
 
@@ -85,6 +102,7 @@ use Template::TT3::Class
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT => '<prefix:<op:%s>%s>', 
+        DEBUG_FORMAT => 'prefix: [<1>] [<4> => <5>]',
     };
 
 
@@ -149,6 +167,7 @@ use Template::TT3::Class
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT => '<postfix:<op:%s>%s>', 
+        DEBUG_FORMAT => 'postfix: [<2> => <3>] [<1>]',
     };
 
 
@@ -212,6 +231,7 @@ use Template::TT3::Class
     constant  => {
         SEXPR_FORMAT  => '<binary:<op:%s>%s%s>', 
         SOURCE_FORMAT => '%s %s %s', 
+        DEBUG_FORMAT  => 'infix: [<1>] [<2> => <3>] [<4> => <5>]',
     };
 
 

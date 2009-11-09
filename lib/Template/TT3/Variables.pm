@@ -9,14 +9,15 @@ use Template::TT3::Class
     messages  => {
         bad_type  => 'Invalid variable type for %s: %s',
         no_module => 'No module defined for variable type: %s',
+    },
+    constant  => {
+        TYPES => 'Template::TT3::Types',
     };
-#    constant  => {
-#        TYPES => 'Template::TT3::Types',
-#    };
 
+use Template::TT3::Types;
 our $TYPES = {
     UNDEF  => 'Template::TT3::Variable::Undef',
-    VALUE  => 'Template::TT3::Variable::Value',
+    TEXT   => 'Template::TT3::Variable::Text',
     HASH   => 'Template::TT3::Variable::Hash',
     ARRAY  => 'Template::TT3::Variable::List',
     CODE   => 'Template::TT3::Variable::Code',
@@ -25,8 +26,9 @@ our $TYPES = {
 
 sub init {
     my ($self, $config) = @_;
-    my $types = $self->class->hash_vars( TYPES => $config->{ types } );
-    my $ctors = { 
+    my $types    = $self->class->hash_vars( TYPES => $config->{ types } );
+    my $vmethods = $self->TYPES->vtables;
+    my $ctors    = { 
         map {
             # load each module and call the constructor() method to generate
             # a typed variable constructor which we can call (in use_var()) 
@@ -47,6 +49,7 @@ sub init {
             
             $_ => class($module)->load->name->constructor(
                 variables => $self,
+                methods   => $vmethods->{ $_ },
                 %$config,
             );
         } 
@@ -58,6 +61,12 @@ sub init {
     $self->{ ctors } = $ctors;
     $self->{ vars  } = { };
     return $self;
+}
+
+sub value {
+    my ($self, $name, $element) = @_;
+    # TODO: check for undef/missing values
+    return $self->{ data }->{ $name };
 }
 
 sub var {
@@ -74,6 +83,8 @@ sub use_var {
     my $ctor;
 
     TYPE_SWITCH: {
+        $self->debug("use_var($name, $value)\n") if DEBUG;
+        
         if (! defined $value) {
             $ctor = $self->{ ctors }->{ UNDEF }
                 || return $self->error_msg( bad_type => $name, 'undef' );
@@ -94,12 +105,16 @@ sub use_var {
                  || return $self->error_msg( bad_type => $name, ref $value );
         }
         else {
-            $ctor = $self->{ ctors }->{ VALUE }
+            $ctor = $self->{ ctors }->{ TEXT }
                  || return $self->error_msg( bad_type => $name, 'value' );
         }
     }
+
+    my $var = $ctor->($name, $value, $parent, $args, @more);
     
-    $self->debug("use_var [$name] [$value]") if DEBUG;
+    $self->debug("use_var($name, $value) =>  [$var]") if DEBUG;
+    
+    return $var;
     
     return $ctor->($name, $value, $parent, $args, @more);
 }

@@ -53,6 +53,10 @@ use Badger::Class
                 LEFT    => '=-1',   # binds left    # NOT USED?
                 RIGHT   => '=1',    # binds right   # NOT USED?
             },
+            eval_args => {
+                SELF    => '=0',
+                CONTEXT => '=1',
+            },
         },
     };
 

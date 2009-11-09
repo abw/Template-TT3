@@ -11,27 +11,22 @@ use Template::TT3::Class
     alias      => {
         value  => \&text,
         values => \&text,
+    },
+    constant   => {
+        SEXPR_FORMAT => '<literal:%s>',
     };
 
+*source = \&text;
 
 sub text {
     $_[0]->[TOKEN];
 }
 
-
-sub number {
-    my $self = shift;
-    my $text = $self->value(@_);
-
-    return 
-        ! defined $text ? $self->error_undef
-      : ! numlike $text ? $self->error_nan($text)
-      : $text;
-}
-
-
-sub OLD_text_element {
-    $_[0];
+sub sexpr {
+    sprintf(
+        $_[0]->SEXPR_FORMAT,
+        $_[0]->[TOKEN]
+    );
 }
 
 
@@ -54,31 +49,7 @@ sub dot_op {
 
 
 
-#-----------------------------------------------------------------------
-# Template::TT3::Element::Word - literal word elements
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Word;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Literal',
-    constants => ':elem_slots';
-
-sub generate {
-    $_[1]->generate_word(
-        $_[0]->[TOKEN],
-    );
-}
-
-sub as_expr {
-    shift->become('variable')->as_expr(@_);
-}
-
-sub as_dotop {
-    $$_[1] = $_[0]->[NEXT];
-    return $_[0];
-}
+# Word was here... maybe should be
 
 
 #-----------------------------------------------------------------------
@@ -125,11 +96,15 @@ use Template::TT3::Class
     constants => ':elem_slots',
     constant  => {
         is_terminator => 1,
+    },
+    alias     => {
+        terminator => 'next_skip_ws',
     };
 
 #sub as_expr {
 #    shift->next_skip_ws($_[0])->as_expr(@_);
 #}
+
 
 sub as_block {
     my ($self, $token, $scope, $prec) = @_;

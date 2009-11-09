@@ -9,6 +9,9 @@ use Template::TT3::Class
     utils    => 'is_object',
     constant => {
         OP => 'Template::TT3::Op',
+    },
+    messages => {
+        bad_method => qq{Can't locate object method "%s" via package "%s" at %s line %s},
     };
 
 our $NUM   = 'num:';   
@@ -42,55 +45,18 @@ sub generate_tokens {
     );
 }
 
-sub generate_ident {
-    my ($self, $ident) = @_;
-    return $IDENT . $ident;
+sub generate_exprs {
+    my ($self, $exprs) = @_;
+    return join(
+        '; ',
+        map { $self->generate($_) }
+        @$exprs
+    );
 }
 
-sub generate_keyword {
-    my ($self, $key) = @_;
-    return $KEY . $key;
-}
+1;
 
-sub generate_number {
-    my ($self, $num) = @_;
-    return $NUM . $num;
-}
-
-sub generate_squote {
-    my ($self, $text) = @_;
-    return "'$text'";
-}
-
-sub generate_dquote {
-    my ($self, $text) = @_;
-    return qq{"$text"};
-}
-
-sub generate_text {
-    my ($self, $text) = @_;
-    return $text;
-}
-
-sub generate_whitespace {
-    my ($self, $text) = @_;
-    return "<WS>$text</WS>";
-}
-
-sub generate_tag_start {
-    my ($self, $text) = @_;
-    return "<TAG_START>$text</TAG_START>";
-}
-
-sub generate_tag_end {
-    my ($self, $text) = @_;
-    return "<TAG_END>$text</TAG_END>";
-}
-
-sub generate_word {
-    my ($self, $text) = @_;
-    return "<WORD>$text</WORD>";
-}
+__END__
 
 sub generate_variable {
     my ($self, $var) = @_;
@@ -133,14 +99,6 @@ sub generate_binop {
     );
 }
 
-sub generate_exprs {
-    my ($self, $exprs) = @_;
-    return join(
-        '; ',
-        map { $self->generate($_) }
-        @$exprs
-    );
-}
 
 sub generate_namespace {
     my ($self, $name, $space) = @_;

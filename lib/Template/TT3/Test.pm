@@ -1,20 +1,23 @@
 package Template::TT3::Test;
 
-use Badger::Test;           # to import ok(), is(), etc.
+use Badger::Test ':default manager';           # to import ok(), is(), etc.
 use Template::TT3::Class
     version   => 0.01,
-    debug     => 0,
     base      => 'Badger::Test',
-    constants => 'HASH',
+    debug     => 0,
+    utils     => 'params',
+    constants => 'HASH CODE',
     exports   => {
         all   => 'test_expect',
-        any   => 'data_text data_tests callsign',
+        any   => 'data_text data_tests callsign test_expressions',
     };
 
+use Template::TT3::Template;
 
-our $MAGIC   = '\s* -- \s*';
-our $ENGINE  = 'Template::TT3';
-our $HANDLER = \&test_handler;
+our $MAGIC    = '\s* -- \s*';
+our $ENGINE   = 'Template::TT3';
+our $HANDLER  = \&test_handler;
+our $TEMPLATE = 'Template::TT3::Template';
 our $DATA;
 
 
@@ -174,6 +177,66 @@ sub callsign {
             sierra tango umbrella victor whisky x-ray yankee zulu 
         )
     }
+}
+
+
+sub test_expressions {
+    my $config   = params(@_);
+    my $tclass   = $config->{ template  } || $TEMPLATE;
+    my $vars     = $config->{ variables };
+    my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars };
+    my $debug    = $config->{ debug } || 0;
+
+    my $block_mode = defined $config->{ block_mode } 
+        ? $config->{ block_mode } 
+        : 0;
+    
+    $config->{ handler } = sub {
+        my $test   = shift;
+        my $output = '';
+        my @lines;
+        
+        local $DEBUG = $test->{ inflag }->{ debug } ? 1 : $debug;
+
+        # -- block -- flag indicates one single test, otherwise we 
+        # split the block into separate lines and feed them to the
+        # parser/generator one by one.  $block_mode can also be set
+        if ($block_mode || $test->{ inflag }->{ block }) {
+            @lines = $test->{ input };
+        }
+        else {
+            @lines  = split(/\n/, $test->{ input });
+        }
+        
+        if ($test->{ exflag }->{ collapse }) {
+            # collapse any whitespace in expected output
+            $test->{ expect } =~ s/\n\s*//sg;
+        }
+
+        foreach my $line (@lines) {
+            my $result = eval {
+                manager->debug(' INPUT: ', $line) if $DEBUG;
+                my $template = $tclass->new( text => '[% ' . $line . ' %]' );
+                manager->debug("TOKENS:\n", $template->tokens->sexpr) 
+                    if $config->{ dump_tokens }; #$DEBUG;
+                $template->fill( $mkvars->() );
+            };
+            if ($@) {
+                my $error = ref($@) ? $@->info : $@;
+                manager->debug(' ERROR: ', $error) if $DEBUG;
+                $result = "<ERROR:$error>";
+            }
+            elsif ($DEBUG) {
+                manager->debug('OUTPUT: ', $result);
+            }
+
+            $output .= "$result\n";
+        }
+        chomp $output;
+        return $output;
+    };
+
+    test_expect($config);
 }
 
 

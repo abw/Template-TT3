@@ -11,8 +11,9 @@ use Template::TT3::Class
         SEXPR_FORMAT => '<number:%s>', 
     },
     alias     => {
-        as_number => 'self',
-        number    => 'value',
+        as_number => 'self',        # this is already a number op
+        as_dotop  => 'accept',
+        number    => 'value',       # our token contains the number
     };
 
 
@@ -212,7 +213,7 @@ package Template::TT3::Element::Number::Plus;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
+    base      => 'Template::TT3::Element::Number';
 
 sub as_expr   { shift->become('num_positive')->as_expr(@_) }
 sub as_postop { shift->become('num_add')->as_postop(@_)    }
@@ -222,7 +223,7 @@ package Template::TT3::Element::Number::Minus;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
+    base      => 'Template::TT3::Element::Number';
 
 sub as_expr   { shift->become('num_negative')->as_expr(@_)   }
 sub as_postop { shift->become('num_subtract')->as_postop(@_) }
@@ -241,7 +242,11 @@ use Template::TT3::Class
 
 sub as_expr   { shift->todo }
 sub as_postop { shift->become('num_multiply')->as_postop(@_) }
-
+sub generate  { 
+    $_[1]->generate_operator(
+        $_[0]->[2]
+    );
+}
 
 package Template::TT3::Element::Slash;
 
@@ -251,6 +256,11 @@ use Template::TT3::Class
 
 sub as_expr   { shift->todo }
 sub as_postop { shift->become('num_divide')->as_postop(@_) }
+sub generate  { 
+    $_[1]->generate_operator(
+        $_[0]->[2]
+    );
+}
 
 
 package Template::TT3::Element::Percent;
@@ -261,6 +271,11 @@ use Template::TT3::Class
 
 sub as_expr   { shift->todo }
 sub as_postop { shift->become('num_modulus')->as_postop(@_) }
+sub generate  { 
+    $_[1]->generate_operator(
+        $_[0]->[2]
+    );
+}
 
 
 1;

@@ -16,6 +16,8 @@ use Template::TT3::Class
     };
 
 
+# TODO: check this isn't being inherited by text ops below...
+
 sub as_expr {
     my ($self, $token) = @_;
     $$token = $self->[NEXT];        # don't use ${$_[1]} - aliasing problem
@@ -127,12 +129,37 @@ sub as_postop { shift->become('txt_combine')->as_postop(@_) }
 # Quoted strings.
 #-----------------------------------------------------------------------
 
+package Template::TT3::Element::String;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Text',
+    constants => ':elem_slots';
+
+sub as_expr {
+    my ($self, $token, $scope, $prec) = @_;
+    
+    # advance token
+    $$token = $self->[NEXT];
+    
+    # strings can be followed by postops (postfix and infix operators)
+    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+}
+
+sub variable {
+    # TODO: fixme so I'm not re-creating single quotes each time
+    $_[1]->{ variables }
+         ->use_var( "'" . $_[0]->[TOKEN] . "'", $_[0]->[TOKEN] );
+}
+
+
+
 
 package Template::TT3::Element::Squote;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element::Text',
+    base      => 'Template::TT3::Element::String',
     constants => ':elem_slots';
 
 sub generate {
@@ -146,7 +173,7 @@ package Template::TT3::Element::Dquote;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element::Text',
+    base      => 'Template::TT3::Element::String',
     constants => ':elem_slots';
 
 sub generate {

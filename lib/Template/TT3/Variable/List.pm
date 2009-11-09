@@ -2,25 +2,38 @@ package Template::TT3::Variable::List;
 
 use Template::TT3::Class
     version   => 0.01,
+    debug     => 0,
     base      => 'Template::TT3::Variable',
     utils     => 'numlike',
     constants => ':type_slots',
-    messages  => {
-        bad_index => 'Invalid list index: <1>.<2> (<2> is not a number)',
+    constant  => {
+        type  => 'list',
     };
+    
 
 sub dot {
     my ($self, $name, $args) = @_;
 
-    return $self->error_msg( bad_index => $self->fullname, $name )
-        unless numlike $name;
-        
-    $self->[META]->[VARS]->use_var( 
-        $name,
-        $self->[VALUE]->[$name], 
-        $self, 
-        $args
-    );
+    if (numlike $name) {
+        $self->debug("numerical list index: $name") if DEBUG;
+        return $self->[META]->[VARS]->use_var( 
+            $name,
+            $self->[VALUE]->[$name], 
+            $self, 
+            $args
+        );
+    }
+    elsif (my $method = $self->[META]->[METHODS]->{ $name }) {
+        $self->debug("list vmethod: $name") if DEBUG;
+        return $self->[META]->[VARS]->use_var( 
+            $name,
+            $method->($self->[VALUE], $args ? @$args : ()),
+            $self
+        );
+    }
+    else {
+        return $self->no_method($name);
+    }
 }
 
 1;

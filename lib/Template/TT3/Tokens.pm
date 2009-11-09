@@ -183,7 +183,8 @@ sub can {
     my $target;
 
     return $self->SUPER::can($name)
-        || $self->token_method($name);
+        || $self->token_method($name)
+        || $self->generator_method($name);
 }
 
 
@@ -202,6 +203,47 @@ sub AUTOLOAD {
     }
 
     return $self->error_msg( bad_method => $name, ref $self, (caller())[1,2] );
+}
+
+
+use Template::TT3::Generators;
+use constant GENERATORS => 'Template::TT3::Generators';
+
+sub generator_method {
+    my ($self, $name) = @_;
+    my $type = $name;
+    my $gen;
+
+    $self->debug("generator_method($name)") if DEBUG;
+
+    if ($type =~ s/^generate_/tokens./) {       # tokens.HTML => Tokens::HTML
+        $self->debug("token generator: $type") if DEBUG;
+        $gen = GENERATORS->generator($type)
+            || return $self->error_msg( invalid => generator => $name );
+    }
+    elsif ($gen = GENERATORS->generator('tokens.' . $name)) {
+        $self->debug("got tokens generator: tokens.$name") if DEBUG;
+        # OK, we've got a generator
+    }
+    else {
+        return;
+    }
+
+    # create closure and register it as a method
+    my $method = sub {
+        shift->generate( $gen );
+    };
+    $self->class->method( $name => $method );
+
+    return $method;
+}
+
+sub html {
+    shift->generate_HTML(@_);
+}
+        
+sub sexpr {
+    shift->generate( GENERATORS->generator('debug') );
 }
 
 

@@ -4,7 +4,6 @@
 
 package Template::TT3::Element::Whitespace;
 
-use Badger::Debug ':debug';
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element',
@@ -106,6 +105,10 @@ use Template::TT3::Class
         eof   => 1,
     };
 
+sub NIT_terminator {
+    # required for exprs() to work - otherwise
+    return undef;
+}
 
 sub generate {
     '';

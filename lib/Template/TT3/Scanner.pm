@@ -17,6 +17,7 @@ use Template::TT3::Class
 
 sub init {
     my ($self, $config) = @_;
+#    $self->debug("INIT: ", $self->dump_data($config));
     $self->configure($config);
     $self->init_scanner($config);
     $self->{ config } = $config;
@@ -27,14 +28,15 @@ sub init {
 sub init_scanner {
     my $self    = shift;
     my $config  = shift || $self->{ config };
-    my $tags    = $config->{ tags } || $self->class->list_vars('TAGS');
+    my $tags    = $self->class->list_vars( TAGS => $config->{ tags } );
     my $tag_map = $self->{ tag_map } = { };
 
-    $self->debug("init_tagset()\n") if DEBUG;
+    $self->debug("init_scanner()\n") if DEBUG;
+#    $self->debug("** tags: ", $self->dump_data($tags)) if DEBUG;
     
     # ask the tags to provide details (into $tag_map) of their start tags
     foreach my $tag (@$tags) {
-        $self->debug("TAGS in TAGSET: $tag\n") if DEBUG;
+        $self->debug("adding tag to tag map: $tag\n") if DEBUG;
         $tag->tag_map($tag_map);
     }
 
@@ -63,7 +65,7 @@ sub init_scanner {
     }
     
     # define a regex to match everything from the current position to the end
-    $self->{ match_to_end } = qr/ \G (.+) $/sx;
+    $self->{ match_to_end } = qr/ \G (.*) $/sx;
 
     return $tag_map;
 }
@@ -103,11 +105,12 @@ sub tokens {
         elsif ($$input =~ /$self->{ match_to_end }/gc) {
             # We've matched the rest of the text after the last tag (or the 
             # entire file if there weren't any tags embedded).
-            $output->text_token($1, $pos);
+            $output->text_token($1, $pos)
+                if length $1;
             last;
         }
         else {
-            return $self->error("run out of text");
+            return $self->error("Run out of text");
         }
     }
 

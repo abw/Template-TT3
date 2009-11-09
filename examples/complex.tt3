@@ -1,0 +1,17 @@
+Hello [% name or 'World' %]!
+
+[% if foo %]
+blah blah blah some text
+[%  %]
+
+[% do %]
+blah blah blah
+[% %]
+
+[% x + 5 * 10 - foo.bar.bar %]
+
+[%  foo      # this is a comment
+    bar      # this is also a comment
+%]
+
+The end

@@ -24,6 +24,7 @@ use Template::TT3::Class
         any  => 'LIST List',
     };
 
+
 our $METHODS   = {
     new      => \&new,
     
