@@ -1,17 +1,23 @@
+# TODO change this to Exprs
+
 package Template::TT3::Element::Block;
 
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element',
-    constants => ':elem_slots BLANK',
+    constants => ':elem_slots :eval_args BLANK',
     constant  => {
         SEXPR_FORMAT => "<block:\n  %s\n>",
+    },
+    alias     => {
+        value  => \&text,
+        values => \&text,
     };
 
+
 sub generate {
-    my $self = $_;
-    $_[1]->generate_block(
-        $_[0]->[EXPR],
+    $_[CONTEXT]->generate_block(
+        $_[SELF]->[EXPR],
     );
 }
 
@@ -28,21 +34,23 @@ sub sexpr {
     );
 }
 
-sub value {
+sub OLD_value {
     [
-        map { $_->values($_[1]) } 
-        @{ $_[0]->[EXPR] } 
+        map { $_->values($_[CONTEXT]) } 
+        @{ $_[SELF]->[EXPR] } 
     ];
 }
 
-sub values {
+sub OLD_values {
     @{ $_[0]->value($_[1]) } 
 }
 
 sub text {
     join(
         BLANK,
-        @{ $_[0]->value($_[1]) }
+        map { $_->text($_[1]) } 
+        @{ $_[0]->[EXPR] } 
+#        @{ $_[0]->value($_[1]) }
     );
 }
 

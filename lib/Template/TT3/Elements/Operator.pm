@@ -55,6 +55,14 @@ sub debug_op {
 }
 
 
+sub generate {
+    $_[1]->generate_operator(
+        $_[0]->[TOKEN],
+        $_[0]->[LHS],    # ->generate($_[1]),
+        $_[0]->[RHS],    # ->generate($_[1]),
+    );
+}
+
 
 
 
@@ -314,6 +322,14 @@ sub as_postop {
     # any operators with a higher precedence can bind tighter
     $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
         || return $self->error("Missing expression after operator: $self->[TOKEN]");
+
+    # CHECK: I originally thought that non-chaining ops should return here,
+    # but that scuppers an expression like: "x < 10 && y > 30" as the '<'
+    # returns after '10', leaving '&&' unparsed.
+
+    # at this point the next token might be a lower precedence operator, so
+    # we give it a chance to continue with the current operator as the LHS
+    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
     
     # non-chaining infix operators always return at this point
     return $self;

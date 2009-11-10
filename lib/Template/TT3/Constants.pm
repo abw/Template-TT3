@@ -54,8 +54,10 @@ use Badger::Class
                 RIGHT   => '=1',    # binds right   # NOT USED?
             },
             eval_args => {
-                SELF    => '=0',
-                CONTEXT => '=1',
+                SELF      => '=0',  # zeroth argument is always $self
+                CONTEXT   => '=1',  # first argument is content/visitor/genr
+                VISITOR   => '=1',
+                GENERATOR => '=1',
             },
         },
     };

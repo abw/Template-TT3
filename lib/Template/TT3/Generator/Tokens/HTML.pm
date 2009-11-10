@@ -1,5 +1,6 @@
 package Template::TT3::Generator::Tokens::HTML;
 
+use utf8;
 use Template::TT3::Class
     version  => 2.7,
     debug    => 0,
@@ -7,7 +8,7 @@ use Template::TT3::Class
     codec    => 'html',
     constant => {
         ATTR    => '%s="%s"',
-        ELEMENT => '<%s%s>%s</%s>',
+        ELEMENT => "<%s%s>%s</%s>",
     };
 
 our $AUTOLOAD;
@@ -23,14 +24,20 @@ sub HTML {
             sort keys %$attrs
           )
         : '';
-            
-    return sprintf( ELEMENT, $name, $attr, join('', @content), $name );
+    
+    return sprintf( ELEMENT, $name, $attr, join('', grep { defined } @content), $name );
 }
 
 sub span {
     my $self      = shift;
     my $css_class = shift;
     HTML( span => { class => $css_class }, @_ );
+}
+
+sub generate_whitespace {
+    my ($self, $text) = @_;
+    $text =~ s/\n/ \n<span class="nl"><\/span>/g;
+    $self->span( whitespace => $text );
 }
 
 
@@ -48,7 +55,7 @@ sub generate_tag_start {
 }
 
 sub generate_tag_end {
-    return shift->span( tag_start => @_ )
+    return shift->span( tag_end => @_ )
         . '</span>';
 }
 

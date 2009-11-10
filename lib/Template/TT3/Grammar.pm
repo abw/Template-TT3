@@ -210,16 +210,28 @@ sub constructor {
     # performing a direct: bless [$meta, $token, $pos], $class;
     
     return $self->{ constructors }->{ $token } ||= do {
-        my $symbol = $self->{ symbols }->{ $token }
-            || return $self->error_msg( invalid => symbol => $token );
-        my $config = {
-            elements => $self,
-            lprec    => $symbol->[LPREC],
-            rprec    => $symbol->[RPREC],
-        };
-        $self->element_class($symbol->[ELEMENT])
+        my ($symbol, $element, $config);
+
+        if ($symbol = $self->{ symbols }->{ $token }) {
+            $config = {
+                elements => $self,
+                lprec    => $symbol->[LPREC],
+                rprec    => $symbol->[RPREC],
+            };
+            $element = $symbol->[ELEMENT];
+        }
+        elsif ($token =~ /^\w+$/) {
+            $config = {
+                elements => $self,
+            };
+            $element = $token;
+        }
+        else {
+            return $self->error_msg( invalid => symbol => $token );
+        }
+        $self->element_class($element)
              ->constructor($config);
-    }
+    };
 }
 
 1;

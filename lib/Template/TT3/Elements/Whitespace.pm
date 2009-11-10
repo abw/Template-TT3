@@ -17,6 +17,12 @@ use Template::TT3::Class
     };
 
 
+sub skip_delimiter {
+    # we can always skip whitespace to skip over a delimiter
+    shift->next_skip_ws($_[0])->skip_delimiter(@_);
+}
+
+
 sub as_expr {
     # we can always skip whitespace to get to an expression
     shift->next_skip_ws($_[0])->as_expr(@_);
@@ -34,6 +40,7 @@ sub generate {
         $_[0]->[TOKEN]
     );
 }
+
 
 
 #-----------------------------------------------------------------------
@@ -88,6 +95,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Whitespace',
     constants => ':elem_slots';
     
+
 sub generate {
     $_[1]->generate_tag_end(
         $_[0]->[TOKEN]
@@ -105,7 +113,7 @@ use Template::TT3::Class
         eof   => 1,
     };
 
-sub NIT_terminator {
+sub NOT_terminator {
     # required for exprs() to work - otherwise
     return undef;
 }

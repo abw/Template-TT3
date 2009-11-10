@@ -218,7 +218,8 @@ sub test_expressions {
                 manager->debug(' INPUT: ', $line) if $DEBUG;
                 my $template = $tclass->new( text => '[% ' . $line . ' %]' );
                 manager->debug("TOKENS:\n", $template->tokens->sexpr) 
-                    if $config->{ dump_tokens }; #$DEBUG;
+                    if $config->{ dump_tokens }
+                    || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
                 $template->fill( $mkvars->() );
             };
             if ($@) {

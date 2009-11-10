@@ -6,7 +6,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
     import    => 'class',
-    constants => ':elem_slots',
+    constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT => '<number:%s>', 
     },
@@ -30,20 +30,20 @@ sub as_expr {
 
 sub sexpr {
     sprintf(
-        $_[0]->SEXPR_FORMAT, 
-        $_[0]->[TOKEN],
+        $_[SELF]->SEXPR_FORMAT, 
+        $_[SELF]->[TOKEN],
     );
 }
 
 
 sub source {
-    $_[0]->[TOKEN];
+    $_[SELF]->[TOKEN];
 }
 
 
 sub generate {
-    $_[1]->generate_number(
-        $_[0]->[TOKEN]
+    $_[CONTEXT]->generate_number(
+        $_[SELF]->[TOKEN]
     );
 }
 
@@ -65,133 +65,132 @@ sub generate {
 # the value() method.  Otherwise the operand's number() method will do
 # the right thing to assert that the value it yields is numeric.
 # For the sake of runtime efficiency, we try to access stack arguments
-# directly (e.g. $_[0]) wherever possible.  
+# directly (e.g. $_[SELF]) wherever possible.  
 #-----------------------------------------------------------------------
 
 class->generate_number_ops(
     pre_inc => prefix => sub {                              # ++a 
-        return $_[0]->[RHS]->assign(
-            $_[1], 
-            $_[0]->[RHS]->number($_[1]) + 1
+        return $_[SELF]->[RHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[RHS]->number($_[CONTEXT]) + 1
         );
     },
     post_inc => postfix => sub {                            # a++
-        my $n = $_[0]->[LHS]->number($_[1]);
-        $_[0]->[LHS]->assign(
-            $_[1], 
+        my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
+        $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
             $n + 1
         );
         return $n;
     },
     pre_dec => prefix => sub {                              # --a
-        return $_[0]->[RHS]->assign(
-            $_[1], 
-            $_[0]->[RHS]->number($_[1]) - 1
+        return $_[SELF]->[RHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[RHS]->number($_[CONTEXT]) - 1
         );
     },
     post_dec => postfix => sub {                            # a--
-        my $n = $_[0]->[LHS]->number($_[1]);
-        $_[0]->[LHS]->assign(
-            $_[1], 
+        my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
+        $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
             $n - 1
         );
         return $n;
     },
     positive => prefix => sub {                             # +a
         return 
-             + $_[0]->[RHS]->number($_[1]);
+             + $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     negative => prefix => sub {                             # -a
         return
-             - $_[0]->[RHS]->number($_[1]);  
+             - $_[SELF]->[RHS]->number($_[CONTEXT]);  
     },
     power => infix_right => sub {                           # a ** b
-        return $_[0]->[LHS]->number($_[1])
-            ** $_[0]->[RHS]->number($_[1]);
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+            ** $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     multiply => infix_left => sub {                         # a * b
-        return $_[0]->[LHS]->number($_[1])
-             * $_[0]->[RHS]->number($_[1]);
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+             * $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     divide => infix_left => sub {                           # a / b
-        return $_[0]->[LHS]->number($_[1])
-             / $_[0]->[RHS]->number($_[1]);
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+             / $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     div_int => infix_left => sub {                          # a div b
         return int(
-               $_[0]->[LHS]->number($_[1])
-             / $_[0]->[RHS]->number($_[1])
+               $_[SELF]->[LHS]->number($_[CONTEXT])
+             / $_[SELF]->[RHS]->number($_[CONTEXT])
         );
     },
     modulus => infix_left => sub {                          # a % b
-        return $_[0]->[LHS]->number($_[1])                  # a mod b
-             % $_[0]->[RHS]->number($_[1])
+        return $_[SELF]->[LHS]->number($_[CONTEXT])         # a mod b
+             % $_[SELF]->[RHS]->number($_[CONTEXT])
     },
     add => infix_left => sub {                              # a + b
         return 
-            $_[0]->[LHS]->number($_[1])
-          + $_[0]->[RHS]->number($_[1]);
+            $_[SELF]->[LHS]->number($_[CONTEXT])
+          + $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     subtract => infix_left => sub {                         # a - b
         return 
-            $_[0]->[LHS]->number($_[1])
-          - $_[0]->[RHS]->number($_[1]);
+            $_[SELF]->[LHS]->number($_[CONTEXT])
+          - $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    # TODO: comparison operators should all be non-chaining infix
-    equal => infix_left => sub {                            # a == b 
-        return $_[0]->[LHS]->number($_[1])
-            == $_[0]->[RHS]->number($_[1]);
+    equal => infix => sub {                                 # a == b 
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+            == $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    not_equal => infix_left => sub {                        # a != b
-        return $_[0]->[LHS]->number($_[1])
-            != $_[0]->[RHS]->number($_[1]);
+    not_equal => infix => sub {                             # a != b
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+            != $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    less_than => infix_left => sub {                        # a < b
-        return $_[0]->[LHS]->number($_[1])
-             < $_[0]->[RHS]->number($_[1]);
+    less_than => infix => sub {                             # a < b
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+             < $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    more_than => infix_left => sub {                        # a > b
-        return $_[0]->[LHS]->number($_[1])
-             > $_[0]->[RHS]->number($_[1]);
+    more_than => infix => sub {                             # a > b
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+             > $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    less_equal => infix_left => sub {                       # a <= b
-        return $_[0]->[LHS]->number($_[1])
-            <= $_[0]->[RHS]->number($_[1]);
+    less_equal => infix => sub {                            # a <= b
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+            <= $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    more_equal => infix_left => sub {                       # a >= b
-        return $_[0]->[LHS]->number($_[1])
-            >= $_[0]->[RHS]->number($_[1]);
+    more_equal => infix => sub {                            # a >= b
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+            >= $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    compare => infix_left => sub {                          # a <=> b
-        return $_[0]->[LHS]->number($_[1])
-           <=> $_[0]->[RHS]->number($_[1]);
+    compare => infix => sub {                               # a <=> b
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+           <=> $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     add_set => infix_right => sub {                         # a += b
-        return $_[0]->[LHS]->assign(
-            $_[1], 
-            $_[0]->[LHS]->number($_[1])
-          + $_[0]->[RHS]->number($_[1])
+        return $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[LHS]->number($_[CONTEXT])
+          + $_[SELF]->[RHS]->number($_[CONTEXT])
         );
     },
     sub_set => infix_right => sub {                         # a -= b
-        return $_[0]->[LHS]->assign(
-            $_[1], 
-            $_[0]->[LHS]->number($_[1])
-          - $_[0]->[RHS]->number($_[1])
+        return $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[LHS]->number($_[CONTEXT])
+          - $_[SELF]->[RHS]->number($_[CONTEXT])
         );
     },
     mul_set => infix_right => sub {                         # a *= b
-        return $_[0]->[LHS]->assign(
-            $_[1], 
-            $_[0]->[LHS]->number($_[1])
-          * $_[0]->[RHS]->number($_[1])
+        return $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[LHS]->number($_[CONTEXT])
+          * $_[SELF]->[RHS]->number($_[CONTEXT])
         );
     },
     div_set => infix_right => sub {                         # a /= b
-        return $_[0]->[LHS]->assign(
-            $_[1], 
-            $_[0]->[LHS]->number($_[1])
-          / $_[0]->[RHS]->number($_[1])
+        return $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[LHS]->number($_[CONTEXT])
+          / $_[SELF]->[RHS]->number($_[CONTEXT])
         );
     },
 );
@@ -213,7 +212,8 @@ package Template::TT3::Element::Number::Plus;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element::Number';
+    base      => 'Template::TT3::Element::Operator
+                  Template::TT3::Element';
 
 sub as_expr   { shift->become('num_positive')->as_expr(@_) }
 sub as_postop { shift->become('num_add')->as_postop(@_)    }
@@ -223,7 +223,8 @@ package Template::TT3::Element::Number::Minus;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element::Number';
+    base      => 'Template::TT3::Element::Operator
+                  Template::TT3::Element';
 
 sub as_expr   { shift->become('num_negative')->as_expr(@_)   }
 sub as_postop { shift->become('num_subtract')->as_postop(@_) }
@@ -238,44 +239,33 @@ package Template::TT3::Element::Star;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
+    base      => 'Template::TT3::Element::Operator
+                  Template::TT3::Element';
 
 sub as_expr   { shift->todo }
 sub as_postop { shift->become('num_multiply')->as_postop(@_) }
-sub generate  { 
-    $_[1]->generate_operator(
-        $_[0]->[2]
-    );
-}
+
 
 package Template::TT3::Element::Slash;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
+    base      => 'Template::TT3::Element::Operator
+                  Template::TT3::Element';
 
 sub as_expr   { shift->todo }
 sub as_postop { shift->become('num_divide')->as_postop(@_) }
-sub generate  { 
-    $_[1]->generate_operator(
-        $_[0]->[2]
-    );
-}
 
 
 package Template::TT3::Element::Percent;
 
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element';
+    base      => 'Template::TT3::Element::Operator
+                  Template::TT3::Element';
 
 sub as_expr   { shift->todo }
 sub as_postop { shift->become('num_modulus')->as_postop(@_) }
-sub generate  { 
-    $_[1]->generate_operator(
-        $_[0]->[2]
-    );
-}
 
 
 1;

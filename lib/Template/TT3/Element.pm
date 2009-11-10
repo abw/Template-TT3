@@ -1,8 +1,9 @@
 package Template::TT3::Element;
 
 use Template::TT3::Class
-    base      => 'Template::TT3::Base',
     version   => 3.00,
+    debug     => 0,
+    base      => 'Template::TT3::Base',
     utils     => 'self_params numlike',
     slots     => 'meta next token pos',
     import    => 'class',
@@ -11,11 +12,13 @@ use Template::TT3::Class
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
         base_id       => 'Template::TT3::Element',
-#        is_whitespace => 0,
- #       is_terminator => 0,
+        is_whitespace => 0,
+        is_delimiter  => 0,
+        is_terminator => 0,
         eof           => 0,
     },
     alias => {
+        delimiter  => \&null,
         terminator => \&null,
     };
 
@@ -25,6 +28,7 @@ our $MESSAGES = {
     no_rhs_expr_msg => "Missing expression after '%s' (%s)",
     no_dot_expr     => "Missing expression after dotop %s",
     missing_match   => "Missing '%s' to match '%s'",
+    missing_for     => "Missing %s for '%s'.  Got '%s'",
     bad_assign      => "Invalid assignment to expression: %s",
     bad_method      => "The %s() method is not implemented by %s.",
     sign_bad_arg    => "Invalid argument in signature for %s function: %s",
@@ -33,7 +37,6 @@ our $MESSAGES = {
     undef_varname   => "Cannot use undefined value as a variable name: %s",
     undefined       => "Undefined value returned by expression: <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
-    missing_after   => 'Missing %s after %s: %s',
 };
 
 
@@ -105,6 +108,11 @@ sub accept {
     return $self;
 }
 
+sub reject {
+    # return the $token passed to us
+    $_[1];
+}
+
 
 #-----------------------------------------------------------------------
 # whitespace handling methods
@@ -128,6 +136,16 @@ sub skip_ws {
 }
 
 
+sub skip_delimiter { 
+    # Most tokens aren't delimiters so they simply return the zeroth argument
+    # ($self).  If a $token reference is passed as the first argument then we 
+    # update it to reference the new token.  This advances the token pointer.
+    my ($self, $token) = @_;
+    $$token = $self if $token;
+    return $self;
+}
+
+
 sub next_skip_ws {
     # delegate to the next token's skip_ws method
 #    my ($self, $token) = @_;
@@ -146,18 +164,6 @@ sub as_postop {
 
 sub as_block {
     return shift->as_expr(@_);
-
-#    my ($self, $token, $scope, $prec) = @_;
-#    my (@exprs, $expr);
-#    
-#    while ($expr = $$token->as_expr($token, $scope, $prec)) {
-#        push(@exprs, $expr);
-#    }
-#    
-#    return $self->[META]->[ELEMS]->construct(
-#        block => $self->[TOKEN], $self->[POS], \@exprs
-#    )
-#    if @exprs;
 }
     
 
@@ -165,26 +171,22 @@ sub as_exprs {
     my ($self, $token, $scope, $prec) = @_;
     my (@exprs, $expr);
 
-    while (1) {
-#        $self->debug("token is $$token: ", $$token->token);
-        if ($expr = $$token->as_expr($token, $scope, $prec)) {
-#            $self->debug("got expression: $expr");
-            push(@exprs, $expr);
-        }
-        elsif ($$token->terminator($token)) {
-#            $self->debug("got terminator");
-        }
-        else {
-            last;
-        }
+#    $self->debug("as_exprs($self, $token, $scope, $prec)");
+#    $self->debug("as_exprs()  token is ", $$token->token);
+
+    $token ||= do { my $this = $self; \$this };
+ 
+    while ($expr = $$token->skip_delimiter($token)
+                          ->as_expr($token, $scope, $prec)) {
+        push(@exprs, $expr);
     }
+
+    return undef
+        unless @exprs;
 
     return $self->[META]->[ELEMS]->construct(
         block => $self->[TOKEN], $self->[POS], \@exprs
     );
-
-#    return undef;
-#    if @exprs;
 }
 
 
@@ -202,6 +204,10 @@ sub variable {
 }
 
 sub values {
+    shift->value(@_);
+}
+
+sub text {
     shift->value(@_);
 }
 
@@ -225,6 +231,13 @@ sub error_undef {
 sub error_nan { 
     my $self = shift;
     $self->error_msg( nan => $self->source, @_ );
+}
+
+sub missing {
+    my ($self, $what, $token) = @_;
+    return $self->error_msg( 
+        missing_for => $what => $self->[TOKEN], $$token->[TOKEN]
+    );
 }
 
     

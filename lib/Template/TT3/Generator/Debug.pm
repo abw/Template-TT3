@@ -103,6 +103,11 @@ sub generate_prefix {
     return "<prefix:$op>";
 }
 
+sub generate_punctuation {
+    my ($self, $punc) = @_;
+    return "<punctuation:$punc>";
+}
+
 sub generate_postfix {
     my ($self, $op, $lhs) = @_;
     return "<postfix:$op>";

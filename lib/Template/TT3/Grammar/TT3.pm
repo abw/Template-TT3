@@ -117,8 +117,11 @@ our $SYMBOLS  = [
     [ 'nor' => bool_nor         => 205,   0 ],      # foo nor bar
                                 
     # directive keywords    
-    [ 'do'  => cmd_do           => 150,   0 ],
-    [ 'end' => cmd_end          =>   0,   0 ],
+    [ 'do'      => cmd_do       => 150,   0 ],
+    [ 'if'      => cmd_if       => 150,   0 ],
+# conflict!  
+#    [ 'block'   => cmd_block    => 150,   0 ],
+    [ 'end'     => end          =>   0,   0 ],
 #    [ "${COMMAND}::For"         => 150,   0, 'for', 'in', 'end' ],
 #    [ "${COMMAND}::With"        => 150,   0, 'with', 'end' ],
 #    [ "${COMMAND}::Block"       =>   0,   0, 'block', 'end' ],
@@ -128,13 +131,12 @@ our $SYMBOLS  = [
                                 
     # grouping constructs
     [ '(' => lparen         =>   0,   0 ],
-    [ ')' => rparen         =>   0,   0 ],
     [ '[' => lbracket       =>   0,   0 ],
-    [ ']' => rbracket       =>   0,   0 ],
     [ '{' => lbrace         =>   0,   0 ],
-    [ '}' => rbrace         =>   0,   0 ],
+    [ [']', ')', '}']
+          => terminator     =>   0,   0 ],
     
-    # punctuation
+    # other punctuation marks
     [ ',' => separator      =>   0,   0 ],
-    [ ';' => terminator     =>   0,   0 ],
+    [ ';' => delimiter      =>   0,   0 ],
 ];
