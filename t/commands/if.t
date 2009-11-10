@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 5,
+    tests   => 8,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -67,6 +67,25 @@ end;
 foo bar
 -- expect --
 a is alpha
+
+-- test if as postop true --
+a if b
+-- expect --
+alpha
+
+-- test if as postop false --
+'[' a if not_defined ']'
+-- expect --
+[]
+
+-- test if as postop zero --
+'[' a if 0 ']'
+-- expect --
+[]
+
+
+
+
 
 
 

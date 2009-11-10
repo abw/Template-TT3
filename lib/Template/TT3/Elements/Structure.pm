@@ -7,11 +7,11 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element',
     constants => ':elem_slots :eval_args BLANK',
     constant  => {
-        SEXPR_FORMAT => "<block:\n  %s\n>",
+        SEXPR_FORMAT => "<block:\n%s\n>",
     },
     alias     => {
-        value  => \&text,
-        values => \&text,
+#        value  => \&text,
+#        values => \&text,
     };
 
 
@@ -22,26 +22,30 @@ sub generate {
 }
 
 sub sexpr {
-    my $self = shift;
-    my $body = join(
-        "\n  ", 
+    my $self   = shift;
+    my $format = shift || $self->SEXPR_FORMAT;
+#    my $indent = shift || 0;
+#    my $pad    = '  ' x $indent;
+    my $body   = join(
+        "\n",
         map { $_->sexpr } 
         @{ $self->[EXPR] }
     );
+    $body =~ s/^/  /gsm;
     sprintf(
-        $self->SEXPR_FORMAT,
+        $format,
         $body
     );
 }
 
-sub OLD_value {
+sub value {
     [
         map { $_->values($_[CONTEXT]) } 
         @{ $_[SELF]->[EXPR] } 
     ];
 }
 
-sub OLD_values {
+sub values {
     @{ $_[0]->value($_[1]) } 
 }
 

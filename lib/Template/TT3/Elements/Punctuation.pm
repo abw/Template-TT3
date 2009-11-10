@@ -21,6 +21,28 @@ sub generate {
 # TODO: separator
 #-----------------------------------------------------------------------
 
+package Template::TT3::Element::Separator;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    debug     => 0,
+    base      => 'Template::TT3::Element::Punctuation',
+    constants => ':elem_slots',
+    constant  => {
+        is_delimiter => 1,
+    },
+    alias     => {
+        skip_delimiter => 'next_skip_ws',
+    };
+
+
+#sub as_expr {
+#    my ($self, $token, @args) = @_;
+#    $$token = $self->[NEXT] if $token;
+#    $self->[NEXT]->as_expr($token, @args);
+#}
+
+
 #-----------------------------------------------------------------------
 # statement delimiter: ';' or '%]' or some other tag end
 #-----------------------------------------------------------------------
@@ -93,36 +115,129 @@ use Template::TT3::Class
 # TODO: as_terminator() to terminate and return preceeding block  
 
 
+
 #-----------------------------------------------------------------------
-# {
+# Template::TT3::Element::Construct
+#
+# Base class for data constructs: () {} []
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Lbrace;
+package Template::TT3::Element::Construct;
 
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Punctuation',
     constants => ':elem_slots';
 
+sub sexpr {
+    my $self = shift;
+    $self->[EXPR]->sexpr(
+        $self->SEXPR_FORMAT
+    );
+}
+
+
+sub as_expr {
+    my ($self, $token, $scope, $prec, $force) = @_;
+
+    # advance past opening token
+    $self->accept($token);
+
+    # parse expressions
+    $self->[EXPR] = $$token->as_exprs($token, $scope)
+        || return $self->missing( expressions => $token );
+
+    # check next token matches our FINISH token
+    return $self->missing( $self->FINISH, $token)
+        unless $$token->is( $self->FINISH );
+    
+    # advance past finish token
+    $$token = $$token->next;
+
+    # list/hash constructs can be followed by postops 
+    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+}
+
+
+#-----------------------------------------------------------------------
+# Constructs: [ ]  { }  ( )
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::List;
+
+use Template::TT3::Class 
+    base      => 'Template::TT3::Element::Construct',
+    constants => ':elem_slots :eval_args',
+    constant  => {
+        FINISH       => ']',
+        SEXPR_FORMAT => "<list:\n%s\n>",
+    },
+    alias     => {
+        values => \&value,
+    };
+
+
+sub generate {
+    $_[CONTEXT]->generate_list($_[SELF]);
+}
+
+
+sub value {
+    return [
+        $_[SELF]->[EXPR]->values($_[CONTEXT])
+    ];
+}
+
+sub variable {
+    $_[CONTEXT]->{ variables }
+        ->use_var( _anon_list => $_[SELF]->value($_[CONTEXT]) );
+}
+
+
+
+package Template::TT3::Element::Hash;
+
+use Template::TT3::Class 
+    base      => 'Template::TT3::Element::Construct',
+    constant  => {
+        FINISH       => '}',
+        SEXPR_FORMAT => "<hash:\n%s\n>",
+    };
+
 
 sub as_block {
     my ($self, $token, $scope, $prec) = @_;
     my (@exprs, $expr);
-
+ 
     # advance past terminator token
-    $$token = $self->[NEXT];
+    $self->accept($token);
 
+    # parse expressions
     my $block = $$token->as_exprs($token)
-        || return $self->error("Missing block after $self->[TOKEN]");
+        || return $self->missing( block => $token );
     
-    # TODO: replace with as_terminator()
-    return $self->error("Missing '}' at end of block, got: ", $$token->text)
-        unless $$token->is('}');
+    # check next token matches our FINISH token
+    return $self->missing( $self->FINISH, $token)
+        unless $$token->is( $self->FINISH );
     
+    # advance past finish token
     $$token = $$token->next;
 
+    # return $block, not $self
     return $block;
 }
+
+
+
+package Template::TT3::Element::Parens;
+
+use Template::TT3::Class 
+    base      => 'Template::TT3::Element::Construct',
+    constant  => {
+        FINISH       => ')',
+        SEXPR_FORMAT => "<parens:\n  %s\n>",
+    };
+
 
 
 

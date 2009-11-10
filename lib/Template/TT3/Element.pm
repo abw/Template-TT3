@@ -210,6 +210,7 @@ sub variable {
 }
 
 sub values {
+    $_[0]->debug("values() calling value()");
     shift->value(@_);
 }
 

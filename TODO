@@ -1,3 +1,9 @@
+There's lots TODO.  This file contains a few notes to remind me about 
+some of the things that need to be done.  It is in no way meant to be 
+a comprehensive list.
+
+-----------------------------------------------------------------------
+
 Elements have text() method to return $self->[TEXT] and text() method to 
 evaluate self ($self->value) and return text.  Need to change/rename one
 or other.
@@ -40,3 +46,5 @@ Resolve problem with generators wanting different arguments/behaviours
 depending on them being token or tree views.  Perhaps better to just 
 have the element call $gen->generate_XXX($self) and let the generator
 unpack/evaluate it as required.
+
+Add $force flag to all as_expr() calls in infix ops.  a = b ~ fill c

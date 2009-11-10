@@ -35,10 +35,33 @@ sub as_expr {
 }
 
 
+sub as_postop {
+    my ($self, $lhs, $token, $scope, $prec) = @_;
+
+    # operator precedence
+    return $lhs
+        if $prec && $self->[META]->[LPREC] <= $prec;
+
+    # store RHS and advance token past keyword
+    $self->[RHS] = $lhs;
+    $self->accept($token);
+
+    # parse expression
+    $self->[LHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
+        || return $self->missing( expression => $token );
+    
+    # at this point the next token might be a lower precedence operator, so
+    # we give it a chance to continue with the current operator as the LHS
+    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+#    return $self;
+}
+
+
 sub text {
     # TODO: should we have a true()/truth() method in elements?
-    return $_[SELF]->[RHS]->text($_[CONTEXT])
-        if $_[SELF]->[LHS]->value($_[CONTEXT]);
+    return $_[SELF]->[LHS]->value($_[CONTEXT])
+        ? $_[SELF]->[RHS]->text($_[CONTEXT])
+        : ();
 }
 
 

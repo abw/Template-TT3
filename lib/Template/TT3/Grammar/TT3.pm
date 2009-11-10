@@ -132,9 +132,9 @@ our $SYMBOLS  = [
 #    [ "${COMMAND}::Tags"        =>   0,   0, 'TAGS' ],
                                 
     # grouping constructs
-    [ '(' => lparen         =>   0,   0 ],
-    [ '[' => lbracket       =>   0,   0 ],
-    [ '{' => lbrace         =>   0,   0 ],
+    [ '(' => parens         =>   0,   0 ],
+    [ '[' => list           =>   0,   0 ],
+    [ '{' => hash           =>   0,   0 ],
     [ [']', ')', '}']
           => terminator     =>   0,   0 ],
     
