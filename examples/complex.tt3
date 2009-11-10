@@ -2,11 +2,13 @@ Hello [% name or 'World' %]!
 
 [% if foo %]
 blah blah blah some text
-[%  %]
+[% end %]
 
-[% do %]
 blah blah blah
-[% %]
+[% if x < 10 { 
+     y z
+   }
+%]
 
 [% x + 5 * 10 - foo.bar.bar %]
 
@@ -14,4 +16,11 @@ blah blah blah
     bar      # this is also a comment
 %]
 
+[%  do;
+        foo
+        +
+        bar
+        baz
+    end
+%]
 The end

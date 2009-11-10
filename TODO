@@ -23,3 +23,15 @@ punctuation: , ;
 
 
 Delete position() and other source methods from T::Type::Text
+
+Change 'block' element type to something non-generic like 'tt_block' 
+(and prohibit tt_ prefixes on keywords) to avoid clash with 'block'
+keywords directives.  The grammar always chooses the block keyword over
+the core block element.
+
+Make if look for elsif/else
+
+Handle the end / } terminator.  If it's 'end' then we shouldn't parse on
+to the next elsif / else.
+
+Figure out what non-chaining infix operators should do.

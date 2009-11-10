@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>TT3 Template Tokens: examples/expr.tt3</title>
+    <style>
+div.template {
+    font-family: Courier, monospace;
+    font-size: 14px;
+    color: #444;
+    white-space: pre;
+    background-color: #ddd;
+    border: 1px solid #aaa;
+    padding: 5px;
+}
+
+span.text {
+    color: #88a;
+}
+
+span.tag {
+    font-weight: bold;
+    background-color: #f8f8f8;
+}
+
+span.keyword {
+    color: #a44;
+}
+
+span.binop,
+span.operator {
+    color: #a44;
+}
+
+span.number,
+span.squote,
+span.dquote {
+    color: #44a;
+}
+
+span.word {
+    color: #4a4;
+/*    font-weight: bold; */
+}
+
+span.whitespace,
+span.comment {
+    color: #888;
+}
+
+span.tag_start,
+span.tag_end {
+    color: #aaa;
+}
+span.tag {
+    padding: 1px 3px;
+    border: 1px solid #aaa;
+}
+    </style>
+  </head>
+  <body>
+    <div class="template tt3">
+<span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">a</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="number">5</span><span class="whitespace"> </span><span class="operator">*</span><span class="whitespace"> </span><span class="number">10</span><span class="whitespace"> </span><span class="operator">-</span><span class="whitespace"> </span><span class="word">foo</span><span class="binop">.</span><span class="word">bar</span><span class="binop">.</span><span class="word">bar</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+</span>
+    </div>
+  </body>
+</html>
