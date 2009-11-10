@@ -10,7 +10,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
     import    => 'class',
-    constants => ':elem_slots',
+    constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT => '<text:%s>', 
     };
@@ -96,6 +96,20 @@ class->generate_text_ops(
         return $_[0]->[LHS]->text($_[1])
            cmp $_[0]->[RHS]->text($_[1])
     },
+#    combine_set => infix_right => sub {                     # a ~= b
+#        return $_[0]->[LHS]->assign(
+#            $_[1], 
+#            $_[0]->[LHS]->text($_[1])
+#          . $_[0]->[RHS]->text($_[1])
+#        );
+#    },
+);
+
+# need to do this one differently so that text() method can be redefined
+# to return nothing
+
+class->generate_ops(
+    { id => 'txt', methods => 'value values' },
     combine_set => infix_right => sub {                     # a ~= b
         return $_[0]->[LHS]->assign(
             $_[1], 
@@ -105,6 +119,12 @@ class->generate_text_ops(
     },
 );
 
+package Template::TT3::Element::Text::CombineSet;
+
+sub text {
+    $_[0]->value($_[1]);
+    return ();
+}
 
 #-----------------------------------------------------------------------
 # Special case for '~' which can be used as a prefix operator (forcing
@@ -112,6 +132,8 @@ class->generate_text_ops(
 # RHS to be a number) or as an infix operator for string concatenation.
 # [% ~foo;  foo ~ bar %]
 #-----------------------------------------------------------------------
+
+
 
 package Template::TT3::Element::Text::Squiggle;
 

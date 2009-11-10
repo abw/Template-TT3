@@ -318,10 +318,12 @@ sub as_postop {
     # advance token past operator
     $$token = $self->[NEXT];
     
-    # parse the RHS as an expression, passing our own precedence so that 
-    # any operators with a higher precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->error("Missing expression after operator: $self->[TOKEN]");
+    # Parse the RHS as an expression, passing our own precedence so that 
+    # any operators with a higher precedence can bind tighter.  Note that 
+    # we also set the $force (1) flag
+    
+    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+        || return $self->missing( expression => $token );
 
     # CHECK: I originally thought that non-chaining ops should return here,
     # but that scuppers an expression like: "x < 10 && y > 30" as the '<'
@@ -369,8 +371,8 @@ sub as_postop {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->error("Missing expression after operator: $self->[TOKEN]");
+    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+        || return $self->missing( expression => $token );
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
@@ -413,8 +415,8 @@ sub as_postop {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->error_msg( no_rhs_expr => $self->[TOKEN] );
+    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+        || return $self->missing( expression => $token );
     
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
@@ -426,131 +428,184 @@ sub as_postop {
 
 1;
 
-__END__
+#__END__
 
+=head1 Binary Infix Operators
 
+The C<Template::TT3::Element::Operator::Binary> module defines a base mixin
+class for all binary operators.  Note that this is I<not> a subclass of 
+C<Template::TT3::Element>, or any other class for that matter.  The 
+operator class are designed to be used as mixin base classes.  So they 
+only define the one or two methods that are related specifically to it
 
-#=======================================================================
-# stuff below to be assimilated
-#=======================================================================
+C<Template::TT3::Element::Operator::Infix> defines a base class for all
+non-chaining binary operators (NOTE: the non-chaining bit doesn't work at
+present - it behaves just like the regular chaining infix left operator - I
+need to look at this). It defines the C<as_postop()> method which subclasses
+can inherit to implement the operator precedence parsing mechanism required
+for non-chaining (see earlier note) infix binary operators.
 
+C<Template::TT3::Element::Operator::InfixLeft> defines a base class
+for all leftward associative binary operators.  It defines the C<as_postop()>
+method to handle operator precedence parsing for left associative infix
+binary operators.
 
-#-----------------------------------------------------------------------
-# base class for unary operators that are either prefix or postfix
-#-----------------------------------------------------------------------
+C<Template::TT3::Element::Operator::InfixRight> defines a base class
+for all leftward associative binary operators.  It defines the C<as_postop()>
+method to handle operator precedence parsing for right associative infix
+binary operators.
 
-package Template::TT3::Element::Operator::Unary::PrePostfix;
+In all cases the C<as_postop()> method does more-or-less the same thing.
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Unary',
-    constants => ':elem_slots',
-    alias     => {
-        as_expr   => 'as_expr_prefix',
-        as_postop => 'as_postop_postfix',
-    };
+    sub as_postop {
+        my ($self, $lhs, $token, $scope, $prec) = @_;
 
+        # Operator precedence
+        return $lhs 
+            if $prec && $self->[META]->[LPREC] <= $prec;
 
+        # store expression on LHS of operator
+        $self->[LHS] = $lhs;
+    
+        # advance token past operator
+        $$token = $self->[NEXT];
+    
+        # Parse the RHS expression
+        $self->[RHS] = $$token->as_expr(
+            $token, $scope, $self->[META]->[LPREC], 1
+        )
+        || return $self->missing( expression => $token );
 
-sub generate {
-#    $_[0]->debug("\nOP $_[0]->[TOKEN]   lhs [$_[0]->[LHS]]  rhs [$_[0]->[RHS]]");
-    $_[0]->[RHS]
-        ? $_[1]->generate_prefix(
-            $_[0]->[TOKEN],
-            $_[0]->[RHS],
-          )
-        : $_[1]->generate_postfix(
-            $_[0]->[TOKEN],
-            $_[0]->[LHS],
-          );
-}
+        # parse any more binary operators following
+        return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    }
 
+The C<as_postop()> method is called with the following arguments:
 
+    $self       # the current element object (a binary operator token)
+    $lhs        # the expression element on the left of the operator
+    $token      # a reference to the current token (initially equals \$self)
+    $scope      # the current lexical scope (TODO)
+    $prec       # precedence limit
 
-#-----------------------------------------------------------------------
-# unary operators
-#-----------------------------------------------------------------------
+The C<$prec> precedence limit is the key to operator precedence parsing.
+If the current operator has a precedence higher than the C<$prec> requested
+then it binds tighter than the preceding operator or expression.  In this
+case, C<as_postop()> should continue.  If on the other hand the current 
+operator has a lower precedence that that requested, the C<as_postop()> 
+method should return the C<$lhs> expression immediately.
 
-package Template::TT3::Element::Not;
+The difference between the infix, infix left and infix right methods all
+comes down to what happens when the precedence in the same.  For left
+associative operators, the method should return early.  This results in 
+equal precedence operators grouping to the left.
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Unary::Prefix';
+    a + b + c       # parsed as: (a + b) + c
 
-package Template::TT3::Element::NotLo;
+For right associative operators, the method should continue when the
+precedence is equal.
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Not';
+    a = b = c       # parsed as: a = (b = c)
 
+In terms of code, the only difference is in the comparison operator in the 
+first line of (proper) code in the C<as_postop()> method.
 
-#-----------------------------------------------------------------------
-# various binary operators
-#-----------------------------------------------------------------------
+C<Template::TT3::Element::Operator::InfixLeft>:
 
-package Template::TT3::Element::Dot;
+    return $lhs 
+        if $prec && $self->[META]->[LPREC] <= $prec;
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Left',
-    constants => ':elem_slots';
+C<Template::TT3::Element::Operator::InfixRight>:
 
+    return $lhs 
+        if $prec && $self->[META]->[LPREC] < $prec;
 
-package Template::TT3::Element::Star;
+So we just need to change the C<E<lt>=> comparison to C<E<lt>>.
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Left',
-    constants => ':elem_slots';
+NOTE: the non-chaining infix operator should do something different, but
+I'm not 100% sure what.  Needs looking at.  For now it works like the infix
+left.
 
+After the precedence check, we store the C<$lhs> parameter in the C<LHS>
+slot of the element.
 
-package Template::TT3::Element::Assign;
+        # store expression on LHS of operator
+        $self->[LHS] = $lhs;
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Right',
-    constants => ':elem_slots';
+We then update the C<$token> token reference to point to the token 
+immediately following the current operator token (C<$self-E<gt>[NEXT]>).
 
-package Template::TT3::Element::Arrow;
+        # advance token past operator
+        $$token = $self->[NEXT];
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Right',
-    constants => ':elem_slots';
+On the right of the operator we expect another expression so we call the
+C<as_expr()> method on the next token.  
 
-sub generate {
-    $_[0]->debug("arrows [$_[0]->[TOKEN]] [$_[0]->[LHS]] [$_[0]->[RHS]]");
-    $_[1]->generate_binop(
-        ' "' . $_[0]->[TOKEN] . '" ',    # for debugging
-        $_[0]->[LHS],
-        $_[0]->[RHS],
-    );
-}
+        # Parse the RHS expression
+        $self->[RHS] = $$token->as_expr(
+            $token, $scope, $self->[META]->[LPREC], 1
+        )
+        || return $self->missing( expression => $token );
 
+We pass it the reference to the current token, C<$token>, so that it can
+advance the token pointer to consume tokens from the input stream. We also
+pass it the current lexical scope, C<$scope>, although that isn't being used
+yet, so you can ignore it for now.  The next argument is the precedence of
+the current operator.  This ensures that the C<as_expr()> method will only 
+consume any further binary operators that have a higher precedence (i.e.
+bind tighter).
 
-package Template::TT3::Element::IfThen;
+The final option is a C<$force> flag which tells the next token that we
+really, really want an expression. Otherwise it would be a syntax error to
+have a binary operator without an expression on the right hand side.
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Left',
-    constants => ':elem_slots';
+This is required as a special dispensation to command keywords that act
+as operators (e.g. C<if>, C<for>, etc).  They have a lower precedence than
+all the other operators.  This is required so that an expression like this:
 
-sub TMP_generate {
-    $_[1]->generate_if_then(
-        $_[0]->[TOKEN],
-        $_[0]->[LHS],
-        $_[0]->[RHS],
-    );
-}
+    a = b if c
 
+Is parsed as:
 
-package Template::TT3::Element::IfElse;
+    (a = b) if c
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Binary::Left',
-    constants => ':elem_slots';
+And not:
 
+    a = (b if c)
 
-1;
+(This is a failing of the current TT2 parser).
 
+By giving keyword operators like C<if> and C<for> a lower precedence than
+the C<=> assignment operator, we can have the regular operator precedence
+parser take care of it.
+
+However, we also want to be able to commands as the right hand side of 
+variable expressions. Like this, for example:
+
+    a = if a { b } else { c }
+
+Or this:
+
+    h = do { fill my/header }
+
+In the usual case, the keywords following the C<=> assignment (C<if> and C<do>
+in these rather contrived examples) would decline and immediately return
+from the as_expr() method because their precedence is lower than that of
+the assignment operator.
+
+The additional C<$force> flag is a hint telling them that it's OK for them 
+to return themselves even if their precedence is lower than the one we 
+specified as the C<$prec> argument.  Any operators following on from the
+command keyword are then parsed as per the specified precedence.
+
+Now that we have an expression for the right hand side of the operator we are
+all done.  Well, almost.  There may be further infix binary operators following
+this one.  They haven't been consumed yet because their precedence was lower
+than ours.  So we finally call the C<as_postop()> method on the next token
+(following any whitespace) and pass C<$self> as the left hand side expression,
+along with the current token reference, the scope and the precedence that 
+we were called with.
+
+        # parse any more binary operators following
+        return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    }

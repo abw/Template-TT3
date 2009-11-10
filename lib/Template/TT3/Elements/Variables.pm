@@ -41,7 +41,7 @@ package Template::TT3::Element::Variable;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element',
-    constants => ':elem_slots',
+    constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT => '<variable:%s>', 
     },
@@ -98,6 +98,11 @@ sub values {
 sub variable {
     $_[1]->{ variables }
          ->var( $_[0]->[TOKEN] );
+}
+
+sub assign {
+    $_[SELF]->variable($_[CONTEXT])->set($_[2]);
+    return ();
 }
 
 
