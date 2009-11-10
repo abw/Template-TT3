@@ -118,6 +118,7 @@ our $SYMBOLS  = [
                                 
     # directive keywords    
     [ 'do'      => cmd_do       => 150,   0 ],
+    [ 'as'      => cmd_as       => 150,   0 ],
     [ 'is'      => cmd_is       => 150,   0 ],
     [ 'if'      => cmd_if       => 150,   0 ],
 # conflict!  

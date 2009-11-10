@@ -18,9 +18,10 @@ sub as_expr {
     return undef
         if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
 
+    # advance token
     $self->accept($token);
     
-    # skip past keyword and parse expression following
+    # parse expression following
     $self->[LHS] = $$token->as_expr($token, $scope)
         || return $self->missing( expression => $token );
 

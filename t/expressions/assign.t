@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 2,
+    tests   => 3,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -39,6 +39,14 @@ a = 10; 'a is ' a
 a is alpha
 a is 10
 
+-- test assign chain --
+-- block --
+foo = bar = baz = 10;  
+'foo: ' foo '  '
+'bar: ' bar '  '
+'baz: ' baz
+-- expect --
+foo: 10  bar: 10  baz: 10
 
 __END__
 
