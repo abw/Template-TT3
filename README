@@ -1,4 +1,27 @@
-Another implementation of TT3!  This time I'm starting with a fresh
-Badger base (0.7), and working upwards from the Template::Variable/Type
-objects that implement the dotops.  See test implementation 
-Template-Variable/TTV
+This is a working prototype of the TT3 (Template Toolkit V3) template
+language.  It's very much under construction at the moment but will 
+eventually become the release version of TT3.
+
+At present all modules are contained under the Template::TT3 namespace.
+They will eventually become the new Template::* modules and the current 
+TT2 modules will be moved permanently into Template::TT2::*.  But that's
+a while off yet.
+
+Everything is still very much under construction so don't expect anything
+production-ready just yet.
+
+You'll need the latest development version of Badger from the subversion
+repository (which I'll get around to moving to github RSN).  See 
+http://badgerpower.com/.  Releasing version 0.07 is also RSN.
+
+With the Badger in place:
+
+  $ perl Makefile.PL
+  $ make
+  $ make test
+
+That's about all you can do right now.  You'll have to look at the tests
+for more inspiration.
+
+-- abw
+   Nov 10 2009
