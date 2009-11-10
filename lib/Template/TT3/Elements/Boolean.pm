@@ -34,28 +34,28 @@ class->generate_boolean_ops(
             ? $value
             : $_[0]->[RHS]->value($_[1])
     },
-    and_set => infix_right => sub {                         # a &&= b
+    and_set => infix_right => assignment => sub {           # a &&= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->value($_[1])
          && $_[0]->[RHS]->value($_[1])
-        );
+        )->value;
     },
-    or_set => infix_right => sub {                          # a ||= b
+    or_set => infix_right => assignment => sub {            # a ||= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->value($_[1])
          || $_[0]->[RHS]->value($_[1])
-        );
+        )->value;
     },
-    nor_set => infix_right => sub {                         # a !!= b
+    nor_set => infix_right => assignment => sub {           # a !!= b
         my $value = $_[0]->[LHS]->value($_[1]);
         return defined $value
             ? $value
             : $_[0]->[LHS]->assign(
                   $_[1], 
                   $_[0]->[RHS]->value($_[1])
-              );
+              )->value;
     },
 );
 

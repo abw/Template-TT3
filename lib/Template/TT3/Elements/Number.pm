@@ -69,34 +69,6 @@ sub generate {
 #-----------------------------------------------------------------------
 
 class->generate_number_ops(
-    pre_inc => prefix => sub {                              # ++a 
-        return $_[SELF]->[RHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[RHS]->number($_[CONTEXT]) + 1
-        );
-    },
-    post_inc => postfix => sub {                            # a++
-        my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
-        $_[SELF]->[LHS]->assign(
-            $_[CONTEXT], 
-            $n + 1
-        );
-        return $n;
-    },
-    pre_dec => prefix => sub {                              # --a
-        return $_[SELF]->[RHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[RHS]->number($_[CONTEXT]) - 1
-        );
-    },
-    post_dec => postfix => sub {                            # a--
-        my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
-        $_[SELF]->[LHS]->assign(
-            $_[CONTEXT], 
-            $n - 1
-        );
-        return $n;
-    },
     positive => prefix => sub {                             # +a
         return 
              + $_[SELF]->[RHS]->number($_[CONTEXT]);
@@ -167,69 +139,97 @@ class->generate_number_ops(
     },
     
     # TODO: these should be $lhs->variable->set(...)
-    add_set => infix_right => sub {                         # a += b
+);
+
+#-----------------------------------------------------------------------
+# A call to generate_number_assign_ops() which performs much the same 
+# task as generate_number_ops() but inherits the text() method from the 
+# T::TT3::Element::Operator::Assignment base class instead of aliasing 
+# it to the value() method.
+#-----------------------------------------------------------------------
+
+class->generate_number_assign_ops(
+    pre_inc => prefix => assignment => sub {                # ++a 
+        return $_[SELF]->[RHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[RHS]->number($_[CONTEXT]) + 1
+        )->value;
+    },
+    post_inc => postfix => assignment => sub {              # a++
+        my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
+        $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
+            $n + 1
+        );
+        return $n;
+    },
+    pre_dec => prefix => assignment => sub {                # --a
+        return $_[SELF]->[RHS]->assign(
+            $_[CONTEXT], 
+            $_[SELF]->[RHS]->number($_[CONTEXT]) - 1
+        )->value;
+    },
+    post_dec => postfix => assignment => sub {              # a--
+        my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
+        $_[SELF]->[LHS]->assign(
+            $_[CONTEXT], 
+            $n - 1
+        );
+        return $n;
+    },
+    add_set => infix_right => assignment => sub {           # a += b
         return $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 
             $_[SELF]->[LHS]->number($_[CONTEXT])
           + $_[SELF]->[RHS]->number($_[CONTEXT])
-        );
+        )->value;
     },
-    sub_set => infix_right => sub {                         # a -= b
+    sub_set => infix_right => assignment => sub {           # a -= b
         return $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 
             $_[SELF]->[LHS]->number($_[CONTEXT])
           - $_[SELF]->[RHS]->number($_[CONTEXT])
-        );
+        )->value;
     },
-    mul_set => infix_right => sub {                         # a *= b
+    mul_set => infix_right => assignment => sub {           # a *= b
         return $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 
             $_[SELF]->[LHS]->number($_[CONTEXT])
           * $_[SELF]->[RHS]->number($_[CONTEXT])
-        );
+        )->value;
     },
-    div_set => infix_right => sub {                         # a /= b
+    div_set => infix_right => assignment => sub {           # a /= b
         return $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 
             $_[SELF]->[LHS]->number($_[CONTEXT])
           / $_[SELF]->[RHS]->number($_[CONTEXT])
-        );
+        )->value;
     },
 );
 
 
+
 #-----------------------------------------------------------------------
-# Special cases for +/- which are both unary prefix and binary infix 
-# operators.  If the operator is at the start of an expression (i.e. 
-# as_expr() is called on it) then it upgrades itself to a num_positive
-# or num_negative op and delegates to the new as_expr() method.  The 
-# num_positive op is Template::TT3::Element::Number::Positive, define as 
-# 'positive' in the above call to generate_number_ops().  Ditto for 
-# num_negative.  If the operator appears on the right of an expression
-# (i.e. as_postop() is called) then it does a similar upgrade and 
-# delegates to num_add / num_subtract.
+# Another call to generate_pre_post_ops() which defines operator classes
+# that can be either prefix operators or postfix operators.  e.g. '-'
+# and '+' can be prefix or postfix (infix).
+#
+# If the operator, say '+', is at the start of an expression (i.e. as_expr() 
+# is called on it) then it upgrades itself to a num_positive op and 
+# delegates to the new as_expr() method.  The num_positive op is 
+# Template::TT3::Element::Number::Positive, define as 'positive' in the 
+# earlier call to generate_number_ops().  If the operator appears on the 
+# right of an expression (i.e. as_postop() is called) then it does a 
+# similar upgrade and delegates to num_add.
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Number::Plus;
+class->generate_pre_post_ops(
+    inc   => ['num_pre_inc',  'num_post_inc'],
+    dec   => ['num_pre_dec',  'num_post_dec'],
+    plus  => ['num_positive', 'num_add'],
+    minus => ['num_negative', 'num_subtract'],
+);
 
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator
-                  Template::TT3::Element';
-
-sub as_expr   { shift->become('num_positive')->as_expr(@_) }
-sub as_postop { shift->become('num_add')->as_postop(@_)    }
-
-
-package Template::TT3::Element::Number::Minus;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator
-                  Template::TT3::Element';
-
-sub as_expr   { shift->become('num_negative')->as_expr(@_)   }
-sub as_postop { shift->become('num_subtract')->as_postop(@_) }
 
 
 #-----------------------------------------------------------------------

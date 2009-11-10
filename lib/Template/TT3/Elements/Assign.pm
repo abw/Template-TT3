@@ -5,6 +5,7 @@ use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::InfixRight
+                  Template::TT3::Element::Operator::Assignment
                   Template::TT3::Element',
     import    => 'class',
     constants => ':elem_slots :eval_args',
@@ -26,13 +27,6 @@ sub value {
               )->value;
 }
 
-
-sub text {
-    # when evaluated as text, e.g. [% a = 10 %], an assignment evaluates
-    # itself but returns nothing.
-    shift->value(@_);
-    return ();
-}
 
 1;
 

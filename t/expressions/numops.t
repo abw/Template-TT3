@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 36,
+    tests   => 54,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions';
@@ -191,12 +191,6 @@ __DATA__
 
 
 #-----------------------------------------------------------------------
-# TODO: unary auto increment/decrement operators: a++, ++a, a--, --a, etc.
-#-----------------------------------------------------------------------
-
-
-
-#-----------------------------------------------------------------------
 # numerical binary operators
 #-----------------------------------------------------------------------
 
@@ -355,6 +349,103 @@ phi + pi * e
 2 * 3 + 5 * 7
 -- expect --
 41
+
+
+
+#-----------------------------------------------------------------------
+# unary auto increment/decrement operators: a++, ++a, a--, --a, etc.
+#-----------------------------------------------------------------------
+
+-- test add assign --
+'set/'; a = 10; 'inc/'; a +=10; a 
+-- expect --
+set/inc/20
+
+-- test pre-increment --
+a = 10; b = ++a; 'a: ' a; '  b: '; b
+-- expect --
+a: 11  b: 11
+
+-- test post-increment --
+a = 10; b = a++; 'a: ' a; '  b: '; b
+-- expect --
+a: 11  b: 10
+
+-- test pre-decrement --
+a = 10; b = --a; 'a: ' a; '  b: '; b
+-- expect --
+a: 9  b: 9
+
+-- test post-decrement --
+a = 10; b = a--; 'a: ' a; '  b: '; b
+-- expect --
+a: 9  b: 10
+
+-- test pre-increment is silent in text --
+a = 10; ++a; 'a: '; a
+-- expect --
+a: 11
+
+-- test post-increment is silent in text --
+a = 10; a++; 'a: '; a
+-- expect --
+a: 11
+
+-- test pre-decrement is silent in text --
+a = 10; --a; 'a: '; a
+-- expect --
+a: 9
+
+-- test post-decrement is silent in text --
+a = 10; a--; 'a: '; a
+-- expect --
+a: 9
+
+-- test add assign --
+a = 10; a += 5; 'a: '; a
+-- expect --
+a: 15
+
+-- test subtract assign --
+a = 10; a -= 5; 'a: '; a
+-- expect --
+a: 5
+
+-- test multiple assign --
+a = 10; a *= 5; 'a: '; a
+-- expect --
+a: 50
+
+-- test divide assign --
+a = 10; a /= 5; 'a: '; a
+-- expect --
+a: 2
+
+-- test add assign yields value --
+a = 10; b = a += 5; 'a: '; a; '  b: '; b;
+-- expect --
+a: 15  b: 15
+
+-- test sub assign yields value --
+a = 10; b = a -= 5; 'a: '; a; '  b: '; b;
+-- expect --
+a: 5  b: 5
+
+-- test mul assign yields value --
+a = 10; b = a *= 5; 'a: '; a; '  b: '; b;
+-- expect --
+a: 50  b: 50
+
+-- test div assign yields value --
+a = 10; b = a /= 5; 'a: '; a; '  b: '; b;
+-- expect --
+a: 2  b: 2
+
+-- test chained assignment ops --
+a = 10; b = 20; c = 4; a *= b /= c -=2; 'a: '; a; '  b: '; b; '  c: '; c
+-- expect --
+a: 100  b: 10  c: 2
+
 
 
 

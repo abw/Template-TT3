@@ -6,8 +6,8 @@ use Template::TT3::Class
     base       => 'Template::TT3::Element::Command',
     constants  => ':elem_slots :eval_args',
     alias      => {
-        value  => \&text,
-        values => \&text,
+        text   => \&value,
+        values => \&value,
     };
 
 sub as_expr {
@@ -28,9 +28,9 @@ sub as_expr {
 }
 
 
-sub text {
-    # hmmm... we need a way to only return value from last expr
-    $_[SELF]->[EXPR]->text($_[CONTEXT]);
+sub value {
+    my @values = $_[SELF]->[EXPR]->values($_[CONTEXT]);
+    return pop @values;
 }
 
 

@@ -38,6 +38,9 @@ sub sexpr {
     );
 }
 
+# TODO: I think value() should return text() - I did it this way to 
+# avoid the overhead of passing back all items on the stack.
+
 sub value {
     [
         map { $_->values($_[CONTEXT]) } 

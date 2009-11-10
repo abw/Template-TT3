@@ -96,21 +96,21 @@ class->generate_text_ops(
         return $_[0]->[LHS]->text($_[1])
            cmp $_[0]->[RHS]->text($_[1])
     },
-#    combine_set => infix_right => sub {                     # a ~= b
-#        return $_[0]->[LHS]->assign(
-#            $_[1], 
-#            $_[0]->[LHS]->text($_[1])
-#          . $_[0]->[RHS]->text($_[1])
-#        );
-#    },
 );
 
-# need to do this one differently so that text() method can be redefined
-# to return nothing
 
-class->generate_ops(
-    { id => 'txt', methods => 'value values' },
-    combine_set => infix_right => sub {                     # a ~= b
+#-----------------------------------------------------------------------
+# A call to generate_text_assign_ops() which performs much the same 
+# task with the exception that it doesn't alias the function to the 
+# text() method.  Instead we inherit the text() method from the 
+# T::TT3::Element::Operator::Assignment base class which performs the 
+# assignment (by calling $self->value()) but returns an empty list.
+# This is how we silence assignment operators from generating any output
+# in "text context", e.g. [% a = 10 %]
+#-----------------------------------------------------------------------
+
+class->generate_text_assign_ops(
+    combine_set => infix_right => assignment => sub {       # a ~= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->text($_[1])
@@ -119,30 +119,17 @@ class->generate_ops(
     },
 );
 
-package Template::TT3::Element::Text::CombineSet;
 
-sub text {
-    $_[0]->value($_[1]);
-    return ();
-}
 
 #-----------------------------------------------------------------------
-# Special case for '~' which can be used as a prefix operator (forcing
-# the RHS to be test, much in the same way that prefix '+' forces the
-# RHS to be a number) or as an infix operator for string concatenation.
-# [% ~foo;  foo ~ bar %]
+# Another call to generate_pre_post_ops() which defines operator classes
+# that can be either prefix operators or postfix operators.  e.g. '~'
 #-----------------------------------------------------------------------
 
+class->generate_pre_post_ops(
+    squiggle => ['txt_convert', 'txt_combine'],
+);
 
-
-package Template::TT3::Element::Text::Squiggle;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element';
-
-sub as_expr   { shift->become('txt_convert')->as_expr(@_) }
-sub as_postop { shift->become('txt_combine')->as_postop(@_) }
 
 
 

@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 6,
+    tests   => 7,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -41,24 +41,33 @@ alpha
 -- test inline do; a; b; end --
 do; a; b; end
 -- expect -- 
-alphabravo
+bravo
 
--- test inline do { a; b } --
-do { a; b; }
+-- test inline do { c; d } --
+do { c; d; }
 -- expect -- 
-alphabravo
+delta
 
 -- test inline do { a; b } c; d--
 do { a; b; } c; ;;;   ; d e f
 -- expect -- 
-alphabravocharliedeltaechofoxtrot
+bravocharliedeltaechofoxtrot
 
 
 -- test assign to do --
 -- block --
 foo = do;
-  x ' ' y 
+  x y 
 end
 foo
 -- expect --
-x-ray yankee
+yankee
+
+-- test do side-effect --
+-- block --
+'y: ' do;
+  x=99 y 
+end
+'  x: ' x
+-- expect --
+y: yankee  x: 99

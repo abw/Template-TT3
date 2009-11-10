@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+#
+# Perl script to benchmark test implementation against TT2.
+# The runtime as it currently stands is quite slow (slower than
+# TT2).  However, everything is being interpreted in an opcode 
+# tree rather than being pre-compiled to Perl code.  And I've made
+# no attempt to optimise anything.  So I'm neither surprised nor
+# overly worried.
+#
+# Written by Andy Wardley http://wardley.org/
+#
+# 10 November 2009
+#
+
+use Badger
+    lib   => '../lib';
+
+use Template;
+use Template::TT3::Template;
+use Template::Config;
+$Template::Config::STASH = 'Template::Stash';
+
+use Benchmark qw(timethese cmpthese);
+
+my $iters = 1_000;
+#my $iters = 1;
+my $data = {
+    a => { 
+        b => { 
+            c => { 
+                d => [1.618, 2.718, 3.142],
+            } ,
+        } ,
+    },
+};
+
+my $text =<<EOF;
+Hello [% name or 'World' %]
+a.b.c.d.first is [% a.b.c.d.first %]
+EOF
+
+my $results    = timethese(
+    $iters => {
+        tt2_perl   => \&tt2_perl,
+        tt3_perl   => \&tt3_perl,
+    },
+);
+
+print "\n";
+
+cmpthese($results);
+
+sub tt2_perl {
+    my $tt  = Template->new;
+    my $in  = $text;
+    my $out = '';
+    $tt->process(\$in, $data, \$out);
+#    print "tt2 perl: $out\n";
+}
+
+sub tt3_perl {
+    my $in  = $text;
+    my $tt  = Template::TT3::Template->new( text => $in ) ;
+    my $out = $tt->fill($data);
+#    print "tt3 perl: $out\n";
+}
+
+

@@ -186,6 +186,30 @@ sub generate_ops {
 }
 
 
+sub generate_pre_post_ops {
+    my ($self, $params) = self_params(@_);
+
+    while (my ($key, $elements) = each %$params) {
+        my $name = $self->{ name }.PKG.camel_case($key);
+        my ($pre, $post) = @$elements;
+        
+        class->export(
+            $name => [
+                base    => $self->{ name },
+                methods => {
+                    as_expr => sub { 
+                        shift->become($pre)->as_expr(@_);
+                    },
+                    as_postop => sub { 
+                        shift->become($post)->as_postop(@_);
+                    },
+                },
+            ]
+        );
+    }
+}
+
+
 sub generate_number_ops {
     shift->generate_ops(
         { id => 'num', methods => 'value values number text' },
@@ -194,9 +218,25 @@ sub generate_number_ops {
 }
 
 
+sub generate_number_assign_ops {
+    shift->generate_ops(
+        { id => 'num', methods => 'value values number' },
+        @_
+    );
+}
+
+
 sub generate_text_ops {
     shift->generate_ops(
         { id => 'txt', methods => 'value values text' },
+        @_
+    );
+}
+
+
+sub generate_text_assign_ops {
+    shift->generate_ops(
+        { id => 'txt', methods => 'value values' },
         @_
     );
 }

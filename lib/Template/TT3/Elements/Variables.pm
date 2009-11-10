@@ -102,7 +102,7 @@ sub variable {
 
 sub assign {
     $_[SELF]->variable($_[CONTEXT])->set($_[2]);
-    return ();
+#    return ();
 }
 
 
@@ -149,6 +149,7 @@ sub as_postop {
     return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
 }
 
+
 sub value {
     my ($self, $context) = @_;
     my $lhs = $self->[LHS]->variable($context);
@@ -156,6 +157,7 @@ sub value {
     $self->debug("DOT value() [$self->[LHS] => $lhs] [$self->[RHS] => $rhs]\n") if DEBUG;
     $lhs->dot($rhs)->value($context);
 }
+
 
 sub variable {
     # args are ($self, $context)
