@@ -8,7 +8,7 @@ div.template {
     line-height: 20px;
     color: #444;
     white-space: pre;
-    background-color: #ddd;
+    background-color: #eee;
     border: 1px solid #aaa;
     padding: 5px;
 }
@@ -54,7 +54,7 @@ span.tag_end {
 }
 span.tag {
     padding: 2px 1px;
-    border: 1px solid #aaa;
+    border: 1px solid #ddd; 
 }
 span.nl {
     display: block;
@@ -75,15 +75,107 @@ span.nl {
     <div class="template tt3">
 <span class="text">Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">!
 
-</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
-blah blah blah some text
+[# 'is' allows you to treat a block as an expression #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">!
 </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">end</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+
+[# you can use semi-colons as expression delimiters #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'Hello '</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'!'</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>   </span><span class="keyword">end</span><span class="whitespace">  
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[# All semi-colons after the first one are optional #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'Hello '</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'!'</span><span class="whitespace"> 
+<span class="nl"></span>   </span><span class="keyword">end</span><span class="whitespace">  
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[# You can also use commas to separate items.  It's all the same #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'Hello '</span><span class="whitespace">                       # TODO: not yet you can't 
+<span class="nl"></span>     </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'!'</span><span class="whitespace"> 
+<span class="nl"></span>   </span><span class="keyword">end</span><span class="whitespace">  
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+
+[# Whitespace is irrelevant.  #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="squote">'Hello '</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="squote">'!'</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="keyword">end</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="punctuation">;</span><span class="whitespace">  
+<span class="nl"></span>     </span><span class="squote">'Hello '</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="squote">'!'</span><span class="punctuation">;</span><span class="whitespace">  
+<span class="nl"></span>   </span><span class="keyword">end</span><span class="whitespace">  
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="punctuation">;</span><span class="whitespace">                              # you can also have embedded comments 
+<span class="nl"></span>     </span><span class="squote">'Hello '</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="squote">'!'</span><span class="punctuation">;</span><span class="whitespace">      # anywhere you like 
+<span class="nl"></span>   </span><span class="keyword">end</span><span class="whitespace">  
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[# you can also specify blocks using { } #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'Hello '</span><span class="whitespace">                           # semi-colons are optional 
+<span class="nl"></span>     </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> 
+<span class="nl"></span>     </span><span class="squote">'!'</span><span class="whitespace"> 
+<span class="nl"></span>   </span><span class="punctuation">}</span><span class="whitespace"> 
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[# single expression blocks #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="whitespace"> </span><span class="dquote">"Hello $name"</span><span class="whitespace">                 # same thing as: foo = "Hello $name" 
+<span class="nl"></span> 
+<span class="nl"></span>   </span><span class="word">bar</span><span class="whitespace"> </span><span class="keyword">is</span><span class="whitespace">                               # whitespace is irrelevant 
+<span class="nl"></span>       </span><span class="dquote">"Hello $name"</span><span class="whitespace"> 
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+    
+
+[# 'if' does the usual conditional thing #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+blah blah </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">bar</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text"> some text
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">end</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+
+[#  an 'if' block defined using semi-colons #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace">  </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>        </span><span class="squote">'bah blah '</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>        </span><span class="word">bar</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>        </span><span class="squote">' some text'</span><span class="punctuation">;</span><span class="whitespace"> 
+<span class="nl"></span>    </span><span class="keyword">end</span><span class="whitespace"> 
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[#  an 'if' block using { braces } #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace">  </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> 
+<span class="nl"></span>        </span><span class="squote">'bah blah '</span><span class="whitespace">  
+<span class="nl"></span>        </span><span class="word">bar</span><span class="whitespace"> 
+<span class="nl"></span>        </span><span class="squote">' some text'</span><span class="whitespace"> 
+<span class="nl"></span>    </span><span class="punctuation">}</span><span class="whitespace"> 
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[# a single expression block #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> 
+<span class="nl"></span>      </span><span class="word">bar</span><span class="whitespace"> 
+<span class="nl"></span>   </span><span class="punctuation">}</span><span class="whitespace"> 
+<span class="nl"></span>    
+<span class="nl"></span>   </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> 
+<span class="nl"></span>      </span><span class="word">bar</span><span class="whitespace"> 
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+[# single expression blocks can also be used in side-effect notation #]
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">bar</span><span class="whitespace"> </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+
+
 
 blah blah blah
 </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">if</span><span class="whitespace"> </span><span class="word">x</span><span class="whitespace"> </span><span class="binop"><</span><span class="whitespace"> </span><span class="number">10</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">  
 <span class="nl"></span>     </span><span class="word">y</span><span class="whitespace"> </span><span class="word">z</span><span class="whitespace"> 
 <span class="nl"></span>   </span><span class="punctuation">}</span><span class="whitespace"> 
 <span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
+
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="keyword">is</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">end</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
 
 </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">x</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="number">5</span><span class="whitespace"> </span><span class="operator">*</span><span class="whitespace"> </span><span class="number">10</span><span class="whitespace"> </span><span class="operator">-</span><span class="whitespace"> </span><span class="word">foo</span><span class="binop">.</span><span class="word">bar</span><span class="binop">.</span><span class="word">bar</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
 

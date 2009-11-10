@@ -78,13 +78,14 @@ sub sexpr {
 }
 
 sub value {
-    return $_[1]->{ variables }
-         ->value( $_[0]->[TOKEN] );
+#    return $_[1]->{ variables }
+#         ->value( $_[0]->[TOKEN] );
 
     # this seems rather redundant... why not just request the value?
-#    $_[1]->{ variables }
-#         ->var( $_[0]->[TOKEN] )
-#         ->value( $_[1] );
+    # Why?  Because it misses the variable cache
+    $_[1]->{ variables }
+         ->var( $_[0]->[TOKEN] )
+         ->value( $_[1] );
 }
 
 sub values {

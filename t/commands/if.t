@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 4,
+    tests   => 5,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -54,6 +54,19 @@ if foo > 5 and bar + 9 < 30 {
 }
 -- expect --
 zulu
+
+
+-- test assignment to if --
+-- block --
+foo = if a;
+   'a is ' a
+end;
+bar = if not_defined;
+   'b is ' b
+end;
+foo bar
+-- expect --
+a is alpha
 
 
 

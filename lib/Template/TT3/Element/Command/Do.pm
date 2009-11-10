@@ -10,37 +10,23 @@ use Template::TT3::Class
         values => \&text,
     };
 
-# hmm... problem with generators here... we really want to generate
-# 'do' as a keyword when called with with token generators.
-
-sub NOT_generate {
-    $_[GENERATOR]->generate_keyword(
-        $_[SELF]->[TOKEN],
-        $_[SELF]->[EXPR],
-    );
-}
-
 sub as_expr {
-    my ($self, $token, $scope, $prec) = @_;
+    my ($self, $token, $scope, $prec, $force) = @_;
 
     # operator precedence
     return undef
-        if $prec && $self->[META]->[LPREC] <= $prec;
+        if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
 
-    # advance token past 'do' keyword
-    $$token = $self->[NEXT];
+    # advance token reference
+    $self->accept($token);
 
-    # parse block
+    # skip past keyword and parse block following
     $self->[EXPR] = $$token->as_block($token, $scope)
-        || return $self->error("Missing block after $self->[TOKEN]");
+        || return $self->missing( block => $token );
         
-    if (DEBUG) {
-        $self->debug("do block expr: $self->[EXPR]");
-        $self->debug("next token: ", $$token->token);
-    }
-    
     return $self;
 }
+
 
 sub text {
     # hmmm... we need a way to only return value from last expr

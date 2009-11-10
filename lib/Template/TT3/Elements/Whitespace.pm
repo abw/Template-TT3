@@ -111,19 +111,13 @@ use Template::TT3::Class
     constants => ':elem_slots',
     constant  => {
         eof   => 1,
+    },
+    alias     => {
+        as_expr => 'null',
     };
-
-sub NOT_terminator {
-    # required for exprs() to work - otherwise
-    return undef;
-}
 
 sub generate {
     '';
-}
-
-sub as_expr {
-    return undef;
 }
 
 

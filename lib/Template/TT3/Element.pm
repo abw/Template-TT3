@@ -104,6 +104,7 @@ sub null { undef }
 
 sub accept {
     my ($self, $token) = @_;
+    # accept the current token and advance to the next once
     $$token = $self->[NEXT];
     return $self;
 }
@@ -179,6 +180,11 @@ sub as_exprs {
     while ($expr = $$token->skip_delimiter($token)
                           ->as_expr($token, $scope, $prec)) {
         push(@exprs, $expr);
+
+        if (DEBUG) {
+            $self->debug("expr: $expr->[TOKEN] => $expr");
+            $self->debug("token: $$token->[TOKEN]");
+        }
     }
 
     return undef
@@ -232,6 +238,7 @@ sub error_nan {
     my $self = shift;
     $self->error_msg( nan => $self->source, @_ );
 }
+
 
 sub missing {
     my ($self, $what, $token) = @_;

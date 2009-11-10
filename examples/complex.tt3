@@ -1,14 +1,106 @@
 Hello [% name or 'World' %]!
 
-[% if foo %]
-blah blah blah some text
+[# 'is' allows you to treat a block as an expression #]
+[% foo is %]
+Hello [% name or 'World' %]!
 [% end %]
+
+[# you can use semi-colons as expression delimiters #]
+[% foo is;
+     'Hello ';
+     name or 'World';
+     '!';
+   end 
+%]
+
+[# All semi-colons after the first one are optional #]
+[% foo is;
+     'Hello '
+     name or 'World'
+     '!'
+   end 
+%]
+
+[# You can also use commas to separate items.  It's all the same #]
+[% foo is;
+     'Hello '                       # TODO: not yet you can't
+     name or 'World'
+     '!'
+   end 
+%]
+
+
+[# Whitespace is irrelevant.  #]
+[% foo is; 'Hello ' name or 'World' '!'; end %]
+[% foo is; 
+     'Hello ' name or 'World' '!'; 
+   end 
+%]
+[% foo is;                              # you can also have embedded comments
+     'Hello ' name or 'World' '!';      # anywhere you like
+   end 
+%]
+
+[# you can also specify blocks using { } #]
+[% foo is {
+     'Hello '                           # semi-colons are optional
+     name or 'World'
+     '!'
+   }
+%]
+
+[# single expression blocks #]
+[% foo is "Hello $name"                 # same thing as: foo = "Hello $name"
+
+   bar is                               # whitespace is irrelevant
+       "Hello $name"
+%]
+    
+
+[# 'if' does the usual conditional thing #]
+[% if foo %]
+blah blah [% bar %] some text
+[% end %]
+
+[#  an 'if' block defined using semi-colons #]
+[%  if foo;
+        'bah blah ';
+        bar;
+        ' some text';
+    end
+%]
+
+[#  an 'if' block using { braces } #]
+[%  if foo {
+        'bah blah ' 
+        bar
+        ' some text'
+    }
+%]
+
+[# a single expression block #]
+[% if foo {
+      bar
+   }
+   
+   if foo
+      bar
+%]
+
+[# single expression blocks can also be used in side-effect notation #]
+[% bar if foo %]
+
+
 
 blah blah blah
 [% if x < 10 { 
      y z
    }
 %]
+
+[% foo is %]
+Hello [% name or 'World' %]
+[% end %]
 
 [% x + 5 * 10 - foo.bar.bar %]
 

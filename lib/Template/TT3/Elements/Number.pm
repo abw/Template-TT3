@@ -165,6 +165,8 @@ class->generate_number_ops(
         return $_[SELF]->[LHS]->number($_[CONTEXT])
            <=> $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
+    
+    # TODO: these should be $lhs->variable->set(...)
     add_set => infix_right => sub {                         # a += b
         return $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 

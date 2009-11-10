@@ -65,9 +65,14 @@ sub init {
 
 sub value {
     my ($self, $name, $element) = @_;
+    my $var = $self->{ vars }->{ $name };
+
     # TODO: check for undef/missing values
-    return $self->{ data }->{ $name };
+    return ($var && $var->value)
+        || $self->{ data }->{ $name };
 }
+
+# TODO: rename these get() set() and use()
 
 sub var {
     my ($self, $name) = @_;
@@ -77,6 +82,19 @@ sub var {
     return  $self->{ vars }->{ $name } 
         ||= $self->use_var( $name => $self->{ data }->{ $name } );
 }
+
+sub set_var {
+    my ($self, $name, $value) = @_;
+
+    $self->debug("var($name)") if DEBUG;
+    
+    # TODO: we currently don't update the target data, just the local
+    # variable wrapper stored in $self->{ vars }
+    return $self->{ vars }->{ $name } 
+         = $self->use_var( $name => $value );
+
+}
+
 
 sub use_var {
     my ($self, $name, $value, $parent, $args, @more) = @_;

@@ -1,8 +1,8 @@
 #============================================================= -*-perl-*-
 #
-# t/commands/do.t
+# t/expressions/assign.t
 #
-# Test script for the 'do' command.
+# Test script for assignment expressions.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 6,
+    tests   => 2,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -25,40 +25,29 @@ test_expressions(
     variables => callsign,
 );
 
-
 __DATA__
 
--- test a --
-a
--- expect -- 
-alpha
-
--- test do a --
-do a
--- expect -- 
-alpha
-
--- test inline do; a; b; end --
-do; a; b; end
--- expect -- 
-alphabravo
-
--- test inline do { a; b } --
-do { a; b; }
--- expect -- 
-alphabravo
-
--- test inline do { a; b } c; d--
-do { a; b; } c; ;;;   ; d e f
--- expect -- 
-alphabravocharliedeltaechofoxtrot
-
-
--- test assign to do --
--- block --
-foo = do;
-  x ' ' y 
-end
-foo
+-- test assign new variable --
+foo = 10; 'foo is '; foo
 -- expect --
-x-ray yankee
+foo is 10
+
+-- test assign existing variable --
+'a is ' a
+a = 10; 'a is ' a
+-- expect --
+a is alpha
+a is 10
+
+
+__END__
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
+# Textmate: is the cheese on toast
+

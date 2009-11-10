@@ -42,7 +42,7 @@ div.template {
     line-height: 20px;
     color: #444;
     white-space: pre;
-    background-color: #ddd;
+    background-color: #eee;
     border: 1px solid #aaa;
     padding: 5px;
 }
@@ -88,7 +88,7 @@ span.tag_end {
 }
 span.tag {
     padding: 2px 1px;
-    border: 1px solid #aaa;
+    border: 1px solid #ddd; 
 }
 span.nl {
     display: block;

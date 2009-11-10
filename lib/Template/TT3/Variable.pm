@@ -8,7 +8,7 @@ use Template::TT3::Class
     # Slot methods are read/write, but we want to make value() read only.  
     # So we use val() for the generated slot method and define value() below
     slots     => 'meta name val parent args',
-    constants => ':type_slots',
+    constants => ':type_slots :eval_args BLANK',
     utils     => 'self_params',
     alias     => {
         value  => \&get,
@@ -49,6 +49,15 @@ sub new {
 
 sub get {
     return $_[0]->[VALUE];
+}
+
+sub set {
+    my ($self, $value) = @_;
+#    $self->debug("setting variable $self->[NAME] to $value");
+    return $self->[META]->[VARS]->set_var( 
+        $self->[NAME],
+        $value,
+    );
 }
 
 
@@ -118,6 +127,11 @@ sub no_method {
         no_vmethod => $self->type => $name => $self->fullname,
 #        join(', ', sort $self->method_names)
      );
+}
+
+sub hush {
+    # hush, hush, thought I heard her calling my name...
+    return BLANK;
 }
 
 1;

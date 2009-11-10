@@ -48,6 +48,7 @@ sub OLD_values {
 sub text {
     join(
         BLANK,
+        grep { defined }                # TODO: warn
         map { $_->text($_[1]) } 
         @{ $_[0]->[EXPR] } 
 #        @{ $_[0]->value($_[1]) }

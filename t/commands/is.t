@@ -1,8 +1,8 @@
 #============================================================= -*-perl-*-
 #
-# t/commands/do.t
+# t/commands/is.t
 #
-# Test script for the 'do' command.
+# Test script for the 'is' command.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -28,37 +28,33 @@ test_expressions(
 
 __DATA__
 
--- test a --
-a
+-- test alpha --
+is a;
 -- expect -- 
 alpha
 
--- test do a --
-do a
+-- test bravo --
+is; b; end;
 -- expect -- 
-alpha
+bravo
 
--- test inline do; a; b; end --
-do; a; b; end
+-- test charlie --
+a is c; a
 -- expect -- 
-alphabravo
+charlie
 
--- test inline do { a; b } --
-do { a; b; }
+-- test delta --
+a is; d; end; a
 -- expect -- 
-alphabravo
+delta
 
--- test inline do { a; b } c; d--
-do { a; b; } c; ;;;   ; d e f
+-- test echo foxtrot golf --
+a is { e f g } a
 -- expect -- 
-alphabravocharliedeltaechofoxtrot
+echofoxtrotgolf
 
-
--- test assign to do --
--- block --
-foo = do;
-  x ' ' y 
-end
-foo
+-- test assign is --
+a = is h; a
 -- expect --
-x-ray yankee
+hotel
+

@@ -42,7 +42,7 @@ use Template::TT3::Class
 
 sub skip_delimiter {
     # we can always skip whitespace to skip over a delimiter
-    shift->next_skip_ws($_[0])->skip_delimiter($_[0]);
+    $_[0]->next_skip_ws($_[1])->skip_delimiter($_[1]);
 }
 
 
