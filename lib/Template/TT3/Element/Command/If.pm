@@ -5,14 +5,33 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
     constants  => ':elem_slots :eval_args',
+    constant   => {
+        SEXPR_FORMAT => "<if:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
+    },
     alias      => {
 #        value  => \&text,
 #        values => \&text,
     };
 
+sub sexpr {
+    my $self   = shift;
+    my $format = shift || $self->SEXPR_FORMAT;
+    my $expr   = $self->[LHS]->sexpr;
+    my $body   = $self->[RHS]->sexpr;
+    for ($expr, $body) {
+        s/\n/\n    /gsm;
+    }
+    sprintf(
+        $format,
+        $expr,
+        $body
+    );
+}
+
 
 sub as_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
+    my $lprec = $self->[META]->[LPREC];
 
     # operator precedence
     return undef
@@ -22,7 +41,7 @@ sub as_expr {
     $self->accept($token);
     
     # parse expression following
-    $self->[LHS] = $$token->as_expr($token, $scope)
+    $self->[LHS] = $$token->as_expr($token, $scope, $lprec)
         || return $self->missing( expression => $token );
 
     # parse block following the expression

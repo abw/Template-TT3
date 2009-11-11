@@ -121,6 +121,7 @@ our $SYMBOLS  = [
     [ 'as'      => cmd_as       => 150,   0 ],
     [ 'is'      => cmd_is       => 150,   0 ],
     [ 'if'      => cmd_if       => 150,   0 ],
+    [ 'for'     => cmd_for      => 150,   0 ],
 # conflict!  
 #    [ 'block'   => cmd_block    => 150,   0 ],
     [ 'end'     => end          =>   0,   0 ],

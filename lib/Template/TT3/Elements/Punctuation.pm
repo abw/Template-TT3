@@ -68,7 +68,6 @@ sub skip_delimiter {
 }
 
 
-
 sub as_block {
     my ($self, $token, $scope, $prec) = @_;
 
