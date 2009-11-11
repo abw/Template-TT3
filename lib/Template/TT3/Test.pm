@@ -14,13 +14,13 @@ use Template::TT3::Class
 
 use Template::TT3::Template;
 
+our $DATA;
 our $MAGIC    = '\s* -- \s*';
 our $ENGINE   = 'Template::TT3';
 our $HANDLER  = \&test_handler;
 our $TEMPLATE = 'Template::TT3::Template';
-our $DATA;
 
-
+        
 sub test_expect {
     my $config  = @_ && ref $_[0] eq HASH ? shift : { @_ };
     my $tests   = $config->{ tests   } || data_tests();
