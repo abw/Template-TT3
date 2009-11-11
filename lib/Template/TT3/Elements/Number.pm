@@ -233,6 +233,36 @@ class->generate_pre_post_ops(
 
 
 #-----------------------------------------------------------------------
+# range
+#-----------------------------------------------------------------------
+
+
+package Template::TT3::Element::Number::To;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Operator::Infix
+                  Template::TT3::Element',
+    constants => ':eval_args :elem_slots';
+
+sub text {
+    join(' ', @{ $_[SELF]->value($_[CONTEXT]) });
+}
+
+sub values {
+    @{ $_[SELF]->value($_[CONTEXT]) };
+}
+
+sub value {
+    [ 
+        $_[SELF]->[LHS]->number($_[CONTEXT])
+     .. $_[SELF]->[RHS]->number($_[CONTEXT])
+    ]
+}
+
+
+
+#-----------------------------------------------------------------------
 # special cases for *, / and % which can be used in places other than as
 # binary operators.
 #-----------------------------------------------------------------------

@@ -11,8 +11,8 @@ use Template::TT3::Class
     constants => ':type_slots :eval_args BLANK',
     utils     => 'self_params',
     alias     => {
-        value  => \&get,
-        values => \&get,
+        value    => \&get,
+        'values' => \&get,
     },
     messages  => {
         undefined  => '%s is undefined',

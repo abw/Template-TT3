@@ -85,7 +85,7 @@ our $SYMBOLS  = [
     [ '||'  => bool_or          => 250,   0 ],      # foo || bar
     [ '!!'  => bool_nor         => 250,   0 ],      # foo !! bar
 
-    [ '..'  => num_range        => 240,   0 ],      # 1 .. 91
+    [ '..'  => num_to           => 240,   0 ],      # 1 .. 91
     [ 'to'  => num_to           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     [ 'by'  => num_by           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     

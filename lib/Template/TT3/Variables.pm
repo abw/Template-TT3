@@ -46,7 +46,7 @@ sub init {
             else {
                 $config = { };
             }
-            
+
             $_ => class($module)->load->name->constructor(
                 variables => $self,
                 methods   => $vmethods->{ $_ },

@@ -184,7 +184,7 @@ sub test_expressions {
     my $config   = params(@_);
     my $tclass   = $config->{ template  } || $TEMPLATE;
     my $vars     = $config->{ variables };
-    my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars };
+    my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
     my $debug    = $config->{ debug } || 0;
 
     my $block_mode = defined $config->{ block_mode } 
