@@ -450,7 +450,7 @@ sub text {
 
 1;
 
-#__END__
+__END__
 
 =head1 Binary Infix Operators
 

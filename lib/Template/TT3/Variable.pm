@@ -7,7 +7,7 @@ use Template::TT3::Class
     import    => 'class',
     # Slot methods are read/write, but we want to make value() read only.  
     # So we use val() for the generated slot method and define value() below
-    slots     => 'meta name val parent args',
+    slots     => 'meta name_slot val parent args',
     constants => ':type_slots :eval_args BLANK',
     utils     => 'self_params',
     alias     => {
@@ -79,7 +79,7 @@ sub text {
 }
 
 sub ref {
-    ref $_[0]->[VALUE];
+    CORE::ref $_[0]->[VALUE];
 }
 
 sub dot {
@@ -90,11 +90,17 @@ sub apply {
     shift->not_implemented;
 }
 
+sub name {
+    CORE::ref $_[0]->[NAME]
+        ? $_[0]->[NAME]->source
+        : $_[0]->[NAME];
+}
+
 sub names {
     my $self  = shift;
     my @names = $self->[PARENT]
-        ? ($self->[PARENT]->names, $self->[NAME])
-        : ($self->[NAME]);
+        ? ($self->[PARENT]->names, $self->name)
+        : ($self->name);
 
     return wantarray
         ?  @names

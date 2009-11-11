@@ -7,9 +7,10 @@ use Template::TT3::Class
     import    => 'class',
     constants => ':elem_slots';
 
+
 #-----------------------------------------------------------------------
 # Call on generate_bool_ops() (in Template::TT3::Class) to create a 
-# bunch of subclasses of Template::TT3::Element::Text.  See the comment
+# bunch of subclasses of Template::TT3::Element::Boolean.  See the comment
 # for generate_number_ops() in Template::TT3::Elements::Number for 
 # further discussion.  For boolean ops we alias the subroutine specified 
 # as value() and values().

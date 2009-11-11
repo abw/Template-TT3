@@ -12,7 +12,8 @@ use Template::TT3::Class
     import    => 'class',
     constants => ':elem_slots :eval_args',
     constant  => {
-        SEXPR_FORMAT => '<text:%s>', 
+        SEXPR_FORMAT  => '<text:%s>', 
+        SOURCE_FORMAT => "'%s'",
     };
 
 
@@ -40,7 +41,11 @@ sub sexpr {
 
 
 sub source {
-    $_[0]->[TOKEN];
+    # TODO: escape single quotes...
+    sprintf(
+        $_[0]->SOURCE_FORMAT, 
+        $_[0]->[TOKEN]
+    );
 }
 
 

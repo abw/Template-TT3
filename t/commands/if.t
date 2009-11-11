@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 8,
+    tests   => 9,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -82,6 +82,15 @@ alpha
 '[' a if 0 ']'
 -- expect --
 []
+
+-- test value propagation --
+-- block --
+list = [a, [b,c] if d];
+'size: '; list.size; 
+'  last size: '; list.last.size;
+'  last item: '; list.last.last
+-- expect --
+size: 2  last size: 2  last item: charlie
 
 
 

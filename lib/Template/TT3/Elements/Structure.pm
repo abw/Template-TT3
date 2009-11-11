@@ -1,13 +1,16 @@
-# TODO change this to Exprs
+# TODO change this to Exprs?
 
 package Template::TT3::Element::Block;
 
 use Template::TT3::Class 
     version   => 3.00,
+    debug     => 0,
     base      => 'Template::TT3::Element',
     constants => ':elem_slots :eval_args BLANK',
     constant  => {
-        SEXPR_FORMAT => "<block:\n%s\n>",
+        SEXPR_FORMAT  => "<block:\n%s\n>",
+        SOURCE_FORMAT => '%s',
+        SOURCE_JOINT  => '; ',
     },
     alias     => {
 #        value  => \&text,
@@ -24,8 +27,6 @@ sub generate {
 sub sexpr {
     my $self   = shift;
     my $format = shift || $self->SEXPR_FORMAT;
-#    my $indent = shift || 0;
-#    my $pad    = '  ' x $indent;
     my $body   = join(
         "\n",
         map { $_->sexpr } 
@@ -38,21 +39,42 @@ sub sexpr {
     );
 }
 
+sub source {
+    my $self   = shift;
+    my $format = shift || $self->SOURCE_FORMAT;
+    my $joint  = shift || $self->SOURCE_JOINT;
+    sprintf(
+        $format,
+        join(
+            $joint,
+            map { $_->source } 
+            @{ $self->[EXPR] }
+        )
+    );
+}
+
+
+
 # TODO: I think value() should return text() - I did it this way to 
 # avoid the overhead of passing back all items on the stack.
 
 sub value {
     [
-        map { $_->values($_[CONTEXT]) } 
+        map { 
+            $_[SELF]->debug("calling values() on expr: ", $_->source) if DEBUG;
+            $_->values($_[CONTEXT]) 
+        } 
         @{ $_[SELF]->[EXPR] } 
     ];
 }
 
 sub values {
+    $_[SELF]->debug("called values() on block: ", $_[SELF]->source) if DEBUG;
     @{ $_[0]->value($_[1]) } 
 }
 
 sub text {
+    $_[SELF]->debug("called text() on block: ", $_[SELF]->source) if DEBUG;
     join(
         BLANK,
         grep { defined }                # TODO: warn

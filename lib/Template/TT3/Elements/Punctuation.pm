@@ -129,10 +129,19 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Punctuation',
     constants => ':elem_slots';
 
+
 sub sexpr {
     my $self = shift;
     $self->[EXPR]->sexpr(
         $self->SEXPR_FORMAT
+    );
+}
+
+sub source {
+    my $self = shift;
+    sprintf(
+        $self->SOURCE_FORMAT, 
+        $self->[EXPR]->source(@_)
     );
 }
 
@@ -167,10 +176,12 @@ package Template::TT3::Element::List;
 
 use Template::TT3::Class 
     base      => 'Template::TT3::Element::Construct',
+    debug     => 0,
     constants => ':elem_slots :eval_args',
     constant  => {
-        FINISH       => ']',
-        SEXPR_FORMAT => "<list:\n%s\n>",
+        FINISH        => ']',
+        SEXPR_FORMAT  => "<list:\n%s\n>",
+        SOURCE_FORMAT => '[ %s ]',
     },
     alias     => {
         values => \&value,
@@ -183,6 +194,7 @@ sub generate {
 
 
 sub value {
+    $_[SELF]->debug("called value() on list: ", $_[SELF]->source) if DEBUG;
     return [
         $_[SELF]->[EXPR]->values($_[CONTEXT])
     ];
@@ -190,7 +202,15 @@ sub value {
 
 sub variable {
     $_[CONTEXT]->{ variables }
-        ->use_var( _anon_list => $_[SELF]->value($_[CONTEXT]) );
+        ->use_var( $_[SELF] => $_[SELF]->value($_[CONTEXT]) );
+}
+
+sub text {
+    $_[SELF]->debug("called text() on list: ", $_[SELF]->source) if DEBUG;
+    return join(
+        '',
+        $_[SELF]->[EXPR]->text($_[CONTEXT])
+    );
 }
 
 
@@ -200,8 +220,9 @@ package Template::TT3::Element::Hash;
 use Template::TT3::Class 
     base      => 'Template::TT3::Element::Construct',
     constant  => {
-        FINISH       => '}',
-        SEXPR_FORMAT => "<hash:\n%s\n>",
+        FINISH        => '}',
+        SEXPR_FORMAT  => "<hash:\n%s\n>",
+        SOURCE_FORMAT => '{ %s }',
     };
 
 
@@ -234,8 +255,19 @@ package Template::TT3::Element::Parens;
 use Template::TT3::Class 
     base      => 'Template::TT3::Element::Construct',
     constant  => {
-        FINISH       => ')',
-        SEXPR_FORMAT => "<parens:\n  %s\n>",
+        FINISH        => ')',
+        SEXPR_FORMAT  => "<parens:\n  %s\n>",
+        SOURCE_FORMAT => '( %s )',
+    };
+
+package Template::TT3::Element::Args;
+
+use Template::TT3::Class 
+    base      => 'Template::TT3::Element::Construct',
+    constant  => {
+        FINISH        => ')',
+        SEXPR_FORMAT  => "<args:\n  %s\n>",
+        SOURCE_FORMAT => '( %s )',
     };
 
 

@@ -17,6 +17,40 @@ use Template::TT3::Class
         values => \&value,      # TODO: parallel assignment
     };
 
+use constant {
+    ARITY      => RHS + 1,
+    LHS_METHOD => RHS + 2,
+    RHS_METHOD => RHS + 3,
+};
+
+
+sub as_postop {
+    my ($self, $lhs, $token, $scope, $prec) = @_;
+
+    return $lhs 
+        if $prec && $self->[META]->[LPREC] < $prec;
+
+    $self->[LHS]   = $lhs;
+    
+    # advance token past operator
+    $$token = $self->[NEXT];
+    
+    # parse the RHS as an expression, passing our own precedence so that 
+    # any operators with a higher or equal precedence can bind tighter
+    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+        || return $self->missing( expression => $token );
+
+    # TODO: negotiation between the LHS and RHS to work out what kind of
+    # assignment this is.  Is the LHS has parens, e.g. foo(), then it's a 
+    # "lazy" assignment (e.g. create a subroutine).  If the LHS is a list
+    # term (e.g. (foo, bar) or @baz) then we need to treat the RHS different
+#   push(@$self, $lhs->assignment($rhs));
+    
+    # at this point the next token might be a lower or equal precedence 
+    # operator, so we give it a chance to continue with the current operator
+    # as the LHS
+    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+}
 
 sub value {
 #    $_[SELF]->debug("assign [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]");
@@ -26,6 +60,7 @@ sub value {
                 $_[SELF]->[RHS]->value( $_[CONTEXT] )
               )->value;
 }
+
 
 
 1;
