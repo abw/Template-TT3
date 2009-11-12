@@ -1,3 +1,46 @@
+# block - defined a content block.  Can be used in "anonymous block" form:
+
+    block;
+        ...;
+    end;
+
+# you can assign this to a variable
+
+    content = block;
+        ...;
+    end;
+
+# you can also create named blocks
+
+    block foo;
+        ...;
+    end;
+    
+    fill foo;
+
+# is - like '=' but expects a block on the RHS instead of an expression
+#   <var> = <expr>
+#   <var> = block; <block>; end
+#   <var> is <block>  
+#  
+
+    a is;                 # same as: a = block; ...; end
+       ...;
+    end;
+
+# as - similar to 'is' but in reverse.
+#   as <var> <block>
+#   <expr> as <var>
+
+    as foo;               # same as: foo is; ...; end
+        ...;
+    end;
+
+# works nicely in side-effect form:
+
+    fill foo              # same as: content = fill foo
+      as content   
+
 for - loop through lists
 
     for a in b;         # iterate over contents of list b, or just b if not a list
@@ -40,12 +83,58 @@ if / elsif / else - conditional branches
 
 fill - the new name for PROCESS
 
-    fill template.html
+    fill template.html    # same as TT2: PROCESS template.html
 
-with - create local variables
+# with - create local variables
 
-    # this emulates INCLUDE 
-    with x=0
+    x=1; y=2; z=3;
+    
+    # create a block with local variables
+    with x=10 y=20;
+       "x is $x\n";       # x is 10
+       "y is $y\n";       # y is 20
+       z = 30;            # local change only
+       "z is $z\n";       # z is 30
+    end;
 
+    # original values 
+    "x is $x\n";          # x is 1
+    "y is $y\n";          # y is 2
+    "z is $z\n";          # z is 3
+    
+# 'with' also works in side-effect form:
 
+    fill template.html    # same as TT2: INCLUDE template.html x=10 y=20
+    with x=10 y=20
+
+# just - create a local scope with *only* some variables
+
+    x=1; y=2;
+    
+    just x=5;
+        "x is $x\n";      # x is 5
+        if y;
+            # not reached - y is not defined in this inner scope
+        end;
+        z = 20;           # local change only
+    end;
+
+    if z;
+        # not reached - z is not defined in this outer scope
+    end;
+
+# into - the new name for WRAPPER
+
+    block foo;
+       "Hello $content";
+    end
+
+    into foo;             # Hello World
+       "World";
+    end;
+
+# into works in side-effect notation
+
+    fill site/content
+    info site/layout
 
