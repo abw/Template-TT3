@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 4,
+    tests   => 5,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -45,4 +45,11 @@ TODO: fill foo.tt3
 fill foo/bar.tt3
 -- expect -- 
 TODO: fill foo/bar.tt3
+
+-- test fill foo .tt3 --
+fill foo .tt3
+-- expect -- 
+# Note that the test_expressions() function automatically add '[%' and '%]'
+# around the input text.  That's why we've got an additional '%]' at the end
+<ERROR:unparsed tokens: .tt3 %]>
 
