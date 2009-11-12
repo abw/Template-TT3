@@ -68,6 +68,7 @@ sub generate {
 # directly (e.g. $_[SELF]) wherever possible.  
 #-----------------------------------------------------------------------
 
+BEGIN {
 class->generate_number_ops(
     positive => prefix => sub {                             # +a
         return 
@@ -206,7 +207,7 @@ class->generate_number_assign_ops(
         )->value;
     },
 );
-
+}
 
 
 #-----------------------------------------------------------------------
@@ -236,7 +237,6 @@ class->generate_pre_post_ops(
 # range
 #-----------------------------------------------------------------------
 
-
 package Template::TT3::Element::Number::Range;
 
 use Template::TT3::Class 
@@ -263,42 +263,32 @@ sub value {
 
 
 #-----------------------------------------------------------------------
+# '/' can be used as a filename separator: foo/bar.tt3
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::Number::Divide;
+
+use Template::TT3::Class 
+    as => 'filename';
+
+
+#-----------------------------------------------------------------------
 # special cases for *, / and % which can be used in places other than as
 # binary operators.
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Star;
+package Template::TT3::Element::Number::Multiply;
+
+
+package Template::TT3::Element::Number::Percent;
 
 use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator
-                  Template::TT3::Element';
+    base => 'Template::TT3::Element::Number::Modulus';
 
-sub as_expr   { shift->todo }
-sub as_postop { shift->become('num_multiply')->as_postop(@_) }
-
-
-package Template::TT3::Element::Slash;
+package Template::TT3::Element::Number::To;
 
 use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator
-                  Template::TT3::Element';
-
-sub as_expr   { shift->todo }
-sub as_postop { shift->become('num_divide')->as_postop(@_) }
-
-
-package Template::TT3::Element::Percent;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator
-                  Template::TT3::Element';
-
-sub as_expr   { shift->todo }
-sub as_postop { shift->become('num_modulus')->as_postop(@_) }
-
+    base => 'Template::TT3::Element::Number::Range';
 
 1;
 

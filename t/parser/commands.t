@@ -16,7 +16,7 @@ use Badger lib => '../../lib';
 use Template::TT3::Test::Parser 
     debug  => '',
     args   => \@ARGV,
-    tests  => 4,
+    tests  => 7,
     import => 'test_parser';
 
 test_parser(
@@ -126,3 +126,20 @@ for 5
     >
   >
 >
+
+-- test filename: foo --
+fill foo
+-- expect -- 
+<fill:<filename:foo>>
+
+-- test filename: foo.tt3 --
+fill foo.tt3
+-- expect -- 
+<fill:<filename:foo.tt3>>
+
+-- test filename: foo/bar.tt3 --
+fill foo/bar.tt3
+-- expect -- 
+<fill:<filename:foo/bar.tt3>>
+
+

@@ -1,40 +1,3 @@
-#-----------------------------------------------------------------------
-# Template::TT3::Element::Word - literal word elements
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Word;
-
-use Template::TT3::Elements::Literal;
-use Template::TT3::Class 
-    version   => 3.00,
-    debug     => 0,
-    base      => 'Template::TT3::Element::Literal',
-    constants => ':elem_slots';
-
-
-sub generate {
-    $_[1]->generate_word(
-        $_[0]->[TOKEN],
-    );
-}
-
-
-sub as_expr {
-    shift->become('variable')->as_expr(@_);
-}
-
-
-sub as_dotop {
-    my ($self, $token) = @_;
-    $$token = $self->[NEXT];
-    $self->debug("using $self->[TOKEN] as dotop: $self\n") if DEBUG;
-    return $self;
-}
-
-sub value {
-    $_[0]->[TOKEN];
-}
-
 
 package Template::TT3::Element::Variable;
 
@@ -118,6 +81,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Operator::Binary
                   Template::TT3::Element',
+    as        => 'filename',        # dots allowed in filenames, e.g. foo.tt3
     constants => ':elem_slots';
 
 

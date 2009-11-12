@@ -11,6 +11,7 @@ use Badger::Class
         PATTERNS  => 'Template::TT3::Patterns',
 #       CONFIG    => 'Template::TT3::Config',
         UTILS     => 'Template::TT3::Utils',
+        AS_ROLE   => 'Template::TT3::Element::Role',
         BASE_OP   => 'Template::TT3::Element::Operator',
     },
     hooks => {
@@ -18,6 +19,7 @@ use Badger::Class
         generate => \&generate,
         subclass => \&subclass,
         alias    => \&alias,
+        as       => \&as,
     };
 
 our $DEBUG_OPS = 0;
@@ -45,6 +47,19 @@ sub alias {
         $self->method( $key => $method );
     }
     return $self;
+}
+
+sub as {
+    my ($self, $roles) = @_;
+    my $base = $self->AS_ROLE;
+
+    $roles = [ split(DELIMITER, $roles) ]
+        unless ref $roles eq ARRAY;
+
+    $self->mixin( 
+        map { $base.PKG.camel_case($_) } 
+        @$roles 
+    );
 }
 
 
@@ -122,7 +137,7 @@ sub generate_ops {
     my $spec = shift;
     my $args = @_ == 1 && ref $_[0] ? shift : [ @_ ];
     my $id   = $spec->{ id } || '';
-       $id   = "${id}_" if $id;
+       $id   = "${id}_" if $id;             # err... this isn't being used
 
     # methods gives us a list of method names that we want to alias to
     my $methods = $spec->{ methods } || 'value';
@@ -426,20 +441,43 @@ will automatically be added as a base class of the new class
 =head2 generate_ops($spec,%classes)
 
 This method can be used to generate a number of operator classes en masse.
+It should be called from the base class package that you want to subclass
+operators from.
+
+    package Template::TT3::Element::Number;
+    
+    use Template::TT3::Class 'class';
 
     class->generate_ops(
         { 
             methods => 'value values number text' 
         },
-        {
-            inc => prefix => sub {
-                # code implementing 'inc' prefix operator
-            },
-            dec => prefix => sub {
-                # code implementing 'dec' prefix operator
-            }
+        inc => prefix => sub {
+            # code implementing 'inc' prefix operator
+        },
+        dec => prefix => sub {
+            # code implementing 'dec' prefix operator
         }
     );
+
+The first argument is a reference to a hash array containing any configuration
+options that apply to all the subsequent operators. The remaining arguments 
+specify the operators to be created.
+
+Each operator starts with a short identified (e.g. C<inc>). This is CamelCased
+(e.g. to C<Inc>) and appended to the base class name to give a new package
+name (e.g. C<Template::TT3::Element::Number::Inc). Any subsequent
+non-reference arguments provide the names of operator base classes for the new
+operator. These are CamelCased and appended to the
+C<Template::TT3::Element::Operator> base class package (e.g. C<prefix> is
+C<Template::TT3::Element::Operator::Prefix>, C<infix_right> is
+C<Template::TT3::Element::Operator::InfixRight>, and so on) before being added
+as base classes of the new operator. The final argument for an operator as a
+code reference which implements an evaluation method for the operator.  This
+is then installed into the new operator class as the methods listed in the 
+C<methods> item of the C<$spec> (e.g. C<value()>, C<values()>, C<number()>
+and C<text()> in this example).
+
 
 =head2 generate_number_ops(%classes)
 
@@ -456,7 +494,18 @@ L<generate_ops()>) for creating numeric operators.
         }
     );
 
+Most numeric operators implement one single evaluation method, C<value()>,
+which is then aliased to C<values()>, C<number()> and C<text()>.
+
 See L<Template::TT3::Elements::Number> for an example of it in use.
+
+=head2 generate_number_assign_ops(%classes)
+
+Similar to L<generate_number_ops()>, this method creates new numerical
+operator classes.
+
+This method of convenience provides a wrapper around L<generate_ops()> to
+
 
 =head2 generate_text_ops(%classes)
 
@@ -469,7 +518,29 @@ provide the correct specification for creating text operators.
         },
     );
 
-See L<Template::TT3::Elements::Text> for an example of it in use.
+=head2 generate_pre_post_ops()
+
+Used to generate intermediate classes that are used to switch between
+two different operators depending on the parse context in which they are
+used.  For example, the minus sign '-' can be used as a prefix operator
+(negative) or an infix operator (subtraction).  
+
+    package Template::TT3::Element::Number;
+    use Template::TT3::Class 'class';
+    
+    class->generate_pre_post_ops(
+        minus => ['num_negative', 'num_subtract'],
+    )
+
+The above code creates a new C<Template::TT3::Element::Number::Minus> class.
+When used as a prefix operator (i.e. the C<as_expr()> method is called on it)
+the object will upgrade itself (via reblessing) to a
+C<Template::TT3::Element::Number::Negative> object. When used as an infix
+operator (or more generally any postfix operator, i.e. when C<as_postop()> is
+called) it will upgrade itself to a
+C<Template::TT3::Element::Number::Subtract> object.
+
+See L<Template::TT3::Elements::Number> for an example of it in use.
 
 =head1 AUTHOR
 

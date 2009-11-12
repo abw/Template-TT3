@@ -29,102 +29,99 @@ our $PREFIXES = {
     
 
 our $SYMBOLS  = [
-    # [ $token, $name, $left_precedence, $right_precedence ]
+#   [ token => element_name => left_precedence, right_precedence ]
 
-    # variable sigils
-    [ '$'   => dollar           =>   0, 350 ],      # $foo
-    [ '@'   => at               =>   0, 350 ],      # @foo
-#   [ '%'   => percent          =>   0, 350 ],      # %foo
-    [ '.'   => dot              => 340,   0 ],      # foo.bar
+    # variable sigils and other super-duper high precedence operators
+    [ '$'       => dollar           =>   0, 350 ],      # $foo
+    [ '@'       => at               =>   0, 350 ],      # @foo
+#   [ '%'       => percent          =>   0, 350 ],      # %foo
+    [ '.'       => dot              => 340,   0 ],      # foo.bar
     
     # ++/-- unary prefix/postfix self-modification operators
-    [ '++'  => num_inc          => 295, 295 ],      # foo++, ++foo
-    [ '--'  => num_dec          => 295, 295 ],      # foo--, --foo
+    [ '++'      => num_inc          => 295, 295 ],      # foo++, ++foo
+    [ '--'      => num_dec          => 295, 295 ],      # foo--, --foo
     
-    # ** binary power operator binds very tight
-    [ '**'  => num_power        => 290,   0 ],      # foo ** 3
-
-    # other mathematical operators
-    [ '+'   => num_plus         => 275, 285 ],      # foo + bar, +foo
-    [ '-'   => num_minus        => 275, 285 ],      # foo - bar, -foo
-    [ '*'   => star             => 280,   0 ],      # foo * bar
-    [ '/'   => slash            => 280,   0 ],      # foo / bar
-    [ '%'   => percent          => 280, 350 ],      # foo % bar, %bar
-    [ div   => num_div_int      => 280,   0 ],      # foo div bar
-    [ mod   => num_modulus      => 280,   0 ],      # foo mod bar
+    # mathematical operators
+    [ '**'      => num_power        => 290,   0 ],      # foo ** 3
+    [ '+'       => num_plus         => 275, 285 ],      # foo + bar, +foo
+    [ '-'       => num_minus        => 275, 285 ],      # foo - bar, -foo
+    [ '*'       => num_multiply     => 280,   0 ],      # foo * bar
+    [ '/'       => num_divide       => 280,   0 ],      # foo / bar
+    [ '%'       => num_percent      => 280, 350 ],      # foo % bar, %bar
+    [ div       => num_div_int      => 280,   0 ],      # foo div bar
+    [ mod       => num_modulus      => 280,   0 ],      # foo mod bar
     
-    # text concatentation operator: TODO add as prefix op
-    [ '~'   => txt_squiggle     => 270, 270 ],      # foo ~ bar, ~ foo
+    # text concatentation operator
+    [ '~'       => txt_squiggle     => 270, 270 ],      # foo ~ bar, ~ foo
 
     # NOTE: Perl6 has cmp and <=> here
 
     # numerical comparisons operators
     # NOTE: TT2 treats == as a string-based comparison - needs resolving
-    [ '=='  => num_equal        => 260,   0 ],      # foo == bar
-    [ '!='  => num_not_equal    => 260,   0 ],      # foo != bar
-    [ '<'   => num_less_than    => 260,   0 ],      # foo < bar
-    [ '>'   => num_more_than    => 260,   0 ],      # foo > bar
-    [ '<='  => num_less_equal   => 260,   0 ],      # foo <= bar
-    [ '>='  => num_more_equal   => 260,   0 ],      # foo >= bar
-    [ '<=>' => num_compare      => 260,   0 ],      # foo <=> bar
+    [ '=='      => num_equal        => 260,   0 ],      # foo == bar
+    [ '!='      => num_not_equal    => 260,   0 ],      # foo != bar
+    [ '<'       => num_less_than    => 260,   0 ],      # foo < bar
+    [ '>'       => num_more_than    => 260,   0 ],      # foo > bar
+    [ '<='      => num_less_equal   => 260,   0 ],      # foo <= bar
+    [ '>='      => num_more_equal   => 260,   0 ],      # foo >= bar
+    [ '<=>'     => num_compare      => 260,   0 ],      # foo <=> bar
 
-    # Text comparison operators.  We use the same operator tokens as Perl 
-    # does, but give them different token names to disambiguate them from 
-    # the numerical comparison operators.
-    [ 'eq'  => txt_equal        => 260,   0 ],      # foo == bar
-    [ 'ne'  => txt_not_equal    => 260,   0 ],      # foo != bar
-    [ 'lt'  => txt_less_than    => 260,   0 ],      # foo < bar
-    [ 'gt'  => txt_more_than    => 260,   0 ],      # foo > bar
-    [ 'le'  => txt_less_equal   => 260,   0 ],      # foo <= bar
-    [ 'ge'  => txt_more_equal   => 260,   0 ],      # foo >= bar
-    [ 'cmp' => txt_compare      => 260,   0 ],      # foo <=> bar
+    # Text comparison operators. 
+    [ 'eq'      => txt_equal        => 260,   0 ],      # foo == bar
+    [ 'ne'      => txt_not_equal    => 260,   0 ],      # foo != bar
+    [ 'lt'      => txt_less_than    => 260,   0 ],      # foo < bar
+    [ 'gt'      => txt_more_than    => 260,   0 ],      # foo > bar
+    [ 'le'      => txt_less_equal   => 260,   0 ],      # foo <= bar
+    [ 'ge'      => txt_more_equal   => 260,   0 ],      # foo >= bar
+    [ 'cmp'     => txt_compare      => 260,   0 ],      # foo <=> bar
 
     # boolean logic operators
-    [ '!'   => bool_not         =>   0, 285 ],      # !foo
-    [ '&&'  => bool_and         => 255,   0 ],      # foo && bar
-    [ '||'  => bool_or          => 250,   0 ],      # foo || bar
-    [ '!!'  => bool_nor         => 250,   0 ],      # foo !! bar
+    [ '!'       => bool_not         =>   0, 285 ],      # !foo
+    [ '&&'      => bool_and         => 255,   0 ],      # foo && bar
+    [ '||'      => bool_or          => 250,   0 ],      # foo || bar
+    [ '!!'      => bool_nor         => 250,   0 ],      # foo !! bar
 
-    [ '..'  => num_range        => 240,   0 ],      # 1 .. 91
-    [ 'to'  => num_range        => 240,   0 ],      # 1 to 91 by 10      # TODO: by
-    [ 'by'  => num_by           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
+    [ '..'      => num_range        => 240,   0 ],      # 1 .. 91
+    [ 'to'      => num_to           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
+    [ 'by'      => num_by           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     
-    [ '?'   => question         => 230,   0 ],      # foo ? bar : baz
-    [ ':'   => colon            => 230,   0 ],      # foo ? bar : baz       # TODO: terminator
+    [ '?'       => question         => 230,   0 ],      # foo ? bar : baz
+#    [ ':'       => terminator       =>   0,   0 ],      # foo ? bar : baz       # TODO: terminator
 
     # this used to be above ? : but I think it's better here so that 
     # something like a -> a > 10 ? "big" : "small" is parsed as 
     # a -> ((a > 10) ? "big" : "small")
-    [ '->'  => arrow            => 230,   0 ],      # a -> a + 1
+    [ '->'      => arrow            => 230,   0 ],      # a -> a + 1
 
     # binary assignment operators
-    [ '='   => assign           => 220,   0 ],      # foo = bar
-    [ '=>'  => fat_arrow        => 220,   0 ],      # foo => bar
-    [ '~='  => txt_combine_set  => 220,   0 ],      # foo ~= bar
-    [ '+='  => num_add_set      => 220,   0 ],      # foo += bar
-    [ '-='  => num_sub_set      => 220,   0 ],      # foo -= bar
-    [ '*='  => num_mul_set      => 220,   0 ],      # foo *= bar
-    [ '/='  => num_div_set      => 220,   0 ],      # foo /= bar
-    [ '&&=' => bool_and_set     => 220,   0 ],      # foo &&= bar
-    [ '||=' => bool_or_set      => 220,   0 ],      # foo ||= bar
-    [ '!!=' => bool_nor_set     => 220,   0 ],      # foo !!= bar
+    [ '='       => assign           => 220,   0 ],      # foo = bar
+    [ '=>'      => fat_arrow        => 220,   0 ],      # foo => bar
+    [ '~='      => txt_combine_set  => 220,   0 ],      # foo ~= bar
+    [ '+='      => num_add_set      => 220,   0 ],      # foo += bar
+    [ '-='      => num_sub_set      => 220,   0 ],      # foo -= bar
+    [ '*='      => num_mul_set      => 220,   0 ],      # foo *= bar
+    [ '/='      => num_div_set      => 220,   0 ],      # foo /= bar
+    [ '&&='     => bool_and_set     => 220,   0 ],      # foo &&= bar
+    [ '||='     => bool_or_set      => 220,   0 ],      # foo ||= bar
+    [ '!!='     => bool_nor_set     => 220,   0 ],      # foo !!= bar
                                 
     # low precedence short-circuiting logical operators
-    [ 'not' => bool_not         => 0,   215 ],      # not foo
-    [ 'and' => bool_and         => 210,   0 ],      # foo and bar
-    [ 'or'  => bool_or          => 205,   0 ],      # foo or bar
-    [ 'nor' => bool_nor         => 205,   0 ],      # foo nor bar
+    [ 'not'     => bool_not         => 0,   215 ],      # not foo
+    [ 'and'     => bool_and         => 210,   0 ],      # foo and bar
+    [ 'or'      => bool_or          => 205,   0 ],      # foo or bar
+    [ 'nor'     => bool_nor         => 205,   0 ],      # foo nor bar
                                 
     # directive keywords    
-    [ 'do'      => cmd_do       => 150,   0 ],
-    [ 'as'      => cmd_as       => 150,   0 ],
-    [ 'is'      => cmd_is       => 150,   0 ],
-    [ 'if'      => cmd_if       => 150,   0 ],
-    [ 'for'     => cmd_for      => 150,   0 ],
+    [ 'do'      => cmd_do           => 150,   0 ],
+    [ 'as'      => cmd_as           => 150,   0 ],
+    [ 'is'      => cmd_is           => 150,   0 ],
+    [ 'if'      => cmd_if           => 150,   0 ],
+    [ 'for'     => cmd_for          => 150,   0 ],
+    [ 'fill'    => cmd_fill         => 150,   0 ],
+    [ 'end'     => end              =>   0,   0 ],
 # conflict!  
 #    [ 'block'   => cmd_block    => 150,   0 ],
-    [ 'end'     => end          =>   0,   0 ],
-#    [ "${COMMAND}::For"         => 150,   0, 'for', 'in', 'end' ],
+
 #    [ "${COMMAND}::With"        => 150,   0, 'with', 'end' ],
 #    [ "${COMMAND}::Block"       =>   0,   0, 'block', 'end' ],
 #    [ "${COMMAND}::Dump"        =>   0,   0, 'dump' ],
@@ -132,13 +129,19 @@ our $SYMBOLS  = [
 #    [ "${COMMAND}::Tags"        =>   0,   0, 'TAGS' ],
                                 
     # grouping constructs
-    [ '(' => parens         =>   0,   0 ],
-    [ '[' => list           =>   0,   0 ],
-    [ '{' => hash           =>   0,   0 ],
-    [ [']', ')', '}']
-          => terminator     =>   0,   0 ],
+    [ '('       => parens           =>   0,   0 ],
+    [ '['       => list             =>   0,   0 ],
+    [ '{'       => hash             =>   0,   0 ],
+    [ ')'       => terminator       =>   0,   0 ],
+    [ ']'       => terminator       =>   0,   0 ],
+    [ '}'       => terminator       =>   0,   0 ],
+
+#    [ [']', ')', '}']
+#         => terminator     =>   0,   0 ],
+
     
-    # other punctuation marks
-    [ ',' => separator      =>   0,   0 ],
-    [ ';' => delimiter      =>   0,   0 ],
+    # Other punctuation marks
+    [ ','       => separator        =>   0,   0 ],
+    [ ';'       => delimiter        =>   0,   0 ],
+    [ ':'       => terminator       =>   0,   0 ],
 ];

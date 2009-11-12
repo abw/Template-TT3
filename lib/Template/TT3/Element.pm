@@ -7,7 +7,7 @@ use Template::TT3::Class
     utils     => 'self_params numlike',
     slots     => 'meta next token pos',
     import    => 'class',
-    constants => ':elem_slots CODE ARRAY HASH',
+    constants => ':elem_slots CODE ARRAY HASH BLANK',
     constant  => {   
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
@@ -195,6 +195,9 @@ sub as_exprs {
     );
 }
 
+sub as_filename {
+    return BLANK;
+}
 
 sub is {
     $_[0]->[TOKEN] && $_[0]->[TOKEN] eq $_[1];
