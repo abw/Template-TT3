@@ -237,16 +237,16 @@ class->generate_pre_post_ops(
 #-----------------------------------------------------------------------
 
 
-package Template::TT3::Element::Number::To;
+package Template::TT3::Element::Number::Range;
 
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Infix
                   Template::TT3::Element',
-    constants => ':eval_args :elem_slots';
+    constants => ':eval_args :elem_slots BLANK';
 
 sub text {
-    join(' ', @{ $_[SELF]->value($_[CONTEXT]) });
+    join(BLANK, @{ $_[SELF]->value($_[CONTEXT]) });
 }
 
 sub values {

@@ -126,7 +126,7 @@ package Template::TT3::Element::Construct;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Punctuation',
-    constants => ':elem_slots';
+    constants => ':elem_slots :eval_args';
 
 
 sub sexpr {
@@ -144,6 +144,10 @@ sub source {
     );
 }
 
+sub variable {
+    $_[CONTEXT]->{ variables }
+        ->use_var( $_[SELF] => $_[SELF]->value($_[CONTEXT]) );
+}
 
 sub as_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
@@ -199,11 +203,6 @@ sub value {
     ];
 }
 
-sub variable {
-    $_[CONTEXT]->{ variables }
-        ->use_var( $_[SELF] => $_[SELF]->value($_[CONTEXT]) );
-}
-
 sub text {
     $_[SELF]->debug("called text() on list: ", $_[SELF]->source) if DEBUG;
     return join(
@@ -253,11 +252,28 @@ package Template::TT3::Element::Parens;
 
 use Template::TT3::Class 
     base      => 'Template::TT3::Element::Construct',
+    constants => ':eval_args :elem_slots',
     constant  => {
         FINISH        => ')',
         SEXPR_FORMAT  => "<parens:\n  %s\n>",
         SOURCE_FORMAT => '( %s )',
     };
+
+sub value {
+    my @values = $_[SELF]->[EXPR]->values($_[CONTEXT]);
+    return @values > 1
+        ? join('', @values)
+        : $values[0];
+}
+
+sub values {
+    return $_[SELF]->[EXPR]->values($_[CONTEXT]);
+}
+
+sub text {
+    $_[SELF]->[EXPR]->text($_[CONTEXT])
+}
+
 
 package Template::TT3::Element::Args;
 

@@ -85,8 +85,8 @@ our $SYMBOLS  = [
     [ '||'  => bool_or          => 250,   0 ],      # foo || bar
     [ '!!'  => bool_nor         => 250,   0 ],      # foo !! bar
 
-    [ '..'  => num_to           => 240,   0 ],      # 1 .. 91
-    [ 'to'  => num_to           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
+    [ '..'  => num_range        => 240,   0 ],      # 1 .. 91
+    [ 'to'  => num_range        => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     [ 'by'  => num_by           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     
     [ '?'   => question         => 230,   0 ],      # foo ? bar : baz
@@ -95,8 +95,7 @@ our $SYMBOLS  = [
     # this used to be above ? : but I think it's better here so that 
     # something like a -> a > 10 ? "big" : "small" is parsed as 
     # a -> ((a > 10) ? "big" : "small")
-    [ ['->', '→']                                   # we can do utf8!
-            => arrow            => 230,   0 ],      # a -> a + 1
+    [ '->'  => arrow            => 230,   0 ],      # a -> a + 1
 
     # binary assignment operators
     [ '='   => assign           => 220,   0 ],      # foo = bar
