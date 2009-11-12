@@ -8,7 +8,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element',
     constants => ':elem_slots :eval_args BLANK',
     constant  => {
-        SEXPR_FORMAT  => "<block:\n%s\n>",
+        SEXPR_FORMAT  => "<block:%s>",
         SOURCE_FORMAT => '%s',
         SOURCE_JOINT  => '; ',
     },
@@ -32,10 +32,10 @@ sub sexpr {
         map { $_->sexpr } 
         @{ $self->[EXPR] }
     );
-    $body =~ s/^/  /gsm;
+    $body =~ s/^/  /gsm if $body;
     sprintf(
         $format,
-        $body
+        $body ? ("\n" . $body . "\n") : ''
     );
 }
 

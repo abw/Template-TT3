@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 10,
+    tests   => 11,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -26,6 +26,11 @@ test_expressions(
 );
 
 __DATA__
+
+-- test empty list --
+[].join
+-- expect --
+
 
 -- test list creator --
 list = [a, b, c]; list.join

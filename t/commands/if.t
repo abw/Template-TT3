@@ -64,9 +64,10 @@ end;
 bar = if not_defined;
    'b is ' b
 end;
-foo bar
+foo 
+bar or ', no bar'
 -- expect --
-a is alpha
+a is alpha, no bar
 
 -- test if as postop true --
 a if b

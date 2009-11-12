@@ -16,5 +16,13 @@ sub apply {
         $self,
     );
 }
-    
+
+sub text {
+    my $self  = shift;
+    my $value = $self->[VALUE];
+#    $self->debug("calling function() to create text view");
+    return $value->();
+}
+
+
 1;

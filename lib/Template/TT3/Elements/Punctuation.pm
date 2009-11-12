@@ -75,10 +75,10 @@ sub as_block {
 #    $self->debug("TOKEN: $token   =>   $$token");
  
     my $block = $$token->as_exprs($token, $scope, $prec)
-        || return $self->error("Missing block after 'do'");
+        || return $self->missing( expressions => $token );
 
     # TODO: replace these with as_terminator()
-    return $self->error("Missing 'end' at end of block, got: ", $token->text)
+    return $self->missing( end => $token )
         unless $$token->is('end');
     $$token = $$token->next;
 
@@ -155,8 +155,8 @@ sub as_expr {
     # advance past opening token
     $self->accept($token);
 
-    # parse expressions
-    $self->[EXPR] = $$token->as_exprs($token, $scope)
+    # parse expressions.  Any precedence (0), allow empty lists (1)
+    $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
 
     # check next token matches our FINISH token
@@ -183,7 +183,7 @@ use Template::TT3::Class
     constants => ':elem_slots :eval_args',
     constant  => {
         FINISH        => ']',
-        SEXPR_FORMAT  => "<list:\n%s\n>",
+        SEXPR_FORMAT  => "<list:%s>",
         SOURCE_FORMAT => '[ %s ]',
     },
     alias     => {
@@ -219,7 +219,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Construct',
     constant  => {
         FINISH        => '}',
-        SEXPR_FORMAT  => "<hash:\n%s\n>",
+        SEXPR_FORMAT  => "<hash:%s>",
         SOURCE_FORMAT => '{ %s }',
     };
 
@@ -255,9 +255,29 @@ use Template::TT3::Class
     constants => ':eval_args :elem_slots',
     constant  => {
         FINISH        => ')',
-        SEXPR_FORMAT  => "<parens:\n  %s\n>",
+        SEXPR_FORMAT  => "<parens:%s>",
         SOURCE_FORMAT => '( %s )',
     };
+
+sub as_args {
+    my ($self, $token, $scope, $prec, $force) = @_;
+
+    # advance past opening token
+    $self->accept($token);
+
+    # parse expressions, any precedence (0), allow empty blocks (1)
+    $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
+        || return $self->missing( expressions => $token );
+
+    # check next token matches our FINISH token
+    return $self->missing( $self->FINISH, $token)
+        unless $$token->is( $self->FINISH );
+    
+    # advance past finish token
+    $$token = $$token->next;
+
+    return $self;
+}
 
 sub value {
     my @values = $_[SELF]->[EXPR]->values($_[CONTEXT]);
@@ -281,7 +301,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Construct',
     constant  => {
         FINISH        => ')',
-        SEXPR_FORMAT  => "<args:\n  %s\n>",
+        SEXPR_FORMAT  => "<args:%s>",
         SOURCE_FORMAT => '( %s )',
     };
 

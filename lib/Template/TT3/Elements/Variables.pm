@@ -6,7 +6,8 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element',
     constants => ':elem_slots :eval_args',
     constant  => {
-        SEXPR_FORMAT => '<variable:%s>', 
+        SEXPR_FORMAT => '<variable:%s%s>', 
+        SEXPR_ARGS   => "<variable:\n  <name:%s>\n%s\n>", 
     },
     alias => {
         source => 'token',
@@ -15,13 +16,16 @@ use Template::TT3::Class
 
 sub as_expr {
     my ($self, $token, $scope, $prec) = @_;
+
+    # advance token
+    $$token = $self->[NEXT];
     
     # ask scope to lookup variable from the symbol table
 
-    # TODO: allow () [] {} following variable word
+    $self->[ARGS] = $$token->as_args($token, $scope);
     
-    # advance token
-    $$token = $self->[NEXT];
+    # TODO: allow () [] {} following variable word
+    #return $$token->as_postfix($self, $token, $scope, $prec);
     
     # variables can be followed by postops (postfix and infix operators)
     return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
@@ -34,10 +38,29 @@ sub generate {
 }
 
 sub sexpr {
+    my $args = $_[0]->[ARGS];
+    my $format;
+    
+    if ($args) {
+        $args = $args->sexpr;
+        $args =~ s/^/  /gsm;
+        $format = $_[0]->SEXPR_ARGS;
+    }
+    else {
+        $args = '';
+        $format = $_[0]->SEXPR_FORMAT;
+    }
     sprintf(
-        $_[0]->SEXPR_FORMAT, 
+        $format,
         $_[0]->[TOKEN],
+        $args
     );
+}
+
+sub text {
+    $_[CONTEXT]->{ variables }
+         ->var( $_[SELF]->[TOKEN] )
+         ->text( $_[CONTEXT] );
 }
 
 sub value {
@@ -46,9 +69,9 @@ sub value {
 
     # this seems rather redundant... why not just request the value?
     # Why?  Because it misses the variable cache
-    $_[1]->{ variables }
-         ->var( $_[0]->[TOKEN] )
-         ->value( $_[1] );
+    $_[CONTEXT]->{ variables }
+         ->var( $_[SELF]->[TOKEN] )
+         ->value( $_[CONTEXT] );
 }
 
 sub values {

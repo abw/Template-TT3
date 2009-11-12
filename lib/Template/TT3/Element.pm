@@ -155,6 +155,15 @@ sub next_skip_ws {
 }
 
 
+sub as_postfix {
+    # Most things aren't postfix operators.  The only things that are 
+    # are () [] and { }.  So in most cases as_postfix() skips any whitespace
+    # and delegates straight onto as_postop() on the next non-whitespace 
+    # token.
+    return shift->skip_ws->as_postop(@_);
+}
+
+
 sub as_postop {
     # args are: ($self, $lhs, $token, $scope, $prec)
     # default behaviour (for non-postop tokens) is to return $lhs without 
@@ -166,10 +175,10 @@ sub as_postop {
 sub as_block {
     return shift->as_expr(@_);
 }
-    
+
 
 sub as_exprs {
-    my ($self, $token, $scope, $prec) = @_;
+    my ($self, $token, $scope, $prec, $force) = @_;
     my (@exprs, $expr);
 
 #    $self->debug("as_exprs($self, $token, $scope, $prec)");
@@ -188,7 +197,7 @@ sub as_exprs {
     }
 
     return undef
-        unless @exprs;
+        unless @exprs || $force;
 
     return $self->[META]->[ELEMS]->construct(
         block => $self->[TOKEN], $self->[POS], \@exprs
@@ -200,10 +209,13 @@ sub as_filename {
     return BLANK;
 }
 
+sub as_args {
+    return undef;
+}
+
 sub is {
     $_[0]->[TOKEN] && $_[0]->[TOKEN] eq $_[1];
 }
-
 
 sub value {
     shift->not_implemented('in element base class');
