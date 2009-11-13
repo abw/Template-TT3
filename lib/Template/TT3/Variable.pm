@@ -13,7 +13,7 @@ use Template::TT3::Class
     alias     => {
         list     => \&get,
         value    => \&get,
-        'values' => \&get,
+        values   => \&get,
     },
     messages  => {
         undefined  => '%s is undefined',
@@ -88,10 +88,13 @@ sub dot {
 }
 
 sub apply {
-    shift->not_implemented;
+    # function application has no effect on things that aren't CODE refs
+    # so we define a default method in the base class that returns $self
+    # and allow Template::TT3::Variable::Code to redefine it.
+    $_[SELF];
 }
 
-sub expand {
+sub TMP_expand {
     shift->not_implemented;
 }
 

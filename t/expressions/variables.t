@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 36,
+    tests   => 42,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -43,6 +43,14 @@ our $vars  = {
             ? ('called @some_things(', @_, ')')
             : 'called $some_things(' . join(', ', @_) . ')';
     },
+    some_list => sub {
+        my @list = wantarray
+            ? ('called @some_list(', @_, ')')
+            : ('called $some_list(', @_, ')');
+        return wantarray
+            ? @list
+            : \@list;
+    },
 };
 
 test_expressions(
@@ -59,6 +67,16 @@ __DATA__
 
 -- test a --
 a
+-- expect --
+alpha
+
+-- test a() --
+a()
+-- expect --
+alpha
+
+-- test a(b,c) --
+a(b,c)
 -- expect --
 alpha
 
@@ -287,3 +305,22 @@ item = @one_thing(a,b);
 -- expect --
 item: called one_thing(alpha, bravo)
 
+-- test some_list() --
+text = some_list(); text.join
+-- expect --
+called $some_list( )
+
+-- test @some_list() --
+@some_list()
+-- expect --
+called @some_list()
+
+-- test @$some_list() --
+@$some_list()
+-- expect --
+called $some_list()
+
+-- test @$some_list() --
+list = [@$some_list()]; list.size ' / ' list.0 ' / ' list.1
+-- expect --
+2 / called $some_list( / )

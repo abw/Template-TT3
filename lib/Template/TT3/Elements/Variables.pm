@@ -297,6 +297,11 @@ sub values {
     $_[SELF]->[EXPR]->value($_[CONTEXT]);
 }
 
+#sub list_values {
+#    # need to unpack here
+##    $_[SELF]->[EXPR]->values($_[CONTEXT]);
+#}
+
 sub text {
     $_[SELF]->[EXPR]->text($_[CONTEXT]);
 }

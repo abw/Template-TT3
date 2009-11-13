@@ -220,8 +220,17 @@ sub variable {
 }
 
 sub values {
-    $_[0]->debug("values() calling value()");
+    $_[0]->debug("values() calling value()") if DEBUG;
     shift->value(@_);
+}
+
+sub list_values {
+    $_[0]->debug("list_values() calling values()") if DEBUG;
+    my $value = shift->value(@_);
+    return ref $value eq ARRAY
+        ? @$value
+        : $value;
+#    shift->values(@_);
 }
 
 sub text {

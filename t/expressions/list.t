@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 12,
+    tests   => 14,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -90,6 +90,19 @@ alpha bravo
 alpha bravo charlie
 
 
+#-----------------------------------------------------------------------
+# list expansion
+#-----------------------------------------------------------------------
+
+-- test merge two lists --
+one = [1,2,3];two = [4,5,6]; three = [@one, @two]; three.size '/' three.join
+-- expect --
+6/1 2 3 4 5 6
+
+-- test merge two non-lists --
+list = [@a, @b]; list.size '/' list.join
+-- expect --
+2/alpha bravo
 
 __END__
 
