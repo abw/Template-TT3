@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 11,
+    tests   => 12,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -41,6 +41,12 @@ alpha bravo charlie
 [a, b, c].join
 -- expect --
 alpha bravo charlie
+
+-- test list join --
+-- skip vmethods don't accept arguments yet --
+list = [a, b, c]; list.join(', ')
+-- expect --
+alpha, bravo, charlie
 
 
 -- test list.first  --

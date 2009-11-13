@@ -11,6 +11,7 @@ use Template::TT3::Class
     constants => ':type_slots :eval_args BLANK',
     utils     => 'self_params',
     alias     => {
+        list     => \&get,
         value    => \&get,
         'values' => \&get,
     },
@@ -87,6 +88,10 @@ sub dot {
 }
 
 sub apply {
+    shift->not_implemented;
+}
+
+sub expand {
     shift->not_implemented;
 }
 

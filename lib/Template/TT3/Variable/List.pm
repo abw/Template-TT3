@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Variable',
     utils     => 'numlike',
-    constants => ':type_slots',
+    constants => ':type_slots :eval_args',
     constant  => {
         type  => 'list',
     };
@@ -34,6 +34,10 @@ sub dot {
     else {
         return $self->no_method($name);
     }
+}
+
+sub values {
+    return @{ $_[SELF]->[VALUE] }
 }
 
 1;

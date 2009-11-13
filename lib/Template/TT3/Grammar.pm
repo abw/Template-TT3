@@ -19,6 +19,9 @@ use Template::TT3::Class
         element_dup => "Duplicate '%s' element found in rules for '%s' and '%s' symbols",
     };
 
+use constant {
+    is_keyword => qr/^$IDENT$/
+};
 
 
 #*init = \&init_grammar;
@@ -102,13 +105,13 @@ sub symbols {
         $symbols->{ $token } = $symbol;
 
         # words go in keywords, non-words go in nonwords
-        if ($token =~ /\W/) {
-            $self->debug("nonword: $token") if DEBUG;
-            $nonwords->{ $token } = $symbol;
-        }
-        else {
+        if ($token =~ /^$IDENT$/) { #is_keyword) {
             $self->debug("keyword: $token") if DEBUG;
             $keywords->{ $token } = $symbol;
+        }
+        else {
+            $self->debug("nonword: $token") if DEBUG;
+            $nonwords->{ $token } = $symbol;
         }
     }
     
@@ -209,6 +212,8 @@ sub constructor {
     # out another middle-man method in match_keyword() and match_nonword() by 
     # performing a direct: bless [$meta, $token, $pos], $class;
     
+    # TODO: this is kinda broken.  We end up with conflicts between a keyword
+    # called 'block' and an element called 'block'
     return $self->{ constructors }->{ $token } ||= do {
         my ($symbol, $element, $config);
 
@@ -220,7 +225,7 @@ sub constructor {
             };
             $element = $symbol->[ELEMENT];
         }
-        elsif ($token =~ /^\w+$/) {
+        elsif ($token =~ /^$IDENT$/) {
             $config = {
                 elements => $self,
             };

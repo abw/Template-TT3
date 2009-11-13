@@ -146,14 +146,12 @@ sub skip_delimiter {
     return $self;
 }
 
-
 sub next_skip_ws {
     # delegate to the next token's skip_ws method
 #    my ($self, $token) = @_;
 #    $self->debug("next_skip_ws(), next is $self->[NEXT]  token is ", $token ? $$token : 'undefined');
     $_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]) 
 }
-
 
 sub as_postfix {
     # Most things aren't postfix operators.  The only things that are 
@@ -163,7 +161,6 @@ sub as_postfix {
     return shift->skip_ws->as_postop(@_);
 }
 
-
 sub as_postop {
     # args are: ($self, $lhs, $token, $scope, $prec)
     # default behaviour (for non-postop tokens) is to return $lhs without 
@@ -171,18 +168,16 @@ sub as_postop {
     return $_[1];
 }
 
-
 sub as_block {
     return shift->as_expr(@_);
 }
-
 
 sub as_exprs {
     my ($self, $token, $scope, $prec, $force) = @_;
     my (@exprs, $expr);
 
-#    $self->debug("as_exprs($self, $token, $scope, $prec)");
-#    $self->debug("as_exprs()  token is ", $$token->token);
+    #    $self->debug("as_exprs($self, $token, $scope, $prec)");
+    #    $self->debug("as_exprs()  token is ", $$token->token);
 
     $token ||= do { my $this = $self; \$this };
  
@@ -203,7 +198,6 @@ sub as_exprs {
         block => $self->[TOKEN], $self->[POS], \@exprs
     );
 }
-
 
 sub as_filename {
     return BLANK;

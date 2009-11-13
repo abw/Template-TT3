@@ -259,6 +259,11 @@ use Template::TT3::Class
         SOURCE_FORMAT => '( %s )',
     };
 
+sub as_postfix {
+    shift->become('var_apply')->as_postfix(@_);
+}
+
+
 sub as_args {
     my ($self, $token, $scope, $prec, $force) = @_;
 

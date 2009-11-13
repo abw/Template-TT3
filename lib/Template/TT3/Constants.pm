@@ -9,13 +9,15 @@ use Badger::Class
         CHOMP_ONE       => 1,           # remove one line of whitespace
         CHOMP_COLLAPSE  => 2,           # collapse all whitespace to a single space
         CHOMP_ALL       => 3,           # remove all whitespace including newlines
+        
+        FORCE           => 1,           # used to override operator precedence
     
-        # parser flags
-        NO_WHITESPACE   => 0,           # don't skip leading whitespace 
-        SKIP_WHITESPACE => 1,           # skip leading whitespace
+        # OLD parser flags
+        # NO_WHITESPACE   => 0,           # don't skip leading whitespace 
+        # SKIP_WHITESPACE => 1,           # skip leading whitespace
     },
     exports => {
-        any  => 'PRESENT',
+        any  => 'FORCE PRESENT',
         tags => {
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_COLLAPSE CHOMP_ALL',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',

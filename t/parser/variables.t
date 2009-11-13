@@ -18,7 +18,7 @@ use Badger
 use Template::TT3::Test::Parser 
     debug  => 'Template::TT3::Tag',
     args   => \@ARGV,
-    tests  => 4,
+    tests  => 10,
     import => 'test_parser';
 
 test_parser(
@@ -26,6 +26,11 @@ test_parser(
 );
 
 __DATA__
+
+
+#-----------------------------------------------------------------------
+# simple variables
+#-----------------------------------------------------------------------
 
 -- test variable foo --
 foo
@@ -35,17 +40,17 @@ foo
 -- test variable foo() --
 foo()
 -- expect -- 
-<variable:
-  <name:foo>
-  <parens:>
+<apply:
+  <variable:foo>
+  <args:>
 >
 
 -- test variable foo(10,20) --
 foo(10,20)
 -- expect -- 
-<variable:
-  <name:foo>
-  <parens:
+<apply:
+  <variable:foo>
+  <args:
     <number:10>
     <number:20>
   >
@@ -54,16 +59,82 @@ foo(10,20)
 -- test variable foo(10, bar(20)) --
 foo(10,bar(20))
 -- expect -- 
-<variable:
-  <name:foo>
-  <parens:
+<apply:
+  <variable:foo>
+  <args:
     <number:10>
-    <variable:
-      <name:bar>
-      <parens:
+    <apply:
+      <variable:bar>
+      <args:
         <number:20>
       >
     >
   >
 >
+
+#-----------------------------------------------------------------------
+# sigils
+#-----------------------------------------------------------------------
+
+-- test variable $foo --
+$foo
+-- expect --
+<$:
+  <variable:foo>
+>
+
+-- test variable $foo() --
+$foo()
+-- expect --
+<$:
+  <apply:
+    <variable:foo>
+    <args:>
+  >
+>
+
+-- test variable $foo(10,20) --
+$foo(10,20)
+-- expect --
+<$:
+  <apply:
+    <variable:foo>
+    <args:
+      <number:10>
+      <number:20>
+    >
+  >
+>
+
+
+-- test variable @foo --
+@foo
+-- expect --
+<@:
+  <variable:foo>
+>
+
+-- test variable @foo() --
+@foo()
+-- expect --
+<@:
+  <apply:
+    <variable:foo>
+    <args:>
+  >
+>
+
+-- test variable @foo(10,20) --
+@foo(10,20)
+-- expect --
+<@:
+  <apply:
+    <variable:foo>
+    <args:
+      <number:10>
+      <number:20>
+    >
+  >
+>
+
 

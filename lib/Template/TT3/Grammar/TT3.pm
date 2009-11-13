@@ -24,6 +24,8 @@ our $PREFIXES = {
     cmd_  => 'command.',
     num_  => 'number.',
     txt_  => 'text.',
+    sig_  => 'sigil.',
+    var_  => 'variable.',
     bool_ => 'boolean.',
 };
     
@@ -32,8 +34,8 @@ our $SYMBOLS  = [
 #   [ token => element_name => left_precedence, right_precedence ]
 
     # variable sigils and other super-duper high precedence operators
-    [ '$'       => dollar           =>   0, 350 ],      # $foo
-    [ '@'       => at               =>   0, 350 ],      # @foo
+    [ '$'       => sig_item         =>   0, 350 ],      # $foo
+    [ '@'       => sig_list         =>   0, 350 ],      # @foo
 #   [ '%'       => percent          =>   0, 350 ],      # %foo
     [ '.'       => dot              => 340,   0 ],      # foo.bar
     
