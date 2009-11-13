@@ -1,6 +1,5 @@
 package Template::TT3::Tag;
 
-use Template::TT3::Grammar::TT3;
 use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
@@ -16,6 +15,7 @@ use Template::TT3::Class
     messages  => {
         bad_style  => 'Invalid tag style specified: %s',
         no_token   => 'No token specified for %s of tag.',
+        no_end     => 'Missing end token for tag: %s',
     };
  
 our $TAG_STYLES     = { };
@@ -26,15 +26,6 @@ our $STYLE_PATTERNS = { };
 
 
 sub init_tag {
-    my $self   = shift;
-    my $config = shift || $self->{ config };
-    $self->init_tag_style($config);
-    $self->init_grammar($config);
-    return $self;
-}
-
-
-sub init_tag_style {
     my $self   = shift;
     my $config = shift || $self->{ config };
     my $style  = $config->{ tag_style } || $config->{ style };
@@ -71,9 +62,9 @@ sub init_tag_style {
     # a canonical identifier for the tag_style based on start/end combination 
     # (e.g. '[% %]') or 'none' if the tag_start and tag_end are undefined 
     # (in case we're parsing "naked" TT code which isn't embedded in tags).
-    $style ||= ( defined($start) || defined($end) )
-               ? join(' ', map { defined $_ ? $_ : '' } $start, $end)
-               : NONE;
+    # We do this via a method so that subclasses can further tweak the 
+    # definitive style and start/end tokens.
+    ($style, $start, $end) = $self->prepare_tag_style($style, $start, $end);
 
     $self->{ style } = $style;
     $self->{ start } = $start;
@@ -101,22 +92,14 @@ sub init_tag_style {
 }
 
 
-sub init_grammar {
-    my $self    = shift;
-    my $config  = shift || $self->{ config };
-    my $grammar = $config->{ grammar } 
-               || $self->class->any_var('GRAMMAR')
-               || $self->GRAMMAR;
-    
-    $grammar = $grammar->new($config)
-        unless blessed $grammar;
-    
-    $self->{ grammar  } = $grammar;
-    $self->{ keywords } = $grammar->keywords;
-    $self->{ nonwords } = $grammar->nonwords;
-    $self->{ match_nw } = $grammar->nonword_regex;
+sub prepare_tag_style {
+    my ($self, $style, $start, $end) = @_;
 
-    return $self;
+    $style ||= ( defined($start) || defined($end) )
+               ? join(' ', map { defined $_ ? $_ : '' } $start, $end)
+               : NONE;
+    
+    return ($style, $start, $end);
 }
 
 
@@ -207,7 +190,7 @@ sub tag_map {
 }
 
 
-sub tokens {
+sub scan {
     my ($self, $input, $output, $text, $start, $pos) = @_;
     my ($token, $type);
 
@@ -220,73 +203,13 @@ sub tokens {
     $token = $output->tag_start_token($start, $pos - length($start))
         if defined $start && length $start;
     
-    while (1) {
-        $self->debug("SCAN \@$pos: ", $self->peek_to_end($input)) if DEBUG;
-        
-        # TODO: consider generating the tokens in here and calling
-        # $output->token($token)
-
-        if ($$input =~ /$NAMESPACE/cog) {
-            $self->namespace_token($input, $output, $1, $pos);
-        }
-        elsif ($$input =~ /$IDENT/cog) {
-            if ($type = $self->{ keywords }->{ $1 }) {
-                $self->{ grammar }->matched($input, $output, $pos, $1);
-                # TMP HACK
-                # $output->keyword_token($1, $pos);
-                # TODO:
-                # $type = "${type}_token";
-                # $output->$type($1, $pos);
-            }
-            else {
-                $output->word_token($1, $pos);
-            }
-        }
-        elsif ($$input =~ /$SQUOTE/cog) {
-            $self->debug("matched single quote: $1") if DEBUG;
-            $output->squote_token($1, $pos);
-        }
-        elsif ($$input =~ /$DQUOTE/cog) {
-            $self->debug("matched double quote: $1") if DEBUG;
-            $output->dquote_token($1, $pos);
-        }
-        elsif ($$input =~ /$self->{ match_at_end }/cg) {
-            $self->debug("matched end of tag: $1") if DEBUG;
-            $output->tag_end_token($1, $pos) 
-                if defined $1 && length $1;
-            last;
-        }
-        elsif ($$input =~ /$self->{ match_nw }/cg) {
-            $self->{ grammar }->matched($input, $output, $pos, $1);
-        }
-        elsif ($$input =~ /$NUMBER/cog) {
-            $self->debug("matched number: $1") if DEBUG;
-            $output->number_token($1, $pos);
-        }
-
-#        elsif ($self->{ grammar }->match_nonword($input, $output, $pos)) {
-            # OK
-#        }
-#        elsif ($$input =~ /$self->{ match_nw }/cg) {
-#            $type = $self->{ nonwords }->{ $1 }
-#                || return $self->error_msg( invalid => token => $1 );
-#            $type = $type->[1] . '_token';
-#            $self->debug("got non-word token: $1 => $type");
-#            $output->$type($1, $pos);
-#        }
-        elsif ($$input =~ /$self->{ match_whitespace }/cg) {
-            $output->whitespace_token($1, $pos);
-        }
-        else {
-            return $self->error("Unexpected input: [", $self->peek_to_end($input), "]");
-        }
-        
-        $pos = pos $$input;
-    }
-
-    return $token;
+    return $self->tokens($input, $output, $token, $pos);
 }
-
+    
+        
+sub tokens {
+    shift->not_implemented('in base class');
+}
 
 
 #-----------------------------------------------------------------------

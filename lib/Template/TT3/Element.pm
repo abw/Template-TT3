@@ -20,6 +20,7 @@ use Template::TT3::Class
     alias => {
         delimiter  => \&null,
         terminator => \&null,
+        as_dotop   => \&null,
     };
 
 

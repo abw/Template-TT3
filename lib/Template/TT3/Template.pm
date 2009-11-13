@@ -73,17 +73,25 @@ sub scan {
 sub scanner {
     my $self = shift;
     return $self->{ scanner }
+        ||= $self->SCANNER->new;
+        # $self->{ config } );
+}
+
+
+sub OLD_scanner {
+    my $self = shift;
+    return $self->{ scanner }
         ||= $self->SCANNER->new( tags => $self->tagset );
         # $self->{ config } );
 }
 
-sub tagset {
+sub OLD_tagset {
     my $self = shift;
     return $self->{ tagset } 
         ||= $self->init_tagset;
 }
 
-sub init_tagset {
+sub OLD_init_tagset {
     my $self   = shift;
     my $dirtag = TAG->new(
         start => '[%',
@@ -110,6 +118,7 @@ sub fill {
     my ($self, $params) = self_params(@_);
     my $vars    = $self->VARS->new( data => $params );
     my $context = { variables => $vars };
+    $self->debug("fetching text from expressions") if DEBUG;
     return $self->exprs->text($context);
 }
 

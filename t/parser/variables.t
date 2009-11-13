@@ -18,7 +18,7 @@ use Badger
 use Template::TT3::Test::Parser 
     debug  => 'Template::TT3::Tag',
     args   => \@ARGV,
-    tests  => 10,
+    tests  => 11,
     import => 'test_parser';
 
 test_parser(
@@ -138,3 +138,17 @@ $foo(10,20)
 >
 
 
+#-----------------------------------------------------------------------
+# dotop args
+#-----------------------------------------------------------------------
+
+-- test list.join(', ') --
+list.join(', ')
+-- expect --
+<dot:
+  <variable:list>
+  <literal:join>
+  <args:
+    <text:, >
+  >
+>

@@ -42,9 +42,9 @@ use Badger::Class
                 # remaining slots have different meanings depending on 
                 # the element type
                 EXPR    => '=4',    # unary expression
-                ARGS    => '=5',    # arguments
                 LHS     => '=4',    # binary expressions
                 RHS     => '=5',
+                ARGS    => '=6',    # arguments
                 GOTO    => '=4',    # used to skip over compile time control tags
 
                 # element metadata slots

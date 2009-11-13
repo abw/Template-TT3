@@ -21,6 +21,22 @@ use Template::TT3::Class
     };
 
 
+
+sub as_dotop {
+    # Operators can't be dotops by default - this is really a nasty quick
+    # hack to mask the as_dotop() method in T::Element::Number which 
+    # allows a number to be used as a dotop.  Because all our numeric
+    # ops are subclasses of T::E::Number (the core problem, I think) that
+    # means they inherit the as_dotop() method and think they are valid
+    # syntax after a dot, e.g. foo.**
+
+    # FIXME: this include 'or' 'and', etc, and other keywords (unless we 
+    # patch in another method in the keyword/command class to override it,
+    # but then it's starting to get messy).  This is a quick hack.
+    
+    return undef;
+}
+
 sub no_rhs_expr { 
     my ($self, $token) = @_;
     

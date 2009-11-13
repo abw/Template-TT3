@@ -64,7 +64,7 @@ sub test_expect {
 }
 
 
-sub test_handler {
+sub old_test_handler {
     my ($test, $config) = @_;
     my $engine = $config->{ engine }
         ||= $ENGINE->new($config->{ config } || { });
@@ -88,6 +88,35 @@ sub test_handler {
     }
 
     return trim $out;
+}
+
+sub test_handler {
+    my $test     = shift;
+    my $config   = params(@_);
+    my $tclass   = $config->{ template  } || $TEMPLATE;
+    my $vars     = $config->{ variables };
+    my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
+    my $debug    = $config->{ debug } || 0;
+    my $source   = $test->{ input };
+    my $result   = eval {
+        manager->debug(' INPUT: ', $source) if $DEBUG;
+        my $template = $tclass->new( text => $source );
+        manager->debug("TOKENS:\n", $template->tokens->sexpr) 
+            if $config->{ dump_tokens }
+            || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
+        $template->fill( $mkvars->() );
+    };
+    if ($@) {
+        my $error = ref($@) ? $@->info : $@;
+        manager->debug(' ERROR: ', $error) if $DEBUG;
+        $result = "<ERROR:$error>";
+    }
+    elsif ($DEBUG) {
+        manager->debug('OUTPUT: ', $result);
+    }
+
+    chomp $result;
+    return $result;
 }
 
 

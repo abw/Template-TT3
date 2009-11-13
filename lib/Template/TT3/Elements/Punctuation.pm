@@ -132,7 +132,7 @@ use Template::TT3::Class
 sub sexpr {
     my $self = shift;
     $self->[EXPR]->sexpr(
-        $self->SEXPR_FORMAT
+        shift || $self->SEXPR_FORMAT
     );
 }
 

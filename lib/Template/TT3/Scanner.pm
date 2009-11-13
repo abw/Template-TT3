@@ -1,38 +1,68 @@
 package Template::TT3::Scanner;
 
+use Template::TT3::Tagset::TT3;
 use Template::TT3::Tokens;
 use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Base',
-    config     => 'tokens|class:TOKENS|method:TOKENS',
     constants  => 'REGEX',
     constant   => {
+        TAGSET => 'Template::TT3::Tagset::TT3',
         TOKENS => 'Template::TT3::Tokens',
     },
+    config     => [
+        'tagset|class:TAGSET|method:TAGSET',
+        'tokens|class:TOKENS|method:TOKENS',
+    ],
     messages   => { 
         no_tag => 'No tag found matching start token: %s',
     };
 
 
-sub init {
+*init = \&init_scanner;
+
+
+sub init_scanner {
     my ($self, $config) = @_;
-#    $self->debug("INIT: ", $self->dump_data($config));
+    $self->debug("INIT: ", $self->dump_data($config)) if DEBUG;
     $self->configure($config);
-    $self->init_scanner($config);
+    $self->init_tagset($config);
+    $self->init_tags($config);
     $self->{ config } = $config;
     return $self;
 }
 
 
-sub init_scanner {
+sub init_tagset {
     my $self    = shift;
     my $config  = shift || $self->{ config };
-    my $tags    = $self->class->list_vars( TAGS => $config->{ tags } );
+    my $tagset  = $self->{ tagset };  #class->any_var( TAGSET => $config->{ tagset } );
+
+    $tagset = $tagset->new($config)
+        unless ref $tagset;
+        
+    $self->{ tagset } = $tagset;
+    $self->{ tags   } = $tagset->tags;
+    
+    if (DEBUG) {
+        $self->debug("tagset: $tagset");
+        $self->debug("tags: $self->{ tags }");
+    }
+
+    return $self;
+}
+
+
+sub init_tags {
+    my $self    = shift;
+    my $config  = shift || $self->{ config };
+#    my $tags    = $self->class->list_vars( TAGS => $config->{ tags } );
+    my $tags    = $self->{ tags };
     my $tag_map = $self->{ tag_map } = { };
 
     $self->debug("init_scanner()\n") if DEBUG;
-#    $self->debug("** tags: ", $self->dump_data($tags)) if DEBUG;
+    $self->debug("** tags: ", $self->dump_data($tags)) if DEBUG;
     
     # ask the tags to provide details (into $tag_map) of their start tags
     foreach my $tag (@$tags) {
@@ -100,7 +130,7 @@ sub tokens {
                ||  return $self->error_msg( invalid => tag => $start );
                
             # should we call ->scan($scanner, $input, $output, ...) instead?
-            $tag->tokens($input, $output, $text, $start, $pos, $self);
+            $tag->scan($input, $output, $text, $start, $pos, $self);
         }
         elsif ($$input =~ /$self->{ match_to_end }/gc) {
             # We've matched the rest of the text after the last tag (or the 

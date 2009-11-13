@@ -48,7 +48,6 @@ sub generate {
     );
 }
 
-
 sub sexpr {
     return sprintf(
         $_[SELF]->SEXPR_FORMAT,
@@ -96,7 +95,6 @@ sub list_values {
     # explicitly force list context
     $_[SELF]->variable( $_[CONTEXT] )->values;
 }
-
 
 sub assign {
     $_[SELF]->variable($_[CONTEXT])->set($_[2]);
@@ -150,21 +148,9 @@ sub as_postfix {
 }
 
 sub variable {
-    return $_[SELF]->[EXPR]->variable( $_[CONTEXT] )->apply( 
+    $_[SELF]->[EXPR]->variable( $_[CONTEXT] )->apply( 
         $_[SELF]->[ARGS]->values( $_[CONTEXT] )
     );
-
-    $_[SELF]->debug("variable() fetching variable from $_[SELF]->[EXPR]") if DEBUG;
-    my $v = $_[SELF]->[EXPR]->variable( $_[CONTEXT] ); 
-    $_[SELF]->debug("variable() var: $v") if DEBUG;
-    my $args = $_[SELF]->[ARGS]->values( $_[CONTEXT] );
-    $_[SELF]->debug("variable() args: $args") if DEBUG;
-    my $res = $v->apply( 
-        $_[SELF]->[ARGS]->values( $_[CONTEXT] )
-    );
-    $_[SELF]->debug("variable() result: $res") if DEBUG;
-    return $res;
-    
 }
 
 sub variable_list {
@@ -175,13 +161,7 @@ sub variable_list {
 }
 
 sub list_values {
-    $_[SELF]->debug('list_values()') if DEBUG;
-    $_[SELF]->debug("calling variable_list() on expr: $_[SELF]->[EXPR]") if DEBUG;
-    my $vl = $_[SELF]->variable_list( $_[CONTEXT] );
-    $_[SELF]->debug("variable_list: $vl, values are ", $vl->values) if DEBUG;
-    return $vl->values;
-    
-    $_[SELF]->[EXPR]->variable_list( $_[CONTEXT] )->values;
+    $_[SELF]->variable_list( $_[CONTEXT] )->values;
 }
 
 sub sexpr {
@@ -210,6 +190,8 @@ sub source {
 
 #-----------------------------------------------------------------------
 # Template:TT3::Element::Sigil
+#
+# Base class for sigils that prefix a variable: $ @ %
 #-----------------------------------------------------------------------
 
 package Template::TT3::Element::Sigil;
@@ -270,6 +252,8 @@ sub source {
 
 #-----------------------------------------------------------------------
 # Template:TT3::Element::Sigil::Item
+#
+# Element for the scalar item sigil '$' which forces scalar context.
 #-----------------------------------------------------------------------
 
 package Template::TT3::Element::Sigil::Item;
@@ -297,11 +281,6 @@ sub values {
     $_[SELF]->[EXPR]->value($_[CONTEXT]);
 }
 
-#sub list_values {
-#    # need to unpack here
-##    $_[SELF]->[EXPR]->values($_[CONTEXT]);
-#}
-
 sub text {
     $_[SELF]->[EXPR]->text($_[CONTEXT]);
 }
@@ -310,6 +289,9 @@ sub text {
 
 #-----------------------------------------------------------------------
 # Template:TT3::Element::Sigil::List
+#
+# Element for the list context sigil '@' which forces list context on 
+# function/methods calls and unpacks list references.
 #-----------------------------------------------------------------------
 
 package Template::TT3::Element::Sigil::List;
@@ -355,7 +337,11 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Operator::Binary
                   Template::TT3::Element',
     as        => 'filename',        # dots allowed in filenames, e.g. foo.tt3
-    constants => ':elem_slots :eval_args';
+    constants => ':elem_slots :eval_args',
+    constant  => {
+        SEXPR_FORMAT => '<dot:%s%s%s>',
+        SEXPR_ARGS   => "<args:%s>",
+    };
 
 
 sub as_postop {
@@ -374,12 +360,15 @@ sub as_postop {
     # advance token past operator
     $$token = $self->[NEXT];
     
-    # parse the RHS as an expression, passing our own precedence so that 
-    # any operators with a higher precedence can bind tighter
+    # TODO: as_dotop() should fetch word/expression, then we look for args
+    $self->debug("asking $$token for dotop") if DEBUG;
+    
     $self->[RHS] = $$token->as_dotop($token, $scope, $self->[META]->[LPREC])
-        || return $self->error("Missing expression after dotop");
+        || return $self->missing( expression => $token );
 
-    $self->debug("DOT as_postop() [$self->[LHS]] [$self->[RHS]]") if DEBUG;
+    $self->[ARGS] = $$token->as_args($token, $scope);
+
+    $self->debug("DOT as_postop() [$self->[LHS]] [$self->[RHS]] [$self->[ARGS]]") if DEBUG;
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
@@ -388,22 +377,37 @@ sub as_postop {
 
 
 sub value {
-    my ($self, $context) = @_;
-    my $lhs = $self->[LHS]->variable($context);
-    my $rhs = $self->[RHS]->value($context);
-    $self->debug("DOT value() [$self->[LHS] => $lhs] [$self->[RHS] => $rhs]\n") if DEBUG;
-    $lhs->dot($rhs)->value($context);
+    return $_[SELF]->variable($_[CONTEXT])->value;
 }
 
-
 sub variable {
-    # args are ($self, $context)
-    # $self->[LHS]->variable($context)->dot($rhs->value($context));
     $_[SELF]->[LHS]->variable($_[CONTEXT])->dot(
-        $_[SELF]->[RHS]->value($_[CONTEXT])
+        $_[SELF]->[RHS]->value($_[CONTEXT]),
+        $_[SELF]->[ARGS]
+            ? [$_[SELF]->[ARGS]->values($_[CONTEXT])]
+            : ()
     );
 }
 
+sub sexpr {
+    my $self = shift;
+    my $lhs  = $self->[LHS]->sexpr;
+    my $rhs  = $self->[RHS]->sexpr;
+    my $args = $self->[ARGS];
+    $args = $args 
+        ? $args->sexpr( $self->SEXPR_ARGS )
+        : '';
+    for ($lhs, $rhs, $args) {
+        next unless length;
+        s/^/  /gsm;
+    }
+    sprintf(
+        $self->SEXPR_FORMAT,
+        "\n" . $lhs,
+        "\n" . $rhs,
+        "\n" . $args . "\n"
+    );
+}
 
 
 

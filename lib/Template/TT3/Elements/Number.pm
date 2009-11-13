@@ -48,6 +48,9 @@ sub generate {
 }
 
 
+## NOTE: I don't think we should make all the number ops a subclass of 
+## T::Element::Number / Literal.
+
 
 #-----------------------------------------------------------------------
 # Call on generate_number_ops() (in Template::TT3::Class) to create a 

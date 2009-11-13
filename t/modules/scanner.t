@@ -9,8 +9,6 @@ use Template::TT3::Test
 
 use utf8;
 use Template::TT3::Scanner;
-use Template::TT3::Tag;
-use Template::TT3::Tokens;
 use Template::TT3::Generator::Debug;
 use Template::TT3::Generator::Source;
 use Template::TT3::Generator::DebugExpr;
@@ -24,6 +22,17 @@ use constant {
 };
 
 
+my $scanner = SCANNER->new();
+ok( $scanner, 'created scanner' );
+
+$text =<<'EOF';
+not [% not a + b %]
+not [% ! a + b %]
+EOF
+
+exit();
+
+__END__
 #-----------------------------------------------------------------------
 # setup
 #-----------------------------------------------------------------------

@@ -1,6 +1,6 @@
 package Template::TT3::Test::Parser;
 
-use Template::TT3::Tag;
+use Template::TT3::Tag::Inline;
 use Template::TT3::Tokens;
 use Template::TT3::Test 'test_expect';
 use Template::TT3::Class
@@ -9,7 +9,7 @@ use Template::TT3::Class
     base     => 'Template::TT3::Test',
     utils    => 'params',
     constant => {
-        TAG    => 'Template::TT3::Tag',
+        TAG    => 'Template::TT3::Tag::Inline',
         TOKENS => 'Template::TT3::Tokens',
     },
     exports  => {

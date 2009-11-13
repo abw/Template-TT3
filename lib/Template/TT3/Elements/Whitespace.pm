@@ -103,6 +103,21 @@ sub generate {
 }
 
 
+package Template::TT3::Element::Comment;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Whitespace',
+    constants => ':elem_slots';
+    
+
+sub generate {
+    $_[1]->generate_comment(
+        $_[0]->[TOKEN]
+    );
+}
+
+
 package Template::TT3::Element::Eof;
 
 use Template::TT3::Class 

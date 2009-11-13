@@ -39,6 +39,8 @@ sub generate {
 
 
 sub dot_op {
+    shift->todo("I don't think this is used.  Is it?");
+    
     my ($self, $text, $pos, $rhs) = @_;
     $self->[META]->[ELEMS]->op(
         # $rhs should call method to resolve it as a dot-right-able item
@@ -96,6 +98,7 @@ sub value {
 package Template::TT3::Element::Keyword;
 
 use Template::TT3::Class 
+    debug     => 0,
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
     constants => ':elem_slots';
@@ -104,6 +107,11 @@ sub generate {
     $_[1]->generate_keyword(
         $_[0]->[TOKEN],
     );
+}
+
+sub as_dotop {
+    # keywords downgrade themselves to simple words when used after a dot
+    shift->become('word')->as_dotop(@_);
 }
 
 

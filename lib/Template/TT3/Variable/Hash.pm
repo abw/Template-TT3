@@ -18,7 +18,7 @@ sub dot {
     ) if DEBUG;
 
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
-        $self->debug("hash vmethod: $name");
+        $self->debug("hash vmethod: $name") if DEBUG;
         return $self->[META]->[VARS]->use_var( 
             $name,
             $method->($self->[VALUE], $args ? @$args : ()),
