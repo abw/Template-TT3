@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 2,
+    tests   => 13,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -29,16 +29,89 @@ test_expect(
 
 __DATA__
 
--- test one --
+-- test no chomp --
 Hello [% a %]
 -- expect --
 Hello alpha
 
--- test pre-chomp --
--- skip no chomp flags working yet --
+-- test pre-chomp chomp_one --
 Hello 
 [%- a %]
 -- expect --
 Hello alpha
 
+-- test pre-chomp chomp_one with multi lines --
+Hello 
 
+[%- a %]
+-- expect --
+Hello 
+alpha
+
+-- test pre-chomp chomp_all --
+Hello   
+[%~ b %]
+-- expect --
+Hellobravo
+
+-- test pre-chomp chomp_all with multi lines --
+Hello   
+   
+   
+[%~ c %]
+-- expect --
+Hellocharlie
+
+-- test pre-chomp chomp_all with two tags --
+[% a %]
+   
+  [%~ b %]
+-- expect --
+alphabravo
+
+
+
+-- test pre-chomp chomp_collapse with no space --
+Hello[%= d %]
+-- expect --
+Hello delta
+
+-- test pre-chomp chomp_collapse with some space --
+Hello   [%= d %]
+-- expect --
+Hello delta
+
+-- test pre-chomp chomp_collapse with one line --
+Hello
+[%= d %]
+-- expect --
+Hello delta
+
+-- test pre-chomp chomp_collapse with multi lines --
+Hello   
+    
+      
+[%= d %]
+-- expect --
+Hello delta
+
+-- test pre-chomp chomp_collapse with two tags --
+[% a %]  
+   
+[%= b %]
+-- expect --
+alpha bravo
+
+-- test comment --
+He[%# foo %]llo
+-- expect --
+Hello
+
+-- test big comment --
+He[%#
+    # foo 
+    # bar
+    # baz
+  %]llo
+-- expect --
+Hello

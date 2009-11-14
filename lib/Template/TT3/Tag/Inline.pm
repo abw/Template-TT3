@@ -12,13 +12,19 @@ use Template::TT3::Class
     constant  => {
         GRAMMAR => 'Template::TT3::Grammar::TT3',
     };
- 
 
+
+#-----------------------------------------------------------------------
+# Initialisation methods
+#-----------------------------------------------------------------------
+ 
 sub init {
     my $self   = shift;
     my $config = shift || $self->{ config };
-    $self->init_tag($config);
-    $self->init_grammar($config);
+    $self->init_flags($config);     # inherited from T::Tag::Closed
+    $self->init_tag($config);       # inherited from T::Tag
+    $self->init_grammar($config);   # implemented by us
+    $self->{ config } = $config;
     return $self;
 }
 
@@ -41,6 +47,11 @@ sub init_grammar {
     return $self;
 }
 
+
+
+#-----------------------------------------------------------------------
+# Scannning methods
+#-----------------------------------------------------------------------
 
 sub tokens {
     my ($self, $input, $output, $token, $pos) = @_;

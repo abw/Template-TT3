@@ -115,7 +115,7 @@ sub tokens {
     my ($pos, $text, $start, $tag);
     
     while (1) {
-        $pos = pos $$input;
+        $pos = pos $$input || 0;
         
         if ($$input =~ /$self->{ match_to_tag }/gc) {
             # We've matched a chunk of text up to the next tag start token.
@@ -129,7 +129,8 @@ sub tokens {
                ||= $self->match_regex_tag($2)
                ||  return $self->error_msg( invalid => tag => $start );
                
-            # should we call ->scan($scanner, $input, $output, ...) instead?
+            # TODO: may want to pass \$text and \$start references to avoid
+            # more string copying
             $tag->scan($input, $output, $text, $start, $pos, $self);
         }
         elsif ($$input =~ /$self->{ match_to_end }/gc) {

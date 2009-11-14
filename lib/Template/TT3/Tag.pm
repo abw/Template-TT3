@@ -20,9 +20,19 @@ use Template::TT3::Class
  
 our $TAG_STYLES     = { };
 our $STYLE_PATTERNS = { };
-   
 
-*init = \&init_tag;
+
+#-----------------------------------------------------------------------
+# Initialisation methods
+#-----------------------------------------------------------------------
+
+sub init {
+    my $self   = shift;
+    my $config = shift || $self->{ config };
+    $self->init_tag($config);
+    $self->{ config } ||= $config;
+    return $self;
+}
 
 
 sub init_tag {
@@ -64,17 +74,11 @@ sub init_tag {
     # (in case we're parsing "naked" TT code which isn't embedded in tags).
     # We do this via a method so that subclasses can further tweak the 
     # definitive style and start/end tokens.
-    ($style, $start, $end) = $self->prepare_tag_style($style, $start, $end);
+    ($style, $start, $end) = $self->init_tag_style($style, $start, $end);
 
     $self->{ style } = $style;
     $self->{ start } = $start;
     $self->{ end   } = $end;
-
-    # TODO: handle start/end tags and modify start/end that we generate
-    # patterns from
-    #    $self->{ pre_chomp  } = $config->{ pre_chomp  } || 0;
-    #    $self->{ post_chomp } = $config->{ post_chomp } || 0;
-
 
     # construct regex patterns for this tag style and cache for next time
     my $patterns = $STYLE_PATTERNS->{ $style } ||= do {
@@ -92,7 +96,7 @@ sub init_tag {
 }
 
 
-sub prepare_tag_style {
+sub init_tag_style {
     my ($self, $style, $start, $end) = @_;
 
     $style ||= ( defined($start) || defined($end) )
@@ -190,19 +194,27 @@ sub tag_map {
 }
 
 
+
+#-----------------------------------------------------------------------
+# Scanning methods
+#-----------------------------------------------------------------------
+
 sub scan {
     my ($self, $input, $output, $text, $start, $pos) = @_;
     my ($token, $type);
 
+    # push any preceding text onto the token list
     $self->debug("pre-text: <$text>") if DEBUG && $text;
     $output->text_token($text, $pos)
         if defined $text && length $text;
     
+    # push the tag start token onto the token list
     $self->debug("tag starting: <$start>") if DEBUG && $start;
     $pos = pos $$input;
     $token = $output->tag_start_token($start, $pos - length($start))
         if defined $start && length $start;
     
+    # call the main tokenising method
     return $self->tokens($input, $output, $token, $pos);
 }
     
@@ -251,7 +263,6 @@ sub peek_to_end {
     pos $$text = $pos;
     return $result || '';
 }
-
 
 
 1;
