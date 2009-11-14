@@ -89,12 +89,13 @@ sub tokens {
         }
         elsif ($$input =~ /$self->{ match_at_end }/cg) {
             $self->debug("matched end of tag: $1") if DEBUG;
+
+            # add the tag end token and return it to scan() so it can 
+            # identify any post-chomping flags
             $output->tag_end_token($1, $pos) 
-                if defined $1 && length $1;
-            last;
-            
-            # TODO: should probably return last token to scan() (for 
-            # post-chomping)
+                if  defined $1 && length $1;
+                
+            return $1;
         }
         elsif ($$input =~ /$self->{ match_nw }/cg) {
             $self->{ grammar }->matched($input, $output, $pos, $1);
@@ -113,7 +114,7 @@ sub tokens {
         $pos = pos $$input;
     }
 
-    return $token;
+    return 0;
 }
 
 

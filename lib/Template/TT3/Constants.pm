@@ -7,15 +7,15 @@ use Badger::Class
         # Chomp flags for removing whitespace around tags
         CHOMP_NONE          => 0,   # do not remove whitespace
         CHOMP_ONE           => 1,   # remove one line of whitespace
-        CHOMP_COLLAPSE      => 2,   # collapse whitespace to single space
-        CHOMP_ALL           => 3,   # remove all whitespace including newlines
+        CHOMP_ALL           => 2,   # remove all whitespace including newlines
+        CHOMP_SPACE         => 3,   # collapse whitespace to single space
         CHOMP_TAG           => 4,   # remove the tag (e.g. [%# comment %])
         
         # Mappings from above constants to the start/end tags that they 
         # represet.  Note that the order is critical.  The 0th item must
         # correlate to CHOMP_NONE, the 1st to CHOMP_ONE, and so on
-        PRE_CHOMP_FLAGS     => [ qw( + - = ~ ), '#' ],
-        POST_CHOMP_FLAGS    => [ qw( + - = ~ ) ],
+        PRE_CHOMP_FLAGS     => [ qw( + - ~ = ), '#' ],
+        POST_CHOMP_FLAGS    => [ qw( + - ~ = ) ],
         
         # flags used by elements
         FORCE               => 1,   # used to override operator precedence
@@ -23,7 +23,7 @@ use Badger::Class
     exports => {
         any  => 'FORCE PRESENT',
         tags => {
-            chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_COLLAPSE CHOMP_ALL 
+            chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
             type_slots  => {

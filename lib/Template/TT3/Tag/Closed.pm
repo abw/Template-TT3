@@ -22,16 +22,16 @@ use Template::TT3::Class
 our $PRE_CHOMP = {
     '+' => 1,       # do nothing
     '-' => \&pre_chomp_one,
-    '=' => \&pre_chomp_collapse,
     '~' => \&pre_chomp_all,
+    '=' => \&pre_chomp_space,
     '#' => \&comment,
 };
 
 our $POST_CHOMP = {
     '+' => 1,       # do nothing
     '-' => \&post_chomp_one,
-    '=' => \&post_chomp_collapse,
     '~' => \&post_chomp_all,
+    '=' => \&post_chomp_space,
 };
 
 
@@ -105,8 +105,9 @@ sub init_flags {
     # Same thing for post_chomp flag, but we're going to glue it onto the 
     # start of the end_token in init_tag_style().  This allows us to match 
     # the end flag and token in one go.
-    $post_chomp = '[' . quotemeta( join('', keys %$POST_CHOMP) ) . ']?';
-    $self->{ match_post_chomp } = $post_chomp;
+    $post_chomp = '[' . quotemeta( join('', keys %$POST_CHOMP) ) . ']';
+    $self->{ post_chomp_chars } = $post_chomp;
+    $self->{ match_post_chomp } = qr/ \G ($post_chomp) /x;
         
     return $self;
 }
@@ -116,10 +117,13 @@ sub init_tag_style {
     my ($self, $style, $start, $end) = @_;
 
     if ($end) {
-        $self->debug("gluing flags $self->{ match_post_chomp} onto end token $end")
-            if DEBUG;
+        $self->debug(
+            "gluing flags $self->{ match_post_chomp} onto end token $end"
+        ) if DEBUG;
+        
         $end = quotemeta($end) unless ref $end eq REGEX;
-        $end = qr/ $self->{ match_post_chomp } $end /x;
+        $end = qr/ $self->{ post_chomp_chars }? $end /x;
+        
         $self->debug("new end regex: $end") if DEBUG;
     }
 
@@ -139,7 +143,7 @@ sub init_tag_style {
 sub scan {
     my ($self, $input, $output, $text, $start, $pos) = @_;
     my $start_pos = $pos - length $start;
-    my ($token, $type, $chomp);
+    my ($token, $type, $chomp, $end);
 
     # Look for a chomping flag at the start
     if ($$input =~ /$self->{ match_pre_chomp }/cgx) {
@@ -149,7 +153,7 @@ sub scan {
     }
 
     # Take care of the preceding text chunk
-    if (defined $text && length $text) {
+    if (defined $text) {
         $self->debug("pre-text: <$text>") if DEBUG;
 
         if ($chomp ||= $self->{ pre_chomp }) {
@@ -171,14 +175,38 @@ sub scan {
     $token = $output->tag_start_token($start, $pos - length($start))
         if defined $start && length $start;
     
-    return $self->tokens($input, $output, $token, $pos);
+    $end = $self->tokens($input, $output, $token, $pos);
     
-    # TODO: post-chomp
+    $self->debug("matching [$end] post-chomp: $self->{ match_post_chomp }")
+        if DEBUG;
+        
+    if ($end && $end =~ /$self->{ match_post_chomp }/) {
+        $self->debug("found post-chomp flag: $1") if DEBUG;
+        $chomp = $POST_CHOMP->{ $1 }
+            || return $self->error_msg( bad_flag => end => $1  );
+    }
+    else {
+        $chomp = undef;
+    }
+
+    if ($chomp ||= $self->{ post_chomp }) {
+        # Let the chomp handler take care of the following text.
+        $self->$chomp($input, $output, $text, $start, pos $$input);
+    }
+
+    return 1;
 }
 
 
+#-----------------------------------------------------------------------
+# chomping methods
+#-----------------------------------------------------------------------
+
 sub pre_chomp_one {
     my ($self, $input, $output, $text, $start, $pos) = @_;
+
+    return CONTINUE 
+        unless length $text;
 
     # remove whitespace up to and including the first preceding newline
     if ($text =~ s/ ((\n|^) [^\S\n]*) \z //mx) {
@@ -197,6 +225,9 @@ sub pre_chomp_one {
 sub pre_chomp_all {
     my ($self, $input, $output, $text, $start, $pos) = @_;
 
+    return CONTINUE
+        unless length $text;
+
     # remove all preceding whitespace
     if ($text =~ s/ (\s+) \z //x ) {
         $output->text_token($text, $pos);
@@ -211,24 +242,59 @@ sub pre_chomp_all {
 }
     
 
-sub pre_chomp_collapse {
+sub pre_chomp_space {
     my ($self, $input, $output, $text, $start, $pos) = @_;
 
     # remove all preceding whitespace and replace with a single space
     if ($text =~ s/ (\s+) \z //x ) {
-        $output->text_token($text, $pos);
+        $output->text_token($text, $pos) if length $text;
         $pos = pos $$input;
         $output->whitespace_token($1, $pos - length $1);
     }
     else {
-        $output->text_token($text, $pos);
+        $output->text_token($text, $pos) if length $text;
     }
 
-    # TODO: make this a synthetic text token so we can tell the difference
-    # between real text and generated text
-    $output->text_token(SPACE, $pos);
+    $output->padding_token(SPACE, $pos);
 
     return CONTINUE;
+}
+
+
+sub post_chomp_one {
+    my ($self, $input, $output, $text, $start, $pos) = @_;
+
+    # consume any whitespace following the tag (i.e. from the \G position)
+    # up to and including the first newline
+    if ($$input =~ / \G ( [^\S\n]* (\n|$) ) /gcx) {
+        $self->debug("post_chomp_one() removed whitespace: [$1]") if DEBUG;
+        $output->whitespace_token($1, $pos);
+    }
+}
+
+
+sub post_chomp_all {
+    my ($self, $input, $output, $text, $start, $pos) = @_;
+
+    # consume all whitespace following the tag
+    if ($$input =~ / \G (\s+) /gcx) {
+        $self->debug("post_chomp_all() removed whitespace: [$1]") if DEBUG;
+        $output->whitespace_token($1, $pos);
+    }
+}
+
+
+sub post_chomp_space {
+    my ($self, $input, $output, $text, $start, $pos) = @_;
+
+    # consume all whitespace following the tag and replace it with a 
+    # single synthesised whitespace token
+    if ($$input =~ / \G (\s+) /gcx) {
+        $output->whitespace_token($1, $pos);    # save original token
+        $pos += length $1;
+    }
+
+    $output->padding_token(SPACE, $pos);
 }
 
 

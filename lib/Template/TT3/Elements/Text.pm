@@ -56,7 +56,6 @@ sub generate {
 }
 
 
-
 #-----------------------------------------------------------------------
 # Call on generate_text_ops() (in Template::TT3::Class) to create a 
 # bunch of subclasses of Template::TT3::Element::Text.  See the comment
@@ -137,6 +136,34 @@ class->generate_pre_post_ops(
 
 
 
+
+#-----------------------------------------------------------------------
+# Template::TT3::Element::Padding - a thin subclass of the text element
+# used to represent sythesised text tokens added as part of the scanning
+# process.  For example, the '=' pre and post chomp flags collapse any
+# preceding/following text to a single space.  We save the original 
+# whitespace (of which there may be none) as a whitespace token and add
+# new padding token of a single space.  When we want to re-generate the 
+# original template source we print out the whitespace but ignore padding.
+# OTOH, when we're parsing we ignore whitespace but include padding as
+# kind of text expression.
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::Padding;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Text',
+    constants => ':elem_slots',
+    constant  => {
+        SEXPR_FORMAT  => '<padding:%s>', 
+    };
+
+sub generate {
+    $_[1]->generate_padding(
+        $_[0]->[TOKEN]
+    );
+}
 
 
 #-----------------------------------------------------------------------

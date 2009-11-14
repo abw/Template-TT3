@@ -108,6 +108,11 @@ sub generate_punctuation {
     return "<punctuation:$punc>";
 }
 
+sub generate_padding {
+    my ($self, $text) = @_;
+    return "<padding:$text>";
+}
+
 sub generate_postfix {
     my ($self, $op, $lhs) = @_;
     return "<postfix:$op>";

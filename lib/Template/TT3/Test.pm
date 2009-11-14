@@ -176,10 +176,15 @@ sub data_tests {
             push(@exflags, $param);
             $exflag->{ $param } = $value;
         }
-            
-        for ($input, $expect) {
-            s/^\s+//;
-            s/\s+$//;
+        
+        # always chomp the expected result
+        chomp $expect;
+
+        unless ($inflag->{ preserve_ws }) {
+            for ($input, $expect) {
+                s/^\s+//;
+                s/\s+$//;
+            }
         }
 
         $test = {
