@@ -1,3 +1,4 @@
+die "T::Tag::Closed is deprecated";
 package Template::TT3::Tag::Closed;
 
 use Template::TT3::Class
@@ -175,11 +176,13 @@ sub scan {
     $token = $output->tag_start_token($start, $pos - length($start))
         if defined $start && length $start;
     
+    # tokenise the tag content
     $end = $self->tokens($input, $output, $token, $pos);
     
     $self->debug("matching [$end] post-chomp: $self->{ match_post_chomp }")
         if DEBUG;
-        
+    
+    # look to see if the end token contained a post-chomp flag
     if ($end && $end =~ /$self->{ match_post_chomp }/) {
         $self->debug("found post-chomp flag: $1") if DEBUG;
         $chomp = $POST_CHOMP->{ $1 }
@@ -196,6 +199,7 @@ sub scan {
 
     return 1;
 }
+
 
 
 #-----------------------------------------------------------------------
