@@ -23,6 +23,7 @@ use Template::TT3::Test
 our $vars = callsign;
 
 test_expect(
+#   dump_tokens => 1,
     debug     => $DEBUG,
     variables => $vars,
 );

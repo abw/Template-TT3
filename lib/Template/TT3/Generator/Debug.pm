@@ -113,6 +113,11 @@ sub generate_padding {
     return "<padding:$text>";
 }
 
+sub generate_comment {
+    my ($self, $text) = @_;
+    return "<comment:$text>";
+}
+
 sub generate_postfix {
     my ($self, $op, $lhs) = @_;
     return "<postfix:$op>";
