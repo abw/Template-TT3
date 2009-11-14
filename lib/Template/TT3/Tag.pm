@@ -220,8 +220,7 @@ sub init_grammar {
 #-----------------------------------------------------------------------
 
 sub scan {
-    my ($self, $input, $output, $text, $start, $pos) = @_;
-    my ($token, $type);
+    my ($self, $input, $output, $text, $start, $pos, $scanner) = @_;
 
     # push any preceding text onto the token list
     $self->debug("pre-text: <$text>") if DEBUG && $text;
@@ -236,7 +235,7 @@ sub scan {
         if defined $start && length $start;
     
     # call the main tokenising method
-    return $self->tokens($input, $output);
+    return $self->tokens($input, $output, $scanner);
 }
     
         

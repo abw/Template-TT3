@@ -7,11 +7,9 @@ use Template::TT3::Class
     base      => 'Template::TT3::Tag',
     import    => 'class',
     utils     => 'numlike',
-    patterns  => ':all',
     constants => ':chomp SPACE REGEX NONE CODE',
     constant  => {
         GRAMMAR     => 'Template::TT3::Grammar::TT3',
-#        REGEX_GROUP => '\G([%s])',
         SKIP_TAG    => 0,
         CONTINUE    => 1,
     },
@@ -180,8 +178,6 @@ sub scan {
     # tokenise the tag content
     $end = $self->tokens($input, $output);
 
-#    $self->scan_end($input, $output
-    
     $self->debug("matching [$end] post-chomp: $self->{ match_post_chomp }")
         if DEBUG;
 
@@ -200,9 +196,6 @@ sub scan {
     if ($chomp ||= $self->{ post_chomp }) {
         # Let the chomp handler take care of the following text.
         $self->$chomp($input, $output, $end, $pos);
-    }
-    else {
-        # push the end token ourselves
     }
 
     return CONTINUE;
@@ -278,8 +271,6 @@ sub pre_chomp_space {
 sub post_chomp_one {
     my ($self, $input, $output, $end, $pos) = @_;
 
-    $output->tag_end_token($end, $pos - length($end));
-
     # consume any whitespace following the tag (i.e. from the \G position)
     # up to and including the first newline
     if ($$input =~ / \G ( [^\S\n]* (\n|$) ) /gcx) {
@@ -292,8 +283,6 @@ sub post_chomp_one {
 sub post_chomp_all {
     my ($self, $input, $output, $end, $pos) = @_;
 
-    $output->tag_end_token($end, $pos - length($end));
-
     # consume all whitespace following the tag
     if ($$input =~ / \G (\s+) /gcx) {
         $self->debug("post_chomp_all() removed whitespace: [$1]") if DEBUG;
@@ -304,8 +293,6 @@ sub post_chomp_all {
 
 sub post_chomp_space {
     my ($self, $input, $output, $end, $pos) = @_;
-
-    $output->tag_end_token($end, $pos - length($end));
 
     # consume all whitespace following the tag and replace it with a 
     # single synthesised whitespace token

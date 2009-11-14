@@ -59,8 +59,10 @@ use Template::TT3::Class
 
 sub next_skip_ws {
 #    my $self = $_[0];
-#    $self->debug("skipping to end of tag [$self->[EXPR]]\n") if $self->[EXPR];
+#    $self->debug("[$self]   NEXT:[$self->[NEXT]]  GOTO:[$self->[GOTO]]");
+#    $self->debug("skipping to end of tag [$self->[GOTO]]\n") if $self->[GOTO];
 #    $self->debug("tag start next_skip_ws(): ${$_[1]}  next is $self->[NEXT] (calling skip_ws())");
+
     # In the case of scan-time control directives (e.g. [? TAGS '<* *>' ?] ) 
     # we want to hide the tokens inside the directive from the expression 
     # parser because they have already been interpreted at tokenising time 

@@ -5,22 +5,23 @@ use Template::TT3::Class
     base       => 'Template::TT3::Tagset';
 
 our $TAGS = {
-    inline => {
-        start => '[%',
+    inline  => {
+        start => '[%', 
         end   => '%]',
     },
-##    outline => {
-#        start => qr/^%%/,
-#    },
-#    control => {
-#        start => '[?',
-#        end   => '?]',
-#    },
-#    comment => {
-#        start => '[#',
-#        end   => '#]',
-#    }
-    comment => '[# #]',
+    outline => {                
+        type    => 'default',       # doesn't have a subclass of it's own so 
+        start   => qr/^%%/m,        # it uses Template::TT3::Tag
+        end     => qr/(\n|$)/m ,
+    },
+    comment => {
+        start   => '[#',
+        end     => '#]',
+    },
+    control => {
+        start => '[?',
+        end   => '?]',
+    },
 };
 
 1;

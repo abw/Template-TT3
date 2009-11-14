@@ -5,7 +5,10 @@ use Badger::Factory::Class
     debug     => 0,
     item      => 'tag',
     base      => 'Template::TT3::Base',
-    path      => 'Template::TT3::Tag Template::Tag TemplateX::Tag';
+    path      => 'Template::TT3::Tag Template::Tag TemplateX::Tag',
+    tags      => {
+        default => 'Template::TT3::Tag',
+    };
 
 1;
 
