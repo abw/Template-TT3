@@ -13,6 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
+    skip  => 'Generators are deprecated... now called Views',
     debug => 'Badger::Factory Template::TT3::Generators',
     args  => \@ARGV,
     tests => 4;
@@ -28,10 +29,10 @@ is(
     'isa Template::TT3::Generator::Source' 
 );
 
-my $tok_gen = GENERATORS->generator('tokens.HTML');
-ok( $tok_gen, 'got token HTML generator' );
-is( 
-    ref $tok_gen, 
-    'Template::TT3::Generator::Tokens::HTML', 
-    'isa Template::TT3::Generator::Tokens::HTML' 
-);
+#my $tok_gen = GENERATORS->generator('tokens.HTML');
+#ok( $tok_gen, 'got token HTML generator' );
+#is( 
+#    ref $tok_gen, 
+#    'Template::TT3::Generator::Tokens::HTML', 
+#    'isa Template::TT3::Generator::Tokens::HTML' 
+#);

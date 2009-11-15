@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    tests => 2,
+    tests => 3,
     debug => 'Template::TT3::Generator::Tokens::HTML',
     args  => \@ARGV;
 
@@ -26,6 +26,9 @@ Hello [% name or 'World' %]
 EOF
 
 ok( $template, 'created template' );
-my $html = $template->tokens->html;
-ok( $html, 'got generated HTML' );
-#print "html: ", $html, "\n";
+my $html = $template->tokens->view_HTML;
+ok( $html, 'got generated HTML via view_HTML' );
+
+print "html: ", $html, "\n" if DEBUG;
+
+ok( $template->tokens->html, 'created view via html()' );

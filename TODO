@@ -47,4 +47,8 @@ depending on them being token or tree views.  Perhaps better to just
 have the element call $gen->generate_XXX($self) and let the generator
 unpack/evaluate it as required.
 
+Figure out why element classes aren't being loaded.  e.g. declaring 
+[ TAGS => ctr_tags => 0, 0 ] should load T::TT3::Element::Control::Tags
+and fail if it doesn't exists.  The find() method appears to be returning
+the class name without checking to see if it can be loaded.
 

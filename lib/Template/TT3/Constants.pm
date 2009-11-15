@@ -50,7 +50,7 @@ use Badger::Class
                 LHS     => '=4',    # binary expressions
                 RHS     => '=5',
                 ARGS    => '=6',    # arguments
-                GOTO    => '=4',    # used to skip over compile time control tags
+                JUMP    => '=4',    # used to skip over compile time control tags
 
                 # element metadata slots
                 CONFIG  => '=0',    # configuration parameters
@@ -64,6 +64,7 @@ use Badger::Class
                 SELF      => '=0',  # zeroth argument is always $self
                 CONTEXT   => '=1',  # first argument is content/visitor/genr
                 VISITOR   => '=1',
+                VIEW      => '=1',
                 GENERATOR => '=1',
             },
         },

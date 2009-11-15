@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    skip    => 'Control tags not implemented yet',
+    skip    => 'TAGS control not implemented yet',
     tests   => 6,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
@@ -36,9 +36,39 @@ Hello [% a %]
 Hello alpha
 
 -- test tags single string --
-[? TAGS <* *> ?]
+-- dump_tokens --
+BEFORE
+[? TAGS '<* *>' -?]
 Hello <* a *>
 -- expect --
+BEFORE
 Hello alpha
+
+-- test tags list ref --
+[? TAGS ['<*' '*>'] -?]
+Hello <* b *>
+-- expect --
+Hello bravo
+
+-- test tags assign string --
+[? TAGS = '<* *>' -?]
+Hello <* c *>
+-- expect --
+Hello charlie
+
+-- test tags list ref --
+[? TAGS = ['<*' '*>'] -?]
+Hello <* d *>
+-- expect --
+Hello delta
+
+-- test tags list ref --
+[? TAGS off -?]
+Hello <* e *>
+[? TAGS on -?]
+Hello <* e *>
+-- expect --
+Hello <* e *>
+Hello echo
 
 

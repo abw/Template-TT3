@@ -158,6 +158,8 @@ sub as_expr {
     # parse expressions.  Any precedence (0), allow empty lists (1)
     $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
+    
+#    $self->debug("list parsed expr: $self->[EXPR]");
 
     # check next token matches our FINISH token
     return $self->missing( $self->FINISH, $token)
@@ -203,8 +205,10 @@ sub value {
     ];
 }
 
+
 sub text {
-    $_[SELF]->debug("called text() on list: ", $_[SELF]->source) if DEBUG;
+#    $_[SELF]->debug_caller;
+#    $_[SELF]->debug("called text() on list: ", $_[SELF]->source) if DEBUG;
     return join(
         '',
         $_[SELF]->[EXPR]->text($_[CONTEXT])

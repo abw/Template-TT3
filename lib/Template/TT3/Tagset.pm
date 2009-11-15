@@ -19,6 +19,7 @@ sub init {
     return $self;
 }
 
+
 sub init_tagset {
     my ($self, $config) = @_;
     my $tags    = $self->class->hash_vars( TAGS => $config->{ tags } );

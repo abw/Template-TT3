@@ -1,11 +1,19 @@
 package Template::TT3::Tag::Control;
 
-use Template::TT3::Grammar::TT3;
+use Template::TT3::Grammar::Control;
+use Template::TT3::Elements::Punctuation;
 use Template::TT3::Class
     version   => 2.71,
     debug     => 0,
     base      => 'Template::TT3::Tag::Inline',
-    constants => ':elem_slots';
+    utils     => 'refaddr',
+    constants => ':elem_slots',
+    constant  => {
+        GRAMMAR => 'Template::TT3::Grammar::Control',
+        EOF     => 'Template::TT3::Element::Eof',
+    };
+
+our $EOF;
 
 
 sub tokens {
@@ -16,10 +24,10 @@ sub tokens {
     
     # set a forward reference from the first token to the last, so that 
     # we can skip over any control tokens when parsing runtime expressions.
-    $self->debug("setting GOTO on $first ($first->[TOKEN]) to $last ($last->[TOKEN])")
+    $self->debug("setting JUMP on $first ($first->[TOKEN]) to $last ($last->[TOKEN]) : ", refaddr $last)
         if DEBUG;
         
-    $first->[GOTO] = $last;    # skip to last token
+    $first->[JUMP] = $last;    # skip to last token
     
     return $end;
 }
@@ -27,10 +35,40 @@ sub tokens {
 
 sub parse {
     my ($self, $token, $input, $output, $scanner) = @_;
-    my $last = $token;
 
+    # we need to put a temporary EOF on the end of the token stream so that
+    # we can parse the tokens that we've got into expressions.
+    my $last = $output->last;
+    $last->[NEXT] = $EOF ||= EOF->new;
+    
+#    $self->debug("parsing control tag") if DEBUG;
+
+    my $exprs = $token->as_exprs(\$token);
+
+    # FIXME: wind over any unparsed tokens
+    while ($token && $token->skip_ws(\$token)) {
+        last if $token->eof;
+        print "** IGNORED ** ", $token->token, "\n";
+        $token = $token->next;
+    }
+    
+    $self->debug("parsed control tag: ", $exprs->sexpr) if DEBUG;
+
+    # clear temporary EOF token
+    $last->[NEXT] = undef;
+    
+    return $last;
+
+}
+
+1;
+
+__END__
+    # we need to add a dummy EOF token to the end of the stream so that
+    # our parse rules terminate properly
+    my $exprs = $token->as_exprs(\$token);
     while ($token = $token->next_skip_ws) {
-        print "** ", $token->text, "\n";
+        print "** ", $token->token, "\n";
         $last = $token;
     }
     
@@ -43,6 +81,8 @@ sub parse {
 #        $token = $last->skip_ws
 #            || return $self->error("Unexpected control token: ", $token->token);
     }
+    
+    $final->[NEXT] = $after;
     
     return $last;
 }

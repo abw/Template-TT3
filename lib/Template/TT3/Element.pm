@@ -4,10 +4,10 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Base',
-    utils     => 'self_params numlike',
+    utils     => 'self_params numlike refaddr',
     slots     => 'meta next token pos',
     import    => 'class',
-    constants => ':elem_slots CODE ARRAY HASH BLANK',
+    constants => ':elem_slots :eval_args CODE ARRAY HASH BLANK',
     constant  => {   
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
@@ -268,6 +268,17 @@ sub missing {
     );
 }
 
+sub view {
+    $_[CONTEXT]->view_element($_[SELF]);
+}
+
+sub view_guts {
+    # used mostly for debugging - see T::TT3::View::Tokens::Debug
+    self => refaddr $_[0],
+    next => refaddr $_[0]->[NEXT],
+    jump => refaddr $_[0]->[JUMP],
+}
+    
     
 1;
 

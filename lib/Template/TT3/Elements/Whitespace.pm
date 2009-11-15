@@ -41,6 +41,10 @@ sub generate {
     );
 }
 
+sub view {
+    $_[1]->view_whitespace($_[0]);
+}
+
 
 
 #-----------------------------------------------------------------------
@@ -58,23 +62,24 @@ use Template::TT3::Class
 
 
 sub next_skip_ws {
-#    my $self = $_[0];
-#    $self->debug("[$self]   NEXT:[$self->[NEXT]]  GOTO:[$self->[GOTO]]");
-#    $self->debug("skipping to end of tag [$self->[GOTO]]\n") if $self->[GOTO];
-#    $self->debug("tag start next_skip_ws(): ${$_[1]}  next is $self->[NEXT] (calling skip_ws())");
-
     # In the case of scan-time control directives (e.g. [? TAGS '<* *>' ?] ) 
     # we want to hide the tokens inside the directive from the expression 
     # parser because they have already been interpreted at tokenising time 
     # and don't equate to runtime expressions that the parser understands.
-    # So the tokeniser for these tags adds a GOTO entry in the start token 
+    # So the tokeniser for these tags adds a JUMP entry in the start token 
     # for the directive that points to the end token.  Whenever we skip_ws 
     # or next_skip_ws on one of these start tokens (as we always do when 
     # a whitespace token as_expr() method is called) then we jump straight
     # down to the end token and continue from there.  For regular tags, we
     # just advance to the next token as usual.
-    ($_[0]->[GOTO] && $_[0]->[GOTO]->skip_ws($_[1]))
+    ($_[0]->[JUMP] && $_[0]->[JUMP]->skip_ws($_[1]))
  || ($_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]))
+
+#    my $self = $_[0];
+#    $self->debug("[$self]   NEXT:[$self->[NEXT]]  GOTO:[$self->[GOTO]]");
+#    $self->debug("skipping to end of tag [$self->[GOTO]]\n") if $self->[GOTO];
+#    $self->debug("tag start next_skip_ws(): ${$_[1]}  next is $self->[NEXT] (calling skip_ws())");
+
 }
 
 
@@ -84,6 +89,9 @@ sub generate {
     );
 }
 
+sub view {
+    $_[1]->view_tag_start($_[0]);
+}
 
 
 #-----------------------------------------------------------------------
@@ -104,6 +112,10 @@ sub generate {
     );
 }
 
+sub view {
+    $_[1]->view_tag_end($_[0]);
+}
+
 
 package Template::TT3::Element::Comment;
 
@@ -117,6 +129,10 @@ sub generate {
     $_[1]->generate_comment(
         $_[0]->[TOKEN]
     );
+}
+
+sub view {
+    $_[1]->view_comment($_[0]);
 }
 
 
@@ -137,5 +153,8 @@ sub generate {
     '';
 }
 
+sub view {
+    $_[1]->view_eof($_[0]);
+}
 
 1;

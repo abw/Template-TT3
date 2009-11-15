@@ -52,8 +52,12 @@ sub element_class {
     # expand any prefix_
     $type =~ s/^([^\W_]+_)/$self->{ prefixes }->{ $1 } || $1/e;
     
+    my $e = $self->{ elements };
+#    $self->debug("looking for $type, elems contains: ", join(', ', keys %$e));
     return $self->{ elements }->{ $type }
+#        || do { print "NOPE\n"; 0}
         || $self->find($type)
+#        || do { print "STILL NOPE\n"; 0}
         || $self->not_found($type);
 }
 

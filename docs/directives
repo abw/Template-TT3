@@ -107,6 +107,13 @@ contains the variables specified.
         # not reached - z is not defined in this outer scope
     end;
 
+The parameters are optional.  You can use the 'just' keyword by itself to
+create an empty variable scope:
+
+    just;
+        ...no variables are defined here...
+    end;
+
 =head2 into
 
 C<into> is the new name for WRAPPER.
@@ -130,6 +137,30 @@ C<into> also works in side-effect notation
 
     fill site/content
     info site/layout
+
+=head2 if
+
+if / elsif / else - conditional branches
+
+    if a;                       # simple test
+       ...;
+    end
+    
+    if a < 10 and b > 20;       # arbitrarily complex expression
+       ...;
+    end
+    
+    if a;
+        ...;
+    elsif b;
+        ...;
+    else;
+        ...;
+    end;
+
+'if' can also be used in side-effect notation
+
+    fill site/debug if user.developer;
 
 =head2 for
 
@@ -155,23 +186,191 @@ Used to loop through lists
         ...;
     end
 
-=head2 if
+TT3 allows you to put 'elsif' and 'else' clauses onto 'for' blocks.
+These are evaluated if the list is empty.  This example iterates over
+the items in a shopping basket.  If there are no items in the basket we
+display one of two messages, depending on the user being logged in or not.
 
-if / elsif / else - conditional branches
-
-    if a;                       # simple test
-       ...;
-    end
-    
-    if a < 10 and b > 20;       # arbitrarily complex expression
-       ...;
-    end
-    
-    if a;
-        ...;
-    elsif b;
-        ...;
+    for item in basket.items;
+        fill basket/item_summary
+    elsif user.logged_id;
+        "There are no items in your basket."
     else;
-        ...;
+        "Please login to view the items in your basket."
+    end
+
+The above is short-hand for:
+
+    if basket.size;
+        for item in basket.items;
+            fill basket/item_summary;
+        end;
+    elsif user.logged_id;
+        "There are no items in your basket."
+    else;
+        "Please login to view the items in your basket."
+    end
+
+There should be some way to create lockstep iterators.  e.g. instead of
+writing this:
+
+    n = 1;
+    for user in user;
+       "$n: $user.name";
+       n++;
     end;
 
+You should be able to create two iterators and run them in lockstep.
+I'm not sure about the best keyword to use, so I'm going with 'join'
+for now.
+
+    for user in user 
+      join n in 1 by 1
+        "$n: $user.name";
+
+=head1 from
+
+'from' defines a data target for a block.  Any variables accessed in the 
+block will be matched from the target data.
+
+    stuff = {
+       foo = 10
+       bar = 20
+    }
+    
+    from stuff;
+        "foo is " foo;      # 'foo' is actually 'stuff.foo'
+        "bar is " bar;      # 'bar' is actually 'stuff.bar'
+    end;
+
+I'm not decided 100% on what should happen if the data doesn't define a 
+particular item.  I'm currently thinking that it should fall back on looking
+for a regular variable.
+
+    stuff = {
+       foo = 10
+       bar = 20
+    }
+    baz = 10;
+    
+    from stuff;
+        "foo is " foo;      # 'foo' is actually 'stuff.foo'
+        "bar is " bar;      # 'bar' is actually 'stuff.bar'
+        "baz is " baz;      # 'baz' is just 'baz'
+    end;
+
+If you want to temporarily mask all the other variables you can use 'just'
+
+    just from stuff;
+        ...
+    end;
+
+Which is just short-hand for:
+
+    just;                   # new, empty variable scope
+      from stuff;           # define data target
+        ...
+      end;
+    end;
+
+This also works quite nicely in side effect form:
+
+    fill user/info from user;
+    fill user/info just from user;
+
+
+
+=head1 THINKING OUT LOUD
+
+Looking at an earlier example:
+
+    if basket.size;
+        for item in basket.items;
+            fill basket/item_summary;
+        end;
+    elsif user.logged_id;
+        "There are no items in your basket."
+    else;
+        "Please login to view the items in your basket."
+    end
+
+That can be written with braces if you prefer.
+
+    if basket.size {
+        for item in basket.items {
+            fill basket/item_summary;
+        }
+    }
+    elsif user.logged_id {
+        "There are no items in your basket."
+    }
+    else {
+        "Please login to view the items in your basket."
+    }
+
+Or the minimalist approach:
+
+    if basket.size
+        for item in basket.items
+            fill basket/item_summary;
+    elsif user.logged_id
+        "There are no items in your basket."
+    else
+        "Please login to view the items in your basket."
+
+[THINKING OUT LOUD]
+
+Hmmm... wait, not that's not right.  The 'elsif' will get attached to the
+inner 'for'.  Ho hum.  This is a good example of why a flexible language
+can be a bad thing.  Flexibility == ambiguity.  I can image things like that 
+tripping people up often, myself included.
+
+Solutions:
+
+* Don't add 'elsif' and 'else' to 'for'.  People aren't expecting 'for' to
+  have them, so the natural expectation is that 'elsif' binds to 'if'.  That's
+  why the above example looks right, but is wrong.  If 'elsif' didn't bind 
+  to 'for' then the above would work because 'for' would reject the 'elsif'
+  terminator, consider itself finished and pass control back to 'if' to pick
+  up the 'elsif'
+
+* Don't allow follow-on keywords after single expressions.
+
+  if x y;                 # OK
+  if x y; else z;         # NOT OK 
+
+* Don't allow follow-on keywords after single expressions unless they follow
+  immediately, without any terminator.
+  
+  if x y; else z;         # NOT OK - semi-colon terminates single expression
+  if x y else z;          # MAYBE OK - lack of semi-colon indicates continuation.
+
+  Well that makes our example correct again:
+    
+    if basket.size
+        for item in basket.items
+            fill basket/item_summary;     # semi-colon ends 'for' expression
+    elsif user.logged_id
+        ...
+    else
+        ...
+
+  But I'm concerned that a single-semi-colon can change the meaning of an 
+  expression.  It wouldn't be so bad if one form or the other was illegal
+  because we would get an immediate parse error.  But when both forms are
+  legal syntax there is no warning.
+    
+    if basket.size
+        for item in basket.items
+            fill basket/item_summary     # no semi-colon 
+        elsif user.logged_id
+            ...
+        else
+            ...
+
+  Perhaps I'm worrying too much.  The above is the stripped down minimalist
+  view that (common sense dictates) should only be used for simple cases.
+  Given that the user has the choice of using explicit block form with
+  semi-colons (if x; y; end) *OR* braces (if x { y }) then I probably don't
+  need to feel too bad if they burn themselves using by deliberately using
+  the ambiguous form.

@@ -37,6 +37,7 @@ Hello [?# this whole tag is ignored because there is no
 Hello World
 
 -- test control tag with comment and pre chomping --
+#-- dump_tokens --
 Hello
 [?- # This line is ignored but only this line 
     # This line is ignored too

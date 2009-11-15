@@ -1,6 +1,7 @@
 package Template::TT3::Tokens;
 
 use Template::TT3::Elements::Core;
+use Template::TT3::Views;
 use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
@@ -11,6 +12,7 @@ use Template::TT3::Class
     constants => ':elem_slots HASH ARRAY',
     constant  => {
         ELEMENTS => 'Template::TT3::Elements',
+        VIEWS    => 'Template::TT3::Views',
     },
     messages => {
         bad_method => "Invalid method '%s' called on %s at %s line %s",
@@ -65,9 +67,15 @@ sub finish {
 }
 
 
+# generate() is old, view() is new
 sub generate {
     my ($self, $generator) = @_;
     return $generator->generate_tokens($self->{ tokens });
+}
+
+sub view {
+    my ($self, $view) = @_;
+    return $view->view_tokens($self->{ tokens });
 }
 
 
@@ -83,6 +91,7 @@ sub first {
 sub last {
     $_[0]->{ tokens }->[-1];
 }
+
 
 sub size {
     scalar @{ $_[0]->{ tokens } };
@@ -179,11 +188,12 @@ sub token {
 
 
 sub can {
-    my ($self, $name) = @_;
+    my ($self, $name, @args) = @_;
     my $target;
 
     return $self->SUPER::can($name)
         || $self->token_method($name)
+        || $self->view_method($name, @args)
         || $self->generator_method($name);
 }
 
@@ -198,7 +208,7 @@ sub AUTOLOAD {
 
     # give the can() method a chance to generate a component or delegate
     # method for us
-    if ($method = $self->can($name)) {
+    if ($method = $self->can($name, @args)) {
         return $method->($self, @args);
     }
 
@@ -209,6 +219,7 @@ sub AUTOLOAD {
 use Template::TT3::Generators;
 use constant GENERATORS => 'Template::TT3::Generators';
 
+# generator_method() is old, view_method() is new
 sub generator_method {
     my ($self, $name) = @_;
     my $type = $name;
@@ -238,11 +249,43 @@ sub generator_method {
     return $method;
 }
 
+sub view_method {
+    my ($self, $name, @args) = @_;
+    my $type = $name;
+    my $view;
+
+    $self->debug("view_method($name)") if DEBUG;
+
+    if ($type =~ s/^view_/tokens./) {       # tokens.HTML => Tokens::HTML
+        $self->debug("token view: $type") if DEBUG;
+        $view = VIEWS->view($type, @args)
+            || return $self->error_msg( invalid => view => $name );
+    }
+    elsif ($view = VIEWS->view('tokens.' . $name, @args)) {
+        # TODO: I think this is a bit dangerous..... better to require
+        # explicit view_ prefix for magic to kick in
+        $self->debug("got tokens view: tokens.$name") if DEBUG;
+        # OK, we've got a view
+    }
+    else {
+        return;
+    }
+
+    # create closure and register it as a method
+    my $method = sub {
+        shift->view( $view );
+    };
+    $self->class->method( $name => $method );
+
+    return $method;
+}
+
 sub html {
-    shift->generate_HTML(@_);
+    shift->view_HTML(@_);
 }
         
 sub sexpr {
+    # FIXME
     shift->generate( GENERATORS->generator('debug') );
 }
 

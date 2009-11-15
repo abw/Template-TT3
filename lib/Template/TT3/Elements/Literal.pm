@@ -7,7 +7,7 @@ package Template::TT3::Element::Literal;
 use Template::TT3::Class 
     version    => 3.00,
     base       => 'Template::TT3::Element',
-    constants  => ':elem_slots',
+    constants  => ':elem_slots :eval_args',
     as         => 'filename',
     alias      => {
         value  => \&text,
@@ -28,6 +28,11 @@ sub sexpr {
         $_[0]->SEXPR_FORMAT,
         $_[0]->[TOKEN]
     );
+}
+
+
+sub view {
+    $_[1]->view_literal($_[0]);
 }
 
 
@@ -72,6 +77,10 @@ sub generate {
     );
 }
 
+sub view {
+    $_[1]->view_word($_[0]);
+}
+
 
 sub as_expr {
     shift->become('variable')->as_expr(@_);
@@ -109,6 +118,10 @@ sub generate {
     );
 }
 
+sub view {
+    $_[1]->view_keyword($_[0]);
+}
+
 sub as_dotop {
     # keywords downgrade themselves to simple words when used after a dot
     shift->become('word')->as_dotop(@_);
@@ -134,6 +147,10 @@ sub generate {
     $_[1]->generate_filename(
         $_[0]->[EXPR],
     );
+}
+
+sub view {
+    $_[1]->view_filename($_[0]);
 }
 
 sub filename {

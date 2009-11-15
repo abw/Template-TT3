@@ -101,9 +101,15 @@ sub test_handler {
     my $result   = eval {
         manager->debug(' INPUT: ', $source) if $DEBUG;
         my $template = $tclass->new( text => $source );
-        manager->debug("TOKENS:\n", $template->tokens->sexpr) 
+
+        manager->debug("TOKENS:\n", $template->tokens->view_debug) 
             if $config->{ dump_tokens }
             || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
+
+#        manager->debug("TOKENS:\n", $template->tokens->sexpr) 
+#            if $config->{ dump_tokens }
+#            || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
+
         $template->fill( $mkvars->() );
     };
     if ($@) {
@@ -251,9 +257,11 @@ sub test_expressions {
             my $result = eval {
                 manager->debug(' INPUT: ', $line) if $DEBUG;
                 my $template = $tclass->new( text => '[% ' . $line . ' %]' );
-                manager->debug("TOKENS:\n", $template->tokens->sexpr) 
+
+                manager->debug("TOKENS:\n", $template->tokens->view_debug) 
                     if $config->{ dump_tokens }
                     || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
+
                 $template->fill( $mkvars->() );
             };
             if ($@) {

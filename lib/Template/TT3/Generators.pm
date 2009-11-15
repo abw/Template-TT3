@@ -22,4 +22,17 @@ use Badger::Factory::Class
                 Template::Generator 
                 TemplateX::Generator';
 
+# This method overrides the default Badger::Factory behaviour of throwing
+# an error when a requested module is not found.  B::F needs some refactoring
+# so this may change.
+
+# See T::TT3::Tokens for an example of an object that calls this 
+# speculatively.  We don't want to throw an error if the item can't 
+# be found so we decline with an undef instead.
+
+sub not_found {
+    return undef;
+}
+
+
 1;

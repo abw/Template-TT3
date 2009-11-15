@@ -1,13 +1,10 @@
-package Template::TT3::Generator::Tokens::HTML;
+package Template::TT3::View::Tokens::HTML;
 
-die __PACKAGE__, ' is deprecated - use Template::TT3::View::Tokens::HTML instead';
-
-
-use utf8;
+#use utf8;
 use Template::TT3::Class
     version  => 2.7,
     debug    => 0,
-    base     => 'Template::TT3::Generator',
+    base     => 'Template::TT3::View::Tokens',
     codec    => 'html',
     constant => {
         ATTR    => '%s="%s"',
@@ -37,32 +34,31 @@ sub span {
     HTML( span => { class => $css_class }, @_ );
 }
 
-sub generate_whitespace {
+sub view_whitespace {
     my ($self, $text) = @_;
     $text =~ s/\n/ \n<span class="nl"><\/span>/g;
     $self->span( whitespace => $text );
 }
 
-
-sub generate_squote {
+sub view_squote {
     shift->span( squote => "'", @_, "'" );
 }
 
-sub generate_dquote {
+sub view_dquote {
     shift->span( dquote => '"', @_, '"' );
 }
 
-sub generate_tag_start {
+sub view_tag_start {
     return '<span class="tag">'
         . shift->span( tag_start => @_ );
 }
 
-sub generate_tag_end {
+sub view_tag_end {
     return shift->span( tag_end => @_ )
         . '</span>';
 }
 
-sub generate_varnode {
+sub view_varnode {
     my ($self, $name, $args) = @_;
     $args = $args
         ? '(' . join(', ', map { $self->generate($_) } @$args) . ')'
@@ -70,11 +66,11 @@ sub generate_varnode {
     return $name . $args;
 }
 
-sub generate_binop {
+sub view_binop {
     shift->span( binop => shift );
 }
 
-sub generate_exprs {
+sub view_exprs {
     my ($self, $exprs) = @_;
     return join(
         "\n",
@@ -88,7 +84,8 @@ sub AUTOLOAD {
     my ($name) = ($AUTOLOAD =~ /([^:]+)$/ );
     return if $name eq 'DESTROY';
 
-    if ($name =~ s/^generate_//) {
+#    print "** $name\n";
+    if ($name =~ s/^view_//) {
         return $self->span( $name => @_ );
     }
 
@@ -104,14 +101,18 @@ __END__
 
 =head1 NAME
 
-Template::TT3::Generator::Debug - debugging code generator
+Template::TT3::View::Tokens::HTML - generates an HTML view of template tokens
 
 =head1 SYNOPSIS
 
-    Template::TT3::Generator::Debug;
-
-    # TODO
-
+    use Template::TT3 'Template';
+    
+    # create a template
+    my $template = Template( text => 'Hello [% world %]' );
+    
+    # generate an HTML view of the tokens.
+    print $template->tokens->html;
+    
 =head1 DESCRIPTION
 
 # TODO
