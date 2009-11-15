@@ -4,7 +4,7 @@ use Template::TT3::Class
     version    => 2.71,
     base       => 'Template::TT3::Tagset';
 
-our $TAGS = {
+our $TAGS = [
     inline  => {
         start => '[%', 
         end   => '%]',
@@ -22,6 +22,6 @@ our $TAGS = {
         start => '[?',
         end   => '?]',
     },
-};
+];
 
 1;

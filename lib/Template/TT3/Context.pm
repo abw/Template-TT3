@@ -8,7 +8,7 @@ use Template::TT3::Class
     constant    => {
         VARIABLES => 'Template::TT3::Variables',
     },
-    accessors   => 'variables';
+    accessors   => 'variables scanner';
 
 
 sub init {
@@ -17,6 +17,8 @@ sub init {
     $self->{ variables } = $self->VARIABLES->new( 
         data => $config->{ variables },
     );
+    
+    $self->{ scanner } = $config->{ scanner };
     
     return $self;
 }

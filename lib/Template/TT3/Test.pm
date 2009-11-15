@@ -7,12 +7,11 @@ use Template::TT3::Class
     debug     => 0,
     utils     => 'params',
     constants => 'HASH CODE',
+    import    => 'class',
     exports   => {
         all   => 'test_expect',
         any   => 'data_text data_tests callsign test_expressions',
     };
-
-use Template::TT3::Template;
 
 our $DATA;
 our $MAGIC    = '\s* -- \s*';
@@ -26,6 +25,8 @@ sub test_expect {
     my $tests   = $config->{ tests   } || data_tests();
     my $handler = $config->{ handler } || $HANDLER;
     my $guard;
+
+    class($TEMPLATE)->load;
 
     foreach my $test (@$tests) {
         # handle -- skip -- flag

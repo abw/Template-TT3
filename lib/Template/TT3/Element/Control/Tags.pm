@@ -17,6 +17,7 @@ use Template::TT3::Class
     },
     messages => {
         tags_undef => 'Undefined value returned by %s expression: %s',
+        no_scanner => 'Scanner is not accessible to TAGS control.',
     };
 
 
@@ -46,6 +47,11 @@ sub value {
         || return $self->error_msg( tags_undef => $self->[TOKEN], $expr->source );
         
     $self->debug("Evaluated TAGS: $tags    # changing TAGS in scanner is TODO\n");
+    
+    my $scanner = $context->scanner
+        || return $self->error_msg('no_scanner');
+        
+    $scanner->tags($tags);
     
     return ();
 }

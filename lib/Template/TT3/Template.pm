@@ -73,7 +73,7 @@ sub scan {
 sub scanner {
     my $self = shift;
     return $self->{ scanner }
-        ||= $self->SCANNER->new;
+        ||= $self->SCANNER->new( $self->{ config } );
         # $self->{ config } );
 }
 

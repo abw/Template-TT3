@@ -63,6 +63,34 @@ sub as {
 }
 
 
+# I think the list_vars() in Badger::Class is broken.
+
+sub list_vars {
+    my $self = shift;               # must remove these from @_ here
+    my $name = shift;
+    my $vars = $self->all_vars($name);
+    my (@merged, $list);
+    
+    # remove any leading '$' 
+    $name =~ s/^\$//;
+
+#    foreach $list (@_, @$vars) {    # use whatever is left in @_ here
+    foreach $list ( reverse(@$vars), @_ ) { 
+        next unless defined $list;
+        if (ref $list eq ARRAY) {
+            next unless @$list;
+            push(@merged, @$list);
+        }
+        else {
+            push(@merged, $list);
+        }
+    }
+
+    return wantarray ? @merged : \@merged;
+
+}
+
+
 sub generate {
     my $self    = shift;
     my $classes = @_ == 1 && ref $_[0] ? shift : [ @_ ];

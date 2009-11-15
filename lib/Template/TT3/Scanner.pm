@@ -7,9 +7,11 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Base',
-    constants  => 'REGEX',
+    accessors  => 'tagset',
+    utils      => 'is_object',
+    constants  => 'REGEX HASH ARRAY',
     constant   => {
-        TAGSET => 'Template::TT3::Tagset::TT3',
+        TAGSET => 'Template::TT3::Tagset',
         TOKENS => 'Template::TT3::Tokens',
         SCOPE  => 'Template::TT3::Scope',
     },
@@ -22,6 +24,10 @@ use Template::TT3::Class
         no_tag => 'No tag found matching start token: %s',
     };
 
+# This over-rides the default TAGSET constant above.  We use TAGSET as the
+# definition of the base class that any valid tagset object should be an
+# instances of (or subclass of).  But our default tagset is the TT3 one.
+our $TAGSET = 'Template::TT3::Tagset::TT3';
 
 *init = \&init_scanner;
 
@@ -40,11 +46,29 @@ sub init_scanner {
 sub init_tagset {
     my $self    = shift;
     my $config  = shift || $self->{ config };
-    my $tagset  = $self->{ tagset };  #class->any_var( TAGSET => $config->{ tagset } );
+    my $class   = $self->class;
+    my $tagset  = $self->{ tagset };
 
-    $tagset = $tagset->new($config)
-        unless ref $tagset;
-        
+    if (is_object( TAGSET, $tagset )) {
+        # got a tagset object, that's OK
+        $self->debug("got pre-existing tagset object: $tagset") if DEBUG;
+    }
+    elsif (ref $tagset) {
+        $self->debug("got tagset reference: ", $self->dump_data($tagset)) if DEBUG;
+        my @classes = grep { ! ref } $class->all_vars('TAGSET'), $self->TAGSET;
+        $self->debug("candidates for tagset class: ", join(', ', @classes)) if DEBUG;
+        my $tclass = $classes[0];
+        $tagset = $tclass->new( tags => $config->{ tagset } );
+        $self->debug("created new tagset object: $tagset") if DEBUG;
+    }
+    else {
+        $self->debug("creating new $tagset tagset object: ", $self->dump_data($config->{ tagset })) if DEBUG;
+        $tagset = $tagset->new( tags => $config->{ tagset } );
+    } 
+    
+    $tagset->change( $config->{ tags } )
+        if $config->{ tags };
+    
     $self->{ tagset } = $tagset;
     $self->{ tags   } = $tagset->tags;
     
@@ -61,18 +85,11 @@ sub init_tags {
     my $self    = shift;
     my $config  = shift || $self->{ config };
 #    my $tags    = $self->class->list_vars( TAGS => $config->{ tags } );
-    my $tags    = $self->{ tags };
-    my $tag_map = $self->{ tag_map } = { };
+    my $tag_map = $self->{ tag_map } = $self->{ tagset }->tag_map;
 
     $self->debug("init_scanner()\n") if DEBUG;
-    $self->debug("** tags: ", $self->dump_data($tags)) if DEBUG;
+#    $self->debug("** tags: ", $self->dump_data($tags)) if DEBUG;
     
-    # ask the tags to provide details (into $tag_map) of their start tags
-    foreach my $tag (@$tags) {
-        $self->debug("adding tag to tag map: $tag\n") if DEBUG;
-        $tag->tag_map($tag_map);
-    }
-
     $self->debug("tag_map: ", $self->dump_data($tag_map), "\n") if DEBUG;
 
     # quotemeta() escape any start tokens that aren't already regexen
@@ -196,5 +213,26 @@ sub match_regex_tag {
 }
 
 
+sub tags {
+    my ($self, $tags) = @_;
+    
+    if (! ref $tags) {
+        $tags = {
+            default => $tags,
+        };
+    }
+    elsif (ref $tags eq ARRAY) {
+        $tags = {
+            default => $tags,
+        }
+    }
+    elsif (ref $tags ne HASH) {
+        return $self->error_msg( invalid => tags => $tags );
+    }
+    
+    $self->debug("setting tags: ", $self->dump_data($tags));
+}
+
+    
 
 1;

@@ -8,6 +8,8 @@ use Template::TT3::Class
 #   throws    => 'tag',
     utils     => 'blessed',
     patterns  => ':all',
+    dumps     => 'start end style',
+    accessors => 'start end style',
     constants => 'HASH ARRAY REGEX NONE',
     constant  => {
         GRAMMAR => 'Template::TT3::Grammar::TT3',
@@ -39,6 +41,7 @@ sub init {
 sub init_tag {
     my $self   = shift;
     my $config = shift || $self->{ config };
+#    $self->debug("init_tag() with ", $self->dump_data($config));
     my $style  = $config->{ tag_style } || $config->{ style };
     my $start  = $config->{ tag_start } || $config->{ start };
     my $end    = $config->{ tag_end   } || $config->{ end   };
@@ -54,6 +57,12 @@ sub init_tag {
             ($start, $end) = @$style;
             $style = undef;
         }
+#        elsif (ref $style eq REGEX) {
+#            # style can be a regular expression for the start tag and we 
+#            # re-use the end tag (no, I think this is a bad idea)
+#            ($start, $end) = ($style, $self->{ end });
+#            $style = undef;
+#        }
         elsif ($style =~ /^\s*(\S+)\s+(\S+)\s*$/) {
             # ...or a string containing "start end", e.g. '[% %]'
             ($start, $end) = ($1, $2);
@@ -75,11 +84,14 @@ sub init_tag {
     # (in case we're parsing "naked" TT code which isn't embedded in tags).
     # We do this via a method so that subclasses can further tweak the 
     # definitive style and start/end tokens.
+    $self->{ start } = $start;      # save these for accessors to use
+    $self->{ end   } = $end;
+
     ($style, $start, $end) = $self->init_tag_style($style, $start, $end);
 
-    $self->{ style } = $style;
-    $self->{ start } = $start;
-    $self->{ end   } = $end;
+    $self->{ style     } = $style;  # save the modified versions for real
+    $self->{ tag_start } = $start;
+    $self->{ tag_end   } = $end;
 
     # construct regex patterns for this tag style and cache for next time
     my $patterns = $STYLE_PATTERNS->{ $style } ||= do {
@@ -170,7 +182,7 @@ sub init_patterns {
 
 sub tag_map {
     my $self    = shift;
-    my $start   = $self->{ start };
+    my $start   = $self->{ tag_start };
     my $tag_map = shift || {
         start  => [ ],    # list of all start tokens
         regex  => [ ],    # list of regex-based start tokens and tags
@@ -213,6 +225,15 @@ sub init_grammar {
     return $self;
 }
 
+
+sub change {
+    shift->init_tag({ style => shift });    # NOTE: init_tag() expect hash ref
+}
+
+
+sub reset {
+    shift->init_tag;                        # no args - uses $self->{ config };
+}
 
 
 #-----------------------------------------------------------------------

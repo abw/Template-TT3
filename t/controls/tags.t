@@ -54,6 +54,8 @@ Hello <* a *>
 BEFORE
 Hello alpha
 
+-- stop --
+
 -- test tags list ref --
 [? TAGS ['<*' '*>'] -?]
 Hello <* b *>

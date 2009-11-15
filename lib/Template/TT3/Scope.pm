@@ -23,7 +23,9 @@ sub context {
 
     return $self->{ context } 
        ||= $self->CONTEXT->new(
+                scanner   => $self->{ scanner },
                 variables => {
+                    # FIXME: do we need both scanner refs?
                     scanner => $self->{ scanner },
                     # FIXME: these are required for "TAGS off" but they
                     # should probably be constant keywords defined in the
