@@ -109,6 +109,28 @@ sub tag_map {
         $self->debug("adding tag to tag map: $tag\n") if DEBUG;
         $tag->tag_map($tag_map);
     }
+
+    # quotemeta() escape any start tokens that aren't already regexen
+    my @regex = map { 
+        ref $_ eq REGEX ? $_ : quotemeta($_);
+    } @{ $tag_map->{ start } };
+
+    $self->debug("generating tagset for ", scalar(@regex), " tag(s)\n") if DEBUG;
+
+    if (@regex) {
+        # generate a regex to match a chunk of text (possible of zero length)
+        # up to the start of any tag
+        my $regex = join('|', @regex);
+        $tag_map->{ match_to_tag } = qr/ \G (.*?) ($regex) /sx;
+        $self->debug("generated tagset regex: $regex\n") if DEBUG;
+    }
+    else {
+        # generate a regex to matches nothing, effectively acting as a short
+        # circuit - if a template has no tags defined then we catch the entire 
+        # text block using the to_end_regex defined below
+        $tag_map->{ match_to_tag } = qr//;
+        $self->debug("no tag_map regex generated\n") if DEBUG;
+    }
     
     return $tag_map;
 }
@@ -147,7 +169,7 @@ sub change {
         $spec ||= $config->{ default }
             unless $not_first++; 
 
-        next unless $spec;
+        next unless defined $spec;
         $changed++;
         
         $self->debug("changing tag $name => ", $self->dump_data($spec)) if DEBUG;

@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    skip  => 'Not working',
+    skip  => 'Old code... being refactored out of existence',
     tests => 1,
     debug => 'Template::TT3::Tokeniser',
     args  => \@ARGV;

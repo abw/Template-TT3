@@ -121,6 +121,7 @@ our $METHODS = {
     # more text munging methods
     'upper'    => \&upper,
     'lower'    => \&lower,
+    'ucfirst'  => \&capital,
     'capital'  => \&capital,
     'capitals' => \&capitals,
     'chop'     => \&chop,

@@ -10,7 +10,7 @@ use Template::TT3::Class
     patterns  => ':all',
     dumps     => 'start end style',
     accessors => 'start end style',
-    constants => 'HASH ARRAY REGEX NONE',
+    constants => 'HASH ARRAY REGEX NONE OFF ON',
     constant  => {
         GRAMMAR => 'Template::TT3::Grammar::TT3',
     },
@@ -31,9 +31,12 @@ our $STYLE_PATTERNS = { };
 sub init {
     my $self   = shift;
     my $config = shift || $self->{ config };
+    
     $self->init_tag($config);
     $self->init_grammar($config);
+    
     $self->{ config } ||= $config;
+    
     return $self;
 }
 
@@ -46,7 +49,7 @@ sub init_tag {
     my $start  = $config->{ tag_start } || $config->{ start };
     my $end    = $config->{ tag_end   } || $config->{ end   };
 
-    if ($style) {
+    if (defined $style) {
         if (ref $style eq HASH) {
             # style can be an array ref of [start, end], e.g. ['[%', '%]']
             ($start, $end) = @$style{ qw( start end ) };
@@ -63,6 +66,16 @@ sub init_tag {
 #            ($start, $end) = ($style, $self->{ end });
 #            $style = undef;
 #        }
+        elsif ($style eq OFF) {
+            $self->debug("turned tag off") if DEBUG;
+            $self->{ off } = 1;
+            ($style, $start, $end) = @$self{ qw( style start end ) };
+        }
+        elsif ($style eq ON) {
+            $self->debug("turned tag on") if DEBUG;
+            $self->{ off } = 0;
+            ($style, $start, $end) = @$self{ qw( style start end ) };
+        }
         elsif ($style =~ /^\s*(\S+)\s+(\S+)\s*$/) {
             # ...or a string containing "start end", e.g. '[% %]'
             ($start, $end) = ($1, $2);
@@ -188,6 +201,10 @@ sub tag_map {
         regex  => [ ],    # list of regex-based start tokens and tags
         fixed  => { },    # hash mapping fixed start tokens to tags
     };
+
+#    $self->debug("tag_map $self is ", $self->{ off } ? 'OFF' : 'ON');
+    
+    return $tag_map if $self->{ off };
 
     if (ref $start eq REGEX) {
         # tags that start with a regex get added to a list for sequential matching

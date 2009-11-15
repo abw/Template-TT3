@@ -43,10 +43,12 @@ sub as_expr {
 sub value {
     my ($self, $context) = @_;
     my $expr = $self->[EXPR];
-    my $tags = $expr->value($context)
-        || return $self->error_msg( tags_undef => $self->[TOKEN], $expr->source );
+    my $tags = $expr->value($context);
+    
+    return $self->error_msg( tags_undef => $self->[TOKEN], $expr->source )
+        unless defined $tags;
         
-    $self->debug("Evaluated TAGS: $tags    # changing TAGS in scanner is TODO\n");
+    $self->debug("Setting TAGS: $tags") if DEBUG;
     
     my $scanner = $context->scanner
         || return $self->error_msg('no_scanner');

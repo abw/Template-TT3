@@ -14,10 +14,12 @@
 use Badger 
     lib     => '../../lib';
 
+#use Badger::Debug
+#    modules => 'Template::TT3::Tag';
+
 use Template::TT3::Test 
-#    skip    => 'TAGS control not implemented yet',
-    tests   => 2,
-    debug   => 'Template::TT3::Template',
+    tests   => 10,
+    debug   => 'Template::TT3::Tag',
     args    => \@ARGV,
     import  => 'test_expect callsign';
 
@@ -41,20 +43,16 @@ Hello World
 -- expect --
 <ERROR:Undefined value returned by TAGS expression: invalid>
 
--- stop --
-
 # TAGS control isn't implemented yet
 
 -- test tags single string --
--- dump_tokens --
+#-- dump_tokens --
 BEFORE
 [? TAGS '<* *>' -?]
 Hello <* a *>
 -- expect --
 BEFORE
 Hello alpha
-
--- stop --
 
 -- test tags list ref --
 [? TAGS ['<*' '*>'] -?]
@@ -80,13 +78,33 @@ Hello <* e *>
 -- expect --
 Hello echo
 
--- test tags off/one --
+#-- start --
+
+-- test tags off --
 [? TAGS off -?]
-Hello <* f *>
-[? TAGS on -?]
-Hello <* f *>
+Hello [% f %]
 -- expect --
-Hello <* f *>
+Hello [% f %]
+
+-- test tags off/on --
+[? TAGS off -?]
+Hello [% f %]
+[? TAGS on -?]
+Hello [% f %]
+-- expect --
+Hello [% f %]
 Hello foxtrot
+
+-- test tags get restored to previous state --
+[? TAGS '<* *>' -?]
+<* h.ucfirst *> California
+[? TAGS off -?]
+<* h.ucfirst *> California
+[? TAGS on -?]
+<* h.ucfirst *> California
+-- expect --
+Hotel California
+<* h.ucfirst *> California
+Hotel California
 
 

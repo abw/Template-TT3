@@ -84,35 +84,13 @@ sub init_tagset {
 sub init_tags {
     my $self    = shift;
     my $config  = shift || $self->{ config };
-#    my $tags    = $self->class->list_vars( TAGS => $config->{ tags } );
     my $tag_map = $self->{ tag_map } = $self->{ tagset }->tag_map;
 
-    $self->debug("init_scanner()\n") if DEBUG;
-#    $self->debug("** tags: ", $self->dump_data($tags)) if DEBUG;
-    
+    $self->debug("init_tags()\n") if DEBUG;
     $self->debug("tag_map: ", $self->dump_data($tag_map), "\n") if DEBUG;
 
-    # quotemeta() escape any start tokens that aren't already regexen
-    my @regex = map { 
-        ref $_ eq REGEX ? $_ : quotemeta($_);
-    } @{ $tag_map->{ start } };
-
-    $self->debug("generating tagset for ", scalar(@regex), " tag(s)\n") if DEBUG;
-
-    if (@regex) {
-        # generate a regex to match a chunk of text (possible of zero length)
-        # up to the start of any tag
-        my $regex = join('|', @regex);
-        $self->{ match_to_tag } = qr/ \G (.*?) ($regex) /sx;
-        $self->debug("generated tagset regex: $regex\n") if DEBUG;
-    }
-    else {
-        # generate a regex to matches nothing, effectively acting as a short
-        # circuit - if a template has no tags defined then we catch the entire 
-        # text block using the to_end_regex defined below
-        $self->{ match_to_tag } = qr//;
-        $self->debug("no tag_map regex generated\n") if DEBUG;
-    }
+    # import the regex to match all tags in the tag set
+    $self->{ match_to_tag } = $tag_map->{ match_to_tag };
     
     # define a regex to match everything from the current position to the end
     $self->{ match_to_end } = qr/ \G (.*) $/sx;
@@ -215,22 +193,9 @@ sub match_regex_tag {
 
 sub tags {
     my ($self, $tags) = @_;
-    
-    if (! ref $tags) {
-        $tags = {
-            default => $tags,
-        };
-    }
-    elsif (ref $tags eq ARRAY) {
-        $tags = {
-            default => $tags,
-        }
-    }
-    elsif (ref $tags ne HASH) {
-        return $self->error_msg( invalid => tags => $tags );
-    }
-    
-    $self->debug("setting tags: ", $self->dump_data($tags));
+    $self->debug("setting tags: ", $self->dump_data($tags)) if DEBUG;
+    $self->{ tagset }->change($tags);
+    $self->init_tags;
 }
 
     

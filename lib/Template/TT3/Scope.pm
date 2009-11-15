@@ -8,6 +8,7 @@ use Template::TT3::Class
     config      => 'scanner',
     init_method => 'configure',
     accessors   => 'scanner',
+    constants   => 'OFF ON',
     constant    => {
         CONTEXT => 'Template::TT3::Context',
     };
@@ -30,8 +31,8 @@ sub context {
                     # FIXME: these are required for "TAGS off" but they
                     # should probably be constant keywords defined in the
                     # grammar.
-                    off     => 'off',
-                    on      => 'on',
+                    off     => OFF,
+                    on      => ON,
                 },
            );
            
