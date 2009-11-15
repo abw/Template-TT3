@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 3,
+    tests   => 4,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -42,8 +42,6 @@ Hello
 [?- # This line is ignored but only this line 
     # This line is ignored too
     # The pre/post chomp flags will eat whitespace around the tag
-    a
-    wizzle fribnitz
 ?] World
 -- expect --
 Hello World
@@ -53,3 +51,10 @@ Hello [? # This line is ignored but only this line -?]
 World
 -- expect --
 Hello World
+
+-- test control tag with undefined variable --
+Hello [? wibble -?]
+World
+-- expect --
+<ERROR:"wibble" is undefined>
+

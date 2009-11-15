@@ -16,7 +16,7 @@ use Template::TT3::Class
         values   => \&get,
     },
     messages  => {
-        undefined  => '%s is undefined',
+        undefined  => '"%s" is undefined',
         no_vmethod => '"<2>" is not a valid <1> method in "<3>.<2>"', 
     };
         

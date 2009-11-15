@@ -17,10 +17,10 @@ our $EOF;
 
 
 sub tokens {
-    my ($self, $input, $output, $scanner) = @_;
+    my ($self, $input, $output, $scope) = @_;
     my $first = $output->last;
-    my $end   = $self->SUPER::tokens($input, $output, $scanner);
-    my $last  = $self->parse($first, $input, $output, $scanner);
+    my $end   = $self->SUPER::tokens($input, $output, $scope);
+    my $last  = $self->parse($first, $input, $output, $scope);
     
     # set a forward reference from the first token to the last, so that 
     # we can skip over any control tokens when parsing runtime expressions.
@@ -34,25 +34,40 @@ sub tokens {
 
 
 sub parse {
-    my ($self, $token, $input, $output, $scanner) = @_;
+    my ($self, $token, $input, $output, $scope) = @_;
+    my ($last, $exprs, $text);
 
+    $self->debug("scope is $scope") if DEBUG;
+    
     # we need to put a temporary EOF on the end of the token stream so that
     # we can parse the tokens that we've got into expressions.
-    my $last = $output->last;
+    $last = $output->last;
     $last->[NEXT] = $EOF ||= EOF->new;
     
 #    $self->debug("parsing control tag") if DEBUG;
 
-    my $exprs = $token->as_exprs(\$token);
+    if ($exprs = $token->as_exprs(\$token)) {
+        $self->debug("parsed control tag: ", $exprs->sexpr) if DEBUG;
 
-    # FIXME: wind over any unparsed tokens
-    while ($token && $token->skip_ws(\$token)) {
-        last if $token->eof;
-        print "** IGNORED ** ", $token->token, "\n";
-        $token = $token->next;
+        # Evaluate expressions in the current scope.  We call text() (rather
+        # than value() or values()) to force any undefined values to be 
+        # reported.  It's OK for an expression to yield an undefined value()
+        # but not text() (TODO: perhaps better to have different variable
+        # objects for undefined vs not_found
+        $exprs->text( $scope->context );
     }
+
+#    $token->skip_ws(\$token);
+#    $self->error("Unexpected text in control tag: $text")
+#        if ($text = $token->remaining_text) && length $text;
+        
+    # FIXME: wind over any unparsed tokens
+#    while ($token && $token->skip_ws(\$token)) {
+#        last if $token->eof;
+#        print "** IGNORED ** ", $token->token, "\n";
+#        $token = $token->next;
+#    }
     
-    $self->debug("parsed control tag: ", $exprs->sexpr) if DEBUG;
 
     # clear temporary EOF token
     $last->[NEXT] = undef;

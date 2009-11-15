@@ -15,8 +15,8 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    skip    => 'TAGS control not implemented yet',
-    tests   => 6,
+#    skip    => 'TAGS control not implemented yet',
+    tests   => 2,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -34,6 +34,16 @@ __DATA__
 Hello [% a %]
 -- expect --
 Hello alpha
+
+-- test tags invalid --
+[? TAGS invalid -?]
+Hello World
+-- expect --
+<ERROR:Undefined value returned by TAGS expression: invalid>
+
+-- stop --
+
+# TAGS control isn't implemented yet
 
 -- test tags single string --
 -- dump_tokens --
@@ -62,13 +72,19 @@ Hello <* d *>
 -- expect --
 Hello delta
 
--- test tags list ref --
-[? TAGS off -?]
-Hello <* e *>
-[? TAGS on -?]
+-- test tags are --
+[? TAGS are ['<*' '*>'] -?]
 Hello <* e *>
 -- expect --
-Hello <* e *>
 Hello echo
+
+-- test tags off/one --
+[? TAGS off -?]
+Hello <* f *>
+[? TAGS on -?]
+Hello <* f *>
+-- expect --
+Hello <* f *>
+Hello foxtrot
 
 

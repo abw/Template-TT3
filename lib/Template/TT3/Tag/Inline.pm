@@ -141,8 +141,8 @@ sub init_tag_style {
 #-----------------------------------------------------------------------
 
 sub scan {
-    my ($self, $input, $output, $text, $start, $pos) = @_;
-    my $start_pos = $pos - length $start;
+    my ($self, $input, $output, $scope, $text, $start, $pos) = @_;
+    my $start_pos = pos($$input) - length $start;
     my ($token, $type, $chomp, $end);
 
     # Look for a chomping flag at the start
@@ -176,7 +176,7 @@ sub scan {
         if defined $start && length $start;
     
     # tokenise the tag content
-    $end = $self->tokens($input, $output);
+    $end = $self->tokens($input, $output, $scope);
 
     $self->debug("matching [$end] post-chomp: $self->{ match_post_chomp }")
         if DEBUG;

@@ -2,6 +2,7 @@ package Template::TT3::Scanner;
 
 use Template::TT3::Tagset::TT3;
 use Template::TT3::Tokens;
+use Template::TT3::Scope;
 use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
@@ -10,10 +11,12 @@ use Template::TT3::Class
     constant   => {
         TAGSET => 'Template::TT3::Tagset::TT3',
         TOKENS => 'Template::TT3::Tokens',
+        SCOPE  => 'Template::TT3::Scope',
     },
     config     => [
         'tagset|class:TAGSET|method:TAGSET',
         'tokens|class:TOKENS|method:TOKENS',
+        'scope|class:SCOPE|method:SCOPE',
     ],
     messages   => { 
         no_tag => 'No tag found matching start token: %s',
@@ -102,16 +105,23 @@ sub init_tags {
 
 
 sub scan {
-    my ($self, $input, $output) = @_;
+    my ($self, $input, $output, $scope) = @_;
+
+    # define a new scope for this scanner and an output list if undefined
+    my $config = $self->{ config };
+    local $config->{ scanner } = $self;
+    $scope ||= $self->{ scope };
+
     return $self->tokens(
         ref $input ? $input : \$input,
-        $output || $self->{ tokens }->new( $self->{ config } ),
+        $output || $self->{ tokens }->new($config),
+        $scope->new($config),
     );
 }
 
 
 sub tokens {
-    my ($self, $input, $output) = @_;
+    my ($self, $input, $output, $scope) = @_;
     my ($pos, $text, $start, $tag);
     
     while (1) {
@@ -131,7 +141,7 @@ sub tokens {
                
             # TODO: may want to pass \$text and \$start references to avoid
             # more string copying
-            $tag->scan($input, $output, $text, $start, $pos, $self);
+            $tag->scan($input, $output, $scope, $text, $start, $pos);
         }
         elsif ($$input =~ /$self->{ match_to_end }/gc) {
             # We've matched the rest of the text after the last tag (or the 
@@ -145,7 +155,9 @@ sub tokens {
         }
     }
 
+    # add the terminator that marks the end of file
     $output->eof_token();
+    
     return $output->finish;
 }
 

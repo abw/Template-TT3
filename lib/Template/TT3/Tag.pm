@@ -220,7 +220,7 @@ sub init_grammar {
 #-----------------------------------------------------------------------
 
 sub scan {
-    my ($self, $input, $output, $text, $start, $pos, $scanner) = @_;
+    my ($self, $input, $output, $scope, $text, $start, $pos) = @_;
 
     # push any preceding text onto the token list
     $self->debug("pre-text: <$text>") if DEBUG && $text;
@@ -235,12 +235,12 @@ sub scan {
         if defined $start && length $start;
     
     # call the main tokenising method
-    return $self->tokens($input, $output, $scanner);
+    return $self->tokens($input, $output, $scope);
 }
     
         
 sub tokens {
-    my ($self, $input, $output) = @_;
+    my ($self, $input, $output, $scope) = @_;
     my $pos = pos $$input;
     my $type;
 
@@ -251,7 +251,7 @@ sub tokens {
         # $output->token($token)
 
         if ($$input =~ /$NAMESPACE/cog) {
-            $self->namespace_token($input, $output, $1, $pos);
+            $self->namespace_token($input, $output, $scope, $1, $pos);
         }
         elsif ($$input =~ /$IDENT/cog) {
             if ($type = $self->{ keywords }->{ $1 }) {

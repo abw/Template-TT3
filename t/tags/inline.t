@@ -31,3 +31,14 @@ ok( $tag, 'created closed tag' );
 $tag = INLINE->new( pre_chomp => 1, post_chomp => '~' );
 ok( $tag, 'created closed tag with custom pre/post chomp' );
 
+#test_expect();
+
+__DATA__
+
+-- test token dump --
+-- dump_tokens --
+Hello [% world %]
+-- expect --
+???
+
+

@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Base',
     utils     => 'self_params numlike refaddr',
-    slots     => 'meta next token pos',
+    slots     => 'meta _next token pos',
     import    => 'class',
     constants => ':elem_slots :eval_args CODE ARRAY HASH BLANK',
     constant  => {   
@@ -137,6 +137,17 @@ sub skip_ws {
 #    $_[0];
 }
 
+sub next { 
+    if (@_ == 1) {
+        return $_[SELF]->[NEXT];
+    }
+    else {
+        my ($self, $token) = @_;
+        $$token = $self->[NEXT];
+        return $$token;
+    }
+}
+
 
 sub skip_delimiter { 
     # Most tokens aren't delimiters so they simply return the zeroth argument
@@ -209,7 +220,11 @@ sub as_args {
 }
 
 sub is {
-    $_[0]->[TOKEN] && $_[0]->[TOKEN] eq $_[1];
+    $_[SELF]->[TOKEN] && $_[SELF]->[TOKEN] eq $_[1];
+}
+
+sub in {
+    $_[SELF]->[TOKEN] && $_[1]->{ $_[SELF]->[TOKEN] };
 }
 
 sub value {
@@ -277,6 +292,19 @@ sub view_guts {
     self => refaddr $_[0],
     next => refaddr $_[0]->[NEXT],
     jump => refaddr $_[0]->[JUMP],
+}
+
+sub remaining_text {
+    my $self = shift;
+    my $elem = $self;
+    my @text;
+    while ($elem) {
+        push(@text, $elem->[TOKEN]);
+        $elem = $elem->[NEXT];
+    }
+    return @text
+        ? join(BLANK, grep { defined } @text)
+        : BLANK;
 }
     
     
