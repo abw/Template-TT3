@@ -19,6 +19,7 @@ use Template::TT3::Class
         tags_undef => 'Undefined value returned by %s expression: %s',
     };
 
+
 sub as_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
@@ -29,12 +30,14 @@ sub as_expr {
     # treated the same as just "TAGS ..."
     $$token->next($token)
         if $$token->in( SKIP_WORDS );
-        
+    
+    # parse the next expression    
     $self->[EXPR] = $$token->as_expr($token, $scope)
         || return $self->missing( expression => $token );
     
     return $self;
 }
+
 
 sub value {
     my ($self, $context) = @_;
@@ -42,9 +45,10 @@ sub value {
     my $tags = $expr->value($context)
         || return $self->error_msg( tags_undef => $self->[TOKEN], $expr->source );
         
-    $self->debug("evaluating TAGS: $tags");
+    $self->debug("Evaluated TAGS: $tags    # changing TAGS in scanner is TODO\n");
     
     return ();
 }
+
 
 1;
