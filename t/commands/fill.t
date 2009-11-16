@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 5,
+    tests   => 8,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -64,6 +64,7 @@ fill 'foo.bar'
 TODO: fill foo.bar
 
 -- test fill $a --
+-- skip not supported yet --
 fill $a
 -- expect --
 TODO: fill alpha
