@@ -19,9 +19,12 @@ use Badger::Class
         
         # flags used by elements
         FORCE               => 1,   # used to override operator precedence
+        
+        # misc symbols
+        DOT                 => '.',
     },
     exports => {
-        any  => 'FORCE PRESENT',
+        any  => 'FORCE DOT',
         tags => {
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',

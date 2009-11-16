@@ -53,3 +53,17 @@ fill foo .tt3
 # around the input text.  That's why we've got an additional '%]' at the end
 <ERROR:unparsed tokens: .tt3 %]>
 
+-- test fill .foo/bar --
+fill .foo/bar
+-- expect -- 
+TODO: fill .foo/bar
+
+-- test fill 'quoted' --
+fill 'foo.bar'
+-- expect --
+TODO: fill foo.bar
+
+-- test fill $a --
+fill $a
+-- expect --
+TODO: fill alpha

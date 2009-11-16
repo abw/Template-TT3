@@ -18,7 +18,7 @@ use Badger
 #    modules => 'Template::TT3::Tag';
 
 use Template::TT3::Test 
-    tests   => 10,
+    tests   => 15,
     debug   => 'Template::TT3::Tag',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -43,10 +43,7 @@ Hello World
 -- expect --
 <ERROR:Undefined value returned by TAGS expression: invalid>
 
-# TAGS control isn't implemented yet
-
 -- test tags single string --
-#-- dump_tokens --
 BEFORE
 [? TAGS '<* *>' -?]
 Hello <* a *>
@@ -60,13 +57,13 @@ Hello <* b *>
 -- expect --
 Hello bravo
 
--- test tags assign string --
+-- test tags equals string --
 [? TAGS = '<* *>' -?]
 Hello <* c *>
 -- expect --
 Hello charlie
 
--- test tags list ref --
+-- test tags equals list ref --
 [? TAGS = ['<*' '*>'] -?]
 Hello <* d *>
 -- expect --
@@ -78,7 +75,11 @@ Hello <* e *>
 -- expect --
 Hello echo
 
-#-- start --
+-- test "tags is" is grammatically incorrect --
+[? TAGS is ['!*' '*!']   # I am illiterate -?]
+Hello !* e *!
+-- expect --
+Hello echo
 
 -- test tags off --
 [? TAGS off -?]
@@ -107,4 +108,43 @@ Hotel California
 <* h.ucfirst *> California
 Hotel California
 
+-- test multiple tags --
+[? TAGS {
+     inline  = '<* *>'
+     comment = '<# #>'
+   }
+-?]
+Hello [% i %]
+Hello <* i *>
+Hello [# i #]
+Hello <# i #>!
+-- expect --
+Hello [% i %]
+Hello india
+Hello [# i #]
+Hello !
+
+-- test dotted tags --
+[? TAGS.inline '<* *>' -?]
+Romeo and [% j.ucfirst %]
+Romeo and <* j.ucfirst *>
+-- expect --
+Romeo and [% j.ucfirst %]
+Romeo and Juliet
+
+-- test dotted tags --
+[? TAGS.comment '<* *>' -?]
+Romeo and [% j.ucfirst %] are lovers
+Romeo and <* j.ucfirst *> are lovers
+-- expect --
+Romeo and Juliet are lovers
+Romeo and  are lovers
+
+-- test dotted tags with invalid name --
+[? TAGS.cheese '<* *>' -?]
+Romeo and [% j.ucfirst %] are lovers
+-- expect --
+<ERROR:Invalid tags specified: cheese>
+
+    
 

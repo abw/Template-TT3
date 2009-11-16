@@ -4,6 +4,7 @@ use Template::TT3::Elements::Literal;
 use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
     version   => 3.00,
+    debug     => 0,
     base      => 'Template::TT3::Element::Operator::InfixRight
                   Template::TT3::Element::Operator::Assignment
                   Template::TT3::Element',
@@ -61,6 +62,11 @@ sub value {
               )->value;
 }
 
+sub pairs {
+    $_[SELF]->debug("pairs [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]") if DEBUG;
+    return $_[SELF]->[LHS]->name( $_[CONTEXT] )     # fetch LHS as a name
+        => $_[SELF]->[RHS]->value( $_[CONTEXT] );   # fetch RHS as a value
+}
 
 
 1;

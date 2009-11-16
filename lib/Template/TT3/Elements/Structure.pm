@@ -68,10 +68,12 @@ sub value {
     ];
 }
 
+
 sub values {
     $_[SELF]->debug("called values() on block: ", $_[SELF]->source) if DEBUG;
     @{ $_[0]->value($_[1]) } 
 }
+
 
 sub text {
     $_[SELF]->debug("called text() on block: ", $_[SELF]->source) if DEBUG;
@@ -82,6 +84,12 @@ sub text {
         @{ $_[0]->[EXPR] } 
 #        @{ $_[0]->value($_[1]) }
     );
+}
+
+sub pairs {
+    $_[SELF]->debug("called pairs() on block: ", $_[SELF]->source) if DEBUG;
+    map { $_->pairs($_[CONTEXT]) } 
+    @{ $_[SELF]->[EXPR] } 
 }
 
 1;

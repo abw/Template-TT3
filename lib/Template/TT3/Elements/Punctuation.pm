@@ -220,7 +220,9 @@ sub text {
 package Template::TT3::Element::Hash;
 
 use Template::TT3::Class 
+    debug     => 0,
     base      => 'Template::TT3::Element::Construct',
+    constants => ':elem_slots :eval_args',
     constant  => {
         FINISH        => '}',
         SEXPR_FORMAT  => "<hash:%s>",
@@ -250,6 +252,12 @@ sub as_block {
     return $block;
 }
 
+sub value {
+    $_[SELF]->debug("called value() on hash: ", $_[SELF]->source) if DEBUG;
+    return {
+        $_[SELF]->[EXPR]->pairs($_[CONTEXT])
+    };
+}
 
 
 package Template::TT3::Element::Parens;

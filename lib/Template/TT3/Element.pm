@@ -21,6 +21,7 @@ use Template::TT3::Class
         delimiter  => \&null,
         terminator => \&null,
         as_dotop   => \&null,
+        as_word    => \&null,
     };
 
 
@@ -220,10 +221,28 @@ sub as_args {
 }
 
 sub is {
-    $_[SELF]->[TOKEN] && $_[SELF]->[TOKEN] eq $_[1];
+    if (@_ == 3) {
+        # if a $token reference is passed as the third argument then we 
+        # advance it on a successful match
+        my ($self, $match, $token) = @_;
+        if ($self->[TOKEN] && $self->[TOKEN] eq $match) {
+            $$token = $self->[NEXT];
+            return $self;
+        }
+    }
+    return $_[SELF]->[TOKEN] && $_[SELF]->[TOKEN] eq $_[1];
 }
 
 sub in {
+    if (@_ == 3) {
+        # as per in(), we advance the $token reference
+        my ($self, $match, $token) = @_;
+        my $result;
+        if ($self->[TOKEN] && ($result = $match->{ $self->[TOKEN] })) {
+            $$token = $self->[NEXT];
+            return $result;
+        }
+    }
     $_[SELF]->[TOKEN] && $_[1]->{ $_[SELF]->[TOKEN] };
 }
 
@@ -247,6 +266,14 @@ sub list_values {
         ? @$value
         : $value;
 #    shift->values(@_);
+}
+
+sub pair {
+    shift->not_implemented;
+}
+
+sub pairs {
+    shift->not_implemented;
 }
 
 sub text {
@@ -408,6 +435,73 @@ Returns a constructor function.
 =head2 configuration($config) 
 
 Stub configuration method for subclasses to redefine if they need to
+
+=head2 is($match,\$token)
+
+This method can be used to test if if a token matches a particular value.
+So instead of writing something like this:
+
+    if ($token->token eq 'hello') {
+        # ...
+    }
+
+You can write:
+
+    if ($token->is('hello')) {
+        # ...
+    }
+
+When you've matched successfully a token you usually want to do something
+meaningful and move onto the next token.  For example:
+
+    if ($token->is('hello')) {
+        # do something meaningful
+        print "Hello back to you!";
+
+        # advance to the next token
+        $token = $token->next;
+    }
+    else {
+        die "Sorry, I don't understand '", $token->token, "\n";
+    }
+
+The C<is()> method accepts a reference to the current token as an optional
+second argument. If the match is successful then the reference will be
+advanced to point to the next token. Thus the above example can be written
+more succinctly as:
+
+    if ($token->is('hello', \$token)) {
+        # do something meaningful
+        print "Hello back to you!";
+    }
+    else {
+        die "Sorry, I don't understand '", $token->token, "\n";
+    }
+
+=head2 in(\%matches,\$token)
+
+This method is similar to L<in()> but allows you to specify a a reference to
+a hash array of potential matches that you're interested in.  If the token
+matches one of the keys in the hash array then the corresponding value will
+be returned. 
+    
+    my $matches = {
+        hello => 'Hello back to you',
+        hey   => 'Hey, wazzup?',
+        hi    => 'Hello',
+        yo    => 'Yo Dawg',
+    };
+
+    if ($response = $token->in($matches)) {
+        print $response;
+    }
+    else {
+        die "Sorry, I don't understand '", $token->token, "\n";
+    }
+
+As with C<is()>, you can pass a reference to the current token as the 
+optional second argument.  If the match is successful then the reference
+will be advanced to point to the next token.
 
 =head1 AUTHOR
 

@@ -9,19 +9,21 @@ use Template::TT3::Class
     base       => 'Template::TT3::Element',
     constants  => ':elem_slots :eval_args',
     as         => 'filename',
-    alias      => {
-        value  => \&text,
-        values => \&text,
-    },
     constant   => {
         SEXPR_FORMAT => '<literal:%s>',
+    },
+    alias      => {
+        name    => \&text,
+        value   => \&text,
+        values  => \&text,
+        source  => \&text,
     };
 
-*source = \&text;
 
 sub text {
     $_[0]->[TOKEN];
 }
+
 
 sub sexpr {
     sprintf(
@@ -56,6 +58,12 @@ sub dot_op {
 }
 
 
+sub as_word {
+    my ($self, $token) = @_;
+    $$token = $self->[NEXT];
+    return $self;
+}
+
 
 #-----------------------------------------------------------------------
 # Template::TT3::Element::Word - literal word elements
@@ -77,6 +85,7 @@ sub generate {
     );
 }
 
+
 sub view {
     $_[1]->view_word($_[0]);
 }
@@ -94,10 +103,6 @@ sub as_dotop {
     return $self;
 }
 
-sub value {
-    $_[0]->[TOKEN];
-}
-
 
 
 #-----------------------------------------------------------------------
@@ -112,19 +117,28 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Literal',
     constants => ':elem_slots';
 
+
 sub generate {
     $_[1]->generate_keyword(
         $_[0]->[TOKEN],
     );
 }
 
+
 sub view {
     $_[1]->view_keyword($_[0]);
 }
 
+
 sub as_dotop {
     # keywords downgrade themselves to simple words when used after a dot
     shift->become('word')->as_dotop(@_);
+}
+
+
+sub as_word {
+    # keywords downgrade themselves to simple words when used after a dot
+    shift->become('word')->as_word(@_);
 }
 
 
@@ -141,7 +155,13 @@ use Template::TT3::Class
     as        => 'filename',        # mixin as_filename() role
     constant  => {
         SEXPR_FORMAT => '<filename:%s>',
+    },
+    alias      => {
+        text   => \&filename,
+        value  => \&filename,
+        values => \&filename,
     };
+
 
 sub generate {
     $_[1]->generate_filename(
@@ -149,13 +169,11 @@ sub generate {
     );
 }
 
+
 sub view {
     $_[1]->view_filename($_[0]);
 }
 
-sub filename {
-    $_[SELF]->[EXPR];
-}
 
 sub sexpr {
     sprintf(
@@ -163,5 +181,6 @@ sub sexpr {
         $_[SELF]->[EXPR]
     )
 }
-   
+
+
 1;

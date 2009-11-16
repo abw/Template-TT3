@@ -44,7 +44,7 @@ sub parse {
     $last = $output->last;
     $last->[NEXT] = $EOF ||= EOF->new;
     
-#    $self->debug("parsing control tag") if DEBUG;
+    $self->debug("parsing control tag") if DEBUG;
 
     if ($exprs = $token->as_exprs(\$token)) {
         $self->debug("parsed control tag: ", $exprs->sexpr) if DEBUG;
@@ -57,10 +57,11 @@ sub parse {
         $exprs->text( $scope->context );
     }
 
-#    $token->skip_ws(\$token);
-#    $self->error("Unexpected text in control tag: $text")
-#        if ($text = $token->remaining_text) && length $text;
-        
+    # check for unparsed text
+    $token->skip_ws(\$token);
+    $self->error("Unexpected text in control tag: $text")
+        if ($text = $token->remaining_text) && length $text;
+    
     # FIXME: wind over any unparsed tokens
 #    while ($token && $token->skip_ws(\$token)) {
 #        last if $token->eof;

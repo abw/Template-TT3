@@ -101,6 +101,12 @@ sub assign {
 #    return ();
 }
 
+sub name {
+    $_[SELF]->debug("name($_[SELF]->[TOKEN])") if DEBUG;
+    $_[SELF]->[TOKEN];
+}
+
+
 # TODO: source() should add args
 
 
