@@ -5,9 +5,9 @@ use Template::TT3::Class
     version     => 3.00,
     debug       => 0,
     base        => 'Template::TT3::Base',
-    config      => 'scanner',
+    config      => 'scanner input output',
     init_method => 'configure',
-    accessors   => 'scanner',
+    accessors   => 'scanner input output',
     constants   => 'OFF ON',
     constant    => {
         CONTEXT => 'Template::TT3::Context',
@@ -22,11 +22,27 @@ sub context {
     # create a context on demand that includes variable references to the 
     # scanner (TODO: and various other items).
 
+    # FIXME: we can't cache this context reference without creating a 
+    # circular reference.  Either use weaken or do something else.
+    return $self->CONTEXT->new(
+        scope     => $self,
+        variables => {
+            %$self,
+            
+            # FIXME: these are required for "TAGS off" but they
+            # should probably be constant keywords defined in the
+            # grammar.
+            off     => OFF,
+            on      => ON,
+        },
+   );
+
+
+    # older code
     return $self->{ context } 
        ||= $self->CONTEXT->new(
                 scanner   => $self->{ scanner },
                 variables => {
-                    # FIXME: do we need both scanner refs?
                     scanner => $self->{ scanner },
                     # FIXME: these are required for "TAGS off" but they
                     # should probably be constant keywords defined in the

@@ -4,11 +4,7 @@ use Template::TT3::Class
     version    => 2.718,
     constants  => ':elem_slots :eval_args',
     mixins     => 'as_filename filename';
-#    alias      => {
-#        text   => \&filename,
-#        value  => \&filename,
-#        values => \&filename,
-#    };
+
 
 sub as_filename {
     my ($self, $token) = @_;

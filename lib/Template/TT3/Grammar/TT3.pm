@@ -117,12 +117,12 @@ our $SYMBOLS  = [
     [ 'do'      => cmd_do           => 150,   0 ],
     [ 'as'      => cmd_as           => 150,   0 ],
     [ 'is'      => cmd_is           => 150,   0 ],
+    [ 'raw'     => cmd_raw          => 150,   0 ],
     [ 'if'      => cmd_if           => 150,   0 ],
     [ 'for'     => cmd_for          => 150,   0 ],
     [ 'fill'    => cmd_fill         => 150,   0 ],
     [ 'end'     => end              =>   0,   0 ],
-# conflict!  
-#    [ 'block'   => cmd_block    => 150,   0 ],
+    [ 'block'   => cmd_block        => 150,   0 ],
 
 #    [ "${COMMAND}::With"        => 150,   0, 'with', 'end' ],
 #    [ "${COMMAND}::Block"       =>   0,   0, 'block', 'end' ],

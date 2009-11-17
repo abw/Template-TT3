@@ -9,15 +9,6 @@ use Template::TT3::Class
         values => \&text,
     };
 
-# hmm... problem with generators here... we really want to generate
-# 'do' as a keyword when called with with token generators.
-
-sub generate {
-    $_[GENERATOR]->generate_keyword(
-        $_[SELF]->[TOKEN],
-        $_[SELF]->[EXPR],
-    );
-}
 
 sub as_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
@@ -51,7 +42,7 @@ sub as_postop {
 
     # store LHS and advance token past keyword
     $self->[LHS] = $lhs;
-    $$token = $self->[NEXT];
+    $self->accept($token);
     
     # parse block
     $self->[RHS] = $$token->as_block($token, $scope)
@@ -71,6 +62,26 @@ sub text {
             ->set( $_[SELF]->[RHS]->text( $_[CONTEXT] ) )->BLANK
         : $_[SELF]->[RHS]->text( $_[CONTEXT] );
 }
+
+
+# Need to generalise this - it's disabled for now because it makes a test
+# in t/control/html.t fail.  Ironically, the test is illustrating how the 
+# html encoding is broken because keywords like 'is' don't have explicit
+# html() methods.  So if I add the html() method then the test fails, 
+# suggesting that the problem is fixed, prompting me to change and/or
+# remove the test.  Technically speaking, it *is* solved for the 'is' 
+# keyword, but it's not fixed for any of the others.  So I don't want to 
+# be led into a false sense of security.
+
+# sub html {
+#     # if an 'is' command has a LHS then it's like an assignment: foo is { xxx }
+#     # otherwise it's just an anonymous block container: is { xxx }
+#     $_[SELF]->[LHS]
+#         ? $_[SELF]->[LHS]
+#             ->variable( $_[CONTEXT] )
+#             ->set( $_[SELF]->[RHS]->html( $_[CONTEXT] ) )->BLANK
+#         : $_[SELF]->[RHS]->html( $_[CONTEXT] );
+# }
 
 
 1;

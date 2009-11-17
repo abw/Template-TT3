@@ -1,8 +1,8 @@
 #============================================================= -*-perl-*-
 #
-# t/commands/is.t
+# t/commands/block.t
 #
-# Test script for the 'is' command.
+# Test script for the 'block' command.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 7,
+    tests   => 6,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -28,40 +28,24 @@ test_expect(
 
 __DATA__
 
--- test alpha --
-[% is a %]
+-- test block ... end --
+[% block; a; end %]
 -- expect -- 
 alpha
 
--- test bravo --
-[% is; b; end %]
+-- test block { } --
+[% block { a b c } %]
 -- expect -- 
-bravo
+alphabravocharlie
 
--- test bravo --
-[% is -%]
-b is [% b %]
-[%- end %]
+-- test block with single expression --
+[% block a %]
 -- expect -- 
-b is bravo
+alpha
 
--- test charlie --
-[% a is c; a %]
--- expect -- 
-charlie
-
--- test delta --
-[% a is; d; end; a %]
--- expect -- 
-delta
-
--- test echo foxtrot golf --
-[% a is { e f g } a %]
--- expect -- 
-echofoxtrotgolf
-
--- test assign is --
-[% a = is h; a %]
+-- test assignment to block .. end --
+[% foo = block; b; c; end -%]
+foo: [% foo %]
 -- expect --
-hotel
+foo: bravocharlie
 

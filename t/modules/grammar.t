@@ -33,9 +33,9 @@ my $tt3 = TT3->new;
 ok( $tt3, 'created TT3 grammar' );
 #print "regex: ", $tt3->nonword_regex, "\n";
 
-ok( $tt3->constructor('<'), 'fetched constructor for <' );
-ok( $tt3->constructor('>'), 'fetched constructor for >' );
-ok( $tt3->constructor('>='), 'fetched constructor for >=' );
-ok( $tt3->constructor('<='), 'fetched constructor for <=' );
+ok( $tt3->token_constructor('<'), 'fetched constructor for <' );
+ok( $tt3->token_constructor('>'), 'fetched constructor for >' );
+ok( $tt3->token_constructor('>='), 'fetched constructor for >=' );
+ok( $tt3->token_constructor('<='), 'fetched constructor for <=' );
 
 # ...and more...

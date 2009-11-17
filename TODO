@@ -23,10 +23,19 @@ brackets: () [] {} <>
 
 Delete position() and other source methods from T::Type::Text
 
-Change 'block' element type to something non-generic like 'tt_block' 
-(and prohibit tt_ prefixes on keywords) to avoid clash with 'block'
-keywords directives.  The grammar always chooses the block keyword over
-the core block element.
+Move the temporary html() method in the 'Is' command to the T::TT3::HTML
+module.  But it has to be installed into a base class for block commands
+so that we don't need to poke it into is(), as(), for(), if(), etc., and
+every other command that has block output.  That said, I'm not sure if it's
+possible.  We may have to explicitly add html() methods to all the block
+commands.  That feels like a little bit of a dirty specialisation, but we
+have to embrace the fact that TT is (guessing) 99% used for generating 
+HTML.  It would be better if we could do it generically (as original planned
+for the HTML extensions - they would just adorn existing classes with 
+html() methods).  But we can't expect the HTML extension to know about every
+class.  Nor can we expect every block-based element to know about every 
+possible output format (although asking them to know HTML wouldn't be so
+bad).  Smells a bit dirty.
 
 Make if look for elsif/else
 
@@ -41,3 +50,7 @@ and fail if it doesn't exists.  The find() method appears to be returning
 the class name without checking to see if it can be loaded.
 
 Add name(), pair() and pairs() methods to all elements that require them.
+
+Move the default text token selection process into Template::Tokens so that
+tags, chompers, etc., can continue to call $output->text_tokens() and have
+it switch internally between text/html tokens.

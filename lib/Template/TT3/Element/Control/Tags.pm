@@ -8,7 +8,7 @@ use Template::TT3::Class
     constant   => {
         SKIP_WORDS => {
             map { $_ => 1 }
-            qw( = is are ) 
+            qw( = are ) 
         },
     },
     alias      => {
@@ -36,7 +36,7 @@ sub as_expr {
         $self->debug('got dotted TAGS: ', $self->[RHS]->[TOKEN]) if DEBUG;
     }
 
-    # skip over '=', 'is' or 'are', so "TAGS are ..." (for example) are
+    # skip over '=' or 'are', so "TAGS are ..." (for example) are
     # treated the same as just "TAGS ..."
     $$token->in(SKIP_WORDS, $token);
     
@@ -64,7 +64,7 @@ sub value {
         
     $self->debug("Setting TAGS: $tags") if DEBUG;
     
-    my $scanner = $context->scanner
+    my $scanner = $context->scope->scanner
         || return $self->error_msg('no_scanner');
         
     $scanner->tags($tags);

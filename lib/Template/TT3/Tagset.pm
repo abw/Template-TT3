@@ -7,7 +7,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Base',
     import    => 'class',
     utils     => 'params',
-    constants => 'HASH ARRAY REGEX DEFAULT',
+    constants => 'HASH ARRAY REGEX DEFAULT ALL',
     constant  => {
         TAGS  => 'Template::TT3::Tags',
     },
@@ -125,10 +125,10 @@ sub tag_map {
         $self->debug("generated tagset regex: $regex\n") if DEBUG;
     }
     else {
-        # generate a regex to matches nothing, effectively acting as a short
+        # generate a regex that never matches, effectively acting as a short
         # circuit - if a template has no tags defined then we catch the entire 
         # text block using the to_end_regex defined below
-        $tag_map->{ match_to_tag } = qr//;
+        $tag_map->{ match_to_tag } = qr/ \G $^ /sx;
         $self->debug("no tag_map regex generated\n") if DEBUG;
     }
     
@@ -165,9 +165,14 @@ sub change {
     foreach $name (@$names) {
         $tag    = $tags->{ $name };
         $spec   = $config->{ $name };
+
         # first item aka 'default'
-        $spec ||= $config->{ default }
-            unless $not_first++; 
+        $spec = $config->{ default }
+            unless defined $spec || $not_first++;
+        
+        # all items can default to 'all'
+        $spec = $config->{ all }
+            unless defined $spec;
 
         next unless defined $spec;
         $changed++;
@@ -177,7 +182,7 @@ sub change {
     }
     
     my @bad_uns = 
-        grep { not ($tags->{ $_ } || $_ eq DEFAULT) } 
+        grep { not $tags->{ $_ } || $_ eq DEFAULT || $_ eq ALL } 
         keys %$config;
         
     $self->error_msg( invalid => tags => join(', ', sort @bad_uns) )

@@ -75,12 +75,6 @@ Hello <* e *>
 -- expect --
 Hello echo
 
--- test "tags is" is grammatically incorrect --
-[? TAGS is ['!*' '*!']   # I am illiterate -?]
-Hello !* e *!
--- expect --
-Hello echo
-
 -- test tags off --
 [? TAGS off -?]
 Hello [% f %]
@@ -139,6 +133,14 @@ Romeo and <* j.ucfirst *> are lovers
 -- expect --
 Romeo and Juliet are lovers
 Romeo and  are lovers
+
+-- test TAGS.all --
+[? TAGS.all off -?]
+[% k %] [? k ?] [# k #]
+%% k
+-- expect --
+[% k %] [? k ?] [# k #]
+%% k
 
 -- test dotted tags with invalid name --
 [? TAGS.cheese '<* *>' -?]

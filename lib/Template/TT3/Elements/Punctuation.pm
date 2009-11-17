@@ -53,9 +53,11 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Punctuation',
+    as        => 'block',
     constants => ':elem_slots',
     constant  => {
         is_delimiter => 1,
+        FINISH       => 'end',
     };
 #    alias     => {
 #        skip_delimiter => 'next_skip_ws',
@@ -68,7 +70,7 @@ sub skip_delimiter {
 }
 
 
-sub as_block {
+sub OLD_as_block {
     my ($self, $token, $scope, $prec) = @_;
 
 #    $self->debug("asking delimiter for as_block(), next token is ", $$token->token);
@@ -77,14 +79,36 @@ sub as_block {
     my $block = $$token->as_exprs($token, $scope, $prec)
         || return $self->missing( expressions => $token );
 
+    $self->debug("DELIMITER: ", $$token->token);
+    
     # TODO: replace these with as_terminator()
     return $self->missing( end => $token )
         unless $$token->is('end');
+
+    $self->debug("GOT END: ", $$token->source);
+        
     $$token = $$token->next;
+
+    $self->debug("NEXT TOKEN: ", $$token->token);
 
     return $block;
 }
 
+
+#-----------------------------------------------------------------------
+# Template::TT3::Element::TagEnd - tag end token
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::TagEnd;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    base      => 'Template::TT3::Element::Delimiter',
+    constants => ':eval_args';
+    
+sub view {
+    $_[CONTEXT]->view_tag_end($_[SELF]);
+}
 
 
 #-----------------------------------------------------------------------
@@ -222,6 +246,7 @@ package Template::TT3::Element::Hash;
 use Template::TT3::Class 
     debug     => 0,
     base      => 'Template::TT3::Element::Construct',
+    as        => 'block',
     constants => ':elem_slots :eval_args',
     constant  => {
         FINISH        => '}',
@@ -229,28 +254,6 @@ use Template::TT3::Class
         SOURCE_FORMAT => '{ %s }',
     };
 
-
-sub as_block {
-    my ($self, $token, $scope, $prec) = @_;
-    my (@exprs, $expr);
- 
-    # advance past terminator token
-    $self->accept($token);
-
-    # parse expressions
-    my $block = $$token->as_exprs($token)
-        || return $self->missing( block => $token );
-    
-    # check next token matches our FINISH token
-    return $self->missing( $self->FINISH, $token)
-        unless $$token->is( $self->FINISH );
-    
-    # advance past finish token
-    $$token = $$token->next;
-
-    # return $block, not $self
-    return $block;
-}
 
 sub value {
     $_[SELF]->debug("called value() on hash: ", $_[SELF]->source) if DEBUG;

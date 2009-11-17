@@ -13,6 +13,7 @@ use Template::TT3::Class
     constant  => {
         ELEMENTS => 'Template::TT3::Elements',
         VIEWS    => 'Template::TT3::Views',
+        TEXT     => 'text',
     },
     messages => {
         bad_method => "Invalid method '%s' called on %s at %s line %s",
@@ -53,12 +54,28 @@ sub init_tokens {
     
     $self->debug("elements factory: $factory") if DEBUG;
     
-    $self->{ elements } = $factory;
-    $self->{ element  } = { };  #$self->{ elements }->constructors;
-    $self->{ tokens   } = [ ];
-    $self->{ config   } = $config;
+    $self->{ elements  } = $factory;
+    $self->{ element   } = { };  #$self->{ elements }->constructors;
+    $self->{ tokens    } = [ ];
+    $self->{ config    } = $config;
+    
+    $self->text_type( $config->{ text_type } || TEXT );
     
     return $self;
+}
+
+
+sub text_type {
+    my ($self, $type) = @_;
+    my $elem = $self->token_element($type)
+        || die "barf\n";
+
+    $self->{ text_elem } 
+        = $self->{ text_elems }->{ $type } 
+      ||= $self->token_element($type)
+      ||  return $self->error_msg( invalid => text_type => $type );
+      
+    $self->{ text_type } = $type;
 }
 
 
@@ -72,6 +89,7 @@ sub generate {
     my ($self, $generator) = @_;
     return $generator->generate_tokens($self->{ tokens });
 }
+
 
 sub view {
     my ($self, $view) = @_;
@@ -98,17 +116,11 @@ sub size {
 }
 
 
-sub token_method {
-    my ($self, $name) = @_;
-    my $type = $name;
+sub token_element {
+    my ($self, $type) = @_;
     my ($elem, $class);
 
-    $self->debug("token_method($name)") if DEBUG;
-
-    # Only generate XXX_token() methods for XXX tokens that we know about
-    return unless ($type =~ s/_token$//);
-
-    $self->debug("looking for $type") if DEBUG;
+    $self->debug("token_element($type)") if DEBUG;
 
     $elem = $self->{ element }->{ $type };
 
@@ -137,6 +149,19 @@ sub token_method {
     # function should Just Work, regardless of which object calls it. 
         
     $self->debug("found $type => $elem") if DEBUG;
+    
+    return $elem;
+}
+
+
+sub token_method {
+    my ($self, $name) = @_;
+    my $type = $name;
+
+    # Only generate XXX_token() methods for XXX tokens that we know about
+    return unless ($type =~ s/_token$//);
+
+    my $elem = $self->token_element($type) || return;
 
     # create closure that binds over $name to create op and push into tokens
     my $method = sub {
@@ -150,6 +175,9 @@ sub token_method {
         # constructor.  It's probably best to require people to subclass anyway.
         # my $token  = $this->{ make_op }->{ $type }->(@_);
 #        $elem = $this->{ element }->{ $type };
+        $this->debug("creating $name element with arguments: ", join(', ', @_))
+            if DEBUG;
+        
         my $token = $elem->(@_);
 
         # add the NEXT link from the preceding token if there is one
@@ -181,6 +209,26 @@ sub token {
     # NOTE: this causes Perl to segfault with a blown stack at cleanup with 
     # large lists (upwards of ~30k tokens).  
     # See http://rt.perl.org/rt3/Ticket/Display.html?id=70253
+    push(@$tokens, $token);
+        
+    return $token;
+}
+
+
+sub text_token {
+    my $self   = shift;
+
+    $self->debug("creating $self->{ text_type } element with arguments: ", join(', ', @_))
+        if DEBUG;
+
+    my $tokens = $self->{ tokens };
+    my $token  = $self->{ text_elem }->(@_);
+
+    # add the NEXT link from the preceding token if there is one
+    $tokens->[-1]->[NEXT] = $token
+        if @$tokens;
+
+    # push the token onto the end of the list
     push(@$tokens, $token);
         
     return $token;

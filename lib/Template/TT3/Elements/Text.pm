@@ -10,6 +10,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
     import    => 'class',
+    view      => 'text',
     constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT  => '<text:%s>', 
@@ -54,6 +55,7 @@ sub generate {
         $_[0]->[TOKEN]
     );
 }
+
 
 
 #-----------------------------------------------------------------------

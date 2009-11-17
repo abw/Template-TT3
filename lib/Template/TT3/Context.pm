@@ -8,7 +8,10 @@ use Template::TT3::Class
     constant    => {
         VARIABLES => 'Template::TT3::Variables',
     },
-    accessors   => 'variables scanner';
+    accessors   => 'variables scanner',
+    messages    => {
+        missing => '%s not found in context',
+    };
 
 
 sub init {
@@ -19,9 +22,18 @@ sub init {
     );
     
     $self->{ scanner } = $config->{ scanner };
+    $self->{ scope   } = $config->{ scope };
     
     return $self;
 }
 
+
+sub scope {
+    my $self = shift;
+    return $self->{ scope }
+        || $self->error_msg( missing => 'scope' );
+}
+    
+    
 
 1;

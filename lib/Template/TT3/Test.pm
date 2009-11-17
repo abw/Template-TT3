@@ -18,6 +18,7 @@ our $MAGIC    = '\s* -- \s*';
 our $ENGINE   = 'Template::TT3';
 our $HANDLER  = \&test_handler;
 our $TEMPLATE = 'Template::TT3::Template';
+our $METHOD   = 'fill';
 
         
 sub test_expect {
@@ -94,27 +95,40 @@ sub old_test_handler {
 sub test_handler {
     my $test     = shift;
     my $config   = params(@_);
-    my $tclass   = $config->{ template  } || $TEMPLATE;
+    my $tclass   = $test->{ inflag }->{ template }
+                || $config->{ template } 
+                || $TEMPLATE;
+    my $method   = $test->{ inflag }->{ method } 
+                || $config->{ method }
+                || $METHOD;
     my $vars     = $config->{ variables };
     my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
     my $debug    = $config->{ debug } || 0;
     my $source   = $test->{ input };
+    
     my $result   = eval {
         manager->debug(' INPUT: ', $source) if $DEBUG;
         my $template = $tclass->new( text => $source );
 
         manager->debug("TOKENS:\n", $template->tokens->view_debug) 
             if $config->{ dump_tokens }
-            || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
+            || $test->{ inflag }->{ dump_tokens }; # || $DEBUG;   ??
+
+        manager->debug("SOURCE:\n", $template->tree->source) 
+            if $config->{ dump_source }
+            || $test->{ inflag }->{ dump_source }; # || $DEBUG;   ??
 
 #        manager->debug("TOKENS:\n", $template->tokens->sexpr) 
 #            if $config->{ dump_tokens }
 #            || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
 
-        $template->fill( $mkvars->() );
+        $template->$method( $mkvars->() );
     };
     if ($@) {
-        my $error = ref($@) ? $@->info : $@;
+        my $error = $test->{ inflag }->{ show_error_type }
+            ? $@
+            : ref($@) ? $@->info : $@;
+#        my $error = $@;
         manager->debug(' ERROR: ', $error) if $DEBUG;
         $result = "<ERROR:$error>";
     }

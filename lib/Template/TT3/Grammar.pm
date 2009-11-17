@@ -162,47 +162,36 @@ sub nonword_regex {
 }
 
 
+sub match_nonword {
+    my ($self, $input, $output, $pos) = @_;
+    $pos ||= pos $$input;
+
+    $self->matched($input, $output, $1, $pos)
+        if $$input =~ /$self->{ nonword_regex }/cg;
+}
+
+
 sub match_keyword {
     my ($self, $input, $output, $pos) = @_;
     $pos ||= pos $$input;
     
-    if ($$input =~ /$IDENT/cog) {
-        # we'll cut out the middle man in the interests of speed
-        return $output->token( 
-            ( $self->{ constructor }->{ $1 } || $self->constructor($1) )
-                ->($1, $pos) 
-        );
-        # otherwise a call like this would do the trick, at the cost of 
-        # 2 additional methods calls:
-        #   return $self->matched($input, $output, $pos, $1);
-    }
-}
-
-
-sub match_nonword {
-    my ($self, $input, $output, $pos) = @_;
-    $pos ||= pos $$input;
-    
-    if ($$input =~ /$self->{ nonword_regex }/cg) {
-        return $output->token( 
-            ( $self->{ constructors }->{ $1 } || $self->constructor($1) )
-                ->($1, $pos) 
-        );
-    }
+    $self->matched($input, $output, $1, $pos)
+        if $$input =~ /$IDENT/cog;
 }
 
 
 sub matched {
-    my ($self, $input, $output, $pos, $token) = @_;
+    my ($self, $input, $output, $token, $pos) = @_;
 
     return $output->token( 
-        ( $self->{ constructor }->{ $token } || $self->constructor($token) )
+        ( $self->{ token_constructor }->{ $token } 
+       || $self->token_constructor($token) )
             ->($token, $pos) 
     );
 }
 
 
-sub constructor {
+sub token_constructor {
     my $self  = shift;
     my $token = shift;
     
@@ -214,7 +203,7 @@ sub constructor {
     
     # TODO: this is kinda broken.  We end up with conflicts between a keyword
     # called 'block' and an element called 'block'
-    return $self->{ constructors }->{ $token } ||= do {
+    return $self->{ token_constructor }->{ $token } ||= do {
         my ($symbol, $element, $config);
 
         if ($symbol = $self->{ symbols }->{ $token }) {
@@ -225,12 +214,6 @@ sub constructor {
             };
             $element = $symbol->[ELEMENT];
         }
-        elsif ($token =~ /^$IDENT$/) {
-            $config = {
-                elements => $self,
-            };
-            $element = $token;
-        }
         else {
             return $self->error_msg( invalid => symbol => $token );
         }
@@ -238,6 +221,7 @@ sub constructor {
              ->constructor($config);
     };
 }
+
 
 1;
 

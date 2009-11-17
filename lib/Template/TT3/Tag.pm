@@ -293,7 +293,7 @@ sub tokens {
         }
         elsif ($$input =~ /$IDENT/cog) {
             if ($type = $self->{ keywords }->{ $1 }) {
-                $self->{ grammar }->matched($input, $output, $pos, $1);
+                $self->{ grammar }->matched($input, $output, $1, $pos);
                 # TMP HACK
                 # $output->keyword_token($1, $pos);
                 # TODO:
@@ -323,7 +323,7 @@ sub tokens {
             return $1;
         }
         elsif ($$input =~ /$self->{ match_nw }/cg) {
-            $self->{ grammar }->matched($input, $output, $pos, $1);
+            $self->{ grammar }->matched($input, $output, $1, $pos);
         }
         elsif ($$input =~ /$NUMBER/cog) {
             $self->debug("matched number: $1") if DEBUG;

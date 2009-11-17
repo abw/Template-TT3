@@ -11,9 +11,10 @@ use Template::TT3::Class
     utils      => 'is_object',
     constants  => 'REGEX HASH ARRAY',
     constant   => {
-        TAGSET => 'Template::TT3::Tagset',
-        TOKENS => 'Template::TT3::Tokens',
-        SCOPE  => 'Template::TT3::Scope',
+        TAGSET     => 'Template::TT3::Tagset',
+        TOKENS     => 'Template::TT3::Tokens',
+        SCOPE      => 'Template::TT3::Scope',
+        TEXT_TOKEN => 'text_token',
     },
     config     => [
         'tagset|class:TAGSET|method:TAGSET',
@@ -100,25 +101,28 @@ sub init_tags {
 
 
 sub scan {
-    my ($self, $input, $output, $scope) = @_;
+    my ($self, $text, $output, $scope) = @_;
+    my $input = ref $text ? $text : \$text;
+
+    # create a T::Tokens object to collect output if we weren't passed one
+    $output ||= $self->{ tokens }->new($self->{ config });
 
     # define a new scope for this scanner and an output list if undefined
-    my $config = $self->{ config };
-    local $config->{ scanner } = $self;
     $scope ||= $self->{ scope };
-
-    return $self->tokens(
-        ref $input ? $input : \$input,
-        $output || $self->{ tokens }->new($config),
-        $scope->new($config),
+    $scope   = $scope->new(
+        scanner => $self,
+        input   => $input,
+        output  => $output,
     );
+
+    return $self->tokens($input, $output, $scope);
 }
 
 
 sub tokens {
     my ($self, $input, $output, $scope) = @_;
     my ($pos, $text, $start, $tag);
-    
+
     while (1) {
         $pos = pos $$input || 0;
         
@@ -141,8 +145,7 @@ sub tokens {
         elsif ($$input =~ /$self->{ match_to_end }/gc) {
             # We've matched the rest of the text after the last tag (or the 
             # entire file if there weren't any tags embedded).
-            $output->text_token($1, $pos)
-                if length $1;
+            $output->text_token($1, $pos) if length $1;
             last;
         }
         else {
@@ -197,6 +200,7 @@ sub tags {
     $self->{ tagset }->change($tags);
     $self->init_tags;
 }
+
 
     
 

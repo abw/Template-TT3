@@ -165,7 +165,7 @@ sub scan {
         }
         else {
             # or push it to the token list ourselves
-            $output->text_token($text, $pos);
+            $output->text_token($text, $pos) if length $text;
         }
     }
     
@@ -308,14 +308,14 @@ sub post_chomp_space {
 sub comment {
     my ($self, $input, $output, $text, $start, $pos) = @_;
 
-    $output->text_token($text, $pos);
+    $output->text_token($text, $pos) if length $text;
     $pos  = pos $$input;
     $pos -= length($start);
     
     $$input =~ /$self->{ match_to_end }/cg
         || return $self->error_msg( no_end => $self->{ end } );
         
-    $output->comment_token($start . $1, $pos);
+    $output->comment_token($start . $1 . $2, $pos);
 
     # Hmmm... that's not right... we still need to process the end token
     # of a comment to see if it's got a post-chomp flag... oh well, the

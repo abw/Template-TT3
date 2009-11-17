@@ -94,27 +94,6 @@ sub view {
 }
 
 
-#-----------------------------------------------------------------------
-# Template::TT3::Element::TagEnd - tag end token
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::TagEnd;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Whitespace',
-    constants => ':elem_slots';
-    
-
-sub generate {
-    $_[1]->generate_tag_end(
-        $_[0]->[TOKEN]
-    );
-}
-
-sub view {
-    $_[1]->view_tag_end($_[0]);
-}
 
 
 package Template::TT3::Element::Comment;
