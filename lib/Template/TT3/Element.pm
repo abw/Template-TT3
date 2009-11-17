@@ -171,7 +171,7 @@ sub as_postfix {
     # are () [] and { }.  So in most cases as_postfix() skips any whitespace
     # and delegates straight onto as_postop() on the next non-whitespace 
     # token.
-    return shift->skip_ws->as_postop(@_);
+    shift->skip_ws($_[1])->as_postop(@_);
 }
 
 sub as_postop {

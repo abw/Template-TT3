@@ -114,7 +114,7 @@ sub test_handler {
             if $config->{ dump_tokens }
             || $test->{ inflag }->{ dump_tokens }; # || $DEBUG;   ??
 
-        manager->debug("SOURCE:\n", $template->tree->source) 
+        manager->debug("SOURCE:\n", $template->exprs->source) 
             if $config->{ dump_source }
             || $test->{ inflag }->{ dump_source }; # || $DEBUG;   ??
 

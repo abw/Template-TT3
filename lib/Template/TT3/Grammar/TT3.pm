@@ -37,7 +37,7 @@ our $SYMBOLS  = [
     [ '$'       => sig_item         =>   0, 350 ],      # $foo
     [ '@'       => sig_list         =>   0, 350 ],      # @foo
 #   [ '%'       => percent          =>   0, 350 ],      # %foo
-    [ '.'       => dot              => 340,   0 ],      # foo.bar
+    [ '.'       => var_dot          => 340,   0 ],      # foo.bar
     
     # ++/-- unary prefix/postfix self-modification operators
     [ '++'      => num_inc          => 295, 295 ],      # foo++, ++foo
@@ -121,6 +121,7 @@ our $SYMBOLS  = [
     [ 'if'      => cmd_if           => 150,   0 ],
     [ 'for'     => cmd_for          => 150,   0 ],
     [ 'fill'    => cmd_fill         => 150,   0 ],
+    [ 'dot'     => cmd_dot          => 150,   0 ],
     [ 'block'   => cmd_block        => 150,   0 ],
     [ 'encode'  => cmd_encode       => 150,   0 ],
     [ 'decode'  => cmd_decode       => 150,   0 ],

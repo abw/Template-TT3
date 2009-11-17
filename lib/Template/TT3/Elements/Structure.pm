@@ -93,4 +93,11 @@ sub pairs {
     @{ $_[SELF]->[EXPR] } 
 }
 
+sub variable {
+    # a block of text can be converted to a text variable in order to 
+    # perform dotops on it.
+    $_[CONTEXT]->{ variables }
+         ->use_var( $_[SELF], $_[SELF]->text( $_[CONTEXT] ) );
+}
+
 1;

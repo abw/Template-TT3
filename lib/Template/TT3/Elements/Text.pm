@@ -57,6 +57,12 @@ sub generate {
 }
 
 
+sub variable {
+    # text can be converted to a text variable in order to perform dotops on it
+    $_[CONTEXT]->{ variables }
+         ->use_var( $_[SELF], $_[SELF]->text( $_[CONTEXT] ) );
+}
+
 
 #-----------------------------------------------------------------------
 # Call on generate_text_ops() (in Template::TT3::Class) to create a 

@@ -22,6 +22,16 @@ You can also create named blocks
     
     fill foo;
 
+NOTE: named blocks aren't implemented yet
+
+=head2 do
+
+Defines a content block like 'block', but it has the same runtime semantics
+as Perl's 'do' block.  That is, it returns *only* the result of the last 
+expression in the block;
+
+    a = do { b c d };     # same as: a = d
+
 =head2 is
 
 C<is> is like C<=> but expects a block on the RHS instead of an expression.
@@ -64,6 +74,10 @@ The new name for PROCESS
 
     fill template.html    # same as TT2: PROCESS template.html
 
+NOTE: 'fill' isn't implemented yet.  The parser will recognise the 
+command, but it generates a "TODO: not working yet" message at runtime
+instead of actually filling the requested template.
+
 =head2 with
 
 C<with> creates a local variable scope for a block.
@@ -87,6 +101,8 @@ C<with> also works in side-effect form:
 
     fill template.html    # same as TT2: INCLUDE template.html x=10 y=20
     with x=10 y=20
+
+NOTE: 'with' isn't implemented yet
 
 =head2 just
 
@@ -114,6 +130,8 @@ create an empty variable scope:
         ...no variables are defined here...
     end;
 
+NOTE: 'just' isn't implemented yet
+
 =head2 into
 
 C<into> is the new name for WRAPPER.
@@ -138,6 +156,8 @@ C<into> also works in side-effect notation
     fill site/content
     info site/layout
 
+NOTE: 'into' isn't implemented yet
+
 =head2 if
 
 if / elsif / else - conditional branches
@@ -161,6 +181,9 @@ if / elsif / else - conditional branches
 'if' can also be used in side-effect notation
 
     fill site/debug if user.developer;
+
+NOTE: 'if' is implemented but 'elsif' and 'else' are TODO
+
 
 =head2 for
 
@@ -228,6 +251,8 @@ for now.
       join n in 1 by 1
         "$n: $user.name";
 
+NOTE: 'for' is only partially implemented
+
 =head1 from
 
 'from' defines a data target for a block.  Any variables accessed in the 
@@ -278,6 +303,65 @@ This also works quite nicely in side effect form:
     fill user/info from user;
     fill user/info just from user;
 
+NOTE: 'from' isn't implemented yet
+
+=head2 encode
+
+Use this to encode a block of text.  It's similar to TT2 FILTER, but it
+uses any of the codecs accessible by Badger::Codecs.
+
+    [% encode html %]
+       ...
+    [% end %]
+    
+    [% encode base64 %]
+       ...
+    [% end %]
+
+=head2 decode
+
+This does the opposite of encode.
+
+    [% decode html %]
+       ...
+    [% end %]
+    
+    [% decode base64 %]
+       ...
+    [% end %]
+
+=head dot
+
+This implements a low-precedence, block oriented form of the dot operator.
+
+    [% dot length -%]     # same as 'Blah blah blah'.length
+    Blah blah blah
+    [%- end %]
+
+In TT2 we had separate filters and text vmethods.  In TT3 we just have text
+vmethods.  The 'dot' keyword takes the place of the FILTER keyword, allowing
+you to define a block of text and then pipe it through any text virtual method.
+
+You can pass arguments and chain multiple dotops together.
+
+    [% dot chunk(3).join(', ') -%]
+    foobarbaz             # outputs: foo, bar, baz
+    [%- end %]
+
+It also works in side effect form.  Because it's low precedence (the same
+precedence as all command keywords), you can use it like this:
+
+    [% fill foo dot html %]
+
+This is the same thing as:
+
+    [% (fill foo).html %]
+  
+But obviously not the same thing as:
+
+    [% fill foo.html %]     # 'foo.html' is a filename
+    
+
 
 
 =head1 THINKING OUT LOUD
@@ -317,8 +401,6 @@ Or the minimalist approach:
         "There are no items in your basket."
     else
         "Please login to view the items in your basket."
-
-[THINKING OUT LOUD]
 
 Hmmm... wait, not that's not right.  The 'elsif' will get attached to the
 inner 'for'.  Ho hum.  This is a good example of why a flexible language

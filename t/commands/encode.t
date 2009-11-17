@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 2,
+    tests   => 3,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -35,9 +35,17 @@ __DATA__
 -- expect -- 
 &lt;foo&gt;
 
+-- test encode base64 --
+[% encode base64 -%]
+Hello World
+[% end -%]
+-- expect -- 
+SGVsbG8gV29ybGQK
+
 -- test bad encoder --
 [% encode some_funky_shit -%]
 <foo>
 [% end -%]
 -- expect -- 
 <ERROR:Invalid encoder specified for encode command: codec not found: some_funky_shit>
+

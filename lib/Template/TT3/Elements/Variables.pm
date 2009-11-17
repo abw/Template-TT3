@@ -334,7 +334,7 @@ sub text {
 # dotop
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Dot;
+package Template::TT3::Element::Variable::Dot;
 
 use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
@@ -383,6 +383,7 @@ sub as_postop {
 
 
 sub value {
+    $_[SELF]->debug("fetching value()") if DEBUG;
     return $_[SELF]->variable($_[CONTEXT])->value;
 }
 

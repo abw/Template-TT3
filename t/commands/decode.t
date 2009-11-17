@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 2,
+    tests   => 3,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -34,6 +34,13 @@ __DATA__
 [% end -%]
 -- expect -- 
 <foo>
+
+-- test decode base64 --
+[% decode base64 -%]
+SGVsbG8gV29ybGQK
+[% end -%]
+-- expect -- 
+Hello World
 
 -- test bad decoder --
 [% decode some_funky_shit -%]

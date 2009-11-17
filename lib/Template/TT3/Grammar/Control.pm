@@ -9,10 +9,11 @@ use Template::TT3::Class
 our $PREFIXES = {
     ctr_  => 'control.',
     num_  => 'number.',
+    var_  => 'variable.',
 };
 
 our $SYMBOLS  = [
-    [ '.'       => dot              => 340,   0 ],
+    [ '.'       => var_dot          => 340,   0 ],
     [ '*'       => num_multiply     => 280,   0 ],
     [ '='       => assign           => 220,   0 ],
     [ '=>'      => fat_arrow        => 220,   0 ],
