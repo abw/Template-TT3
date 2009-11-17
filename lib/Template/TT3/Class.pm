@@ -1,5 +1,6 @@
 package Template::TT3::Class;
 
+use Template::TT3::Constants ':eval_args';
 use Badger::Class
     version   => 3.00,
     debug     => 0,
@@ -7,18 +8,20 @@ use Badger::Class
     utils     => 'self_params camel_case',
     constants => 'ARRAY HASH CODE DELIMITER PKG BLANK',
     constant  => {
-        CONSTANTS => 'Template::TT3::Constants',
-        PATTERNS  => 'Template::TT3::Patterns',
-#       CONFIG    => 'Template::TT3::Config',
-        UTILS     => 'Template::TT3::Utils',
-        AS_ROLE   => 'Template::TT3::Element::Role',
-        BASE_OP   => 'Template::TT3::Element::Operator',
+        CONSTANTS   => 'Template::TT3::Constants',
+        PATTERNS    => 'Template::TT3::Patterns',
+#       CONFIG      => 'Template::TT3::Config',
+        UTILS       => 'Template::TT3::Utils',
+        AS_ROLE     => 'Template::TT3::Element::Role',
+        BASE_OP     => 'Template::TT3::Element::Operator',
+        VIEW_METHOD => 'view_%s',
     },
     hooks => {
         patterns => \&patterns,
         generate => \&generate,
         subclass => \&subclass,
         alias    => \&alias,
+        view     => \&view,
         as       => \&as,
     };
 
@@ -47,6 +50,18 @@ sub alias {
         $self->method( $key => $method );
     }
     return $self;
+}
+
+
+sub view {
+    my ($self, $view) = @_;
+    my $method = sprintf(VIEW_METHOD, $view);
+
+    $self->method( 
+        view => sub {
+            $_[VIEW]->$method($_[SELF]);
+        }
+    );
 }
 
 sub as {
