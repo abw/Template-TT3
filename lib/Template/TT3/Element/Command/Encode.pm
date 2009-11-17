@@ -3,6 +3,7 @@ package Template::TT3::Element::Command::Encode;
 use Template::TT3::Class 
     version    => 3.00,
     base       => 'Template::TT3::Element::Command::Block',
+    as         => 'name_block_expr',
     constants  => ':elem_slots :eval_args',
     constant   => {
         ARG_NAME => 'encoder',      # changed in ...::Decode subclass
@@ -16,28 +17,6 @@ use Template::TT3::Class
     };
 
 use Badger::Codecs 'Codec';
-
-
-sub as_expr {
-    my ($self, $token, $scope, $prec, $force) = @_;
-
-    # Operator precedence.
-    return undef
-        if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
-
-    # advance token past keyword
-#    $self->accept($token);
-
-    # parse code name as a filename, so we can accept foo.bar, Foo::Bar, etc.
-    $self->[LHS] = $$token->next_skip_ws($token)->as_filename($token, $scope)
-        || return $self->missing( $self->ARG_NAME => $token );
-
-    # parse block following the expression
-    $self->[RHS] = $$token->as_block($token, $scope)
-        || return $self->missing( block => $token );
-
-    return $self;
-}
 
 
 sub as_postop {

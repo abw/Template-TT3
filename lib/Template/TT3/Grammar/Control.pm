@@ -13,21 +13,22 @@ our $PREFIXES = {
 };
 
 our $SYMBOLS  = [
-    [ '.'       => var_dot          => 340,   0 ],
-    [ '*'       => num_multiply     => 280,   0 ],
-    [ '='       => assign           => 220,   0 ],
-    [ '=>'      => fat_arrow        => 220,   0 ],
-    [ '('       => parens           =>   0,   0 ],
-    [ '['       => list             =>   0,   0 ],
-    [ '{'       => hash             =>   0,   0 ],
-    [ ')'       => terminator       =>   0,   0 ],
-    [ ']'       => terminator       =>   0,   0 ],
-    [ '}'       => terminator       =>   0,   0 ],
-    [ ','       => separator        =>   0,   0 ],
-    [ ';'       => delimiter        =>   0,   0 ],
-    [ ':'       => terminator       =>   0,   0 ],
-    [ 'TAGS'    => ctr_tags         =>   0,   0 ],
-    [ 'HTML'    => ctr_html         =>   0,   0 ],
+    [ '.'           => var_dot          => 340,   0 ],
+    [ '*'           => num_multiply     => 280,   0 ],
+    [ '='           => assign           => 220,   0 ],
+    [ '=>'          => fat_arrow        => 220,   0 ],
+    [ '('           => parens           =>   0,   0 ],
+    [ '['           => list             =>   0,   0 ],
+    [ '{'           => hash             =>   0,   0 ],
+    [ ')'           => terminator       =>   0,   0 ],
+    [ ']'           => terminator       =>   0,   0 ],
+    [ '}'           => terminator       =>   0,   0 ],
+    [ ','           => separator        =>   0,   0 ],
+    [ ';'           => delimiter        =>   0,   0 ],
+    [ ':'           => terminator       =>   0,   0 ],
+    [ 'TAGS'        => ctr_tags         =>   0,   0 ],
+    [ 'HTML'        => ctr_html         =>   0,   0 ],
+    [ 'COMMANDS'    => ctr_commands     =>   0,   0 ],
 ];
 
 1;

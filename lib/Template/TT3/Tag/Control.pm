@@ -54,6 +54,7 @@ sub parse {
         # reported.  It's OK for an expression to yield an undefined value()
         # but not text() (TODO: perhaps better to have different variable
         # objects for undefined vs not_found
+#        local $scope->{ tag } = $self;
         $exprs->text( $scope->context );
     }
 

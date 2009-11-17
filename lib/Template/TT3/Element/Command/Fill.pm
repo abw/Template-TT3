@@ -4,6 +4,7 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
+    as         => 'name_expr',
     constants  => ':elem_slots :eval_args ARRAY',
     constant   => {
         SEXPR_FORMAT => "<fill:%s>",
@@ -21,22 +22,6 @@ sub sexpr {
     );
 }
     
-
-sub as_expr {
-    my ($self, $token, $scope, $prec, $force) = @_;
-    my $lprec = $self->[META]->[LPREC];
-
-    return undef
-        if $prec && ! $force && $lprec <= $prec;
-
-    $self->accept($token);
-    
-    $self->[EXPR] = $$token->skip_ws($token)->as_filename($token, $scope, $lprec)
-        || return $self->missing( filename => $token );
-
-    return $self;
-}
-
 
 sub text {
     return "TODO: fill ", $_[SELF]->[EXPR]->filename;

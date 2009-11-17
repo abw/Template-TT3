@@ -95,6 +95,11 @@ sub tag {
     return $tags->{ $name };
 }
 
+
+sub default_tag {
+    shift->tag(DEFAULT);
+}
+
    
 sub tag_map {
     my $self    = shift;

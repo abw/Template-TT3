@@ -17,7 +17,7 @@ use Template::TT3::Class
     },
     messages => {
         tags_undef => 'Undefined value returned by %s expression: %s',
-        no_scanner => 'Scanner is not accessible to TAGS control.',
+        no_scanner => 'Scanner is not accessible to %s control.',
     };
 
 
@@ -65,7 +65,7 @@ sub value {
     $self->debug("Setting TAGS: $tags") if DEBUG;
     
     my $scanner = $context->scope->scanner
-        || return $self->error_msg('no_scanner');
+        || return $self->error_msg( no_scanner => $self->[TOKEN] );
         
     $scanner->tags($tags);
     

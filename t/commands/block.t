@@ -15,6 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
+    skip    => 'abw is working on this at the moment',
     tests   => 4,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
@@ -39,9 +40,10 @@ alpha
 alphabravocharlie
 
 -- test block with single expression --
+# this should fail because it looks like a named block
 [% block a %]
 -- expect -- 
-alpha
+<ERROR:Missing block for 'block'.  End of file reached.>
 
 -- test assignment to block .. end --
 [% foo = block; b; c; end -%]
@@ -49,3 +51,20 @@ foo: [% foo %]
 -- expect --
 foo: bravocharlie
 
+-- test named block --
+[% block bar -%]
+This is the bar block
+[% end -%]
+The end
+-- expect --
+The end
+
+-- test block with args --
+[% foo = block(name,@foo) { 'Hello ' name } -%]
+greeting: [%# hello('World') %]
+-- expect --
+greeting: Hello World
+
+-- start --
+-- test named block --
+[% block lovers; r.ucfirst ' and ' j.ucfirst; end %]

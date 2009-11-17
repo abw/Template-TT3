@@ -8,8 +8,12 @@ use Template::TT3::Class
 
 
 sub as_block {
-    my ($self, $token, $scope, $prec) = @_;
+    my ($self, $token, $scope, $parent) = @_;
     my (@exprs, $expr);
+    
+    # Optional 4th argument is a reference to the parent but default to $self.
+    # We report all errors from this perspective.
+    $parent ||= $self;
 
     $self->debug("as_block()") if DEBUG;
  
@@ -17,11 +21,11 @@ sub as_block {
     $self->accept($token);
 
     # parse expressions
-    my $block = $$token->as_exprs($token)
-        || return $self->missing( block => $token );
+    my $block = $$token->as_exprs($token, $scope)
+        || return $parent->missing( $self->ARG_BLOCK, $token );
     
     # check next token matches our FINISH token
-    return $self->missing( $self->FINISH, $token)
+    return $parent->missing( $self->FINISH, $token)
         unless $$token->is( $self->FINISH, $token );
     
     # return $block, not $self

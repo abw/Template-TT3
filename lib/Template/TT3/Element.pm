@@ -11,17 +11,24 @@ use Template::TT3::Class
     constant  => {   
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
-        base_id       => 'Template::TT3::Element',
-        is_whitespace => 0,
-        is_delimiter  => 0,
-        is_terminator => 0,
-        eof           => 0,
+        base_id         => 'Template::TT3::Element',
+        is_whitespace   => 0,
+        is_delimiter    => 0,
+        is_terminator   => 0,
+        eof             => 0,
+        # default names for parser arguments - see T::TT3::Element::Role::*Expr
+        ARG_NAME        => 'name',
+        ARG_EXPR        => 'expression',
+        ARG_BLOCK       => 'block',
+        EOF             => 'end of file',
     },
     alias => {
-        delimiter  => \&null,
-        terminator => \&null,
-        as_dotop   => \&null,
-        as_word    => \&null,
+        delimiter       => \&null,
+        terminator      => \&null,
+        as_dotop        => \&null,
+        as_word         => \&null,
+        as_args         => \&null,
+        as_signature    => \&null,
     };
 
 
@@ -31,11 +38,12 @@ our $MESSAGES = {
     no_dot_expr     => "Missing expression after dotop %s",
     missing_match   => "Missing '%s' to match '%s'",
     missing_for     => "Missing %s for '%s'.  Got '%s'",
+    missing_for_eof => "Missing %s for '%s'.  End of file reached.",
     bad_assign      => "Invalid assignment to expression: %s",
     bad_method      => "The %s() method is not implemented by %s.",
-    sign_bad_arg    => "Invalid argument in signature for %s function: %s",
-    sign_dup_arg    => "Duplicate argument in signature for %s function: %s",
-    sign_dup_sigil  => "Duplicate '%s' argument in signature for %s function: %s",
+    sign_bad_arg    => "Invalid argument in signature for %s: %s",
+    sign_dup_arg    => "Duplicate argument in signature for %s: %s",
+    sign_dup_sigil  => "Duplicate '<4>' argument in signature for %s: %s",
     undef_varname   => "Cannot use undefined value as a variable name: %s",
     undefined       => "Undefined value returned by expression: <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
@@ -106,10 +114,28 @@ sub null { undef }
 
 sub accept {
     my ($self, $token) = @_;
-    # accept the current token and advance to the next once
+
+    # accept the current token and advance to the next one
     $$token = $self->[NEXT];
+    
     return $self;
 }
+
+
+sub accept_expr {
+    my ($self, $token, $scope, $prec, $force) = @_;
+
+    # operator precedence
+    return undef
+        if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
+
+    # accept the current token and advance to the next one
+    $$token = $self->[NEXT];
+
+    return $self;
+}
+
+
 
 sub reject {
     # return the $token passed to us
@@ -189,9 +215,6 @@ sub as_exprs {
     my ($self, $token, $scope, $prec, $force) = @_;
     my (@exprs, $expr);
 
-    #    $self->debug("as_exprs($self, $token, $scope, $prec)");
-    #    $self->debug("as_exprs()  token is ", $$token->token);
-
     $token ||= do { my $this = $self; \$this };
  
     while ($expr = $$token->skip_delimiter($token)
@@ -216,9 +239,9 @@ sub as_filename {
     return BLANK;
 }
 
-sub as_args {
-    return undef;
-}
+#sub as_args {
+#    return undef;
+#}
 
 sub is {
     if (@_ == 3) {
@@ -291,6 +314,20 @@ sub number {
 }
 
 
+sub signature {
+    shift->bad_signature( bad_arg => @_ );
+}
+
+
+sub bad_signature {
+    my $self = shift;
+    my $type = shift;
+    my $name = shift;
+    $name = $name ? "$name()" : 'function';
+    $self->error_msg( "sign_$type" => $name, $self->source, @_ );
+}
+
+
 sub error_undef { 
     my $self = shift;
     $self->error_msg( undefined => $self->source, @_ );
@@ -306,7 +343,9 @@ sub error_nan {
 sub missing {
     my ($self, $what, $token) = @_;
     return $self->error_msg( 
-        missing_for => $what => $self->[TOKEN], $$token->[TOKEN]
+        $$token->eof 
+            ? (missing_for_eof => $what => $self->[TOKEN])
+            : (missing_for     => $what => $self->[TOKEN] => $$token->[TOKEN])
     );
 }
 
@@ -394,18 +433,6 @@ sub expand {
 sub assignment_methods {
     shift->not_implemented;
 #    $_[0]->error_msg( bad_assign => $_[0]->source );
-}
-
-sub signature {
-    shift->bad_signature('bad_arg');
-}
-
-sub bad_signature {
-    my $self = shift;
-    my $type = shift;
-    my $name = shift;
-    $name = $name ? "$name()" : 'anonymous';
-    $self->error_msg( "sign_$type" => $name, $self->source );
 }
 
 # methods to return the leftmost and rightmost leaf node of a subtree

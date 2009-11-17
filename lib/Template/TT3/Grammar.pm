@@ -4,15 +4,15 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Elements',
-    constants => 'HASH ARRAY REGEX',
+    constants => 'HASH ARRAY REGEX CMD_PRECEDENCE CMD_ELEMENT DELIMITER',
     import    => 'class',
     accessors => 'keywords nonwords',
     patterns  => '$IDENT',
     constant  => {
-        TOKEN   => 0,
-        ELEMENT => 1,
-        LPREC   => 2,
-        RPREC   => 3,
+        TOKEN    => 0,
+        ELEMENT  => 1,
+        LPREC    => 2,
+        RPREC    => 3,
     },
     messages  => {
         symbol_dup  => "Duplicate '%s' symbol found in rules for '%s' and '%s' elements",
@@ -52,6 +52,12 @@ sub init_grammar {
     $self->symbols( 
         $class->list_vars( 
             SYMBOLS => $config->{ symbols } 
+        )
+    );
+
+    $self->commands( 
+        $class->list_vars( 
+            COMMANDS => $config->{ commands } 
         )
     );
 
@@ -119,6 +125,51 @@ sub symbols {
     delete $self->{ nonword_regex };
     
     return $symbols;
+}
+
+
+sub commands {
+    my $self     = shift;
+    my $args     = @_ == 1 && ref $_[0] eq ARRAY ? shift : [ @_ ];
+    my $symbols  = $self->{ symbols };
+    my $keywords = $self->{ keywords };
+    my $names    = $self->{ element_names };
+    my (@commands, $command, $name, $element, $lprec, $rprec);
+
+    $self->debug("adding commands: ", $self->dump_data($args), "\n") if DEBUG;
+
+    @commands = map { 
+        ref $_ eq ARRAY ? $_ : split(DELIMITER, $_) 
+    } @$args;
+
+    foreach $command (@commands) {
+        if (ref $command eq ARRAY) {
+            ($name, $element, $lprec, $rprec) = @$command;
+        }
+        else {
+            $name    = $command;
+            $element = sprintf(CMD_ELEMENT, $command);
+            $lprec   = $rprec = CMD_PRECEDENCE;
+            $command = [$name, $element, $lprec, 0];
+        }
+        
+        # check we haven't got an existing entry for a keyword
+        if ($symbols->{ $name }) {
+            return $self->error_msg( 
+                symbol_dup => $name, $symbols->{ $name }->[ELEMENT], $name 
+            );
+        }
+
+        # stash the symbol away by both token and element name
+        $names->{ $name     } = $command;
+        $symbols->{ $name   } = $command;
+        $keywords->{ $name  } = $command;
+
+        $self->debug("added command $name => ", $self->dump_data($command))
+            if DEBUG;
+    }
+    
+    return $keywords;
 }
 
 

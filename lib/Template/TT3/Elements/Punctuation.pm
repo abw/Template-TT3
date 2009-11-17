@@ -1,10 +1,11 @@
 package Template::TT3::Element::Punctuation;
 
-use Template::TT3::Elements::Literal;
+#use Template::TT3::Elements::Literal;
 use Template::TT3::Class 
     version   => 3.00,
-    base      => 'Template::TT3::Element::Literal',
+    base      => 'Template::TT3::Element',
     constants => ':elem_slots';
+    
 
 sub as_expr {
     return undef;
@@ -264,9 +265,14 @@ sub value {
 }
 
 
+#-----------------------------------------------------------------------
+# parens
+#-----------------------------------------------------------------------
+
 package Template::TT3::Element::Parens;
 
 use Template::TT3::Class 
+    debug     => 0,
     base      => 'Template::TT3::Element::Construct',
     constants => ':eval_args :elem_slots',
     constant  => {
@@ -281,7 +287,7 @@ sub as_postfix {
 
 
 sub as_args {
-    my ($self, $token, $scope, $prec, $force) = @_;
+    my ($self, $token, $scope) = @_;
 
     # advance past opening token
     $self->accept($token);
@@ -292,12 +298,34 @@ sub as_args {
 
     # check next token matches our FINISH token
     return $self->missing( $self->FINISH, $token)
-        unless $$token->is( $self->FINISH );
+        unless $$token->is( $self->FINISH, $token );
     
-    # advance past finish token
-    $$token = $$token->next;
-
     return $self;
+}
+
+
+sub as_signature {
+    my ($self, $token, $scope, $parent) = @_;
+    my (@exprs, $expr);
+    my $signature = { };
+
+    $parent ||= $self;
+    my $name = $parent->[TOKEN];
+    $self->debug("sign name: $name  parent is $parent") if DEBUG;
+
+    # advance past opening token
+    $self->accept($token);
+    
+    while ($expr = $$token->skip_delimiter($token)
+                          ->as_expr($token, $scope)) {
+        push(@exprs, $expr->signature($name, $signature));
+    }
+
+    # check next token matches our FINISH token
+    return $parent->missing( $self->FINISH, $token )
+        unless $$token->is( $self->FINISH, $token );
+
+    return $signature;
 }
 
 sub value {

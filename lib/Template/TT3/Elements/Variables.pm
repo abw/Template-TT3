@@ -42,11 +42,13 @@ sub as_expr {
     #return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
 }
 
+
 sub generate {
     $_[CONTEXT]->generate_variable(
         $_[SELF]->[TOKEN],
     );
 }
+
 
 sub sexpr {
     return sprintf(
@@ -74,21 +76,25 @@ sub sexpr {
     );
 }
 
+
 sub variable {
     $_[SELF]->debug("variable($_[SELF]->[TOKEN])") if DEBUG;
     $_[CONTEXT]->{ variables }
          ->var( $_[SELF]->[TOKEN] );
 }
 
+
 sub text {
     $_[SELF]->debug("text($_[SELF]->[TOKEN])") if DEBUG;
     $_[SELF]->variable( $_[CONTEXT] )->text;
 }
 
+
 sub value {
     $_[SELF]->debug("value($_[SELF]->[TOKEN])") if DEBUG;
     $_[SELF]->variable( $_[CONTEXT] )->value;
 }
+
 
 sub list_values {
     $_[SELF]->debug("list_values($_[SELF]->[TOKEN])") if DEBUG;
@@ -96,14 +102,52 @@ sub list_values {
     $_[SELF]->variable( $_[CONTEXT] )->values;
 }
 
+
 sub assign {
     $_[SELF]->variable($_[CONTEXT])->set($_[2]);
 #    return ();
 }
 
+
 sub name {
     $_[SELF]->debug("name($_[SELF]->[TOKEN])") if DEBUG;
     $_[SELF]->[TOKEN];
+}
+
+
+# Signature for a function, e.g. foo(a, b, @c, %d) is:
+# {  a => '$', b => '$', c => '@', d => '%',       # name => type
+#    '$' => ['a', 'b'],     # list of scalar positional args
+#    '@' => 'c',            # positional args collector
+#    '%' => 'd' ,           # named parameters collector
+# }
+# Each argument in an argument list fills its own entry into the
+# shared hash array, or barfs if there's a conflict with an existing
+# argument.
+
+sub signature {
+    my ($self, $name, $signature) = @_;
+    my $sigil = '$';
+    $signature ||= { };
+
+    # we can't be an argument in a function signature if we have args
+    # or we have a dynamic name, e.g. $$foo
+    return $self->bad_signature( bad => $name )
+        if $self->[ARGS] || $self->[EXPR];
+
+    # fail if there's an existing argument with same name
+    my $token = $self->[TOKEN];
+    return $self->bad_signature( dup => $name, $token )
+        if $signature->{ $token };
+
+    # save (name => type) pair
+    $signature->{ $token } = $sigil;
+
+    # add name to '$' scalar argument list
+    my $args = $signature->{ $sigil } ||= [ ];
+    push(@$args, $token);
+
+    return $signature;
 }
 
 
@@ -326,6 +370,33 @@ sub values {
 
 sub text {
     join('', $_[SELF]->values($_[CONTEXT]) );
+}
+
+sub signature {
+    my ($self, $name, $signature) = @_;
+    my $sigil = $self->[TOKEN];
+    $signature ||= { };
+
+    # we can't be an argument in a function signature if we have args
+    # or we have a dynamic name, e.g. $$foo
+#    return $self->bad_signature( bad => $name )
+#        if $self->[ARGS] || $self->[EXPR];
+
+    # fail if there's an existing list argument
+    # FIXME: we should delegate to the expression - that must check args,
+    # dynamic name, etc.
+    my $token = $self->[EXPR]->[TOKEN];
+
+    # check that there isn't already an argument with a '@' sigil - we 
+    # can't have two
+    return $self->bad_signature( dup_sigil => $name, $token, $sigil )
+        if $signature->{ $sigil };
+
+    # save (name => type) pair
+    $signature->{ $sigil } = $token;
+    $signature->{ $token } = $sigil;
+
+    return $signature;
 }
 
 

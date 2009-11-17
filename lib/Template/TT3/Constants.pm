@@ -22,6 +22,9 @@ use Badger::Class
         
         # misc symbols
         DOT                 => '.',
+        
+        CMD_PRECEDENCE      => 100,
+        CMD_ELEMENT         => 'cmd_%s',
     },
     exports => {
         any  => 'FORCE DOT',
@@ -29,6 +32,7 @@ use Badger::Class
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
+            precedence  => 'CMD_PRECEDENCE CMD_ELEMENT',
             type_slots  => {
                 # variable slots
                 META    => '=0',
@@ -49,11 +53,12 @@ use Badger::Class
 
                 # remaining slots have different meanings depending on 
                 # the element type
-                EXPR    => '=4',    # unary expression
-                LHS     => '=4',    # binary expressions
+                JUMP    => '=4',    # used to skip over compile time control tags
+                EXPR    => '=4',    # unary expression and expr/block...
+                BLOCK   => '=5',    # ... expressions use EXPR and/or BLOCK
+                LHS     => '=4',    # binary expressions use LHS and RHS
                 RHS     => '=5',
                 ARGS    => '=6',    # arguments
-                JUMP    => '=4',    # used to skip over compile time control tags
 
                 # element metadata slots
                 CONFIG  => '=0',    # configuration parameters

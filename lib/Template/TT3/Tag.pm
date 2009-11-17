@@ -6,11 +6,11 @@ use Template::TT3::Class
     base      => 'Template::TT3::Base',
     import    => 'class',
 #   throws    => 'tag',
-    utils     => 'blessed',
+    utils     => 'blessed params',
     patterns  => ':all',
     dumps     => 'start end style',
     accessors => 'start end style',
-    constants => 'HASH ARRAY REGEX NONE OFF ON',
+    constants => 'HASH ARRAY REGEX NONE OFF ON CMD_PRECEDENCE',
     constant  => {
         GRAMMAR => 'Template::TT3::Grammar::TT3',
     },
@@ -258,7 +258,52 @@ sub change {
 
 
 sub reset {
-    shift->init_tag;                        # no args - uses $self->{ config };
+    my $self    = shift;
+    my $grammar = $self->{ grammar };
+
+    # call init_tag() to reset the tag start/end tokens
+    $self->init_tag;
+    
+    # reload the original keywords 
+    $self->{ keywords } = $grammar->keywords
+        if delete $self->{ dirty_keywords };
+}
+
+sub keywords {
+    my $self     = shift;
+    my $keywords = $self->{ keywords };
+    
+    # For efficiency we share a copy of the keyword with the grammar.  But if 
+    # anyone tries to update the keywords (which might include us passing
+    # out a reference to them) then we need to clone them first so that we
+    # don't affect the original keyword set defined in the grammar.  We only 
+    # ever need to clone them once so we use the dirty_keywords flags to keep
+    # track of when we've done that.
+
+    # hmmm... come to think of it... that's not going to work....  we have
+    # to modify the grammar's copy of the keywords so the grammar can 
+    # generate elements for them...
+#    $keywords = $self->{ keywords } = { %$keywords }
+#        unless $self->{ dirty_keywords };
+    
+    if (@_) {
+        my $extra = params(@_);
+        @$keywords{ keys %$extra } = map {
+            [ $_, 'cmd_' . $_, CMD_PRECEDENCE, CMD_PRECEDENCE ]
+        } values %$extra;
+        $self->debug("augmented keywords: ", $self->dump_data($keywords));
+    }
+
+    return $keywords;
+}
+
+
+sub commands {
+    # TODO: this messes up the grammar
+    my $self = shift;
+    $self->{ keywords } = $self->{ grammar }->commands(@_);
+    $self->debug("new keywords: ", $self->dump_data($self->{ keywords }))
+        if DEBUG;
 }
 
 

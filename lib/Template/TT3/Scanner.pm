@@ -201,8 +201,6 @@ sub tags {
     $self->{ tagset }->change($tags);
     $self->init_tags;
 }
-
-
     
 
 1;

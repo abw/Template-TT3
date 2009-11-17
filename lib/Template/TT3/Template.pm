@@ -1,5 +1,6 @@
 package Template::TT3::Template;
 
+use Template::TT3::Scope;
 use Template::TT3::Class
     version     => 2.7,
     debug       => 0,
@@ -10,6 +11,7 @@ use Template::TT3::Class
     constants   => 'GLOB',
     constant    => {
         SOURCE  => 'Template::TT3::Type::Source',
+        SCOPE   => 'Template::TT3::Scope',
         SCANNER => 'Template::TT3::Scanner',
         VARS    => 'Template::TT3::Variables',
         TAG     => 'Template::TT3::Tag',
@@ -63,10 +65,12 @@ sub tokens {
 }
 
 sub scan {
-    my $self = shift;
-    my $scnaner = $self->scanner;
+    my $self    = shift;
+    my $scanner = $self->scanner;
     return $self->scanner->scan(
-        $self->source
+        $self->source,
+        undef,
+        $self->scope,
     );
 }
 
@@ -77,6 +81,13 @@ sub scanner {
         # $self->{ config } );
 }
 
+
+sub scope {
+    my $self = shift;
+    return $self->{ scope }
+       ||= $self->SCOPE->new( template => $self );
+}
+    
 
 sub OLD_scanner {
     my $self = shift;
@@ -127,7 +138,8 @@ sub parse {
     my $self   = shift;
     my $tokens = $self->tokens;
     my $token  = $tokens->first;
-    my $exprs  = $token->as_exprs(\$token);
+    my $scope  = $self->scope;
+    my $exprs  = $token->as_exprs(\$token, $scope);
     my @leftover;
 
     while (! $token->eof) {
@@ -138,6 +150,9 @@ sub parse {
     if (@leftover) {
         $self->error("unparsed tokens: ", join('', @leftover));
     }
+    
+    $self->debug("template blocks: ", $self->dump_data($scope->{ blocks }))
+        if $scope->{ blocks };
 
     return $exprs;
 }

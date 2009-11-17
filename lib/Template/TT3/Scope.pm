@@ -5,15 +5,35 @@ use Template::TT3::Class
     version     => 3.00,
     debug       => 0,
     base        => 'Template::TT3::Base',
+    utils       => 'self_params',
     config      => 'scanner input output',
     init_method => 'configure',
-    accessors   => 'scanner input output',
+    accessors   => 'scanner input output tag',
     constants   => 'OFF ON',
     constant    => {
         CONTEXT => 'Template::TT3::Context',
     };
 
 
+sub new {
+    my $class = shift;
+    return ref $class
+        ? $class->clone(@_)
+        : $class->SUPER::new(@_);
+}
+
+
+sub clone {
+    my ($self, $params) = self_params(@_);
+    my $class = ref $self 
+        || return $self->SUPER::new($params);
+    return $class->SUPER::new(
+        %$self,
+        %$params,
+        parent => $self,
+    );
+}
+    
 sub context {
     my $self = shift;
 

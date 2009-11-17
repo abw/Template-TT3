@@ -114,18 +114,19 @@ our $SYMBOLS  = [
     [ 'nor'     => bool_nor         => 205,   0 ],      # foo nor bar
                                 
     # directive keywords    
-    [ 'do'      => cmd_do           => 150,   0 ],
-    [ 'as'      => cmd_as           => 150,   0 ],
-    [ 'is'      => cmd_is           => 150,   0 ],
-    [ 'raw'     => cmd_raw          => 150,   0 ],
-    [ 'if'      => cmd_if           => 150,   0 ],
-    [ 'for'     => cmd_for          => 150,   0 ],
-    [ 'fill'    => cmd_fill         => 150,   0 ],
-    [ 'dot'     => cmd_dot          => 150,   0 ],
-    [ 'block'   => cmd_block        => 150,   0 ],
-    [ 'encode'  => cmd_encode       => 150,   0 ],
-    [ 'decode'  => cmd_decode       => 150,   0 ],
-    [ 'end'     => end              =>   0,   0 ],
+#    [ 'do'      => cmd_do           => 150,   0 ],
+#    [ 'as'      => cmd_as           => 150,   0 ],
+#    [ 'is'      => cmd_is           => 150,   0 ],
+#    [ 'raw'     => cmd_raw          => 150,   0 ],
+#    [ 'if'      => cmd_if           => 150,   0 ],
+#    [ 'for'     => cmd_for          => 150,   0 ],
+#    [ 'fill'    => cmd_fill         => 150,   0 ],
+#    [ 'dot'     => cmd_dot          => 150,   0 ],
+#    [ 'block'   => cmd_block        => 150,   0 ],
+#    [ 'encode'  => cmd_encode       => 150,   0 ],
+#    [ 'decode'  => cmd_decode       => 150,   0 ],
+
+     [ 'end'     => end              =>   0,   0 ],
 
 #    [ "${COMMAND}::With"        => 150,   0, 'with', 'end' ],
 #    [ "${COMMAND}::Block"       =>   0,   0, 'block', 'end' ],
@@ -144,9 +145,14 @@ our $SYMBOLS  = [
 #    [ [']', ')', '}']
 #         => terminator     =>   0,   0 ],
 
-    
     # Other punctuation marks
     [ ','       => separator        =>   0,   0 ],
     [ ';'       => delimiter        =>   0,   0 ],
     [ ':'       => terminator       =>   0,   0 ],
 ];
+
+
+our $COMMANDS = 'do as is raw if for fill dot block encode decode';
+
+
+1;

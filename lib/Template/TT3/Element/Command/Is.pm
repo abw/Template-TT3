@@ -2,8 +2,9 @@ package Template::TT3::Element::Command::Is;
 
 use Template::TT3::Class 
     version    => 3.00,
-    base       => 'Template::TT3::Element::Command::Block',
+    base       => 'Template::TT3::Element::Command',
     constants  => ':elem_slots :eval_args',
+    as         => 'block_expr',
     alias      => {
         value  => \&text,
         values => \&text,
