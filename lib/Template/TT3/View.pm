@@ -7,6 +7,7 @@ use Template::TT3::Class
     constants => 'ARRAY BLANK',
     messages  => {
         bad_method => qq{Can't locate object method "%s" via package "%s" at %s line %s},
+        no_view    => 'No view method defined for %s',
     };
 
 

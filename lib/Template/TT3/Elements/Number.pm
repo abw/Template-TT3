@@ -6,6 +6,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
     import    => 'class',
+    view      => 'number',
     constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT => '<number:%s>', 

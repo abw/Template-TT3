@@ -6,6 +6,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element',
+    view      => 'block',
     constants => ':elem_slots :eval_args BLANK',
     constant  => {
         SEXPR_FORMAT  => "<block:%s>",

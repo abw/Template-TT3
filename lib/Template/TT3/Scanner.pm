@@ -149,7 +149,8 @@ sub tokens {
             last;
         }
         else {
-            return $self->error("Run out of text");
+            last;
+#            return $self->error("Run out of text");
         }
     }
 

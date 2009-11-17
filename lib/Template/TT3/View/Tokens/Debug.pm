@@ -129,12 +129,14 @@ class->methods(
     }
     qw(
         text comment whitespace padding tag_start tag_end html
-        literal word keyword filename
+        literal word keyword number filename unary binary prefix
+        postfix
     )
 );
 
 
 
+__END__
 
 #-----------------------------------------------------------------------
 # main chunks
@@ -160,10 +162,12 @@ sub view_expr {
     my ($name, @args) = @$expr;
     $method = $self->{ views }->{ $name } 
           ||= $self->can("view_$name")
-          ||  return $self->error_msg( no_view => "$name (" . join(', ', @$name) . ")");
+          ||  return $self->error_msg( no_view => $name );
     $self->debug(" - calling view for '$name'\n") if $DEBUG;
     return $method->($self, @args);
 }
+
+
 
 
 #-----------------------------------------------------------------------
@@ -179,11 +183,6 @@ sub view_line {
 sub view_integer {
     my ($self, $integer) = @_;
     return "<integer:$integer>";
-}
-
-sub view_number {
-    my ($self, $number) = @_;
-    return "<number:$number>";
 }
 
 sub view_regex {
@@ -221,32 +220,6 @@ sub view_dquote {
 # these methods take sexpr args
 #-----------------------------------------------------------------------
 
-sub view_put {
-    my ($self, $expr) = @_;
-    return '<PUT:' . $self->view_expr($expr) . '>';
-}
-
-sub view_get {
-    my ($self, $expr) = @_;
-    return '<GET:' . $self->view_expr($expr) . '>';
-}
-
-sub view_set {
-    my ($self, $var, $expr) = @_;
-    $var = [ map { $self->view_var_node(@$_) } @{$var->[1]} ];
-
-    # for testing
-    $var  = $var->[0] if @$var == 1 && ! ref $var->[0];
-    $expr = $self->view_expr($expr) if ref $expr;
-
-    return "<SET:$var=$expr>";
-
-    $self->emit_set(
-        $self->view_expr($var),
-        $self->view_expr($expr),
-    );
-
-}
 
 sub view_dotop {
     my ($self, $nodes) = @_;
@@ -258,12 +231,12 @@ sub view_variable {
     return '<VAR:' . join('.', map { $self->view_var_node(@$_) } @$nodes) . '>';
 }
 
-sub view_var_node {
-    my ($self, $name, $args) = @_;
-    $name = $self->view_expr($name);
-    $args = $args ? $self->view_args($args) : "";
-    return "$name$args";
-}
+#sub view_var_node {
+#    my ($self, $name, $args) = @_;
+#    $name = $self->view_expr($name);
+#    $args = $args ? $self->view_args($args) : "";
+#    return "$name$args";
+#}
 
 sub view_args {
     my ($self, $args) = @_;

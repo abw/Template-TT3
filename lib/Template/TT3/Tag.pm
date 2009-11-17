@@ -147,10 +147,17 @@ sub init_patterns {
 
     # define a regex to match to the end of the tag if tag_end is 
     # defined or to the end of line (\n) or end of file if not
+    
+    # TODO: we need a special case for outline tags that have the newline
+    # as the end of tag
+    
     if (defined $end) {
         $end = ref $end eq REGEX ? $end : quotemeta($end);
         $eol = qr/
             [^\n]*?        # capture everything on this line non-greedily
+                           # TODO: fix this so that outline tags work - they
+                           # have a "\n" end tag that should be matched before
+                           # the newline
             (?: \n         # either match and consumer a newline character
               | (?=        # or look ahead for the end of the text or the        
                  $end      # end-of-tag marker
@@ -169,6 +176,8 @@ sub init_patterns {
     my $comment = qr/ \# $eol /sx;
 
     # whitespace can contain ignorable comments
+    # TODO: fix this so that we don't gobble a newline that an outline 
+    # token may be expecting
     my $wspace = qr/ (?:\s+|$comment)+ /sx;
 
     # now construct table of regexen for matching various operators and 

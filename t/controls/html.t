@@ -18,7 +18,7 @@ use Badger
 #    modules => 'Badger::Factory Template::TT3::Element::Control::HTML';
 
 use Template::TT3::Test 
-    tests   => 7,
+    tests   => 8,
     debug   => 'Template::TT3::Tag',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -125,6 +125,21 @@ raw b: [% raw b %]
 b: &lt;b&gt;Marks &amp;amp; Spencer&lt;/b&gt;
 # But this is correct!  Yay!
 raw b: <b>Marks &amp; Spencer</b>
+
+-- test if blocks don't (yet) honour html --
+-- skip TODO --
+-- method html --
+[? HTML on -?]
+<li>
+[% if 1 -%]
+  <b>blah</b>
+[%- end -%]
+</li>
+-- expect --
+<li>
+  <b>blah</b>
+</li>
+
 
 -- stop --
 -- test nested HTML with raw block evaluation --

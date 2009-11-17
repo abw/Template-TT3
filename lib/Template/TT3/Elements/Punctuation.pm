@@ -120,6 +120,7 @@ package Template::TT3::Element::Terminator;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Punctuation',
+    view      => 'terminator',
     constants => ':elem_slots',
     constant  => {
         is_terminator => 1,
@@ -337,6 +338,7 @@ package Template::TT3::Element::End;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Terminator',
+    view      => 'keyword',
     constants => ':elem_slots';
 
 sub generate {

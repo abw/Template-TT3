@@ -1,8 +1,8 @@
 #============================================================= -*-perl-*-
 #
-# t/commands/block.t
+# t/commands/encode.t
 #
-# Test script for the 'block' command.
+# Test script for the 'encode' command.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 4,
+    tests   => 2,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -28,24 +28,16 @@ test_expect(
 
 __DATA__
 
--- test block ... end --
-[% block; a; end %]
+-- test encode html --
+[% encode html -%]
+<foo>
+[% end -%]
 -- expect -- 
-alpha
+&lt;foo&gt;
 
--- test block { } --
-[% block { a b c } %]
+-- test bad encoder --
+[% encode some_funky_shit -%]
+<foo>
+[% end -%]
 -- expect -- 
-alphabravocharlie
-
--- test block with single expression --
-[% block a %]
--- expect -- 
-alpha
-
--- test assignment to block .. end --
-[% foo = block; b; c; end -%]
-foo: [% foo %]
--- expect --
-foo: bravocharlie
-
+<ERROR:Invalid encoder specified for encode command: codec not found: some_funky_shit>

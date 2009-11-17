@@ -15,6 +15,7 @@ use Template::TT3::Class
     version   => 3.00,
     constants => ':elem_slots',
     utils     => 'xprintf',
+    view      => 'operator',
     messages  => {
         no_rhs_expr     => "Missing expression after '%s'",
         no_rhs_expr_got => "Missing expression after '%s' (got '%s')",
@@ -93,6 +94,7 @@ package Template::TT3::Element::Operator::Unary;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
+    view      => 'unary',
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT  => '<unary:<op:%s>%s>', 
@@ -123,6 +125,7 @@ package Template::TT3::Element::Operator::Prefix;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Unary',
+    view      => 'prefix',
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT => '<prefix:<op:%s>%s>', 
@@ -188,6 +191,7 @@ package Template::TT3::Element::Operator::Postfix;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Unary',
+    view      => 'postfix',
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT => '<postfix:<op:%s>%s>', 
@@ -251,6 +255,7 @@ package Template::TT3::Element::Operator::Binary;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
+    view      => 'binary',
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT  => '<binary:<op:%s>%s%s>', 

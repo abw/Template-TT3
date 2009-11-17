@@ -121,8 +121,10 @@ our $SYMBOLS  = [
     [ 'if'      => cmd_if           => 150,   0 ],
     [ 'for'     => cmd_for          => 150,   0 ],
     [ 'fill'    => cmd_fill         => 150,   0 ],
-    [ 'end'     => end              =>   0,   0 ],
     [ 'block'   => cmd_block        => 150,   0 ],
+    [ 'encode'  => cmd_encode       => 150,   0 ],
+    [ 'decode'  => cmd_decode       => 150,   0 ],
+    [ 'end'     => end              =>   0,   0 ],
 
 #    [ "${COMMAND}::With"        => 150,   0, 'with', 'end' ],
 #    [ "${COMMAND}::Block"       =>   0,   0, 'block', 'end' ],

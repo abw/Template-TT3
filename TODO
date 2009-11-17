@@ -51,6 +51,8 @@ the class name without checking to see if it can be loaded.
 
 Add name(), pair() and pairs() methods to all elements that require them.
 
-Move the default text token selection process into Template::Tokens so that
-tags, chompers, etc., can continue to call $output->text_tokens() and have
-it switch internally between text/html tokens.
+Fix the regexes that are constructed for the outline tag so they don't 
+consume newlines in comments, whitespace, etc.  Also make the end tag
+optional and accept a simple string as a start token which gets compiled
+to qr/^$start/.
+
