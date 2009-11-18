@@ -229,10 +229,11 @@ class->generate_number_assign_ops(
 #-----------------------------------------------------------------------
 
 class->generate_pre_post_ops(
-    inc   => ['num_pre_inc',  'num_post_inc'],
-    dec   => ['num_pre_dec',  'num_post_dec'],
-    plus  => ['num_positive', 'num_add'],
-    minus => ['num_negative', 'num_subtract'],
+    inc     => ['num_pre_inc',  'num_post_inc'],
+    dec     => ['num_pre_dec',  'num_post_dec'],
+    plus    => ['num_positive', 'num_add'],
+    minus   => ['num_negative', 'num_subtract'],
+    percent => ['sig_hash',     'num_modulus'],
 );
 
 

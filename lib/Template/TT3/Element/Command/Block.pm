@@ -2,9 +2,10 @@ package Template::TT3::Element::Command::Block;
 
 use Template::TT3::Class 
     version    => 3.00,
+    debug      => 0,
     base       => 'Template::TT3::Element::Command',
     utils      => 'tt_params',
-    constants  => ':elem_slots :eval_args',
+    constants  => ':elem_slots :eval_args BLANK',
     alias      => {
         value  => \&text,
         values => \&text,
@@ -34,15 +35,21 @@ sub as_expr {
 
     if ($self->[EXPR]) {
         # this is a named block so we need to define a block at compile time
-        $self->debug("declaring block: $self->[EXPR] in scope: $scope");
+        $self->debug("declaring block: $self->[EXPR] in scope: $scope") if DEBUG;
+        
         my $name = $self->[EXPR]->value( $scope->context );
         
         if ($self->[ARGS]) {
+            # TODO: I think named blocks can't have args.  They're creating
+            # runtime templates which need a context to work in.  Hmmm...
+            # unless they inherit the context of the point at which they're
+            # defined....
+            
             $scope->{ blocks }->{ $name } = sub {
                 my $context = shift;
-                $self->debug("RUNNING BLOCK WITH ARGS!");
+                $self->debug("RUNNING BLOCK WITH ARGS!") if DEBUG;
                 my $params = tt_params($self, $self->[ARGS], undef, @_);
-                $self->debug("got params: $params");
+                $self->debug("got params: $params") if DEBUG;
                 return "TODO: real block subs";
             };
         }
@@ -54,7 +61,8 @@ sub as_expr {
             };
         }
             
-        $self->debug("added blocks: ", $self->dump_data($scope->{ blocks }));
+        $self->debug("added blocks: ", $self->dump_data($scope->{ blocks }))
+            if DEBUG;
     }
         
     return $self;
@@ -63,8 +71,34 @@ sub as_expr {
 
 sub text {
     my ($self, $context) = @_;
+
+    if ($self->[EXPR]) {
+        $self->debug(
+            "Block has a name (", 
+            $self->[EXPR]->value($context),
+            ") no runtime content generated"
+        ) if DEBUG;
+        
+        return BLANK;
+    }
     
- #   if ($self->[EXPR]) {
+    if ($self->[ARGS]) {
+        $self->debug(
+            "Block has arguments, generating runtime subroutine (", 
+            $self->dump_data($self->[ARGS]),
+            ")"
+        ) if DEBUG;
+
+        return sub {
+            $self->debug("Running block with args: ", $self->dump_data($self->[ARGS]))
+                if DEBUG;
+            my $params = tt_params($self, $self->[ARGS], undef, @_);
+            $self->debug("got params: ", $self->dump_data($params)) if DEBUG;
+            $context->{ variables }->set_vars($params);
+            return $self->[BLOCK]->text( $context );
+        };
+    }
+        
         # this is a named block;
  #       if ($self->[ARGS]) {
             
@@ -76,9 +110,7 @@ sub text {
 #    $_[SELF]->debug("BLOCK HAS ARGS: ", $_[SELF]->dump_data($_[SELF]->[ARGS]))
 #        if $_[SELF]->[ARGS];
         
-    return $_[SELF]->[EXPR]
-        ? ()
-        : $_[SELF]->[BLOCK]->text( $_[CONTEXT] );
+    return $self->[BLOCK]->text( $context );
 }
 
 1;

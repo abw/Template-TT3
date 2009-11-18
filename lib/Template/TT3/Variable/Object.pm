@@ -4,14 +4,15 @@ use Template::TT3::Class
     version   => 0.01,
     debug     => 0,
     base      => 'Template::TT3::Variable',
-    constants => ':type_slots',
+    constants => ':type_slots CODE',
     constant  => {
         type    => 'object',
         PRIVATE => '_',
         PUBLIC  => '*',
     },
     messages => {
-        denied => 'Access denied to object method: %s.%s',
+        denied     => 'Access denied to object method: %s.%s',
+        bad_method => 'Invalid object method called: %s.%s',
     };
 
 our $PRIVATE = qr/^_/;
@@ -50,6 +51,9 @@ sub dot {
        || return $self->error_msg( denied => $self->[NAME], $name );
               
     $method = $name if $method eq '1';
+    $method = $self->[VALUE]->can($method)
+        || return $self->error_msg( bad_method => $self->[NAME], $method )
+            unless ref $method eq CODE;
 
     $self->[META]->[VARS]->use_var( 
         $name,

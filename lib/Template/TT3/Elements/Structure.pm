@@ -2,6 +2,7 @@
 
 package Template::TT3::Element::Block;
 
+use Template::TT3::Type::Params 'PARAMS';
 use Template::TT3::Class 
     version   => 3.00,
     debug     => 0,
@@ -19,11 +20,12 @@ use Template::TT3::Class
     };
 
 
-sub generate {
+sub OLD_generate {
     $_[CONTEXT]->generate_block(
         $_[SELF]->[EXPR],
     );
 }
+
 
 sub sexpr {
     my $self   = shift;
@@ -40,6 +42,7 @@ sub sexpr {
     );
 }
 
+
 sub source {
     my $self   = shift;
     my $format = shift || $self->SOURCE_FORMAT;
@@ -53,7 +56,6 @@ sub source {
         )
     );
 }
-
 
 
 # TODO: I think value() should return text() - I did it this way to 
@@ -87,11 +89,32 @@ sub text {
     );
 }
 
+
 sub pairs {
+#    $_[SELF]->debug_caller;
     $_[SELF]->debug("called pairs() on block: ", $_[SELF]->source) if DEBUG;
     map { $_->pairs($_[CONTEXT]) } 
     @{ $_[SELF]->[EXPR] } 
 }
+
+
+sub params {
+    $_[SELF]->debug("called params() on block: ", $_[SELF]->source) if DEBUG;
+
+    my ($self, $context, $posit, $named) = @_;
+    $posit ||= [ ];
+    $named ||= bless { }, PARAMS;
+    
+    $_->params($context, $posit, $named)
+        for @{ $_[SELF]->[EXPR] };
+    
+    push(@$posit, $named) 
+        if $named && %$named;
+
+    $self->debug("returning ", $self->dump_data($posit)) if DEBUG;
+    return @$posit;
+}
+
 
 sub variable {
     # a block of text can be converted to a text variable in order to 
@@ -99,5 +122,6 @@ sub variable {
     $_[CONTEXT]->{ variables }
          ->use_var( $_[SELF], $_[SELF]->text( $_[CONTEXT] ) );
 }
+
 
 1;

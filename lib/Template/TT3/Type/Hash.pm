@@ -17,17 +17,20 @@ use warnings;
 use strict;
 
 use Template::TT3::Class
-    version  => 3.00,
-    debug    => 0,
-    base     => 'Template::TT3::Type',
-    utils    => 'blessed',
-    constant => {
-        HASH => __PACKAGE__,
-        type => 'Hash',     # capitalised because it's a format type (of sorts)
+    version   => 3.00,
+    debug     => 0,
+    base      => 'Template::TT3::Type',
+    utils     => 'blessed',
+    codec     => 'html',
+    constants => 'SPACE BLANK',
+    constant  => {
+        HASH  => __PACKAGE__,
+        type  => 'Hash',     # capitalised because it's a format type (of sorts)
     },
-    exports  => {
-        any => 'HASH Hash',
+    exports   => {
+        any   => 'HASH Hash',
     };
+
 
 our $METHODS   = {
     # ref/type methods
@@ -282,6 +285,18 @@ sub kvlist {
     [ map { [ $_, $self->{ $_ } ] } CORE::keys %$self ];
 }
 
+
+sub html_attrs {
+    my $self  = shift;
+    my @attrs = map {
+        $_ . '="' . encode($self->{ $_ }) . '"'
+    } 
+    CORE::sort(CORE::keys(%$self));
+    
+    return @attrs
+        ? SPACE . join(SPACE, @attrs)
+        : BLANK;
+}
 
 
 #------------------------------------------------------------------------

@@ -1,40 +1,29 @@
-#========================================================================
-#
-# Template::TT3::Type::Params
-#
-# DESCRIPTION
-#   A wafer thin subclass of T::Type::Hash.
-# 
-# AUTHOR
-#   Andy Wardley <abw@wardley.org>
-#
-#========================================================================
-
 package Template::TT3::Type::Params;
 
 use Template::TT3::Class
-    base     => 'Template::TT3::Type::Hash',
     version  => 3.00,
     debug    => 0,
+    base     => 'Template::TT3::Type::Hash',
     utils    => 'blessed',
     constant => {
         PARAMS => __PACKAGE__,
-        type   => 'Params',     # capitalised because it's a format type (of sorts)
+        type   => 'Params',
+    },
+    exports  => {
+        any  => 'PARAMS Params',
     };
 
-PARAMS->export_any( qw( PARAMS Params ) );
 
 sub Params {
-    return
-        # if we only have one argument and it's already HASH then return it,
-        # otherwise forward all arguments to the HASH constructor.
-        @_ == 1 && blessed($_[0]) && $_[0]->isa(PARAMS)
-        ? $_[0]
-        : PARAMS->new(@_);
+    # if we only have one argument and it's already HASH then return it,
+    # otherwise forward all arguments to the HASH constructor.
+    return @_ == 1 
+        && blessed($_[0]) 
+        && $_[0]->isa(PARAMS)
+            ? $_[0]
+            : PARAMS->new(@_);
 }
 
-
-1;
 
 1;
 
@@ -50,7 +39,8 @@ Template::TT3::Type::Params - wafer thin subclass of Template::TT3::Type::Hash
 
 =head1 DESCRIPTION
 
-C<Template::TT3::Type::Params> is a wafer thin subclass of L<Template::TT3::Type::Hash>.
+C<Template::TT3::Type::Params> is a wafer thin subclass of
+L<Template::TT3::Type::Hash>.
 
 It is used to store named parameters that are passed to a subroutine or
 object method from TT.  
@@ -67,7 +57,7 @@ Andy Wardley  E<lt>abw@wardley.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 1996-2008 Andy Wardley.  All Rights Reserved.
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

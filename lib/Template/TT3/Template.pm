@@ -152,7 +152,7 @@ sub parse {
     }
     
     $self->debug("template blocks: ", $self->dump_data($scope->{ blocks }))
-        if $scope->{ blocks };
+        if DEBUG && $scope->{ blocks };
 
     return $exprs;
 }

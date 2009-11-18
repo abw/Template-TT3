@@ -5,6 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     import    => 'class',
     base      => 'Template::TT3::Base',
+    utils     => 'self_params',
     constants => 'HASH CODE',
     messages  => {
         bad_type  => 'Invalid variable type for %s: %s',
@@ -93,6 +94,15 @@ sub set_var {
     return $self->{ vars }->{ $name } 
          = $self->use_var( $name => $value );
 
+}
+
+sub set_vars {
+    my ($self, $params) = self_params(@_);
+    my $vars = $self->{ vars };
+    
+    while (my ($name, $value) = each %$params) {
+        $vars->{ $name } = $self->use_var( $name => $value );
+    }
 }
 
 

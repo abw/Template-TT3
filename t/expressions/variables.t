@@ -95,6 +95,7 @@ foo (a)
 -- expect --
 called foo()alpha
 
+
 -- test foo(a,b) --
 foo(a,b)
 -- expect --
@@ -209,31 +210,31 @@ called one_thing(alpha, bravo)
 -- test explicit list call on list sub with no args --
 @many_things
 -- expect --
-called many_things()
+called many_things( )
 
 -- test explicit list call on list sub with empty args --
 @many_things()
 -- expect --
-called many_things()
+called many_things( )
 
 -- test explicit list call on list sub with one arg --
 @many_things(a)
 -- expect --
-called many_things(alpha)
+called many_things( alpha )
 
 -- test explicit list call on list sub with many args --
 @many_things(a,b,c,d)
 -- expect --
 # note that we're getting back a number of items here which are 
-# being concatenated together
-called many_things(alphabravocharliedelta)
+# being joined together with spaces
+called many_things( alpha bravo charlie delta )
 
 -- test explicit list call on polymorphic sub --
 @some_things
 @some_things()
 -- expect --
-called @some_things()
-called @some_things()
+called @some_things( )
+called @some_things( )
 
 
 #-----------------------------------------------------------------------
@@ -313,12 +314,12 @@ called $some_list( )
 -- test @some_list() --
 @some_list()
 -- expect --
-called @some_list()
+called @some_list( )
 
 -- test @$some_list() --
 @$some_list()
 -- expect --
-called $some_list()
+called $some_list( )
 
 -- test @$some_list() --
 list = [@$some_list()]; list.size ' / ' list.0 ' / ' list.1

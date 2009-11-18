@@ -29,6 +29,7 @@ use Template::TT3::Class
         as_word         => \&null,
         as_args         => \&null,
         as_signature    => \&null,
+        as_filename     => \&null,
     };
 
 
@@ -50,10 +51,10 @@ our $MESSAGES = {
 };
 
 
-#class->alias(
-#    as_postop => 'self',
-#);
 
+#-----------------------------------------------------------------------
+# constructor / initialisation methods
+#-----------------------------------------------------------------------
 
 sub new {
     my ($class, @self) = @_;
@@ -100,6 +101,7 @@ sub lprec { $_[0]->[META]->[LPREC]  }
 sub rprec { $_[0]->[META]->[RPREC]  }
 
 
+
 #-----------------------------------------------------------------------
 # nullop methods to use for aliases
 #-----------------------------------------------------------------------
@@ -109,7 +111,7 @@ sub null { undef }
 
 
 #-----------------------------------------------------------------------
-# other generic parse methods
+# generic parse methods
 #-----------------------------------------------------------------------
 
 sub accept {
@@ -136,114 +138,15 @@ sub accept_expr {
 }
 
 
-
 sub reject {
     # return the $token passed to us
     $_[1];
 }
 
 
-#-----------------------------------------------------------------------
-# whitespace handling methods
-# NOTE: we should be able to remove the $_[0]->[NEXT] check now that 
-# we have an explicit EOF token (which must handle this)
-#-----------------------------------------------------------------------
-
-sub skip_ws { 
-    # Most tokens aren't whitespace so they simply return the zeroth argument
-    # ($self).  If a $token reference is passed as the first argument then we 
-    # update it to reference the new token.  This advances the token pointer.
-    my ($self, $token) = @_;
-    $$token = $self if $token;
-    return $self;
-
-# NOTE: I'm wary of this because I've had aliasing problems...
-#    $self->debug("skip_ws(), next is $self->[NEXT]  token is ", $token ? $$token : 'undefined');
-#    ${$_[1]} = $_[0] if $_[1]; 
-#    $self->debug("set next to ", $token ? $$token : 'undefined', "  returning $_[0]");
-#    $_[0];
-}
-
-sub next { 
-    if (@_ == 1) {
-        return $_[SELF]->[NEXT];
-    }
-    else {
-        my ($self, $token) = @_;
-        $$token = $self->[NEXT];
-        return $$token;
-    }
-}
-
-
-sub skip_delimiter { 
-    # Most tokens aren't delimiters so they simply return the zeroth argument
-    # ($self).  If a $token reference is passed as the first argument then we 
-    # update it to reference the new token.  This advances the token pointer.
-    my ($self, $token) = @_;
-    $$token = $self if $token;
-    return $self;
-}
-
-sub next_skip_ws {
-    # delegate to the next token's skip_ws method
-#    my ($self, $token) = @_;
-#    $self->debug("next_skip_ws(), next is $self->[NEXT]  token is ", $token ? $$token : 'undefined');
-    $_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]) 
-}
-
-sub as_postfix {
-    # Most things aren't postfix operators.  The only things that are 
-    # are () [] and { }.  So in most cases as_postfix() skips any whitespace
-    # and delegates straight onto as_postop() on the next non-whitespace 
-    # token.
-    shift->skip_ws($_[1])->as_postop(@_);
-}
-
-sub as_postop {
-    # args are: ($self, $lhs, $token, $scope, $prec)
-    # default behaviour (for non-postop tokens) is to return $lhs without 
-    # advancing $token
-    return $_[1];
-}
-
-sub as_block {
-    return shift->as_expr(@_);
-}
-
-sub as_exprs {
-    my ($self, $token, $scope, $prec, $force) = @_;
-    my (@exprs, $expr);
-
-    $token ||= do { my $this = $self; \$this };
- 
-    while ($expr = $$token->skip_delimiter($token)
-                          ->as_expr($token, $scope, $prec)) {
-        push(@exprs, $expr);
-
-        if (DEBUG) {
-            $self->debug("expr: $expr->[TOKEN] => $expr");
-            $self->debug("token: $$token->[TOKEN]");
-        }
-    }
-
-    return undef
-        unless @exprs || $force;
-
-    return $self->[META]->[ELEMS]->construct(
-        block => $self->[TOKEN], $self->[POS], \@exprs
-    );
-}
-
-sub as_filename {
-    return BLANK;
-}
-
-#sub as_args {
-#    return undef;
-#}
-
 sub is {
+    # Check to see if the token matches that specifed: 
+    # e.g. if ($token->is('foo'))
     if (@_ == 3) {
         # if a $token reference is passed as the third argument then we 
         # advance it on a successful match
@@ -256,7 +159,10 @@ sub is {
     return $_[SELF]->[TOKEN] && $_[SELF]->[TOKEN] eq $_[1];
 }
 
+
 sub in {
+    # See if the token is in the hash ref passed: 
+    # e.g. if ($token->in({ foo => 1, bar => 2 }))
     if (@_ == 3) {
         # as per in(), we advance the $token reference
         my ($self, $match, $token) = @_;
@@ -269,18 +175,125 @@ sub in {
     $_[SELF]->[TOKEN] && $_[1]->{ $_[SELF]->[TOKEN] };
 }
 
+
+#-----------------------------------------------------------------------
+# whitespace handling methods
+#-----------------------------------------------------------------------
+
+sub skip_ws { 
+    # Most tokens aren't whitespace so they simply return $self.  If a $token 
+    # reference is passed as the first argument then we update it to reference 
+    # the new token.  This advances the token pointer.
+    my ($self, $token) = @_;
+    $$token = $self if $token;
+    return $self;
+}
+
+
+sub next { 
+    # next() returns the next token.  If a token reference is passed as the
+    # first argument then it is also advanced to reference the next token.
+    if (@_ == 1) {
+        return $_[SELF]->[NEXT];
+    }
+    else {
+        my ($self, $token) = @_;
+        $$token = $self->[NEXT];
+        return $$token;
+    }
+}
+
+
+sub skip_delimiter { 
+    # Most tokens aren't delimiters so they simply return $self.  If a $token 
+    # reference is passed as the first argument then we update it to reference
+    # the new token.  This advances the token pointer.
+    my ($self, $token) = @_;
+    $$token = $self if $token;
+    return $self;
+}
+
+
+sub next_skip_ws {
+    # Delegate to the next token's skip_ws method
+    $_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]) 
+}
+
+
+
+#-----------------------------------------------------------------------
+# parser rule matching methods
+#-----------------------------------------------------------------------
+
+sub as_postfix {
+    # Most things aren't postfix operators.  The only things that are 
+    # are () [] and { }.  So in most cases as_postfix() skips any whitespace
+    # and delegates straight onto as_postop() on the next non-whitespace 
+    # token.
+    shift->skip_ws($_[1])->as_postop(@_);
+}
+
+
+sub as_postop {
+    # Args are: ($self, $lhs, $token, $scope, $prec)
+    # Default behaviour (for non-postop tokens) is to return $lhs without 
+    # advancing $token
+    return $_[1];
+}
+
+
+sub as_block {
+    # Any expression can be a single expression block
+    return shift->as_expr(@_);
+}
+
+
+sub as_exprs {
+    my ($self, $token, $scope, $prec, $force) = @_;
+    my (@exprs, $expr);
+
+    $token ||= do { my $this = $self; \$this };
+ 
+    while ($expr = $$token->skip_delimiter($token)
+                          ->as_expr($token, $scope, $prec)) {
+        push(@exprs, $expr);
+    }
+
+    return undef
+        unless @exprs || $force;
+
+    return $self->[META]->[ELEMS]->construct(
+        block => $self->[TOKEN], $self->[POS], \@exprs
+    );
+}
+
+
+#sub as_filename {
+    # most elements aren't filenames
+#    return BLANK;
+#}
+
+
+
+#-----------------------------------------------------------------------
+# evaluation methods
+#-----------------------------------------------------------------------
+
 sub value {
     shift->not_implemented('in element base class');
 }
+
 
 sub variable {
     shift->not_implemented('in element base class');
 }
 
+
 sub values {
     $_[0]->debug("values() calling value()") if DEBUG;
     shift->value(@_);
 }
+
 
 sub list_values {
     $_[0]->debug("list_values() calling values()") if DEBUG;
@@ -291,17 +304,29 @@ sub list_values {
 #    shift->values(@_);
 }
 
+
 sub pair {
     shift->not_implemented;
 }
 
+
 sub pairs {
+#    $_[SELF]->debug_caller;
     shift->not_implemented;
 }
+
+
+sub params {
+    my ($self, $context, $posit) = @_;
+    $posit ||= [ ];
+    push(@$posit, $self->value($context));
+}
+
 
 sub text {
     shift->value(@_);
 }
+
 
 sub number {
     my $self = shift;
@@ -318,6 +343,42 @@ sub signature {
     shift->bad_signature( bad_arg => @_ );
 }
 
+
+#-----------------------------------------------------------------------
+# view / inspection methods
+#-----------------------------------------------------------------------
+
+sub view {
+    $_[CONTEXT]->view_element($_[SELF]);
+}
+
+
+sub view_guts {
+    # used mostly for debugging - see T::TT3::View::Tokens::Debug
+    self => refaddr $_[0],
+    next => refaddr $_[0]->[NEXT],
+    jump => refaddr $_[0]->[JUMP],
+}
+
+
+sub remaining_text {
+    my $self = shift;
+    my $elem = $self;
+    my @text;
+    while ($elem) {
+        push(@text, $elem->[TOKEN]);
+        $elem = $elem->[NEXT];
+    }
+    return @text
+        ? join(BLANK, grep { defined } @text)
+        : BLANK;
+}
+
+
+
+#-----------------------------------------------------------------------
+# error handling
+#-----------------------------------------------------------------------
 
 sub bad_signature {
     my $self = shift;
@@ -349,31 +410,7 @@ sub missing {
     );
 }
 
-sub view {
-    $_[CONTEXT]->view_element($_[SELF]);
-}
 
-sub view_guts {
-    # used mostly for debugging - see T::TT3::View::Tokens::Debug
-    self => refaddr $_[0],
-    next => refaddr $_[0]->[NEXT],
-    jump => refaddr $_[0]->[JUMP],
-}
-
-sub remaining_text {
-    my $self = shift;
-    my $elem = $self;
-    my @text;
-    while ($elem) {
-        push(@text, $elem->[TOKEN]);
-        $elem = $elem->[NEXT];
-    }
-    return @text
-        ? join(BLANK, grep { defined } @text)
-        : BLANK;
-}
-    
-    
 1;
 
 __END__

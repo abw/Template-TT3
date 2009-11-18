@@ -36,7 +36,7 @@ our $SYMBOLS  = [
     # variable sigils and other super-duper high precedence operators
     [ '$'       => sig_item         =>   0, 350 ],      # $foo
     [ '@'       => sig_list         =>   0, 350 ],      # @foo
-#   [ '%'       => percent          =>   0, 350 ],      # %foo
+#   [ '%'       => sig_hash         =>   0, 350 ],      # %foo
     [ '.'       => var_dot          => 340,   0 ],      # foo.bar
     
     # ++/-- unary prefix/postfix self-modification operators

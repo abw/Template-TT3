@@ -281,6 +281,7 @@ use Template::TT3::Class
         SOURCE_FORMAT => '( %s )',
     };
 
+
 sub as_postfix {
     shift->become('var_apply')->as_postfix(@_);
 }
@@ -328,6 +329,7 @@ sub as_signature {
     return $signature;
 }
 
+
 sub value {
     my @values = $_[SELF]->[EXPR]->values($_[CONTEXT]);
     return @values > 1
@@ -335,19 +337,43 @@ sub value {
         : $values[0];
 }
 
+
 sub values {
     return $_[SELF]->[EXPR]->values($_[CONTEXT]);
 }
+
+
+sub params {
+    # This isn't being called in the right place.  Function application
+    # stores args as raw block
+    
+    my ($self, $context) = @_;
+    $self->error('params() method needs some work');
+    
+    my ($posit, $named) = shift->[EXPR]->params(@_);
+    $self->debug("posit: $posit   named: $named");
+    
+    push(@$posit, $named) 
+        if $named && %$named;
+    return @$posit;
+}
+
 
 sub text {
     $_[SELF]->[EXPR]->text($_[CONTEXT])
 }
 
 
+
+#-----------------------------------------------------------------------
+# args
+#-----------------------------------------------------------------------
+
+
 package Template::TT3::Element::Args;
 
 use Template::TT3::Class 
-    base      => 'Template::TT3::Element::Construct',
+    base      => 'Template::TT3::Element::Parens',
     constant  => {
         FINISH        => ')',
         SEXPR_FORMAT  => "<args:%s>",

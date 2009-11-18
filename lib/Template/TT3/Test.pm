@@ -4,7 +4,7 @@ use Badger::Test ':default manager';           # to import ok(), is(), etc.
 use Template::TT3::Class
     version   => 0.01,
     base      => 'Badger::Test',
-    debug     => 0,
+#    debug     => 0,
     utils     => 'params',
     constants => 'HASH CODE',
     import    => 'class',
@@ -19,6 +19,7 @@ our $ENGINE   = 'Template::TT3';
 our $HANDLER  = \&test_handler;
 our $TEMPLATE = 'Template::TT3::Template';
 our $METHOD   = 'fill';
+our $DEBUG;
 
         
 sub test_expect {

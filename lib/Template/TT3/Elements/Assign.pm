@@ -53,8 +53,9 @@ sub as_postop {
     return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
 }
 
+
 sub value {
-#    $_[SELF]->debug("assign [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]");
+#   $_[SELF]->debug("assign [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]");
     $_[SELF]->[LHS]
             ->variable( $_[CONTEXT] )        # fetch LHS as a variable
             ->set(                           # set it to RHS value
@@ -66,6 +67,19 @@ sub pairs {
     $_[SELF]->debug("pairs [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]") if DEBUG;
     return $_[SELF]->[LHS]->name( $_[CONTEXT] )     # fetch LHS as a name
         => $_[SELF]->[RHS]->value( $_[CONTEXT] );   # fetch RHS as a value
+}
+
+
+sub params {
+    $_[3]->{ $_[SELF]->[LHS]->name( $_[CONTEXT] ) }
+           = $_[SELF]->[RHS]->value( $_[CONTEXT] );
+           
+    # my ($self, $context, $posit, $named) = @_;
+#    $named ||= { };
+#    my $name  = $_[SELF]->[LHS]->name( $_[CONTEXT] );
+#    my $value = $_[SELF]->[RHS]->value( $_[CONTEXT] );
+#    $self->debug("adding named parameter: $name => $value") if DEBUG;
+#    $named->{ $name } = $value;
 }
 
 

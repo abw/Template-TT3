@@ -15,8 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    skip    => 'abw is working on this at the moment',
-    tests   => 15,
+    tests   => 5,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -38,7 +37,7 @@ Hello World
 
 -- test block with list arg --
 -- block --
-foo = block(@foo) { 'Hello ' foo.join(' and ') }; 
+hello = block(@foo) { 'Hello ' foo.join(' and ') }; 
 hello('World', 'Badger')
 -- expect --
 Hello World and Badger
@@ -52,3 +51,13 @@ foo = block(@foo, @bar) { }
 block wiz(@foo, @bar) { }
 -- expect --
 <ERROR:Duplicate '@' argument in signature for wiz(): @bar>
+
+-- test hash collector --
+-- block --
+wiz = block(%foo) { 'hello' foo.html_attrs };
+'wiz: ' wiz(x=10, y=20)
+-- expect --
+wiz: hello x="10" y="20"
+
+
+

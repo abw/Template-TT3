@@ -197,22 +197,33 @@ sub as_postfix {
     return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
 }
 
+
 sub variable {
     $_[SELF]->[EXPR]->variable( $_[CONTEXT] )->apply( 
-        $_[SELF]->[ARGS]->values( $_[CONTEXT] )
+#       $_[SELF]->[ARGS]->values( $_[CONTEXT] )
+        $_[SELF]->[ARGS]->params( $_[CONTEXT] )
     );
+
+#    my @params = $_[SELF]->[ARGS]->params( $_[CONTEXT] );
+#    $_[SELF]->debug("variable() params: ", $_[SELF]->dump_data(\@params)) if DEBUG or 1;
+#    $_[SELF]->debug("ARGS: ", $_[SELF]->[ARGS]);
+#    $_[SELF]->debug("PARAMS: ", $_[SELF]->[ARGS]->params( $_[CONTEXT] ));
 }
+
 
 sub variable_list {
     $_[SELF]->debug('variable_list() args are ', $_[SELF]->[ARGS]->source) if DEBUG;
     $_[SELF]->[EXPR]->variable( $_[CONTEXT] )->apply_list( 
-        $_[SELF]->[ARGS]->values( $_[CONTEXT] )
+#       $_[SELF]->[ARGS]->values( $_[CONTEXT] )
+        $_[SELF]->[ARGS]->params( $_[CONTEXT] )
     );
 }
+
 
 sub list_values {
     $_[SELF]->variable_list( $_[CONTEXT] )->values;
 }
+
 
 sub sexpr {
     my $self = shift;
@@ -228,6 +239,7 @@ sub sexpr {
     );
 }
 
+
 sub source {
     my $self = shift;
     sprintf(
@@ -236,6 +248,7 @@ sub source {
         $self->[ARGS]->source,
     );
 }
+
 
 
 #-----------------------------------------------------------------------
@@ -300,6 +313,7 @@ sub source {
 }
 
 
+
 #-----------------------------------------------------------------------
 # Template:TT3::Element::Sigil::Item
 #
@@ -350,7 +364,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil',
-    constants => ':elem_slots :eval_args ARRAY';
+    constants => ':elem_slots :eval_args ARRAY SPACE';
 
 
 sub value {
@@ -369,7 +383,7 @@ sub values {
 }
 
 sub text {
-    join('', $_[SELF]->values($_[CONTEXT]) );
+    join(SPACE, $_[SELF]->values($_[CONTEXT]) );
 }
 
 sub signature {
@@ -398,6 +412,49 @@ sub signature {
 
     return $signature;
 }
+
+
+
+#-----------------------------------------------------------------------
+# Template:TT3::Element::Sigil::Hash
+#
+# Element for the hash context sigil '%' which forces hash context on 
+# function/methods calls and unpacks hash references.
+#-----------------------------------------------------------------------
+
+package Template::TT3::Element::Sigil::Hash;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    debug     => 0,
+    base      => 'Template::TT3::Element::Sigil::List',
+    constants => ':elem_slots :eval_args';
+
+our $TEXT_FORMAT = '%s: %s';
+our $TEXT_JOINT  = ', ';
+
+
+sub value {
+    $_[SELF]->debug('value()') if DEBUG;
+    return { 
+        $_[SELF]->[EXPR]->hash_values($_[CONTEXT])
+    };
+}
+
+sub values {
+    $_[SELF]->debug('values()') if DEBUG;
+    $_[SELF]->[EXPR]->hash_values($_[CONTEXT]);
+}
+
+sub text {
+    my $hash = $_[SELF]->value($_[CONTEXT]);
+    join(
+        $TEXT_JOINT,
+        map { sprintf($TEXT_FORMAT, $_, $hash->{ $_ }) }
+        sort keys %$hash
+    );
+}
+
 
 
 
