@@ -2,15 +2,19 @@ package Template::TT3::View::Tokens::HTML;
 
 #use utf8;
 use Template::TT3::Class
-    version  => 2.7,
-    debug    => 0,
-    base     => 'Template::TT3::View::Tokens',
-    codec    => 'html',
-    constant => {
+    version   => 2.7,
+    debug     => 0,
+    base      => 'Template::TT3::View::Tokens',
+    import    => 'class',
+    codec     => 'html',
+    constants => ':elem_slots',
+    constant  => {
         ATTR    => '%s="%s"',
         ELEMENT => "<%s%s>%s</%s>",
     };
 
+
+our $TRIM_TEXT = 64;
 our $AUTOLOAD;
 
 
@@ -34,29 +38,70 @@ sub span {
     HTML( span => { class => $css_class }, @_ );
 }
 
+
+class->methods(
+    map {
+        my $type = $_;              # lexical copy for closure
+        "view_$type" => sub {
+            $_[0]->span( $type, $_[1]->[TOKEN] )
+        }
+    }
+    qw(
+        text comment padding html element terminator string
+        literal word keyword number filename unary binary prefix
+        postfix
+    )
+);
+
+class->methods(
+    map {
+        my $type = $_;              # lexical copy for closure
+        "view_$type" => sub {
+            $_[0]->span( "$type keyword", $_[1]->[TOKEN] )
+        }
+    }
+    qw(
+      is as if for 
+    )
+);
+
 sub view_whitespace {
-    my ($self, $text) = @_;
+    my ($self, $elem) = @_;
+    my $text = $elem->[TOKEN];
     $text =~ s/\n/ \n<span class="nl"><\/span>/g;
     $self->span( whitespace => $text );
 }
 
 sub view_squote {
-    shift->span( squote => "'", @_, "'" );
+    my ($self, $elem) = @_;
+    $self->span( squote => "'", $elem->[TOKEN], "'" );
 }
 
 sub view_dquote {
-    shift->span( dquote => '"', @_, '"' );
+    my ($self, $elem) = @_;
+    $self->span( dquote => '"', $elem->[TOKEN], '"' );
 }
 
 sub view_tag_start {
+    my ($self, $elem) = @_;
     return '<span class="tag">'
-        . shift->span( tag_start => @_ );
+        . $self->span( tag_start => $elem->[TOKEN] );
 }
 
 sub view_tag_end {
-    return shift->span( tag_end => @_ )
+    my ($self, $elem) = @_;
+    return $self->span( tag_end => $elem->[TOKEN] )
         . '</span>';
 }
+
+sub view_eof {
+    my ($self, $elem) = @_;
+    return $self->span( eof => '--EOF--' );
+}
+
+__END__
+
+
 
 sub view_varnode {
     my ($self, $name, $args) = @_;

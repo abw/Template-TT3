@@ -11,11 +11,12 @@
 #
 #========================================================================
 
+#$Badger::Class::DEBUG=1;
 use Badger lib => '../../lib';
 use Template::TT3::Test 
     debug => 'Badger::Factory Template::TT3::Views',
     args  => \@ARGV,
-    tests => 2;
+    tests => 4;
 
 use Template::TT3::Views;
 use constant VIEWS => 'Template::TT3::Views';
@@ -26,6 +27,14 @@ is(
     ref $tok_dbg, 
     'Template::TT3::View::Tokens::Debug', 
     'isa Template::TT3::View::Tokens::Debug' 
+);
+
+my $tree_html = VIEWS->view('tree.HTML');
+ok( $tree_html, 'got tree html view' );
+is( 
+    ref $tree_html, 
+    'Template::TT3::View::Tree::HTML', 
+    'isa Template::TT3::View::Tree::HTML' 
 );
 
 __END__

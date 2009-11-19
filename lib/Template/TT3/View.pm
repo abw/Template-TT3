@@ -10,6 +10,8 @@ use Template::TT3::Class
         no_view    => 'No view method defined for %s',
     };
 
+our $TRIM_TEXT = 64;
+
 
 sub init {
     my ($self, $config) = @_;
@@ -34,6 +36,15 @@ sub emit {
         map  { ref $_ eq ARRAY ? @$_ : $_ }
         @_
     );
+}
+
+sub tidy_text {
+    my ($self, $text) = @_;
+    $text =~ s/\n/\\n/g;
+    $text =~ s/\t/\\t/g;
+    $text = substr($text, 0, $TRIM_TEXT) . '...' 
+        if $TRIM_TEXT && length($text) > $TRIM_TEXT - 3;
+    return $text;
 }
 
 1;
