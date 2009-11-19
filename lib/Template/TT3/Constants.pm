@@ -44,8 +44,15 @@ use Badger::Class
                 VARS    => '=1',
                 METHODS => '=2',
                 
-                # evaluation parameters
+                # some dupliction here - needs sorting out
                 SELF    => '=0',    # zeroth argument is always $self
+            },
+            args => {
+                SELF    => '=0',    # zeroth argument is always $self
+                ARG1    => '=1',
+                ARG2    => '=2',
+                ARG3    => '=3',
+                ARG4    => '=4',
             },
             elements  => {
                 # element slots - the first 4 are common to all elements
@@ -72,7 +79,8 @@ use Badger::Class
                 LEFT    => '=-1',   # binds left    # NOT USED?
                 RIGHT   => '=1',    # binds right   # NOT USED?
 
-                # evaluation parameters
+                # evaluation parameters - move these back to being separate
+                # constant set and merge them in
                 SELF      => '=0',  # zeroth argument is always $self
                 CONTEXT   => '=1',  # first argument is content/visitor/genr
                 VISITOR   => '=1',

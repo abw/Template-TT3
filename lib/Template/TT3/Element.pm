@@ -12,9 +12,9 @@ use Template::TT3::Class
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
         base_id         => 'Template::TT3::Element',
-        is_whitespace   => 0,
-        is_delimiter    => 0,
-        is_terminator   => 0,
+#        is_whitespace   => 0,
+#        is_delimiter    => 0,
+#        is_terminator   => 0,
         eof             => 0,
         # default names for parser arguments - see T::TT3::Element::Role::*Expr
         ARG_NAME        => 'name',
@@ -25,6 +25,7 @@ use Template::TT3::Class
     alias => {
         delimiter       => \&null,
         terminator      => \&null,
+        as_expr         => \&null,
         as_dotop        => \&null,
         as_word         => \&null,
         as_args         => \&null,
@@ -243,18 +244,34 @@ sub as_postop {
 
 
 sub as_block {
-    # my ($self, $token, $scope, $parent, $follow) = @_;
-    
-    # Any expression can be a single expression block.  We specify the 
-    # precedence level for commands so that the expression will consume
-    # higher precedence operators, but stop at the next keyword, e.g.
-    # "if x a + 10 for y" is parsed as "(if x (a + 10)) for y".  Note that 
-    # the block (denoted by "(...)") ends at the 'for' keyword rather than
-    # consuming it rightwards as "(if x ((a + 10) for y)).  We use the FORCE
-    # flag to indicate that the precedence may be ignored for the first
-    # and only the first token (i.e. this one, $self).  That allows a 
-    # command to follow as the single expression: if x fill y
-    return $_[0]->as_expr($_[1], $_[2], CMD_PRECEDENCE, FORCE);
+    my ($self, $token, $scope, $parent, $follow) = @_;
+    $parent ||= $self;
+
+    $self->debug("as_block()") if DEBUG;
+ 
+    # Any expression can be a single expression block.  We specify the command 
+    # keyword precedence level, CMD_PRECEDENCE, so that the expression will 
+    # consume higher precedence operators, but stop at the next keyword.
+    # e.g. 
+    #    "if x a + 10 for y" is parsed as "(if x (a + 10)) for y".  
+    #
+    # Note that  the block (denoted by "(...)") ends at the 'for' keyword 
+    # rather than consuming it rightwards as "(if x ((a + 10) for y)).  We use 
+    # the FORCE flag to indicate that the precedence may be ignored for the 
+    # first and only the first token (i.e. this one, $self).  That allows a 
+    # command to follow as the single expression, e.g. if x fill y
+
+    my $expr = $self->as_expr($token, $scope, CMD_PRECEDENCE, FORCE)
+        || return;
+
+    # if the parent defines any follow-on blocks (e.g. elsif/else for if)
+    # then we look to see if the next token is one of them and activate it
+    if ($follow && $$token->skip_ws($token)->in($follow)) {
+        $self->debug("Found follow-on token: ", $$token->token) if DEBUG;
+        return $$token->as_follow($expr, $token, $scope, $parent);
+    }
+
+    return $expr;
 }
 
 

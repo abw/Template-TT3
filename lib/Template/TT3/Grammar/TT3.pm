@@ -7,8 +7,9 @@ use Template::TT3::Class
     debug    => 0,
     base     => 'Template::TT3::Grammar';
 
-# TODO: decide what we're going to do with ops that can work both ways, e.g.
-# %foo and foo % bar
+# These are the command keywords that we recognise
+our $COMMANDS = 'do as is raw if elsif else for fill dot block encode decode';
+
 
 # We're lazy, so we rely on Badger::Factory (the base class of T::Elements
 # which in turn is the base class of T::Grammar) to convert a simple string 
@@ -28,7 +29,7 @@ our $PREFIXES = {
     var_  => 'variable.',
     bool_ => 'boolean.',
 };
-    
+
 
 our $SYMBOLS  = [
 #   [ token => element_name => left_precedence, right_precedence ]
@@ -152,7 +153,6 @@ our $SYMBOLS  = [
 ];
 
 
-our $COMMANDS = 'do as is raw if for fill dot block encode decode';
 
 
 1;

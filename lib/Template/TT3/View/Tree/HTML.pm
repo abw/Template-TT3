@@ -129,7 +129,7 @@ sub view_if {
     $self->element( 
         'if keyword' => $elem,
         $self->div( 'test'  => $self->span( branch => 'Test' ), $elem->[EXPR]->view($self) ),
-        $self->div( 'true'  => $self->span( branch => 'True' ), $elem->[BLOCK]->view($self) ),
+        $self->div( 'true'  => $self->span( branch => 'Then' ), $elem->[BLOCK]->view($self) ),
 #        $self->div( 'false element'     => $elem->[FOLLOW]->view($self) ),
     );
 }

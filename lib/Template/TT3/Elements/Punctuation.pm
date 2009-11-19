@@ -55,7 +55,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Punctuation',
-    as        => 'block',
+#    as        => 'block',
     constants => ':elements',
     constant  => {
         is_delimiter => 1,
@@ -72,20 +72,30 @@ sub skip_delimiter {
 }
 
 
-sub OLD_as_block {
-    my ($self, $token, $scope, $prec) = @_;
-
-    my $block = $$token->as_exprs($token, $scope, $prec)
-        || return $self->missing( expressions => $token );
-
-    $self->debug("DELIMITER: ", $$token->token);
+sub as_block {
+    my ($self, $token, $scope, $parent, $follow) = @_;
+    my (@exprs, $expr);
     
-    # TODO: replace these with as_terminator()
-    return $self->missing( end => $token )
-        unless $$token->is('end');
+    $parent ||= $self;
 
-    $$token = $$token->next;
+    $self->debug("as_block()") if DEBUG;
+ 
+    # skip past token any whitespace, then parse expressions
+    my $block = $$token->next_skip_ws($token)->as_exprs($token, $scope)
+        || return $parent->missing( $self->ARG_BLOCK, $token );
 
+    # if the parent defines any follow-on blocks (e.g. elsif/else for if)
+    # then we look to see if the next token is one of them and activate it
+    if ($follow && $$token->skip_ws($token)->in($follow)) {
+        $self->debug("Found follow-on token: ", $$token->token) if DEBUG;
+        return $$token->as_follow($block, $token, $scope, $parent);
+    }
+
+    # otherwise the next token must be our FINISH token (end)
+    return $parent->missing( $self->FINISH, $token)
+        unless $$token->is( $self->FINISH, $token );
+
+    # return the $block we built, not $self which is the delimiter
     return $block;
 }
 
@@ -234,13 +244,16 @@ sub text {
 }
 
 
+#-----------------------------------------------------------------------
+# Curly braces denote literal hashes, or block of content in block scope
+#-----------------------------------------------------------------------
 
 package Template::TT3::Element::Hash;
 
 use Template::TT3::Class 
     debug     => 0,
     base      => 'Template::TT3::Element::Construct',
-    as        => 'block',
+#    as        => 'block',
     constants => ':elements',
     constant  => {
         FINISH        => '}',
@@ -256,7 +269,7 @@ sub value {
     };
 }
 
-sub NOT_as_block {
+sub as_block {
     my ($self, $token, $scope, $parent, $follow) = @_;
     my (@exprs, $expr);
     
@@ -264,7 +277,7 @@ sub NOT_as_block {
 
     $self->debug("as_block()") if DEBUG;
  
-    # skip past token and any whitespace, then parse expressions
+    # skip past token any whitespace, then parse expressions
     my $block = $$token->next_skip_ws($token)->as_exprs($token, $scope)
         || return $parent->missing( $self->ARG_BLOCK, $token );
 
@@ -272,12 +285,14 @@ sub NOT_as_block {
     return $parent->missing( $self->FINISH, $token)
         unless $$token->is( $self->FINISH, $token );
     
-    if ($follow && $$token->in($follow)) {
-        $self->debug("Found follow-on token: ", $$token->token);
+    # if the parent defines any follow-on blocks (e.g. elsif/else for if)
+    # then we look to see if the next token is one of them and activate it
+    if ($follow && $$token->skip_ws($token)->in($follow)) {
+        $self->debug("Found follow-on token: ", $$token->token) if DEBUG;
+        return $$token->as_follow($block, $token, $scope, $parent);
     }
-#       unless $$token->is( $self->FINISH );
 
-    # return $block, not $self
+    # return the $block we contain, not $self which is the { } container
     return $block;
 }
 
