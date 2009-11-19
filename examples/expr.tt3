@@ -1,1 +1,1 @@
-[% a + 5 * 10 - foo.bar.bar %]
+[% title = 'Result: ' ~ a + 5 * 10 - foo.bar.baz + (8 * 3 + 1) =%]

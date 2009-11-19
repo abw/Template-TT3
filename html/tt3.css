@@ -1,0 +1,296 @@
+body {
+    font-family: Trebuchet MS, Lucida Sans Unicode, Lucida Grande, Lucida Sans, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+    color: #444;
+}
+
+div.tabset {
+}
+
+div.tabset ul.tabs {
+    display: block;
+    width: 220px;
+    float: right;
+    margin: 0;
+    padding: 0;
+}
+
+div.tabset ul.tabs li {
+    margin: 0 0 0 2px;
+    padding: 0;
+    float: left;
+    list-style: none;
+}
+
+div.tabset ul.tabs li a {
+    display: block;
+    width: 100px;
+    height: 19px;
+    border: 1px solid #aaa;
+    background-color: #ddd;
+    font-size: 12px;
+    text-align: center;
+    text-decoration: none;
+    color: #888;
+    -moz-border-radius: 5px 5px 0 0;
+}
+
+div.tabset ul.tabs li a:hover {
+    cursor: pointer;
+    background-color: #eee;
+    color: #666;
+}
+
+div.tabset ul.tabs li.warm a,
+div.tabset ul.tabs li.warm a:hover {
+    border-bottom: 0;
+    background-color: #eee;
+    color: #444;
+    height: 20px;
+}
+
+
+div.tabset div.panels {
+    padding-top: 20px;
+}
+
+div.tabset div.panels div.panel {
+    border: 1px solid #aaa;
+    background-color: #fff;
+    display: none;
+}
+
+div.tabset div.panels div.warm {
+    display: block;
+}
+
+div.tabset div.panels div.panel {
+    cursor: pointer;
+    color: #444;
+}
+
+div.tabset div.panels div.panel h2 {
+    background-color: #eee;
+    border-bottom: 1px solid #ccc;
+    margin: 0;
+    padding: 8px;
+}
+
+div.tabset div.panels div.panel div.content {
+    margin: 5px;
+}
+
+
+div.element {
+    border: 1px solid #aaa;
+    background-color: #eee;
+    padding: 0;
+    margin-bottom: 4px;
+    color: #888;
+}
+
+div.element div.head {
+    padding: 0 150px 0 5px;
+    height: 20px;
+    position: relative;
+}
+
+div.element div.head span.info {
+    position: absolute;
+    top: 0px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    padding: 0;
+    text-align: right;
+}
+
+div.element div.head span.type {
+    right: 50px;
+    width: 145px;
+}
+
+div.element div.head span.posn {
+    right: 10px;
+    width: 40px;
+}
+
+div.element div.body {
+    border: 1px solid #888;
+    background-color: white;
+    padding: 4px 4px 0px 4px;
+    margin: 0 4px 4px 4px;
+}
+
+div.element div.head span.source {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+/* green */
+div.variable {
+    color: #4F8A10;
+    border-color: #4F8A10;
+    background-color: #DFF2BF;
+}
+
+/* red/orange */
+div.keyword {
+    color: #D63301;
+    border-color: #D63301;
+    background-color: #FFCCBA;
+}
+
+div.keyword:hover {
+    background-color: #EFBCAA;
+}
+
+/* blue */
+div.word,
+div.string,
+div.number {
+    color: #00529B;
+    border-color: #00529B;
+    background-color: #BDE5F8;
+}
+
+div.expr {
+    color: #9F6000;
+    border-color: #9F6000;
+    background-color: #FEEFB3;
+    padding-left: 5px;
+}
+
+div.expr:hover {
+    background-color: #EEDFA3;
+}
+
+div.operator {
+    color: #D63301;
+    border-color: #D63301;
+    background-color: #FFCCBA;
+    padding-left: 5px;
+}
+
+div.lhs,
+div.rhs {
+    padding-left: 20px;
+}
+
+span.branch {
+    font-size: 10px;
+    line-height: 14px;
+    color: #999;
+}
+
+/*
+info = {
+    text = '#00529B'
+    back = '#BDE5F8'
+}
+success = {
+    text = '#4F8A10'
+    back = '#DFF2BF'
+}
+warning = {
+    text = '#9F6000'
+    back = '#FEEFB3'
+}
+error = {
+    text = '#D8000C'
+    back = '#FFBABA'
+}
+invalid = {
+    text = '#D63301'
+    back = '#FFCCBA'
+}
+*/
+
+div.element > div.body {
+    display: none;
+}
+
+div.open > div.body {
+    display: block;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* tokens                                                                 */
+/*------------------------------------------------------------------------*/
+
+#tokens div.content {
+    font-family: Courier, monospace;
+/*    font-size: 14px;
+    line-height: 20px; */
+    color: #444;
+    white-space: pre;
+    background-color: #e4e4e4;
+    border: 1px solid #aaa;
+    padding: 5px; */
+}
+
+#tokens span.text {
+    color: #88a;
+}
+
+#tokens span.tag {
+    font-weight: bold;
+    background-color: #fff;
+}
+
+#tokens span.keyword {
+    color: #a44;
+}
+
+#tokens span.unary,
+#tokens span.binary,
+#tokens span.operator {
+    color: #a44;
+}
+
+#tokens span.number,
+#tokens span.string {
+    color: #44a;
+}
+
+#tokens span.squote {
+    color: #66c;
+}
+
+#tokens span.dquote {
+    color: #88e;
+}
+
+#tokens span.word {
+    color: #4a4;
+}
+
+#tokens span.whitespace,
+#tokens span.comment {
+    color: #888;
+}
+
+#tokens span.tag_start,
+#tokens span.tag_end {
+    color: #aaa;
+}
+
+#tokens span.tag {
+    padding: 2px 1px;
+/*    border: 1px solid #ddd;  */
+}
+
+#tokens span.nl {
+    display: block;
+    float: left;
+    margin: 1px 0 0 0;
+    width: 2px;
+    height: 19px;
+    border: 1px solid #aaa;
+    border-right: 0;
+    border-left: 0;
+    background-color: white;
+    display: none;
+}

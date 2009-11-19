@@ -1,0 +1,13 @@
+[% if a; b; end %]
+
+Hello [% name or 'World' %]
+
+[% if foo {
+      x y z
+   }
+%]
+
+[% if a + b < c + 3 -%]
+Hello World
+[% end %]
+

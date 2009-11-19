@@ -13,41 +13,6 @@ Hello [% name or 'World' %]!
    end 
 %]
 
-[# All semi-colons after the first one are optional #]
-[% foo is;
-     'Hello '
-     name or 'World'
-     '!'
-   end 
-%]
-
-[# You can also use commas to separate items.  It's all the same #]
-[% foo is;
-     'Hello '                       # TODO: not yet you can't
-     name or 'World'
-     '!'
-   end 
-%]
-
-
-[# Whitespace is irrelevant.  #]
-[% foo is; 'Hello ' name or 'World' '!'; end %]
-[% foo is; 
-     'Hello ' name or 'World' '!'; 
-   end 
-%]
-[% foo is;                              # you can also have embedded comments
-     'Hello ' name or 'World' '!';      # anywhere you like
-   end 
-%]
-
-[# you can also specify blocks using { } #]
-[% foo is {
-     'Hello '                           # semi-colons are optional
-     name or 'World'
-     '!'
-   }
-%]
 
 [# single expression blocks #]
 [% foo is "Hello $name"                 # same thing as: foo = "Hello $name"
@@ -100,6 +65,13 @@ blah blah blah
 
 [% foo is %]
 Hello [% name or 'World' %]
+[%   if x %]
+       some nested text
+       [% if y %]
+         some more nested text
+       [% end %]
+       blah blah
+[%   end -%]
 [% end %]
 
 [% x + 5 * 10 - foo.bar.bar %]

@@ -1,0 +1,77 @@
+#!/usr/bin/perl
+#
+# Perl script to generates an HTML representation of a template.
+#
+# Written by Andy Wardley http://wardley.org/
+#
+# November 2009
+#
+
+use Badger 
+    lib => '../lib';
+
+use Template::TT3::Template;
+use constant TEMPLATE => 'Template::TT3::Template';
+
+my $file     = shift || die usage();
+my $template = TEMPLATE->new( file => $file );
+my $tokens   = $template->tokens->view_HTML;
+my $tree     = $template->tree->view_HTML;
+my $wrapper  = TEMPLATE->new( file => \*DATA );
+
+print $wrapper->fill( 
+    tokens => $tokens,
+    tree   => $tree,
+    name   => $file,
+);
+
+sub usage {
+    return <<EOF;
+Usage: $0 <template>
+EOF
+}
+
+
+__DATA__
+<html>
+  <head>
+    <title>TT3 Template Tree: [% name %]</title>
+    <link rel="stylesheet" type="text/css" href="tt3.css">
+    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="tt3.js"></script>
+
+  </head>
+  <body>
+    <h1>TT3: [% name %]</h1>
+   
+    <div class="tabset" id="tabset">
+      <ul class="tabs">
+        <li class="warm"><a href="#tokens">Tokens</a></li>
+        <li><a href="#tree">Tree</a></li>
+      </ul>
+      <div class="panels">
+        <div class="panel warm" id="tokens">
+          <h2>Source Tokens</h1>
+          <div class="content">
+[% tokens %]
+          </div>
+        </div>       
+        <div class="panel" id="tree">
+          <h2>Parse Tree</h1>
+          <div class="content">
+[% tree %]
+          </div>
+        </div>       
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    $(document).ready(
+        function() {
+            $('#tabset').tt3_tabset();
+            $('#tree').tt3_tree();
+        }
+    );
+  </script>
+</html>
+
