@@ -43,13 +43,13 @@ class->methods(
     map {
         my $type = $_;              # lexical copy for closure
         "view_$type" => sub {
-            $_[0]->span( $type, $_[1]->[TOKEN] )
+            $_[0]->span( $type, encode $_[1]->[TOKEN] )
         }
     }
     qw(
         text comment padding html element terminator string
         literal word keyword number filename unary binary prefix
-        postfix
+        postfix squote dquote parens
     )
 );
 
@@ -61,25 +61,15 @@ class->methods(
         }
     }
     qw(
-      is as if for 
+      is as if for raw
     )
 );
 
 sub view_whitespace {
     my ($self, $elem) = @_;
     my $text = $elem->[TOKEN];
-    $text =~ s/\n/ \n<span class="nl"><\/span>/g;
+    $text =~ s/\n/\n<span class="nl"><\/span>/g;
     $self->span( whitespace => $text );
-}
-
-sub view_squote {
-    my ($self, $elem) = @_;
-    $self->span( squote => "'", $elem->[TOKEN], "'" );
-}
-
-sub view_dquote {
-    my ($self, $elem) = @_;
-    $self->span( dquote => '"', $elem->[TOKEN], '"' );
 }
 
 sub view_tag_start {
@@ -98,47 +88,6 @@ sub view_eof {
     my ($self, $elem) = @_;
     return $self->span( eof => '--EOF--' );
 }
-
-__END__
-
-
-
-sub view_varnode {
-    my ($self, $name, $args) = @_;
-    $args = $args
-        ? '(' . join(', ', map { $self->generate($_) } @$args) . ')'
-        : '';
-    return $name . $args;
-}
-
-sub view_binop {
-    shift->span( binop => shift );
-}
-
-sub view_exprs {
-    my ($self, $exprs) = @_;
-    return join(
-        "\n",
-        map { $self->generate($_) }
-        @$exprs
-    );
-}
-
-sub AUTOLOAD {
-    my $self   = shift;
-    my ($name) = ($AUTOLOAD =~ /([^:]+)$/ );
-    return if $name eq 'DESTROY';
-
-#    print "** $name\n";
-    if ($name =~ s/^view_//) {
-        return $self->span( $name => @_ );
-    }
-
-    my ($pkg, $file, $line) = caller;
-    my $class = ref $self || $self;
-    return $self->error_msg( bad_method => $name, $class, $file, $line );
-}
-
 
 1;
 

@@ -20,14 +20,14 @@ use Template::TT3::Test
 use Template::TT3::Constants ':elements';
 
 ok( 1, 'loaded Template::TT3::Constants' );
-is( BRANCH, 4, 'BRANCH is 4 in main' );
+is( BRANCH, 7, 'BRANCH is 7 in main' );
 
 package Foo;
 
 use Template::TT3::Constants ':elements';
 use Template::TT3::Test;
 
-is( BRANCH, 4, 'BRANCH is 4 in Foo' );
+is( BRANCH, 7, 'BRANCH is 7 in Foo' );
 
 
 

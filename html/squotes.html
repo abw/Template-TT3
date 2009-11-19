@@ -1,0 +1,103 @@
+<html>
+  <head>
+    <title>TT3 Template Tree: examples/squotes.tt3</title>
+    <link rel="stylesheet" type="text/css" href="tt3.css">
+    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="tt3.js"></script>
+
+  </head>
+  <body>
+    <h1>TT3: examples/squotes.tt3</h1>
+   
+    <div class="tabset" id="tabset">
+      <ul class="tabs">
+        <li class="warm"><a href="#tokens">Tokens</a></li>
+        <li><a href="#tree">Tree</a></li>
+        <li><a href="#output">Output</a></li>
+      </ul>
+      <div class="panels">
+        <div class="panel warm" id="tokens">
+          <h2>Source Tokens</h1>
+          <div class="content">
+<span class="tag"><span class="tag_start">[#</span><span class="comment"> You can generate HTML from this template by running the following command:
+ #
+ #    $ bin/tt3-html examples/squotes.tt3 &gt; html/squotes.html
+ #
+-#]</span><span class="whitespace">
+<span class="nl"></span></span><span class="tag"><span class="tag_start">[%</span><span class="whitespace">  </span><span class="word">br</span><span class="whitespace"> </span><span class="binary">=</span><span class="whitespace"> </span><span class="squote">'&lt;br&gt;'</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="squote">'This is a single quoted string'</span><span class="whitespace">
+<span class="nl"></span>    
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>        
+<span class="nl"></span>    </span><span class="squote">'This is a single quoted string with
+     literal newlines and spaces embedded'</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>         
+<span class="nl"></span>    </span><span class="squote">'This is a single quoted string with
+     escaped \'single quotes\' in it'</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="squote">'The only other character that might require escaping is 
+     the backslash character itself when it appears right at
+     the end of a single quoted string like this: \\'</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="squote">'If a backslash appears before \any\ other character other
+     than \\ or \' then it will be left intact'</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="squote">'That means you can single quote MS paths like
+     C:\Program Files\Template Toolkit\ and not have to 
+     worry about escaping every backslash'</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="eof">--EOF--</span>
+          </div>
+        </div>       
+        <div class="panel" id="tree">
+          <h2>Parse Tree</h1>
+          <div class="content">
+<div class="block"><div class="binary expr element"><div class="head"><span class="info type">binary expr</span><span class="info posn">@157</span><span class="source">br = '&lt;br&gt;'</span></div><div class="body"><div class="lhs "><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@154</span><span class="source">br</span></div></div></div><div class="operator element">=</div><div class="rhs "><div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@159</span><span class="source">'&lt;br&gt;'</span></div></div></div></div></div>
+<div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@172</span><span class="source">'This is a single quoted string'</span></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@214</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@218</span><span class="source">br</span></div></div></div></div>
+<div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@235</span><span class="source">'This is a single quoted string with\n     literal newlines and spaces embedded'</span></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@320</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@324</span><span class="source">br</span></div></div></div></div>
+<div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@342</span><span class="source">'This is a single quoted string with\n     escaped \'single quotes\' in it'</span></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@422</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@426</span><span class="source">br</span></div></div></div></div>
+<div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@440</span><span class="source">'The only other character that might require escaping is \n     the backslash character itself when it appears right at\n     the end of a single quoted string like this: \\'</span></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@623</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@627</span><span class="source">br</span></div></div></div></div>
+<div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@641</span><span class="source">'If a backslash appears before \any\ other character other\n     than \\ or \' then it will be left intact'</span></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@758</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@762</span><span class="source">br</span></div></div></div></div>
+<div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@775</span><span class="source">'That means you can single quote MS paths like\n     C:\Program Files\Template Toolkit\ and not have to \n     worry about escaping every backslash'</span></div></div></div>
+          </div>
+        </div>       
+        <div class="panel" id="output">
+          <h2>Generated Output</h1>
+          <div class="content">
+This is a single quoted string<br>This is a single quoted string with
+     literal newlines and spaces embedded<br>This is a single quoted string with
+     escaped \'single quotes\' in it<br>The only other character that might require escaping is 
+     the backslash character itself when it appears right at
+     the end of a single quoted string like this: \\<br>If a backslash appears before \any\ other character other
+     than \\ or \' then it will be left intact<br>That means you can single quote MS paths like
+     C:\Program Files\Template Toolkit\ and not have to 
+     worry about escaping every backslash
+          </div>
+        </div>       
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    $(document).ready(
+        function() {
+            $('#tabset').tt3_tabset();
+            $('#tree').tt3_tree();
+        }
+    );
+  </script>
+</html>
+

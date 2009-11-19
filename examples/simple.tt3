@@ -1,13 +1,10 @@
-[% if a; b; end %]
-
 Hello [% name or 'World' %]
 
-[% if foo {
-      x y z
-   }
-%]
+Hello [% name or "World" %]
 
-[% if a + b < c + 3 -%]
-Hello World
-[% end %]
+[% greeting = "Hello $name" -%]
+
+[% quote = "Hello Arthur \"Monkey Man\" Dent" -%]
+
+[% greeting %]
 

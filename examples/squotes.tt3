@@ -1,0 +1,37 @@
+[# You can generate HTML from this template by running the following command:
+ #
+ #    $ bin/tt3-html examples/squotes.tt3 > html/squotes.html
+ #
+-#]
+[%  br = '<br>';
+
+    'This is a single quoted string'
+    
+    raw br;
+        
+    'This is a single quoted string with
+     literal newlines and spaces embedded'
+
+    raw br;
+         
+    'This is a single quoted string with
+     escaped \'single quotes\' in it'
+
+    raw br;
+     
+    'The only other character that might require escaping is 
+     the backslash character itself when it appears right at
+     the end of a single quoted string like this: \\'
+     
+    raw br;
+     
+    'If a backslash appears before \any\ other character other
+     than \\ or \' then it will be left intact'
+     
+    raw br
+     
+    'That means you can single quote MS paths like
+     C:\Program Files\Template Toolkit\ and not have to 
+     worry about escaping every backslash'
+
+%]

@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <title>TT3 Template Tree: examples/dquotes.tt3</title>
+    <link rel="stylesheet" type="text/css" href="tt3.css">
+    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="tt3.js"></script>
+
+  </head>
+  <body>
+    <h1>TT3: examples/dquotes.tt3</h1>
+   
+    <div class="tabset" id="tabset">
+      <ul class="tabs">
+        <li class="warm"><a href="#tokens">Tokens</a></li>
+        <li><a href="#tree">Tree</a></li>
+        <li><a href="#output">Output</a></li>
+      </ul>
+      <div class="panels">
+        <div class="panel warm" id="tokens">
+          <h2>Source Tokens</h1>
+          <div class="content">
+<span class="tag"><span class="tag_start">[#</span><span class="comment"> You can generate HTML from this template by running the following command:
+ #
+ #    $ bin/tt3-html examples/dquotes.tt3 &gt; html/dquotes.html
+ #
+-#]</span><span class="whitespace">
+<span class="nl"></span></span><span class="tag"><span class="tag_start">[%</span><span class="whitespace">  </span><span class="word">br</span><span class="whitespace"> </span><span class="binary">=</span><span class="whitespace"> </span><span class="squote">'&lt;br&gt;'</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="dquote">&quot;This is a double quoted string&quot;</span><span class="whitespace">
+<span class="nl"></span>    
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>        
+<span class="nl"></span>    </span><span class="dquote">&quot;This is a double quoted string with
+     literal newlines and spaces embedded&quot;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="dquote">&quot;You can also use \n to encode newlines and \t for tabs&quot;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>         
+<span class="nl"></span>    </span><span class="dquote">&quot;You can also use the backslash characters to escape
+     other \&quot;double quotes\&quot; inside the string&quot;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="dquote">&quot;Backslash characters can also escape themselves.  Say, if
+     you want a literal backslash and then an 'n' like this: \\n&quot;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="dquote">&quot;If a backslash appears before \any\ other character other
+     than '\\', '\&quot;', 'n' or 't' then it will be left intact.
+     Here\is\an\example\of\\that - note we *DO* need the extra
+     backslash before the 't' otherwise it would be interpreted
+     as a tab character&quot;</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="whitespace">
+<span class="nl"></span>     
+<span class="nl"></span>    </span><span class="dquote">&quot;That means you can double quote MS paths like
+     C:\Program Files\Template Toolkit\ and not have to 
+     worry about escaping every backslash&quot;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="raw keyword">raw</span><span class="whitespace"> </span><span class="word">br</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="word">name</span><span class="whitespace"> </span><span class="binary">=</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="element">;</span><span class="whitespace">
+<span class="nl"></span>
+<span class="nl"></span>    </span><span class="dquote">&quot;In a double quoted string, a dollar sign is used to denote a 
+     variable name, like this: Hello $name&quot;</span><span class="whitespace">
+<span class="nl"></span>	
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="eof">--EOF--</span>
+          </div>
+        </div>       
+        <div class="panel" id="tree">
+          <h2>Parse Tree</h1>
+          <div class="content">
+<div class="block"><div class="binary expr element"><div class="head"><span class="info type">binary expr</span><span class="info posn">@157</span><span class="source">br = '&lt;br&gt;'</span></div><div class="body"><div class="lhs "><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@154</span><span class="source">br</span></div></div></div><div class="operator element">=</div><div class="rhs "><div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@159</span><span class="source">'&lt;br&gt;'</span></div></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@172</span><span class="source">&quot;This is a double quoted string&quot;</span></div><div class="body"><div class="text element">This is a double quoted string</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@214</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@218</span><span class="source">br</span></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@235</span><span class="source">&quot;This is a double quoted string with\n     literal newlines and spaces embedded&quot;</span></div><div class="body"><div class="text element">This is a double quoted string with
+     literal newlines and spaces embedded</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@320</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@324</span><span class="source">br</span></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@333</span><span class="source">&quot;You can also use \n to encode newlines and \t for tabs&quot;</span></div><div class="body"><div class="text element">You can also use 
+ to encode newlines and 	 for tabs</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@395</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@399</span><span class="source">br</span></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@417</span><span class="source">&quot;You can also use the backslash characters to escape\n     other \&quot;double quotes\&quot; inside the string&quot;</span></div><div class="body"><div class="text element">You can also use the backslash characters to escape
+     other "double quotes" inside the string</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@523</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@527</span><span class="source">br</span></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@541</span><span class="source">&quot;Backslash characters can also escape themselves.  Say, if\n     you want a literal backslash and then an 'n' like this: \\n&quot;</span></div><div class="body"><div class="text element">Backslash characters can also escape themselves.  Say, if
+     you want a literal backslash and then an 'n' like this: \n</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@671</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@675</span><span class="source">br</span></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@689</span><span class="source">&quot;If a backslash appears before \any\ other character other\n     than '\\', '\&quot;', 'n' or 't' then it will be left intact.\n     Here\is\an\example\of\\that - note we *DO* need the extra\n     backslash before the 't' otherwise it would be interpreted\n     as a tab character&quot;</span></div><div class="body"><div class="text element">If a backslash appears before \any\ other character other
+     than '\', '"', 'n' or 't' then it will be left intact.
+     Here\is\an\example\of\that - note we *DO* need the extra
+     backslash before the 't' otherwise it would be interpreted
+     as a tab character</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@972</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@976</span><span class="source">br</span></div></div></div></div>
+<div class="string element element"><div class="head"><span class="info type">string element</span><span class="info posn">@989</span><span class="source">&quot;That means you can double quote MS paths like\n     C:\Program Files\Template Toolkit\ and not have to \n     worry about escaping every backslash&quot;</span></div><div class="body"><div class="text element">That means you can double quote MS paths like
+     C:\Program Files\Template Toolkit\ and not have to 
+     worry about escaping every backslash</div></div></div>
+<div class="raw keyword element"><div class="head"><span class="info type">raw keyword</span><span class="info posn">@1141</span><span class="source">raw</span></div><div class="body"><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@1145</span><span class="source">br</span></div></div></div></div>
+<div class="binary expr element"><div class="head"><span class="info type">binary expr</span><span class="info posn">@1158</span><span class="source">name = 'World'</span></div><div class="body"><div class="lhs "><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@1153</span><span class="source">name</span></div></div></div><div class="operator element">=</div><div class="rhs "><div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@1160</span><span class="source">'World'</span></div></div></div></div></div>
+<div class="variable string element element"><div class="head"><span class="info type">variable string element</span><span class="info posn">@1174</span><span class="source">&quot;In a double quoted string, a dollar sign is used to denote a \n     variable name, like this: Hello $name&quot;</span></div><div class="body"><div class="block"><div class="text element"><div class="head"><span class="info type">text</span><span class="info posn">@1174</span><span class="source">In a double quoted string, a dollar sign is used to denote a \n     variable name, like this: Hello </span></div></div>
+<div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@1273</span><span class="source">name</span></div></div></div></div></div></div>
+          </div>
+        </div>       
+        <div class="panel" id="output">
+          <h2>Generated Output</h1>
+          <div class="content">
+This is a double quoted string<br>This is a double quoted string with
+     literal newlines and spaces embedded<br>You can also use 
+ to encode newlines and 	 for tabs<br>You can also use the backslash characters to escape
+     other &quot;double quotes&quot; inside the string<br>Backslash characters can also escape themselves.  Say, if
+     you want a literal backslash and then an 'n' like this: \n<br>If a backslash appears before \any\ other character other
+     than '\', '&quot;', 'n' or 't' then it will be left intact.
+     Here\is\an\example\of\that - note we *DO* need the extra
+     backslash before the 't' otherwise it would be interpreted
+     as a tab character<br>That means you can double quote MS paths like
+     C:\Program Files\Template Toolkit\ and not have to 
+     worry about escaping every backslash<br>In a double quoted string, a dollar sign is used to denote a 
+     variable name, like this: Hello World
+          </div>
+        </div>       
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    $(document).ready(
+        function() {
+            $('#tabset').tt3_tabset();
+            $('#tree').tt3_tree();
+        }
+    );
+  </script>
+</html>
+

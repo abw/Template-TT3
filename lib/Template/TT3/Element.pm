@@ -4,9 +4,9 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Base',
-    utils     => 'self_params numlike refaddr',
+    utils     => 'self_params numlike refaddr is_object',
     slots     => 'meta _next token pos',
-    import    => 'class',
+    import    => 'class CLASS',
     constants => ':elements CODE ARRAY HASH BLANK CMD_PRECEDENCE FORCE',
     constant  => {   
         # define a new base_type for the T::Base type() method to strip off
@@ -92,6 +92,58 @@ sub become {
     my $class = $self->[META]->[ELEMS]->element_class($type)
         || return $self->error_msg( invalid => element => $type );
     bless $self, $class;
+}
+
+
+sub branch {
+    # return existing branch when called without args
+    return $_[SELF]->[BRANCH]
+        if @_ == 1;
+
+    my $self = shift;
+    my $tail = $self;
+    my $element;
+    
+    if (@_ == 1 && is_object(CLASS, $_[1])) {
+        $element = shift;
+        $self->debug("adding passed element to branch: $element") if DEBUG;
+    }
+    else {
+        $element = $self->[META]->[ELEMS]->construct(@_);
+    }
+        
+    # chase down the last node in any existing branch
+    while ($tail->[BRANCH]) {
+        $tail = $tail->[BRANCH];
+    }
+    
+    $tail->[BRANCH] = $element;
+    
+    return $element;
+}
+
+
+# Hmm... this is clumsy... we're already using next() to fetch the current
+# NEXT token and we can't overload it to accept an argument to set a new
+# NEXT (to make it work the same way as branch()) because it already accepts
+# an argument (a token ref, to advance the pointer).  Until I've had a 
+# chance to rethink the names I'm just going to call it then().
+
+sub then {
+    my $self = shift;
+    my $element;
+    
+    if (@_ == 1 && is_object(CLASS, $_[1])) {
+        $element = shift;
+        $self->debug("adding passed element to branch: $element") if DEBUG;
+    }
+    else {
+        $element = $self->[META]->[ELEMS]->construct(@_);
+    }
+        
+    $self->[NEXT] = $element;
+    
+    return $element;
 }
 
 
@@ -405,6 +457,20 @@ sub remaining_text {
         push(@text, $elem->[TOKEN]);
         $elem = $elem->[NEXT];
     }
+    return @text
+        ? join(BLANK, grep { defined } @text)
+        : BLANK;
+}
+
+sub branch_text {
+    my $self = shift;
+    my $elem = $self->[BRANCH];
+    my @text;
+    while ($elem) {
+        push(@text, $elem->[TOKEN]);
+        $elem = $elem->[NEXT];
+    }
+#    $self->debug("BRANCHES: ",  $self->dump_data( $self->[BRANCH
     return @text
         ? join(BLANK, grep { defined } @text)
         : BLANK;

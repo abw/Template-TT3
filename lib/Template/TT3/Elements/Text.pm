@@ -213,6 +213,10 @@ sub text {
 }
 
 
+#-----------------------------------------------------------------------
+# single quoted strings
+#-----------------------------------------------------------------------
+
 package Template::TT3::Element::Squote;
 
 use Template::TT3::Class 
@@ -224,15 +228,64 @@ use Template::TT3::Class
     };
 
 
+#-----------------------------------------------------------------------
+# double quoted strings
+#-----------------------------------------------------------------------
+
 package Template::TT3::Element::Dquote;
 
 use Template::TT3::Class 
-    version   => 3.00,
+    version   => 2.71,
+    debug     => 0,
     base      => 'Template::TT3::Element::String',
     view      => 'dquote',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<dquote:%s>', 
     };
 
+
+sub as_expr {
+    my ($self, $token, $scope) = @_;
+    my $branch = $self->[BRANCH];
+    
+    $self->accept($token);
+
+    if ($branch) {
+        $self->[BLOCK] = $branch->as_exprs(\$branch, $scope)
+            || $self->missing( branch => $branch );
+
+        my $junk = $branch->remaining_text;
+        return $self->error("Trailing text in double quoted string branch: $junk")
+            if defined $junk && length $junk;
+        
+        $self->debug(
+            "compiled double quoted string branch: ", 
+            $self->[BLOCK]->source,
+        ) if DEBUG;
+    }
+    
+    return $self;
+}
+
+
+sub variable {
+    $_[CONTEXT]->{ variables }->use_var( 
+        $_[SELF], 
+        $_[SELF]->text( $_[CONTEXT] )
+    );
+}
+
+
+sub text {
+    # If we have a BLOCK then this is a dynamic string, e.g. "foo $bar"
+    # otherwise it's a static string in EXPR
+    $_[SELF]->[BLOCK] 
+        ? $_[SELF]->[BLOCK]->text($_[CONTEXT])
+        : $_[SELF]->[EXPR]
+}
+
+
+# TODO: source()
 
 1;

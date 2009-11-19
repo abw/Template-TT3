@@ -19,7 +19,7 @@ use Template::TT3::Class
     version => 3.00,
     exports => {
         tags => {
-            space     => '$TO_EOL $COMMENT $WHITESPACE $LAST_LINE',
+            space     => '$TO_EOL $COMMENT $SPACE $WHITESPACE $LAST_LINE',
             punctuate => '$SEPARATOR $DELIMITER $PAIR $DOTOP', # $EQUALS $COLON ',
             groups    => '$GROUPS $LGROUP $RGROUP $LPAREN $RPAREN $LBRACKET $RBRACKET $LBRACE $RBRACE',
             numbers   => '$HEXNUM $SIGN $FLOAT $EXPONENT $NUMBER $INTEGER $INDEX',
@@ -28,6 +28,7 @@ use Template::TT3::Class
             sigils    => '$EXPAND $INTERP $EMBED $UNEMBED',
             names     => '$IDENT $KEYWORD $STATIC $FILEPATH $RESOURCE $NAMESPACE',
             pathops   => '$PLUSPATH',
+            dquote    => '$DQUOTE_TEXT $DQUOTE_ESCAPE $DQUOTE_VAR $DQUOTE_CHUNK',
         },
     };
 
@@ -45,6 +46,7 @@ use Template::TT3::Class
 
 our $TO_EOL     = qr/ (?-s).* /x;
 our $COMMENT    = qr/ \# $TO_EOL /ox;
+our $SPACE      = qr/ \G \s* /ox;
 our $WHITESPACE = qr/ \G \s* (?:$COMMENT\s*)* /ox;
 our $LAST_LINE  = qr/(?:\n|^)([^\n]*)\z/;
 
@@ -124,13 +126,21 @@ our $INDEX    = qr/ \G ( -? \d+ ) /x;
 # detecting and reporting this common error.
 #------------------------------------------------------------------------
 
-our $SQ       = qr/ (?: \\' | [^'] )* /x;               # TODO non-greedy?
+our $SQ       = qr/ (?: \\['\\] | [^'] )* /x;               # TODO non-greedy?
 our $DQ       = qr/ (?: \\\\ | \\" | . | \n )*? /x;     # or greedy?
 our $SQUOTE   = qr/ \G (' ($SQ) ') /x;
 our $DQUOTE   = qr/ \G (" ($DQ) ") /x;
 our $SQUOTEND = qr/ \G ($SQ) ' /x;
 our $DQUOTEND = qr/ \G ($DQ) " /x;
 our $BADQUOTE = qr/ \G ('|") /x;
+
+# we use an explicit limit to the size of a text chunk to avoid a bug in 
+# Perl that makes it barf on large captures
+our $DQUOTE_TEXT   = qr/ ( [^\$\\]{1,3000} ) /x;        # plain text
+our $DQUOTE_ESCAPE = qr/ (?: \\ ( . ) )/sx;             # escaped character \?
+our $DQUOTE_VAR    = qr/ ( \$ )/x;                      # variable prefix
+our $DQUOTE_CHUNK  = qr/ \G $DQUOTE_TEXT | $DQUOTE_ESCAPE | $DQUOTE_VAR /x;
+
 
 
 #-----------------------------------------------------------------------

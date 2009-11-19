@@ -40,10 +40,11 @@ sub emit {
 
 sub tidy_text {
     my ($self, $text) = @_;
+	my $len = shift || $TRIM_TEXT;
     $text =~ s/\n/\\n/g;
     $text =~ s/\t/\\t/g;
-    $text = substr($text, 0, $TRIM_TEXT) . '...' 
-        if $TRIM_TEXT && length($text) > $TRIM_TEXT - 3;
+    $text = substr($text, 0, $len) . '...' 
+        if $len && length($text) > $len - 3;
     return $text;
 }
 

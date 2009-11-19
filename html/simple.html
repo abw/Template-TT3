@@ -13,23 +13,21 @@
       <ul class="tabs">
         <li class="warm"><a href="#tokens">Tokens</a></li>
         <li><a href="#tree">Tree</a></li>
+        <li><a href="#output">Output</a></li>
       </ul>
       <div class="panels">
         <div class="panel warm" id="tokens">
           <h2>Source Tokens</h1>
           <div class="content">
-<span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="if keyword">if</span><span class="whitespace"> </span><span class="word">a</span><span class="element">;</span><span class="whitespace"> </span><span class="word">b</span><span class="element">;</span><span class="whitespace"> </span><span class="keyword">end</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+<span class="text">Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binary">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
 
-Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binary">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binary">or</span><span class="whitespace"> </span><span class="dquote">"World"</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
 
-</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="if keyword">if</span><span class="whitespace"> </span><span class="word">foo</span><span class="whitespace"> </span><span class="element">{</span><span class="whitespace"> 
-<span class="nl"></span>      </span><span class="word">x</span><span class="whitespace"> </span><span class="word">y</span><span class="whitespace"> </span><span class="word">z</span><span class="whitespace"> 
-<span class="nl"></span>   </span><span class="terminator">}</span><span class="whitespace"> 
-<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="text">
-
-</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="if keyword">if</span><span class="whitespace"> </span><span class="word">a</span><span class="whitespace"> </span><span class="number">+</span><span class="whitespace"> </span><span class="word">b</span><span class="whitespace"> </span><span class="binary"><</span><span class="whitespace"> </span><span class="word">c</span><span class="whitespace"> </span><span class="number">+</span><span class="whitespace"> </span><span class="number">3</span><span class="whitespace"> </span><span class="tag_end">-%]</span></span><span class="whitespace"> 
-<span class="nl"></span></span><span class="text">Hello World
-</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="keyword">end</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">greeting</span><span class="whitespace"> </span><span class="binary">=</span><span class="whitespace"> </span><span class="dquote">"Hello $name"</span><span class="whitespace"> </span><span class="tag_end">-%]</span></span><span class="whitespace"> 
+<span class="nl"></span></span><span class="text">
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">quote</span><span class="whitespace"> </span><span class="binary">=</span><span class="whitespace"> </span><span class="dquote">"Hello Arthur \"Monkey Man\" Dent"</span><span class="whitespace"> </span><span class="tag_end">-%]</span></span><span class="whitespace"> 
+<span class="nl"></span></span><span class="text">
+</span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">greeting</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">
 
 </span><span class="eof">--EOF--</span>
           </div>
@@ -39,39 +37,18 @@ Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whi
           <div class="content">
 
 <div class="block">
-<div class="if keyword element">
-<div class="head"><span class="info type">if keyword</span><span class="info posn">@3</span><span class="source">if a { b }</span></div>
-
-<div class="body">
-<div class="test"><span class="branch">Test</span>
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@6</span><span class="source">a</span></div>
-</div>
-</div>
-
-<div class="true"><span class="branch">True</span>
-<div class="block">
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@9</span><span class="source">b</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-
 <div class="text element">
-<div class="head"><span class="info type">text</span><span class="info posn">@18</span><span class="source">\n\nHello </span></div>
+<div class="head"><span class="info type">text</span><span class="info posn">@0</span><span class="source">Hello </span></div>
 </div>
 
 
 <div class="binary expr element">
-<div class="head"><span class="info type">binary expr</span><span class="info posn">@34</span><span class="source">name or "World"</span></div>
+<div class="head"><span class="info type">binary expr</span><span class="info posn">@14</span><span class="source">name or 'World'</span></div>
 
 <div class="body">
 <div class="lhs ">
 <div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@29</span><span class="source">name</span></div>
+<div class="head"><span class="info type">variable element</span><span class="info posn">@9</span><span class="source">name</span></div>
 </div>
 </div>
 
@@ -79,7 +56,7 @@ Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whi
 
 <div class="rhs ">
 <div class="squote string element element">
-<div class="head"><span class="info type">squote string element</span><span class="info posn">@37</span><span class="source">"World"</span></div>
+<div class="head"><span class="info type">squote string element</span><span class="info posn">@17</span><span class="source">'World'</span></div>
 </div>
 </div>
 </div>
@@ -87,108 +64,56 @@ Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whi
 
 
 <div class="text element">
-<div class="head"><span class="info type">text</span><span class="info posn">@47</span><span class="source">\n\n</span></div>
+<div class="head"><span class="info type">text</span><span class="info posn">@27</span><span class="source">\n\nHello </span></div>
 </div>
 
 
-<div class="if keyword element">
-<div class="head"><span class="info type">if keyword</span><span class="info posn">@52</span><span class="source">if foo { x; y; z }</span></div>
-
-<div class="body">
-<div class="test"><span class="branch">Test</span>
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@55</span><span class="source">foo</span></div>
-</div>
-</div>
-
-<div class="true"><span class="branch">True</span>
-<div class="block">
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@67</span><span class="source">x</span></div>
-</div>
-
-
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@69</span><span class="source">y</span></div>
-</div>
-
-
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@71</span><span class="source">z</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-
-<div class="text element">
-<div class="head"><span class="info type">text</span><span class="info posn">@80</span><span class="source">\n\n</span></div>
-</div>
-
-
-<div class="if keyword element">
-<div class="head"><span class="info type">if keyword</span><span class="info posn">@85</span><span class="source">if a + b < c + 3 { "Hello World\n" }</span></div>
-
-<div class="body">
-<div class="test"><span class="branch">Test</span>
 <div class="binary expr element">
-<div class="head"><span class="info type">binary expr</span><span class="info posn">@94</span><span class="source">a + b < c + 3</span></div>
-
-<div class="body">
-<div class="lhs ">
-<div class="binary expr element">
-<div class="head"><span class="info type">binary expr</span><span class="info posn">@90</span><span class="source">a + b</span></div>
+<div class="head"><span class="info type">binary expr</span><span class="info posn">@43</span><span class="source">name or "World"</span></div>
 
 <div class="body">
 <div class="lhs ">
 <div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@88</span><span class="source">a</span></div>
+<div class="head"><span class="info type">variable element</span><span class="info posn">@38</span><span class="source">name</span></div>
 </div>
 </div>
 
-<div class="operator element">+</div>
-
-<div class="rhs ">
-<div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@92</span><span class="source">b</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-<div class="operator element"><</div>
+<div class="operator element">or</div>
 
 <div class="rhs ">
+<div class="string element element">
+<div class="head"><span class="info type">string element</span><span class="info posn">@46</span><span class="source">"World"</span></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="text element">
+<div class="head"><span class="info type">text</span><span class="info posn">@56</span><span class="source">\n\n</span></div>
+</div>
+
+
 <div class="binary expr element">
-<div class="head"><span class="info type">binary expr</span><span class="info posn">@98</span><span class="source">c + 3</span></div>
+<div class="head"><span class="info type">binary expr</span><span class="info posn">@70</span><span class="source">greeting = "Hello $name"</span></div>
 
 <div class="body">
 <div class="lhs ">
 <div class="variable element element">
-<div class="head"><span class="info type">variable element</span><span class="info posn">@96</span><span class="source">c</span></div>
+<div class="head"><span class="info type">variable element</span><span class="info posn">@61</span><span class="source">greeting</span></div>
 </div>
 </div>
 
-<div class="operator element">+</div>
+<div class="operator element">=</div>
 
 <div class="rhs ">
-<div class="number element element">
-<div class="head"><span class="info type">number element</span><span class="info posn">@100</span><span class="source">3</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+<div class="variable string element element">
+<div class="head"><span class="info type">variable string element</span><span class="info posn">@72</span><span class="source">"Hello $name"</span></div>
 
-<div class="true"><span class="branch">True</span>
-<div class="block">
+<div class="body">
 <div class="text element">
-<div class="head"><span class="info type">text</span><span class="info posn">@106</span><span class="source">Hello World\n</span></div>
+<div class="head"><span class="info type">text</span><span class="info posn">@72</span><span class="source">Hello </span></div>
+</div>
 </div>
 </div>
 </div>
@@ -197,10 +122,52 @@ Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whi
 
 
 <div class="text element">
-<div class="head"><span class="info type">text</span><span class="info posn">@127</span><span class="source">\n\n</span></div>
+<div class="head"><span class="info type">text</span><span class="info posn">@90</span><span class="source">\n</span></div>
+</div>
+
+
+<div class="binary expr element">
+<div class="head"><span class="info type">binary expr</span><span class="info posn">@100</span><span class="source">quote = "Hello Arthur \"Monkey Man\" Dent"</span></div>
+
+<div class="body">
+<div class="lhs ">
+<div class="variable element element">
+<div class="head"><span class="info type">variable element</span><span class="info posn">@94</span><span class="source">quote</span></div>
 </div>
 </div>
 
+<div class="operator element">=</div>
+
+<div class="rhs ">
+<div class="string element element">
+<div class="head"><span class="info type">string element</span><span class="info posn">@102</span><span class="source">"Hello Arthur \"Monkey Man\" Dent"</span></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="text element">
+<div class="head"><span class="info type">text</span><span class="info posn">@141</span><span class="source">\n</span></div>
+</div>
+
+
+<div class="variable element element">
+<div class="head"><span class="info type">variable element</span><span class="info posn">@145</span><span class="source">greeting</span></div>
+</div>
+
+
+<div class="text element">
+<div class="head"><span class="info type">text</span><span class="info posn">@156</span><span class="source">\n\n</span></div>
+</div>
+</div>
+
+          </div>
+        </div>       
+        <div class="panel" id="output">
+          <h2>Generated Output</h1>
+          <div class="content">
+template.tt3.variable.undef error - "greeting" is undefined
           </div>
         </div>       
       </div>

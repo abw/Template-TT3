@@ -10,9 +10,10 @@ use Template::TT3::Class
     patterns  => ':all',
     dumps     => 'start end style',
     accessors => 'start end style',
-    constants => 'HASH ARRAY REGEX NONE OFF ON CMD_PRECEDENCE',
+    constants => 'HASH ARRAY REGEX NONE OFF ON BLANK CMD_PRECEDENCE :elements',
     constant  => {
-        GRAMMAR => 'Template::TT3::Grammar::TT3',
+        GRAMMAR   => 'Template::TT3::Grammar::TT3',
+		BACKSLASH => '\\',
     },
     messages  => {
         bad_style  => 'Invalid tag style specified: %s',
@@ -22,6 +23,13 @@ use Template::TT3::Class
  
 our $TAG_STYLES     = { };
 our $STYLE_PATTERNS = { };
+our $QUOTED_ESCAPES = {
+    n    => "\n",
+    t    => "\t",
+	(BACKSLASH) x 2
+#   r    => "\r",
+#   '"'  => '"',
+};
 
 
 #-----------------------------------------------------------------------
@@ -239,7 +247,7 @@ sub init_grammar {
                || $self->class->any_var('GRAMMAR')
                || $self->GRAMMAR;
     
-    $grammar = $grammar->new($config)
+    $grammar = class($grammar)->load->instance($config)
         unless blessed $grammar;
     
     $self->{ grammar  } = $grammar;
@@ -366,7 +374,8 @@ sub tokenise {
         }
         elsif ($$input =~ /$DQUOTE/cog) {
             $self->debug("matched double quote: $1") if DEBUG;
-            $output->dquote_token($1, $pos, $2);
+            $self->tokenise_string($input, $output, $scope, $1, $pos, $2, '"');
+#            $output->dquote_token($1, $pos, $2);
         }
         elsif ($$input =~ /$self->{ match_at_end }/cg) {
             $self->debug("matched end of tag: $1") if DEBUG;
@@ -396,6 +405,209 @@ sub tokenise {
     }
 
     return 0;
+}
+
+
+sub tokenise_string {
+    my ($self, $input, $output, $scope, $token, $pos, $content, $delim) = @_;
+    # phew! what a lot of arguments
+
+    $self->debug(
+        "tokenise_string(\n",
+        "  input: $input\n",
+        " output: $output\n",
+        "  scope: $scope\n",
+        "  token: $token\n",
+        "content: $content\n",
+        "  delim: $delim\n"
+    ) if DEBUG;
+    
+    my $dquote = $output->dquote_token($token, $pos);
+    my (@text, $tpos, $branch);
+    my $n = 0;
+    
+    $self->debug("created dquote string token: $dquote") if DEBUG;
+    
+#  while ($content =~ $DQUOTE_CHUNK) {
+
+    while ($content =~ /
+        ( [^\$\\]{1,3000} )             # regular text sequence         [$1]
+        |
+        (?: \\(.) )                     # escape character \            [$2]
+        |
+        (?:                             
+            \$                          # embedded variable 
+            (?:
+                ([\w\.]+)               # naked variable $foo           [$3]
+            |
+                \{ ( [^\}]* ) \}        # enclosed variable ${foo.bar}  [$4]
+            )
+        )
+        /cgx) {
+
+        if (defined $1) {
+            # Plain text gets pushed into the @text buffer.  If it's the 
+            # first text chunk then we save the start position in $tpos.
+            # Then we increment our running $pos count by the number of 
+            # text characters we've consumed.
+            $tpos = $pos unless @text;
+            push(@text, $1);
+            $pos += length $1;
+#            $self->debug("** pushed text: $1");
+        }
+        elsif (defined $2) {
+            # An escaped character is either an escape sequence like \n or \t
+            # that is substituted for its literal text, or it's protecting the 
+            # next character, e.g. \" \$ \".  Either way, it's static text so
+            # it gets pushed onto the buffer as above.
+            $tpos = $pos unless @text;
+            push(@text, 
+					$QUOTED_ESCAPES->{ $2 } 		# \n \t \\
+	 			||  ($2 eq $delim && $delim)        # \"
+	 			||  BACKSLASH . $2                  # \anything else
+			);
+            $pos += 1 + length $2;      # Is this always 1?  What about utf8?
+#            $self->debug("** pushed escape: $text[-1]");
+        }
+        elsif (defined $3) {
+            # A $word is tokenised as a variable.  If we've got any preceding
+            # text in the @text buffer then we need to compact it into a 
+            # single text string which gets added as a text element to the 
+            # end of the branch, or at the start of a new branch if we haven't
+            # created a branch element yet.
+#            $self->debug("NAKED VAR: [$3]");
+            if (@text) {
+                $branch = $branch 
+                    ? $branch->then( text => join(BLANK, @text), $tpos )
+                    : $dquote->branch( text => join(BLANK, @text), $tpos );
+                @text = ();
+            }
+            $branch = $branch
+                ? $branch->then( word => $3, $pos )
+                : $dquote->branch( word => $3, $pos );
+
+            $pos += length $3;
+        }
+        elsif (defined $4) {
+#            $self->debug("CLOTHED VAR: [$3]   ** TODO **");
+        }
+        else {
+            return $self->error("tokenise_string() failed to match anything");
+        }
+ 
+# for debugging runaways       
+#        unless (++$n % 10) {
+#            $self->debug("PAUSING....");
+#            sleep 1;
+#        }
+    }
+
+    if (@text) {
+        if ($branch) {
+            # if we've got a branch then we add any trailing text to it
+            $branch = $branch->then( text => join(BLANK, @text), $tpos );
+        }
+        else {
+            # if we haven't got a branch then we've just got static text,
+            # in which case we don't need a branch at all
+            $dquote->[EXPR] = join(BLANK, @text);
+        }
+    }
+
+    if ($branch) {
+        $branch->then('eof');
+        $self->debug("Parsed string branch: ", $dquote->branch_text)
+            if DEBUG;
+    }
+    else {
+        $self->debug("Merged static string: ", $dquote->[EXPR])
+            if DEBUG;
+    }
+
+#    $self->debug("BRANCH CHAIN: ", $self->dump_data($string->branch));
+#    $self->debug("BRANCH TEXT: ", $string->branch_text);
+    
+    return $dquote;
+}
+
+
+# TMP STUFF
+
+sub unescape {
+    my ($self, $text, $match, $replace) = @_;
+    
+    $match = quotemeta $match
+        unless ref $match eq REGEX;
+
+#    $match = qr/\\(\\|$match)/;
+    $match = qr/\\($match)/;
+#    $self->debug(" pre: $text");
+#    $self->debug("  qm: $match");
+    $text =~ s/$match/($replace && $replace->{ $1 }) || $1/ge;
+#    $self->debug("post: $text");
+    return $text;
+}
+
+sub parsed_squote {
+    my ($self, $text, $quoted, $pos) = @_;
+    return $self->parsed_text($text, $self->unescape($quoted, qr/[\\']/), $pos);
+#   return [ SQUOTE => $quoted ];
+}
+
+sub parsed_dquote {
+    my ($self, $text, $quoted, $pos) = @_;
+    $self->debug("  dquoted: $quoted") if DEBUG;
+    $quoted =~ s/\\([\\nrt"])/$QUOTED_ESCAPES->{$1}/ge;
+    $self->debug("unescaped: $quoted") if DEBUG;
+
+    if ($quoted =~ /\$/) {
+        # TODO: look for '$' and expand
+        return [ DQUOTE => $quoted, $pos ];
+    }
+    else {
+        return $self->parsed_text($text, $quoted, $pos);
+    }
+}
+
+sub interpolate_text {
+    my ($self, $text, $line) = @_;
+    my @tokens  = ();
+    my ($pre, $var, $dir);
+
+
+   while ($text =~
+           /
+           ( (?: \\. | [^\$] ){1,3000} ) # escaped or non-'$' character [$1]
+           |
+           ( \$ (?:                 # embedded variable            [$2]
+             (?: \{ ([^\}]*) \} )   # ${ ... }                     [$3]
+             |
+             ([\w\.]+)              # $word                        [$4]
+             )
+           )
+        /gx) {
+
+        ($pre, $var, $dir) = ($1, $3 || $4, $2);
+
+        # preceding text
+        if (defined($pre) && length($pre)) {
+            $line += $pre =~ tr/\n//;
+            $pre =~ s/\\\$/\$/g;
+            push(@tokens, 'TEXT', $pre);
+        }
+        # $variable reference
+        if ($var) {
+            $line += $dir =~ tr/\n/ /;
+            push(@tokens, [ $dir, $line, $self->tokenise_directive($var) ]);
+        }
+        # other '$' reference - treated as text
+        elsif ($dir) {
+            $line += $dir =~ tr/\n//;
+            push(@tokens, 'TEXT', $dir);
+        }
+    }
+
+    return \@tokens;
 }
 
 
@@ -442,4 +654,42 @@ sub peek_to_end {
 
 
 1;
+
+__END__
+
+=pod
+
+=head1 METHODS
+
+=head2 sub tokenise_string($input, $output, $scope, $token, $pos, $content, $delim)
+
+
+This method takes a quoted string like "foo $bar" and tokenises it into chunks
+of text and variable references. 
+
+NOTE: The argument list is something of a monstrosity which is likely to get
+pared down Real Soon Now.
+
+The first three arguments are the regular $input, $output and $scope. Then we
+have the complete $token including any quote marks. We create a literal dquote
+element to represent this complete token in case we need to regenerate the
+original source code. The next argument, $pos, tells us the source position it
+was parsed at. That goes into the token element too. The next argument is the
+string content without the enclosing quotes. The final argument is the
+delimiter, usually '"', but it can be something else, e.g. in the case of
+qq:/foo $bar/. 
+
+We tokenise the string and create a sub-stream of tokens representing the
+original chunks. We don't want to inject these into the normal output stream
+because it would then look like they were read from the source, messing up any
+regeneration. So we hang them off the $token->[BRANCH] pointer.
+
+    +-------------------+  BRANCH   +-------------+
+    | dquote:"foo $bar" |---------->| text:"foo " |
+    +-------------------+           +-------------+
+              |                            |  NEXT
+             \|/                          \|/
+             TBA                    +--------------+
+                                    | word:bar     |
+                                    +--------------+
 

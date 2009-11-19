@@ -1,6 +1,6 @@
 body {
     font-family: Trebuchet MS, Lucida Sans Unicode, Lucida Grande, Lucida Sans, Arial, sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 20px;
     color: #444;
 }
@@ -10,7 +10,7 @@ div.tabset {
 
 div.tabset ul.tabs {
     display: block;
-    width: 220px;
+    width: 330px;
     float: right;
     margin: 0;
     padding: 0;
@@ -92,7 +92,7 @@ div.element {
 
 div.element div.head {
     padding: 0 150px 0 5px;
-    height: 20px;
+    min-height: 20px;
     position: relative;
 }
 
@@ -128,13 +128,6 @@ div.element div.head span.source {
     line-height: 20px;
 }
 
-/* green */
-div.variable {
-    color: #4F8A10;
-    border-color: #4F8A10;
-    background-color: #DFF2BF;
-}
-
 /* red/orange */
 div.keyword {
     color: #D63301;
@@ -155,6 +148,14 @@ div.number {
     background-color: #BDE5F8;
 }
 
+/* green */
+div.variable {
+    color: #4F8A10;
+    border-color: #4F8A10;
+    background-color: #DFF2BF;
+}
+
+
 div.expr {
     color: #9F6000;
     border-color: #9F6000;
@@ -173,6 +174,13 @@ div.operator {
     padding-left: 5px;
 }
 
+div.error {
+    color: #D8000C;
+    border: 1px solid #D8000C;
+    background-color: #FFBABA;
+	padding: 10px;
+}
+
 div.lhs,
 div.rhs {
     padding-left: 20px;
@@ -182,6 +190,12 @@ span.branch {
     font-size: 10px;
     line-height: 14px;
     color: #999;
+}
+
+span.eof {
+    padding: 2px;
+    background-color: #a00;
+    color: white;
 }
 
 /*
@@ -226,7 +240,7 @@ div.open > div.body {
     line-height: 20px; */
     color: #444;
     white-space: pre;
-    background-color: #e4e4e4;
+    background-color: #f4f4f4;
     border: 1px solid #aaa;
     padding: 5px; */
 }

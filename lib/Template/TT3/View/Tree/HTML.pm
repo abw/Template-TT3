@@ -12,6 +12,8 @@ use Template::TT3::Class
         ELEMENT => "<%s%s>%s</%s>",
     };
 
+our $TRIM_TEXT = 128;
+
 sub HTML {
     my ($name, $attrs, @content) = @_;
     my $attr = $attrs
@@ -42,7 +44,7 @@ sub span {
 sub div {
     my $self      = shift;
     my $css_class = shift;
-    "\n" . HTML( div => { class => $css_class }, @_ ) . "\n";
+    HTML( div => { class => $css_class }, @_ );
 }
 
 sub element {
@@ -55,7 +57,7 @@ sub element {
             $self->span( "info type" => $type ),
             $self->span( "info posn" => '@' . $elem->[POS] ),
 #            $self->span( source => $self->tidy_text( $elem->source ) ),
-            $self->span( source => $self->tidy_text( $elem->source ) ),
+            $self->span( source => $self->tidy_text( encode($elem->source), $TRIM_TEXT ) ),
         ),
         @content
             ? $self->div( body => @content )
@@ -83,7 +85,7 @@ sub view_text {
             head => 
             $self->span( "info type" => 'text' ),
             $self->span( "info posn" => '@' . $elem->[POS] ),
-            $self->span( source => $self->tidy_text( $elem->[TOKEN] ) ),
+            $self->span( source => $self->tidy_text( $elem->[TOKEN], $TRIM_TEXT ) ),
 #            $self->span( source => '&laquo;' . $self->tidy_text( $elem->[TOKEN] ) . '&raquo;'),
         ),
     );
@@ -98,8 +100,21 @@ sub view_squote {
 
 sub view_dquote {
     my ($self, $elem) = @_;
+    my $block = $elem->[BLOCK];
+    my ($type, $text);
+    
+    if ($block) {
+        $type = 'variable string';
+        $text = $block->view($self);
+    }
+    else {
+        $type = 'string';
+        $text = $self->div( 'text element' => $elem->[EXPR] );
+    }
+    
     $self->element( 
-        'dquote string element' => $elem,
+        "$type element" => $elem,
+        $text,
     );
 }
 
@@ -134,6 +149,14 @@ sub view_if {
     );
 }
 
+sub view_raw {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'raw keyword' => $elem,
+        $elem->[BLOCK]->view($self) 
+    );
+}
+
 sub view_is {
     my ($self, $elem) = @_;
     $self->element( 
@@ -156,7 +179,7 @@ class->methods(
     map {
         my $type = $_;              # lexical copy for closure
         "view_$type" => sub {
-            $_[0]->span( "$type element", $_[0]->tidy_text( $_[1]->[TOKEN] ) )
+            $_[0]->span( "$type element", $_[0]->tidy_text( $_[1]->[TOKEN], $TRIM_TEXT ) )
         }
     }
     qw(

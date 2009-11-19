@@ -11,19 +11,22 @@ use Badger
     lib => '../lib';
 
 use Template::TT3::Template;
+use Template::TT3::HTML;
 use constant TEMPLATE => 'Template::TT3::Template';
 
 my $file     = shift || die usage();
 my $template = TEMPLATE->new( file => $file );
 my $tokens   = $template->tokens->view_HTML;
-my $tree     = $template->try->tree; 
+my $tree     = $template->tree; 
 $tree = $tree ? $tree->view_HTML : "ERROR: $@";
+my $output   = $template->try->html || qq{<div class="error">$@</div>};
 my $wrapper  = TEMPLATE->new( file => \*DATA );
 
 print $wrapper->fill( 
     tokens => $tokens,
     tree   => $tree,
     name   => $file,
+    output => $output,
 );
 
 sub usage {
@@ -49,6 +52,7 @@ __DATA__
       <ul class="tabs">
         <li class="warm"><a href="#tokens">Tokens</a></li>
         <li><a href="#tree">Tree</a></li>
+        <li><a href="#output">Output</a></li>
       </ul>
       <div class="panels">
         <div class="panel warm" id="tokens">
@@ -61,6 +65,12 @@ __DATA__
           <h2>Parse Tree</h1>
           <div class="content">
 [% tree %]
+          </div>
+        </div>       
+        <div class="panel" id="output">
+          <h2>Generated Output</h1>
+          <div class="content">
+[% output %]
           </div>
         </div>       
       </div>
