@@ -355,9 +355,9 @@ sub view {
 
 sub view_guts {
     # used mostly for debugging - see T::TT3::View::Tokens::Debug
-    self => refaddr $_[0],
-    next => refaddr $_[0]->[NEXT],
-    jump => refaddr $_[0]->[JUMP],
+    self   => refaddr $_[0],
+    next   => refaddr $_[0]->[NEXT],
+    branch => refaddr $_[0]->[BRANCH],
 }
 
 

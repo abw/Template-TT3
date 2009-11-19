@@ -20,14 +20,14 @@ use Template::TT3::Test
 use Template::TT3::Constants ':elem_slots';
 
 ok( 1, 'loaded Template::TT3::Constants' );
-is( JUMP, 4, 'JUMP is 4 in main' );
+is( BRANCH, 4, 'BRANCH is 4 in main' );
 
 package Foo;
 
 use Template::TT3::Constants ':elem_slots';
 use Template::TT3::Test;
 
-is( JUMP, 4, 'JUMP is 4 in Foo' );
+is( BRANCH, 4, 'BRANCH is 4 in Foo' );
 
 
 

@@ -123,5 +123,10 @@ sub variable {
          ->use_var( $_[SELF], $_[SELF]->text( $_[CONTEXT] ) );
 }
 
+sub expressions {
+    return wantarray
+        ? @{ $_[SELF]->[EXPR] }
+        :    $_[SELF]->[EXPR];
+}
 
 1;

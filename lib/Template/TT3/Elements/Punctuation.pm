@@ -28,6 +28,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Punctuation',
+    view      => 'separator',
     constants => ':elem_slots',
     constant  => {
         is_delimiter => 1,
@@ -74,9 +75,6 @@ sub skip_delimiter {
 sub OLD_as_block {
     my ($self, $token, $scope, $prec) = @_;
 
-#    $self->debug("asking delimiter for as_block(), next token is ", $$token->token);
-#    $self->debug("TOKEN: $token   =>   $$token");
- 
     my $block = $$token->as_exprs($token, $scope, $prec)
         || return $self->missing( expressions => $token );
 
@@ -86,11 +84,7 @@ sub OLD_as_block {
     return $self->missing( end => $token )
         unless $$token->is('end');
 
-    $self->debug("GOT END: ", $$token->source);
-        
     $$token = $$token->next;
-
-    $self->debug("NEXT TOKEN: ", $$token->token);
 
     return $block;
 }
@@ -264,6 +258,32 @@ sub value {
     };
 }
 
+sub NOT_as_block {
+    my ($self, $token, $scope, $parent, $follow) = @_;
+    my (@exprs, $expr);
+    
+    $parent ||= $self;
+
+    $self->debug("as_block()") if DEBUG;
+ 
+    # skip past token and any whitespace, then parse expressions
+    my $block = $$token->next_skip_ws($token)->as_exprs($token, $scope)
+        || return $parent->missing( $self->ARG_BLOCK, $token );
+
+    # check next token matches our FINISH token
+    return $parent->missing( $self->FINISH, $token)
+        unless $$token->is( $self->FINISH, $token );
+    
+    if ($follow && $$token->in($follow)) {
+        $self->debug("Found follow-on token: ", $$token->token);
+    }
+#       unless $$token->is( $self->FINISH );
+
+    # return $block, not $self
+    return $block;
+}
+
+
 
 #-----------------------------------------------------------------------
 # parens
@@ -274,6 +294,7 @@ package Template::TT3::Element::Parens;
 use Template::TT3::Class 
     debug     => 0,
     base      => 'Template::TT3::Element::Construct',
+    view      => 'parens',
     constants => ':eval_args :elem_slots',
     constant  => {
         FINISH        => ')',
@@ -382,7 +403,6 @@ use Template::TT3::Class
 
 
 
-
 #-----------------------------------------------------------------------
 # end
 #-----------------------------------------------------------------------
@@ -394,14 +414,6 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Terminator',
     view      => 'keyword',
     constants => ':elem_slots';
-
-sub generate {
-    $_[1]->generate_keyword(
-        $_[0]->[TOKEN]
-    );
-}
-
-
 
 
 1;    

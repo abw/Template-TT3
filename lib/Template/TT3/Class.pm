@@ -25,6 +25,7 @@ use Badger::Class
         as       => \&as,
     };
 
+
 our $DEBUG_OPS = 0;
 
 
@@ -76,6 +77,7 @@ sub as {
         @$roles 
     );
 }
+
 
 
 # I think the list_vars() in Badger::Class is broken.

@@ -14,7 +14,8 @@ use Template::TT3::Class
     constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT  => '<text:%s>', 
-        SOURCE_FORMAT => "'%s'",
+        SOURCE_FORMAT => '"%s"',
+#        SOURCE_FORMAT => "%s",
     };
 
 
@@ -162,16 +163,12 @@ package Template::TT3::Element::Padding;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Text',
+    view      => 'padding',
     constants => ':elem_slots',
     constant  => {
         SEXPR_FORMAT  => '<padding:%s>', 
     };
 
-sub generate {
-    $_[1]->generate_padding(
-        $_[0]->[TOKEN]
-    );
-}
 
 
 #-----------------------------------------------------------------------
@@ -183,7 +180,9 @@ package Template::TT3::Element::String;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Text',
+    view      => 'string',
     constants => ':elem_slots';
+
 
 sub as_expr {
     my ($self, $token, $scope, $prec) = @_;
@@ -195,6 +194,7 @@ sub as_expr {
     return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
 }
 
+
 sub variable {
     # TODO: fixme so I'm not re-creating single quotes each time
     $_[1]->{ variables }
@@ -203,19 +203,14 @@ sub variable {
 
 
 
-
 package Template::TT3::Element::Squote;
 
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
+    view      => 'squote',
     constants => ':elem_slots';
 
-sub generate {
-    $_[1]->generate_squote(
-        $_[0]->[TOKEN],
-    );
-}
 
 
 package Template::TT3::Element::Dquote;
@@ -223,12 +218,8 @@ package Template::TT3::Element::Dquote;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
+    view      => 'dquote',
     constants => ':elem_slots';
 
-sub generate {
-    $_[1]->generate_dquote(
-        $_[0]->[TOKEN],
-    );
-}
 
 1;

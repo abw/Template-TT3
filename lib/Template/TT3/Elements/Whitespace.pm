@@ -66,14 +66,14 @@ sub next_skip_ws {
     # we want to hide the tokens inside the directive from the expression 
     # parser because they have already been interpreted at tokenising time 
     # and don't equate to runtime expressions that the parser understands.
-    # So the tokeniser for these tags adds a JUMP entry in the start token 
+    # So the tokeniser for these tags adds a BRANCH entry in the start token 
     # for the directive that points to the end token.  Whenever we skip_ws 
     # or next_skip_ws on one of these start tokens (as we always do when 
     # a whitespace token as_expr() method is called) then we jump straight
     # down to the end token and continue from there.  For regular tags, we
     # just advance to the next token as usual.
-    ($_[0]->[JUMP] && $_[0]->[JUMP]->skip_ws($_[1]))
- || ($_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]))
+    ($_[0]->[BRANCH] && $_[0]->[BRANCH]->skip_ws($_[1]))
+ || ($_[0]->[NEXT]   && $_[0]->[NEXT]->skip_ws($_[1]))
 
 #    my $self = $_[0];
 #    $self->debug("[$self]   NEXT:[$self->[NEXT]]  GOTO:[$self->[GOTO]]");

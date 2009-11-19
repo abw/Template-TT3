@@ -10,6 +10,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element',
+    view      => 'variable',
     constants => ':elem_slots :eval_args',
     constant  => {
         SEXPR_FORMAT => '<variable:%s>', 
@@ -168,6 +169,7 @@ package Template::TT3::Element::Variable::Apply;
 use Template::TT3::Class 
     debug     => 0,
     base      => 'Template::TT3::Element::Variable',
+    view      => 'apply',
     constants => ':eval_args :elem_slots',
     constant  => {
         FINISH        => ')',

@@ -53,12 +53,13 @@ use Badger::Class
 
                 # remaining slots have different meanings depending on 
                 # the element type
-                JUMP    => '=4',    # used to skip over compile time control tags
+                BRANCH  => '=4',    # used to skip over compile time control tags
                 EXPR    => '=4',    # unary expression and expr/block...
                 BLOCK   => '=5',    # ... expressions use EXPR and/or BLOCK
                 LHS     => '=4',    # binary expressions use LHS and RHS
                 RHS     => '=5',
                 ARGS    => '=6',    # arguments
+                ELSE    => '=7',    # reference to follow-on block, e.g. else
 
                 # element metadata slots
                 CONFIG  => '=0',    # configuration parameters

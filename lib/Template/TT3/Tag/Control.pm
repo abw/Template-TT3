@@ -24,10 +24,10 @@ sub tokens {
     
     # set a forward reference from the first token to the last, so that 
     # we can skip over any control tokens when parsing runtime expressions.
-    $self->debug("setting JUMP on $first ($first->[TOKEN]) to $last ($last->[TOKEN]) : ", refaddr $last)
+    $self->debug("setting BRANCH on $first ($first->[TOKEN]) to $last ($last->[TOKEN]) : ", refaddr $last)
         if DEBUG;
         
-    $first->[JUMP] = $last;    # skip to last token
+    $first->[BRANCH] = $last;    # skip to last token
     
     return $end;
 }
