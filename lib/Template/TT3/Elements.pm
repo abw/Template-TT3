@@ -1,5 +1,6 @@
 package Template::TT3::Elements;
 
+use Template::TT3::Elements::Variables;          # TMP
 use Badger::Factory::Class
     version   => 3.00,
     debug     => 0,
@@ -7,7 +8,10 @@ use Badger::Factory::Class
     base      => 'Template::TT3::Base',
     utils     => 'params',
     path      => ['Template::TT3::Element', 'TemplateX::TT3::Element'],
-    constants => 'PKG';
+    constants => 'PKG',
+    elements  => {
+        dot => 'Template::TT3::Element::Variable::Dot',     # TMP
+    };
 
 
 *init = \&init_elements;

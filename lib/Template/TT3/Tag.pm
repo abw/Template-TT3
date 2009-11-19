@@ -428,23 +428,23 @@ sub tokenise_string {
     
     $self->debug("created dquote string token: $dquote") if DEBUG;
     
-#  while ($content =~ $DQUOTE_CHUNK) {
-
-    while ($content =~ /
-        ( [^\$\\]{1,3000} )             # regular text sequence         [$1]
-        |
-        (?: \\(.) )                     # escape character \            [$2]
-        |
-        (?:                             
-            \$                          # embedded variable 
-            (?:
-                ([\w\.]+)               # naked variable $foo           [$3]
-            |
-                \{ ( [^\}]* ) \}        # enclosed variable ${foo.bar}  [$4]
-            )
-        )
-        /cgx) {
-
+#    while ($content =~ /
+#        ( [^\$\\]{1,3000} )             # regular text sequence         [$1]
+#        |
+#        (?: \\(.) )                     # escape character \            [$2]
+#        |
+#        (?:                             
+#            \$                          # embedded variable 
+#            (?:
+#                ([\w\.]+)               # naked variable $foo           [$3]
+#            |
+#                \{ ( [^\}]* ) \}        # enclosed variable ${foo.bar}  [$4]
+#            )
+#        )
+#        /cgx) {
+#
+    while ($content =~ /$DQUOTE_CHUNK/cogx) {
+#        print "[1:$1] [2:$2] [3:$3] [4:$4]\n";
         if (defined $1) {
             # Plain text gets pushed into the @text buffer.  If it's the 
             # first text chunk then we save the start position in $tpos.
@@ -453,7 +453,7 @@ sub tokenise_string {
             $tpos = $pos unless @text;
             push(@text, $1);
             $pos += length $1;
-#            $self->debug("** pushed text: $1");
+            $self->debug("double quoted text: $1") if DEBUG;
         }
         elsif (defined $2) {
             # An escaped character is either an escape sequence like \n or \t
@@ -467,7 +467,7 @@ sub tokenise_string {
 	 			||  BACKSLASH . $2                  # \anything else
 			);
             $pos += 1 + length $2;      # Is this always 1?  What about utf8?
-#            $self->debug("** pushed escape: $text[-1]");
+            $self->debug("double quoted escape: $2 => $text[-1]") if DEBUG;
         }
         elsif (defined $3) {
             # A $word is tokenised as a variable.  If we've got any preceding
@@ -475,7 +475,7 @@ sub tokenise_string {
             # single text string which gets added as a text element to the 
             # end of the branch, or at the start of a new branch if we haven't
             # created a branch element yet.
-#            $self->debug("NAKED VAR: [$3]");
+            $self->debug("double quoted variable: [$3]") if DEBUG;
             if (@text) {
                 $branch = $branch 
                     ? $branch->then( text => join(BLANK, @text), $tpos )
@@ -487,9 +487,15 @@ sub tokenise_string {
                 : $dquote->branch( word => $3, $pos );
 
             $pos += length $3;
-        }
-        elsif (defined $4) {
-#            $self->debug("CLOTHED VAR: [$3]   ** TODO **");
+            
+            # look for any dotops
+            while ($content =~ /$DOT_WORD/cogx) {
+                $self->debug("double quoted dotop: [$1]") if DEBUG;
+                $branch = $branch
+                    ->then( dot  => '.', $pos++ )
+                    ->then( word => $1, $pos );
+                $pos += length $1;
+            }
         }
         else {
             return $self->error("tokenise_string() failed to match anything");
@@ -524,9 +530,6 @@ sub tokenise_string {
             if DEBUG;
     }
 
-#    $self->debug("BRANCH CHAIN: ", $self->dump_data($string->branch));
-#    $self->debug("BRANCH TEXT: ", $string->branch_text);
-    
     return $dquote;
 }
 

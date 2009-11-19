@@ -28,7 +28,7 @@ use Template::TT3::Class
             sigils    => '$EXPAND $INTERP $EMBED $UNEMBED',
             names     => '$IDENT $KEYWORD $STATIC $FILEPATH $RESOURCE $NAMESPACE',
             pathops   => '$PLUSPATH',
-            dquote    => '$DQUOTE_TEXT $DQUOTE_ESCAPE $DQUOTE_VAR $DQUOTE_CHUNK',
+            dquote    => '$DQUOTE_TEXT $DQUOTE_ESCAPE $DQUOTE_VAR $DQUOTE_CHUNK $DOT $DOT_WORD',
         },
     };
 
@@ -117,6 +117,25 @@ our $INDEX    = qr/ \G ( -? \d+ ) /x;
 
 
 #------------------------------------------------------------------------
+# regexen to match various unquoted strings.  $IDENT matches a simple
+# identifier (e.g. foo), while $KEYWORD adds the requirement of a word
+# boundary at the end (TODO: this isn't used any more).  $STATIC matches
+# a static variable name or dot operation: a word or numerical index.
+# $FILEPATH allows dots, slashes and colon (e.g. /foo/bar.txt) and 
+# $RESOURCE is a special case of this with an explicit leading resource 
+# identifier (e.g.  file:foo.txt).  $NAMESPACE is the prefix by itself.
+#------------------------------------------------------------------------
+
+our $BAREWORD  = qr/ [[:alpha:]^_] \w* /x;
+our $IDENT     = qr/ \G ( $BAREWORD ) /x;
+our $KEYWORD   = qr/ \G $IDENT \b /x;
+our $STATIC    = qr/ \G ( [[:alpha:]] \w* | -? \d+ ) /x;
+our $FILEPATH  = qr/ \G ( [\w\.\/:]+ ) /x;
+our $RESOURCE  = qr/ \G ( \w+ ) : ( [\w\.\/:]+ ) /x;
+our $NAMESPACE = qr/ \G ( \w+ ) : /x;
+
+
+#------------------------------------------------------------------------
 # Regexen to match single and double quoted strings.  $SQ and $DQ define
 # the permitted content for single and double quoted strings.  $SQUOTE 
 # and $DQUOTE match them at the current regex position complete with 
@@ -138,8 +157,8 @@ our $BADQUOTE = qr/ \G ('|") /x;
 # Perl that makes it barf on large captures
 our $DQUOTE_TEXT   = qr/ ( [^\$\\]{1,3000} ) /x;        # plain text
 our $DQUOTE_ESCAPE = qr/ (?: \\ ( . ) )/sx;             # escaped character \?
-our $DQUOTE_VAR    = qr/ ( \$ )/x;                      # variable prefix
-our $DQUOTE_CHUNK  = qr/ \G $DQUOTE_TEXT | $DQUOTE_ESCAPE | $DQUOTE_VAR /x;
+our $DQUOTE_VAR    = qr/ (?: \$ ( $BAREWORD ) )/x;      # variable prefix
+our $DQUOTE_CHUNK  = qr/ \G (?: $DQUOTE_TEXT | $DQUOTE_ESCAPE | $DQUOTE_VAR ) /x;
 
 
 
@@ -168,22 +187,6 @@ our $EMBED    = qr/ \G \${ /x;
 our $UNEMBED  = qr/ \G } /x;
 
 
-#------------------------------------------------------------------------
-# regexen to match various unquoted strings.  $IDENT matches a simple
-# identifier (e.g. foo), while $KEYWORD adds the requirement of a word
-# boundary at the end (TODO: this isn't used any more).  $STATIC matches
-# a static variable name or dot operation: a word or numerical index.
-# $FILEPATH allows dots, slashes and colon (e.g. /foo/bar.txt) and 
-# $RESOURCE is a special case of this with an explicit leading resource 
-# identifier (e.g.  file:foo.txt).  $NAMESPACE is the prefix by itself.
-#------------------------------------------------------------------------
-
-our $IDENT     = qr/ \G ( [[:alpha:]^_] \w* ) /x;
-our $KEYWORD   = qr/ \G $IDENT \b /x;
-our $STATIC    = qr/ \G ( [[:alpha:]] \w* | -? \d+ ) /x;
-our $FILEPATH  = qr/ \G ( [\w\.\/:]+ ) /x;
-our $RESOURCE  = qr/ \G ( \w+ ) : ( [\w\.\/:]+ ) /x;
-our $NAMESPACE = qr/ \G ( \w+ ) : /x;
 
 
 #------------------------------------------------------------------------
@@ -193,9 +196,10 @@ our $NAMESPACE = qr/ \G ( \w+ ) : /x;
 # multiple paths
 #------------------------------------------------------------------------
 
-our $DOT    = qr/ \G \.(?!\.) /x;
-our $PIPE   = qr/ \G \| /x;
-our $PLUS   = qr/ \G \+ /x;
+our $DOT      = qr/ \G \.(?!\.) /x;
+our $DOT_WORD = qr/ \G \.($BAREWORD) /x;
+our $PIPE     = qr/ \G \| /x;
+our $PLUS     = qr/ \G \+ /x;
 
 
 #our $LIST     = qr/ \G \[ /x;

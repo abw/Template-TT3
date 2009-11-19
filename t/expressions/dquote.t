@@ -12,17 +12,25 @@
 #========================================================================
 
 use Badger lib => '../../lib';
+#use Badger::Debug modules => 'Template::TT3::Tag';
 use Template::TT3::Test::Parser 
 #    skip   => 'Not working yet',
-    tests  => 8,
+    tests  => 10,
     debug  => 'Template::TT3::Tag',
     args   => \@ARGV,
     import => 'test_expressions callsign';
+    
+my $vars = {
+    %{ callsign() },
+    user => {
+        name => 'Arthur Dent',
+    },
+};
 
 
 test_expressions(
     debug     => $DEBUG,
-    variables => callsign,
+    variables => $vars,
 );
 
 __DATA__
@@ -92,3 +100,13 @@ worry about escaping every backslash
 "Hello $a"
 -- expect --
 Hello alpha
+
+-- test embedded dotop --
+"Hello $user.name"
+-- expect --
+Hello Arthur Dent
+
+-- test embedded dotops --
+"Your name is $user.name.length characters long"
+-- expect --
+Your name is 11 characters long
