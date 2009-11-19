@@ -48,7 +48,9 @@ our $MESSAGES = {
     sign_dup_sigil  => "Duplicate '<4>' argument in signature for %s: %s",
     undef_varname   => "Cannot use undefined value as a variable name: %s",
     undefined       => "Undefined value returned by expression: <1>",
+    undefined_in    => "Undefined value returned by '<2>' expression: <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
+    not_follow      => "'%s' cannot follow '%s'",
 };
 
 
@@ -295,6 +297,13 @@ sub as_exprs {
 }
 
 
+sub as_follow {
+    my ($self, $block, $token, $scope, $parent) = @_;
+    $parent ||= $block;
+    return $self->error_msg( not_follow => $$token->[TOKEN], $parent->[TOKEN] );
+}
+    
+    
 #sub as_filename {
     # most elements aren't filenames
 #    return BLANK;
@@ -419,6 +428,11 @@ sub bad_signature {
 sub error_undef { 
     my $self = shift;
     $self->error_msg( undefined => $self->source, @_ );
+}
+
+sub error_undef_in { 
+    my $self = shift;
+    $self->error_msg( undefined_in => $self->source, @_ );
 }
 
 

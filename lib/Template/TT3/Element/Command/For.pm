@@ -7,6 +7,10 @@ use Template::TT3::Class
     constants  => ':elements ARRAY',
     constant   => {
         SEXPR_FORMAT => "<for:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
+        FOLLOW       => {
+            map { $_ => 1 }
+            qw( elsif else )
+        },
     },
     alias      => {
         value  => \&text,
@@ -41,7 +45,7 @@ sub as_expr {
     $self->[LHS] = $$token->as_expr($token, $scope, $lprec)
         || return $self->missing( expression => $token );
 
-    $self->[RHS] = $$token->as_block($token, $scope)
+    $self->[RHS] = $$token->as_block($token, $scope, $self, $self->FOLLOW)
         || return $self->missing( block => $token );
 
 #    $self->debug("RHS: $self->[RHS]");
@@ -69,12 +73,27 @@ sub as_postop {
 }
 
 
+sub else_block {
+    return @_ == 1
+        ? $_[SELF]->[ELSE]
+        : $_[SELF]->[ELSE] = $_[1];
+}        
+
+
 sub values {
     my ($self, $context) = @_;
     my $value = $self->[LHS]->value($context);
     my @values;
+
+    # value must be defined (or should we short-circuit?
+    return $self->[LHS]->error_undef_in($self->[TOKEN])
+        unless defined $value;
     
-    $value = [ $value ] unless ref $value eq ARRAY;
+    $value = [ $value ] 
+        unless ref $value eq ARRAY;
+    
+    return $self->else_values($context)
+        unless @$value;
     
 #    $self->debug("iterating over $value");
 
@@ -92,8 +111,25 @@ sub values {
 
 
 sub text {
+    # Hmmm... should we re-implement this in full so we can call else_text()
+    # instead of else_values()?
     join('', $_[SELF]->values($_[CONTEXT]));
 }
+
+
+sub else_values {
+    return $_[SELF]->[ELSE]
+         ? $_[SELF]->[ELSE]->values($_[CONTEXT])
+         : ()
+}
+
+
+sub else_text {
+    return $_[SELF]->[ELSE]
+         ? $_[SELF]->[ELSE]->text($_[CONTEXT])
+         : ()
+}
+
 
 
 1;
