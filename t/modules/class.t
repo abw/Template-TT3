@@ -44,7 +44,7 @@ is( ref Template::TT3::Test::Class1->class, 'Template::TT3::Class', 'class metho
 #-----------------------------------------------------------------------
 
 package Template::TT3::Test::Constants;
-use Template::TT3::Class constants => ':elem_slots';
+use Template::TT3::Class constants => ':elements';
 use Template::TT3::Test;
     
 is( META, 0, 'META is ' . META );

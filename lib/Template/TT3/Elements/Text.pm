@@ -11,7 +11,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Literal',
     import    => 'class',
     view      => 'text',
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<text:%s>', 
         SOURCE_FORMAT => '"%s"',
@@ -164,7 +164,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Text',
     view      => 'padding',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<padding:%s>', 
     };
@@ -181,7 +181,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Text',
     view      => 'string',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub as_expr {
@@ -209,7 +209,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
     view      => 'squote',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 
@@ -219,7 +219,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
     view      => 'dquote',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 1;

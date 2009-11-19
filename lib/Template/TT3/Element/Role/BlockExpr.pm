@@ -3,7 +3,7 @@ package Template::TT3::Element::Role::BlockExpr;
 use Template::TT3::Class 
     version   => 2.718,
     mixins    => 'as_expr',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub as_expr {

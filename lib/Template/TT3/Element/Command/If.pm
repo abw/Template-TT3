@@ -4,9 +4,14 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
-    constants  => ':elem_slots :eval_args',
+    view       => 'if',
+    constants  => ':elements',
     constant   => {
         SEXPR_FORMAT => "<if:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
+        FOLLOW       => {
+            map { $_ => 1 }
+            qw( elsif else )
+        },
     },
     alias      => {
 #        value  => \&text,
@@ -45,7 +50,7 @@ sub as_expr {
         || return $self->missing( expression => $token );
 
     # parse block following the expression
-    $self->[RHS] = $$token->as_block($token, $scope)
+    $self->[RHS] = $$token->as_block($token, $scope, $self, $self->FOLLOW)
         || return $self->missing( block => $token );
 
     # TODO: look for elsif/else
@@ -99,7 +104,7 @@ sub source {
     my $self = shift;
     my $expr = $self->[LHS]->source;
     my $body = $self->[RHS]->source;
-    return "if $expr; $body; end";
+    return "if $expr { $body }";
 }
 
 1;

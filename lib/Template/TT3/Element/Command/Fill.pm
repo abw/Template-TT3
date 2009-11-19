@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
     as         => 'name_expr',
-    constants  => ':elem_slots :eval_args ARRAY',
+    constants  => ':elements ARRAY',
     constant   => {
         SEXPR_FORMAT => "<fill:%s>",
     },

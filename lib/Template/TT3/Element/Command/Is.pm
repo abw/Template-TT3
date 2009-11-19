@@ -3,7 +3,11 @@ package Template::TT3::Element::Command::Is;
 use Template::TT3::Class 
     version    => 3.00,
     base       => 'Template::TT3::Element::Command',
-    constants  => ':elem_slots :eval_args',
+    view       => 'is',
+    constants  => ':elements',
+    constant   => {
+        SOURCE_FORMAT => '%s %s { %s }',
+    },
     as         => 'block_expr',
     alias      => {
         value  => \&text,
@@ -61,5 +65,14 @@ sub text {
 #         : $_[SELF]->[RHS]->html( $_[CONTEXT] );
 # }
 
+
+sub source {
+    sprintf(
+        $_[SELF]->SOURCE_FORMAT,
+        $_[SELF]->[LHS]->source,
+        $_[SELF]->[TOKEN],
+        $_[SELF]->[RHS]->source,
+    )
+}
 
 1;

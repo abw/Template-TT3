@@ -17,14 +17,14 @@ use Template::TT3::Test
     debug => 'Template::TT3::Constants',
     args  => \@ARGV;
 
-use Template::TT3::Constants ':elem_slots';
+use Template::TT3::Constants ':elements';
 
 ok( 1, 'loaded Template::TT3::Constants' );
 is( BRANCH, 4, 'BRANCH is 4 in main' );
 
 package Foo;
 
-use Template::TT3::Constants ':elem_slots';
+use Template::TT3::Constants ':elements';
 use Template::TT3::Test;
 
 is( BRANCH, 4, 'BRANCH is 4 in Foo' );

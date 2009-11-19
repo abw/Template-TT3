@@ -11,7 +11,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element',
     view      => 'variable',
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<variable:%s>', 
 #        SEXPR_FORMAT => '<variable:%s%s>', 
@@ -170,7 +170,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Variable',
     view      => 'apply',
-    constants => ':eval_args :elem_slots',
+    constants => ':elements',
     constant  => {
         FINISH        => ')',
         SEXPR_FORMAT  => "<apply:%s%s>",
@@ -265,7 +265,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element',
-    constants => ':elem_slots :eval_args FORCE',
+    constants => ':elements FORCE',
     constant  => {
         SEXPR_FORMAT  => "<%s:%s>",
         SOURCE_FORMAT => '%s%s',
@@ -328,7 +328,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil',
-    constants => ':elem_slots :eval_args ARRAY';
+    constants => ':elements ARRAY';
 
 # NOTE: I considered change the as_expr() / as_variable() methods to return 
 # the next variable expression directly so we can avoid these indirections.
@@ -366,7 +366,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil',
-    constants => ':elem_slots :eval_args ARRAY SPACE';
+    constants => ':elements ARRAY SPACE';
 
 
 sub value {
@@ -430,7 +430,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil::List',
-    constants => ':elem_slots :eval_args';
+    constants => ':elements';
 
 our $TEXT_FORMAT = '%s: %s';
 our $TEXT_JOINT  = ', ';
@@ -473,7 +473,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Operator::Binary
                   Template::TT3::Element',
     as        => 'filename',        # dots allowed in filenames, e.g. foo.tt3
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<dot:%s%s%s>',
         SEXPR_ARGS   => "<args:%s>",

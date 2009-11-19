@@ -4,7 +4,7 @@ package Template::TT3::Element::Punctuation;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element',
-    constants => ':elem_slots';
+    constants => ':elements';
     
 
 sub as_expr {
@@ -28,8 +28,8 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Punctuation',
-    view      => 'separator',
-    constants => ':elem_slots',
+#    view      => 'separator',
+    constants => ':elements',
     constant  => {
         is_delimiter => 1,
     },
@@ -56,7 +56,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Punctuation',
     as        => 'block',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         is_delimiter => 1,
         FINISH       => 'end',
@@ -99,11 +99,9 @@ package Template::TT3::Element::TagEnd;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Delimiter',
-    constants => ':eval_args';
+    view      => 'tag_end',
+    constants => ':elements';
     
-sub view {
-    $_[CONTEXT]->view_tag_end($_[SELF]);
-}
 
 
 #-----------------------------------------------------------------------
@@ -116,7 +114,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Punctuation',
     view      => 'terminator',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         is_terminator => 1,
     },
@@ -146,7 +144,7 @@ package Template::TT3::Element::Construct;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Punctuation',
-    constants => ':elem_slots :eval_args';
+    constants => ':elements';
 
 
 sub sexpr {
@@ -202,7 +200,7 @@ package Template::TT3::Element::List;
 use Template::TT3::Class 
     base      => 'Template::TT3::Element::Construct',
     debug     => 0,
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         FINISH        => ']',
         SEXPR_FORMAT  => "<list:%s>",
@@ -243,7 +241,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Construct',
     as        => 'block',
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         FINISH        => '}',
         SEXPR_FORMAT  => "<hash:%s>",
@@ -295,7 +293,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Construct',
     view      => 'parens',
-    constants => ':eval_args :elem_slots',
+    constants => ':elements',
     constant  => {
         FINISH        => ')',
         SEXPR_FORMAT  => "<parens:%s>",
@@ -413,7 +411,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Terminator',
     view      => 'keyword',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 1;    

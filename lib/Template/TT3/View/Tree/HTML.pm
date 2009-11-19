@@ -6,7 +6,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::View::Tree',
     import    => 'class',
     codec     => 'html',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         ATTR    => '%s="%s"',
         ELEMENT => "<%s%s>%s</%s>",

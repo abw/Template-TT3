@@ -14,10 +14,12 @@ use Template::TT3::Class
         SCOPE   => 'Template::TT3::Scope',
         SCANNER => 'Template::TT3::Scanner',
         VARS    => 'Template::TT3::Variables',
+        TREE    => 'Template::TT3::Type::Tree',
         TAG     => 'Template::TT3::Tag',
     };
 
 use Template::TT3::Type::Source 'Source';
+use Template::TT3::Type::Tree 'Tree';
 use Template::TT3::Variables;
 use Template::TT3::Scanner;
 use Template::TT3::Tag;
@@ -123,6 +125,12 @@ sub exprs {
     my $self = shift;
     $self->{ exprs }
         ||= $self->parse;
+}
+
+sub tree {
+    my $self = shift;
+    return $self->{ tree }
+        ||= $self->TREE->new( root => $self->exprs );
 }
 
 sub fill {

@@ -13,7 +13,7 @@ package Template::TT3::Element::Operator;
 
 use Template::TT3::Class 
     version   => 3.00,
-    constants => ':elem_slots',
+    constants => ':elements',
     utils     => 'xprintf',
     view      => 'operator',
     messages  => {
@@ -95,7 +95,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
     view      => 'unary',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<unary:<op:%s>%s>', 
         SOURCE_FORMAT => '%s%s', 
@@ -126,7 +126,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Unary',
     view      => 'prefix',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<prefix:<op:%s>%s>', 
         DEBUG_FORMAT => 'prefix: [<1>] [<4> => <5>]',
@@ -192,7 +192,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Unary',
     view      => 'postfix',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<postfix:<op:%s>%s>', 
         DEBUG_FORMAT => 'postfix: [<2> => <3>] [<1>]',
@@ -256,7 +256,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
     view      => 'binary',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<binary:<op:%s>%s%s>', 
         SOURCE_FORMAT => '%s %s %s', 
@@ -322,7 +322,7 @@ package Template::TT3::Element::Operator::Infix;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Binary',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub as_postop {
@@ -371,7 +371,7 @@ package Template::TT3::Element::Operator::InfixLeft;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Binary',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub as_postop {
@@ -413,7 +413,7 @@ package Template::TT3::Element::Operator::InfixRight;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Binary',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub as_postop {
@@ -460,7 +460,7 @@ package Template::TT3::Element::Operator::Assignment;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator',
-    constants => ':eval_args';
+    constants => ':elements';
     
 sub text {
     $_[SELF]->value($_[CONTEXT]);

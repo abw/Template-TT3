@@ -7,7 +7,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Literal',
     import    => 'class',
     view      => 'number',
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<number:%s>', 
     },
@@ -248,7 +248,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Operator::Infix
                   Template::TT3::Element',
-    constants => ':eval_args :elem_slots BLANK';
+    constants => ':elements BLANK';
 
 sub text {
     join(BLANK, @{ $_[SELF]->value($_[CONTEXT]) });

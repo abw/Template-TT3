@@ -5,7 +5,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element',
     import    => 'class',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 #-----------------------------------------------------------------------

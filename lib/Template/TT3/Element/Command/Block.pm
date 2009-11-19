@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
     utils      => 'tt_params',
-    constants  => ':elem_slots :eval_args BLANK',
+    constants  => ':elements BLANK',
     alias      => {
         value  => \&text,
         values => \&text,

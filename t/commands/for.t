@@ -65,6 +65,7 @@ item: alpha  item: bravo  done
 2 4 6 8
 
 -- test list generator with single block expressions --
+#-- dump_tokens --
 -- block --
 [   for [1, 2, 3, 4, 5, 6] 
         if item < 5

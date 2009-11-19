@@ -7,7 +7,7 @@ use Template::TT3::Class
     utils     => 'self_params numlike refaddr',
     slots     => 'meta _next token pos',
     import    => 'class',
-    constants => ':elem_slots :eval_args CODE ARRAY HASH BLANK',
+    constants => ':elements CODE ARRAY HASH BLANK CMD_PRECEDENCE FORCE',
     constant  => {   
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
@@ -243,8 +243,18 @@ sub as_postop {
 
 
 sub as_block {
-    # Any expression can be a single expression block
-    return shift->as_expr(@_);
+    # my ($self, $token, $scope, $parent, $follow) = @_;
+    
+    # Any expression can be a single expression block.  We specify the 
+    # precedence level for commands so that the expression will consume
+    # higher precedence operators, but stop at the next keyword, e.g.
+    # "if x a + 10 for y" is parsed as "(if x (a + 10)) for y".  Note that 
+    # the block (denoted by "(...)") ends at the 'for' keyword rather than
+    # consuming it rightwards as "(if x ((a + 10) for y)).  We use the FORCE
+    # flag to indicate that the precedence may be ignored for the first
+    # and only the first token (i.e. this one, $self).  That allows a 
+    # command to follow as the single expression: if x fill y
+    return $_[0]->as_expr($_[1], $_[2], CMD_PRECEDENCE, FORCE);
 }
 
 

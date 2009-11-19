@@ -2,7 +2,7 @@ package Template::TT3::Element::Role::Filename;
 
 use Template::TT3::Class 
     version    => 2.718,
-    constants  => ':elem_slots :eval_args',
+    constants  => ':elements',
     mixins     => 'as_filename filename';
 
 

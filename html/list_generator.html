@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <title>TT3 Template Tree: examples/list_generator.tt3</title>
+    <link rel="stylesheet" type="text/css" href="tt3.css">
+    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="tt3.js"></script>
+
+  </head>
+  <body>
+    <h1>TT3: examples/list_generator.tt3</h1>
+   
+    <div class="tabset" id="tabset">
+      <ul class="tabs">
+        <li class="warm"><a href="#tokens">Tokens</a></li>
+        <li><a href="#tree">Tree</a></li>
+      </ul>
+      <div class="panels">
+        <div class="panel warm" id="tokens">
+          <h2>Source Tokens</h1>
+          <div class="content">
+<span class="tag"><span class="tag_start">[%</span><span class="whitespace"> 
+<span class="nl"></span>    </span><span class="element">[</span><span class="whitespace"> 
+<span class="nl"></span>      </span><span class="keyword">for</span><span class="whitespace"> </span><span class="element">[</span><span class="number">1</span><span class="element">,</span><span class="whitespace"> </span><span class="number">2</span><span class="element">,</span><span class="whitespace"> </span><span class="number">3</span><span class="element">,</span><span class="whitespace"> </span><span class="number">4</span><span class="element">,</span><span class="whitespace"> </span><span class="number">5</span><span class="element">,</span><span class="whitespace"> </span><span class="number">6</span><span class="terminator">]</span><span class="whitespace">  
+<span class="nl"></span>        </span><span class="if keyword">if</span><span class="whitespace"> </span><span class="word">item</span><span class="whitespace"> </span><span class="binary"><</span><span class="whitespace"> </span><span class="number">5</span><span class="whitespace"> 
+<span class="nl"></span>          </span><span class="word">item</span><span class="whitespace"> </span><span class="binary">*</span><span class="whitespace"> </span><span class="number">2</span><span class="whitespace"> 
+<span class="nl"></span>    </span><span class="terminator">]</span><span class="binary">.</span><span class="word">join</span><span class="whitespace"> 
+<span class="nl"></span> 
+<span class="nl"></span></span><span class="tag_end">%]</span></span><span class="eof">--EOF--</span>
+          </div>
+        </div>       
+        <div class="panel" id="tree">
+          <h2>Parse Tree</h1>
+          <div class="content">
+
+<div class="block">
+<div class="binary expr element">
+<div class="head"><span class="info type">binary expr</span><span class="info posn">@83</span><span class="source">[ for ] . join</span></div>
+
+<div class="body">
+<div class="lhs ">
+<div class="element">Template::TT3::Element::List=ARRAY(0x40f10)</div>
+</div>
+
+<div class="operator element">.</div>
+
+<div class="rhs ">
+<div class="word element element">
+<div class="head"><span class="info type">word element</span><span class="info posn">@84</span><span class="source">join</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+          </div>
+        </div>       
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    $(document).ready(
+        function() {
+            $('#tabset').tt3_tabset();
+            $('#tree').tt3_tree();
+        }
+    );
+  </script>
+</html>
+

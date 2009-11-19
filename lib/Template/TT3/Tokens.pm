@@ -9,7 +9,7 @@ use Template::TT3::Class
     import    => 'class',
     vars      => 'AUTOLOAD',
     accessors => 'tokens',
-    constants => ':elem_slots HASH ARRAY',
+    constants => ':elements HASH ARRAY',
     constant  => {
         ELEMENTS => 'Template::TT3::Elements',
         VIEWS    => 'Template::TT3::Views',

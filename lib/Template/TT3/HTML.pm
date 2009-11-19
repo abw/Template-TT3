@@ -12,7 +12,7 @@ use Template::TT3::Class
     utils     => 'self_params',
     codec     => 'html',
     words     => 'METHODS',
-    constants => 'BLANK :elem_slots :eval_args',
+    constants => 'BLANK :elements',
     constant  => {
         TEMPLATE    => 'Template::TT3::Template',
         ELEMENT     => 'Template::TT3::Element',

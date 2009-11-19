@@ -4,7 +4,7 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
-    constants  => ':elem_slots :eval_args ARRAY',
+    constants  => ':elements ARRAY',
     constant   => {
         SEXPR_FORMAT => "<for:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
     },

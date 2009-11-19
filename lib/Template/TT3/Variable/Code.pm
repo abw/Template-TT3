@@ -4,7 +4,7 @@ use Template::TT3::Class
     version   => 0.01,
     debug     => 0,
     base      => 'Template::TT3::Variable',
-    constants => ':type_slots :eval_args',
+    constants => ':type_slots',
     alias     => {
         apply => \&apply_scalar,
     },

@@ -8,7 +8,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element',
     import    => 'class',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         is_whitespace => 1,
     },
@@ -56,7 +56,7 @@ package Template::TT3::Element::TagStart;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Whitespace',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 *skip_ws = \&next_skip_ws;
 
@@ -101,7 +101,7 @@ package Template::TT3::Element::Comment;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Whitespace',
-    constants => ':elem_slots';
+    constants => ':elements';
     
 
 sub generate {
@@ -120,7 +120,7 @@ package Template::TT3::Element::Eof;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         eof   => 1,
     },

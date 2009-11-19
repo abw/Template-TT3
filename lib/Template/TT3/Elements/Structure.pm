@@ -8,7 +8,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element',
     view      => 'block',
-    constants => ':elem_slots :eval_args BLANK',
+    constants => ':elements BLANK',
     constant  => {
         SEXPR_FORMAT  => "<block:%s>",
         SOURCE_FORMAT => '%s',

@@ -4,7 +4,7 @@ use Template::TT3::Elements::Literal;
 use Template::TT3::Class 
     version    => 3.00,
     base       => 'Template::TT3::Element::Keyword',
-    constants  => ':elem_slots :eval_args';
+    constants  => ':elements';
 
 sub generate {
     $_[CONTEXT]->generate_keyword(

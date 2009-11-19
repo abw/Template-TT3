@@ -1,6 +1,6 @@
 package Template::TT3::Class;
 
-use Template::TT3::Constants ':eval_args';
+#use Template::TT3::Constants ':elements';
 use Badger::Class
     version   => 3.00,
     debug     => 0,
@@ -60,7 +60,7 @@ sub view {
 
     $self->method( 
         view => sub {
-            $_[VIEW]->$method($_[SELF]);
+            $_[1]->$method($_[0]);
         }
     );
 }

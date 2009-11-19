@@ -4,7 +4,7 @@ use Template::TT3::Class
     version    => 3.00,
     base       => 'Template::TT3::Element::Command::Block',
     as         => 'name_block_expr',
-    constants  => ':elem_slots :eval_args',
+    constants  => ':elements',
     constant   => {
         ARG_NAME => 'encoder',      # changed in ...::Decode subclass
     },

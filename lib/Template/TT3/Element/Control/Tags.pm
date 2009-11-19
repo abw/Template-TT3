@@ -4,7 +4,7 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Command',
-    constants  => ':elem_slots :eval_args DOT',
+    constants  => ':elements DOT',
     constant   => {
         SKIP_WORDS => {
             map { $_ => 1 }

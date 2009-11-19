@@ -8,7 +8,7 @@ use Template::TT3::Class
     # Slot methods are read/write, but we want to make value() read only.  
     # So we use val() for the generated slot method and define value() below
     slots     => 'meta name_slot val parent args',
-    constants => ':type_slots :eval_args BLANK',
+    constants => ':type_slots BLANK',
     utils     => 'self_params',
     alias     => {
         list     => \&get,
@@ -91,7 +91,7 @@ sub apply {
     # function application has no effect on things that aren't CODE refs
     # so we define a default method in the base class that returns $self
     # and allow Template::TT3::Variable::Code to redefine it.
-    $_[SELF];
+    $_[0];
 }
 
 sub TMP_expand {

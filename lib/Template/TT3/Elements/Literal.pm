@@ -7,7 +7,7 @@ package Template::TT3::Element::Literal;
 use Template::TT3::Class 
     version    => 3.00,
     base       => 'Template::TT3::Element',
-    constants  => ':elem_slots :eval_args',
+    constants  => ':elements',
     as         => 'filename',
     constant   => {
         SEXPR_FORMAT => '<literal:%s>',
@@ -76,7 +76,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Literal',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub generate {
@@ -115,7 +115,7 @@ use Template::TT3::Class
     debug     => 0,
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
-    constants => ':elem_slots';
+    constants => ':elements';
 
 
 sub generate {
@@ -151,7 +151,7 @@ package Template::TT3::Element::Filename;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     as        => 'filename',        # mixin as_filename() role
     constant  => {
         SEXPR_FORMAT => '<filename:%s>',

@@ -43,8 +43,11 @@ use Badger::Class
                 CONFIG  => '=0',
                 VARS    => '=1',
                 METHODS => '=2',
+                
+                # evaluation parameters
+                SELF    => '=0',    # zeroth argument is always $self
             },
-            elem_slots  => {
+            elements  => {
                 # element slots - the first 4 are common to all elements
                 META    => '=0',
                 NEXT    => '=1',
@@ -68,8 +71,8 @@ use Badger::Class
                 RPREC   => '=3',    # rightward precedence
                 LEFT    => '=-1',   # binds left    # NOT USED?
                 RIGHT   => '=1',    # binds right   # NOT USED?
-            },
-            eval_args => {
+
+                # evaluation parameters
                 SELF      => '=0',  # zeroth argument is always $self
                 CONTEXT   => '=1',  # first argument is content/visitor/genr
                 VISITOR   => '=1',

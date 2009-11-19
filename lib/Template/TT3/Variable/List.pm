@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Variable',
     utils     => 'numlike',
-    constants => ':type_slots :eval_args',
+    constants => ':type_slots',
     constant  => {
         type  => 'list',
     };

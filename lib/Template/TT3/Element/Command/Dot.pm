@@ -4,7 +4,7 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Command::Block',
-    constants  => ':elem_slots :eval_args',
+    constants  => ':elements',
     constant   => {
         ARG_NAME      => 'decoder',
         SOURCE_FORMAT => '%s %s %s',

@@ -7,7 +7,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Tag::Inline',
     utils     => 'refaddr',
-    constants => ':elem_slots',
+    constants => ':elements',
     constant  => {
         GRAMMAR => 'Template::TT3::Grammar::Control',
         EOF     => 'Template::TT3::Element::Eof',

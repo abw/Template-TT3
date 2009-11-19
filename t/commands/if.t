@@ -102,6 +102,12 @@ list = [a, [b,c] if 0];
 -- expect --
 size: 1  last size: 1  last item: alpha
 
+-- stop --
+-- test elsif with braces --
+if a { b } elsif d { e }
+-- expect --
+bravo
+ 
 
 
 

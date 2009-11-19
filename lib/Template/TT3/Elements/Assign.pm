@@ -9,7 +9,7 @@ use Template::TT3::Class
                   Template::TT3::Element::Operator::Assignment
                   Template::TT3::Element',
     import    => 'class',
-    constants => ':elem_slots :eval_args',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<assign:<%s><%s>>', 
     },

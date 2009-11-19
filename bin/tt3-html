@@ -16,7 +16,8 @@ use constant TEMPLATE => 'Template::TT3::Template';
 my $file     = shift || die usage();
 my $template = TEMPLATE->new( file => $file );
 my $tokens   = $template->tokens->view_HTML;
-my $tree     = $template->tree->view_HTML;
+my $tree     = $template->try->tree; 
+$tree = $tree ? $tree->view_HTML : "ERROR: $@";
 my $wrapper  = TEMPLATE->new( file => \*DATA );
 
 print $wrapper->fill( 
