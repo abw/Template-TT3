@@ -50,8 +50,7 @@ sub test_parser {
                 my $tokens = TOKENS->new;
                 my $tag    = TAG->new;
                 my $text = $line;
-                # tokenise
-                $tag->tokens(\$text, $tokens);
+                $tag->tokenise(\$text, $tokens);
                 $tokens->eof_token();
                 $tokens->finish;
 

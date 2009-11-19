@@ -44,7 +44,6 @@ sub init {
 sub init_tag {
     my $self   = shift;
     my $config = shift || $self->{ config };
-#    $self->debug("init_tag() with ", $self->dump_data($config));
     my $style  = $config->{ tag_style } || $config->{ style };
     my $start  = $config->{ tag_start } || $config->{ start };
     my $end    = $config->{ tag_end   } || $config->{ end   };
@@ -60,12 +59,12 @@ sub init_tag {
             ($start, $end) = @$style;
             $style = undef;
         }
-#        elsif (ref $style eq REGEX) {
-#            # style can be a regular expression for the start tag and we 
-#            # re-use the end tag (no, I think this is a bad idea)
-#            ($start, $end) = ($style, $self->{ end });
-#            $style = undef;
-#        }
+        #        NOT_elsif (ref $style eq REGEX) {
+        #            # style can be a regular expression for the start tag and we 
+        #            # re-use the end tag (no, I think this is a bad idea)
+        #            ($start, $end) = ($style, $self->{ end });
+        #            $style = undef;
+        #        }
         elsif ($style eq OFF) {
             $self->debug("turned tag off") if DEBUG;
             $self->{ off } = 1;
@@ -252,6 +251,8 @@ sub init_grammar {
 }
 
 
+# TODO: rename this to change_tags() or something more descriptive
+
 sub change {
     shift->init_tag({ style => shift });    # NOTE: init_tag() expect hash ref
 }
@@ -269,6 +270,7 @@ sub reset {
         if delete $self->{ dirty_keywords };
 }
 
+
 sub keywords {
     my $self     = shift;
     my $keywords = $self->{ keywords };
@@ -282,7 +284,7 @@ sub keywords {
 
     # hmmm... come to think of it... that's not going to work....  we have
     # to modify the grammar's copy of the keywords so the grammar can 
-    # generate elements for them...
+    # generate elements for them... see commands()
 #    $keywords = $self->{ keywords } = { %$keywords }
 #        unless $self->{ dirty_keywords };
     
@@ -299,7 +301,7 @@ sub keywords {
 
 
 sub commands {
-    # TODO: this messes up the grammar
+    # FIXME: this messes up the grammar
     my $self = shift;
     $self->{ keywords } = $self->{ grammar }->commands(@_);
     $self->debug("new keywords: ", $self->dump_data($self->{ keywords }))
@@ -327,11 +329,11 @@ sub scan {
         if defined $start && length $start;
     
     # call the main tokenising method
-    return $self->tokens($input, $output, $scope);
+    return $self->tokenise($input, $output, $scope);
 }
     
         
-sub tokens {
+sub tokenise {
     my ($self, $input, $output, $scope) = @_;
     my $pos = pos $$input;
     my $type;

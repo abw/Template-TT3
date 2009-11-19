@@ -6,7 +6,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Tag::Inline';
 
 
-sub tokens {
+sub tokenise {
     my ($self, $input, $output) = @_;
     my $pos = pos $$input;
     

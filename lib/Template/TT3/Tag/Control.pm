@@ -16,10 +16,10 @@ use Template::TT3::Class
 our $EOF;
 
 
-sub tokens {
+sub tokenise {
     my ($self, $input, $output, $scope) = @_;
     my $first = $output->last;
-    my $end   = $self->SUPER::tokens($input, $output, $scope);
+    my $end   = $self->SUPER::tokenise($input, $output, $scope);
     my $last  = $self->parse($first, $input, $output, $scope);
     
     # set a forward reference from the first token to the last, so that 

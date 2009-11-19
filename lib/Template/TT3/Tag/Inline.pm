@@ -176,7 +176,7 @@ sub scan {
         if defined $start && length $start;
     
     # tokenise the tag content
-    $end = $self->tokens($input, $output, $scope);
+    $end = $self->tokenise($input, $output, $scope);
 
     $self->debug("matching [$end] post-chomp: $self->{ match_post_chomp }")
         if DEBUG;

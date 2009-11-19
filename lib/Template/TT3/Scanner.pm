@@ -115,11 +115,11 @@ sub scan {
         output  => $output,
     );
 
-    return $self->tokens($input, $output, $scope);
+    return $self->tokenise($input, $output, $scope);
 }
 
 
-sub tokens {
+sub tokenise {
     my ($self, $input, $output, $scope) = @_;
     my ($pos, $text, $start, $tag);
 
@@ -129,7 +129,7 @@ sub tokens {
         if ($$input =~ /$self->{ match_to_tag }/gc) {
             # We've matched a chunk of text up to the next tag start token.
             # We find the tag object corresponding to the tag start token 
-            # and call its tokens() method.  We pass the preceeding text
+            # and call its scan() method.  We pass the preceeding text
             # in case the tag wants to modify it (e.g. pre-chomping) before
             # committing it to the output stream.
             ($text, $start) = ($1, $2);
@@ -149,6 +149,8 @@ sub tokens {
             last;
         }
         else {
+            # FIXME: match_to_end doesn't match empty strings
+            # if it did then we would never get here in normal use
             last;
 #            return $self->error("Run out of text");
         }
