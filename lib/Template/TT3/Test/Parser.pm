@@ -56,23 +56,14 @@ sub test_parser {
                 $tokens->finish;
 
                 # parse into expression
-                my $token = $tokens->first;
-                my (@exprs, $expr, @leftover);
-
-                while ($expr = $token->as_expr(\$token)) {
-                    push(@exprs, $expr);
-                }
-
-                while (! $token->eof) {
-                    push(@leftover, $token->text);
-                    $token = $token->next;
-                }
+                my $token  = $tokens->first;
+                my $block  = $token->as_exprs(\$token);
+                my $remain = $token->remaining_text;
                 
-                if (@leftover) {
-                    die "unparsed tokens: ", join('', @leftover), "\n";
+                if ($remain) {
+                    die "unparsed tokens: $remain";
                 }
-                
-                join("\n", map { $_->sexpr } @exprs);
+                join("\n", map { $_->sexpr } $block->exprs);
             };
             if ($@) {
                 my $error = ref($@) ? $@->info : $@;

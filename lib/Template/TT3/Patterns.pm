@@ -126,8 +126,8 @@ our $INDEX    = qr/ \G ( -? \d+ ) /x;
 
 our $SQ       = qr/ (?: \\' | [^'] )* /x;               # TODO non-greedy?
 our $DQ       = qr/ (?: \\\\ | \\" | . | \n )*? /x;     # or greedy?
-our $SQUOTE   = qr/ \G ' ($SQ) ' /x;
-our $DQUOTE   = qr/ \G " ($DQ) " /x;
+our $SQUOTE   = qr/ \G (' ($SQ) ') /x;
+our $DQUOTE   = qr/ \G (" ($DQ) ") /x;
 our $SQUOTEND = qr/ \G ($SQ) ' /x;
 our $DQUOTEND = qr/ \G ($DQ) " /x;
 our $BADQUOTE = qr/ \G ('|") /x;

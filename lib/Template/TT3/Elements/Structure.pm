@@ -15,6 +15,7 @@ use Template::TT3::Class
         SOURCE_JOINT  => '; ',
     },
     alias     => {
+        exprs  => \&expressions,
 #        value  => \&text,
 #        values => \&text,
     };

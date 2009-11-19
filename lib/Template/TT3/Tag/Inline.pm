@@ -163,7 +163,7 @@ sub scan {
             $self->$chomp($input, $output, $text, $start, $pos)
                 || return;
         }
-        else {
+        else { 
             # or push it to the token list ourselves
             $output->text_token($text, $pos) if length $text;
         }
@@ -195,6 +195,7 @@ sub scan {
     
     if ($chomp ||= $self->{ post_chomp }) {
         # Let the chomp handler take care of the following text.
+        $self->debug("calling post-chomp handler: $end") if DEBUG;
         $self->$chomp($input, $output, $end, $pos);
     }
 

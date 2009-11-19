@@ -359,12 +359,12 @@ sub tokens {
             }
         }
         elsif ($$input =~ /$SQUOTE/cog) {
-            $self->debug("matched single quote: $1") if DEBUG;
-            $output->squote_token($1, $pos);
+            $self->debug("matched single quote: [$1] [$2]") if DEBUG;
+            $output->squote_token($1, $pos, $2);
         }
         elsif ($$input =~ /$DQUOTE/cog) {
             $self->debug("matched double quote: $1") if DEBUG;
-            $output->dquote_token($1, $pos);
+            $output->dquote_token($1, $pos, $2);
         }
         elsif ($$input =~ /$self->{ match_at_end }/cg) {
             $self->debug("matched end of tag: $1") if DEBUG;

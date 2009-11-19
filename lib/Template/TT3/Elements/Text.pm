@@ -51,13 +51,6 @@ sub source {
 }
 
 
-sub generate {
-    $_[1]->generate_text(
-        $_[0]->[TOKEN]
-    );
-}
-
-
 sub variable {
     # text can be converted to a text variable in order to perform dotops on it
     $_[CONTEXT]->{ variables }
@@ -181,26 +174,43 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Text',
     view      => 'string',
-    constants => ':elements';
+    constants => ':elements',
+    constant  => {
+        SOURCE_FORMAT => '%s',
+    },
+    alias     => {
+        value  => \&text,
+        values => \&text,
+    };
 
 
 sub as_expr {
     my ($self, $token, $scope, $prec) = @_;
     
+    # copy original TEXT into EXPR in case we don't already have a 
+    # reduced form (i.e. without quotes)
+    $self->[EXPR] = $self->[TOKEN]
+        unless defined $self->[EXPR];
+    
     # advance token
-    $$token = $self->[NEXT];
+#    $$token = $self->[NEXT];
     
     # strings can be followed by postops (postfix and infix operators)
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->next_skip_ws($token)
+        ->as_postop($self, $token, $scope, $prec);
 }
 
 
 sub variable {
     # TODO: fixme so I'm not re-creating single quotes each time
-    $_[1]->{ variables }
-         ->use_var( "'" . $_[0]->[TOKEN] . "'", $_[0]->[TOKEN] );
+    $_[CONTEXT]->{ variables }
+         ->use_var( $_[SELF], $_[SELF]->[EXPR] );
 }
 
+
+sub text {
+    $_[SELF]->[EXPR];
+}
 
 
 package Template::TT3::Element::Squote;
@@ -209,8 +219,9 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
     view      => 'squote',
-    constants => ':elements';
-
+    constant  => {
+        SEXPR_FORMAT  => '<squote:%s>', 
+    };
 
 
 package Template::TT3::Element::Dquote;
@@ -219,7 +230,9 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
     view      => 'dquote',
-    constants => ':elements';
+    constant  => {
+        SEXPR_FORMAT  => '<dquote:%s>', 
+    };
 
 
 1;

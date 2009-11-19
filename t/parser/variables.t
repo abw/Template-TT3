@@ -149,6 +149,6 @@ list.join(', ')
   <variable:list>
   <literal:join>
   <args:
-    <text:, >
+    <squote:', '>
   >
 >

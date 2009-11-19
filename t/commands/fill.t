@@ -61,7 +61,7 @@ TODO: fill .foo/bar
 -- test fill 'quoted' --
 fill 'foo.bar'
 -- expect --
-TODO: fill foo.bar
+TODO: fill 'foo.bar'
 
 -- test fill $a --
 -- skip not supported yet --

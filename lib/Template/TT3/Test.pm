@@ -10,7 +10,7 @@ use Template::TT3::Class
     import    => 'class',
     exports   => {
         all   => 'test_expect',
-        any   => 'data_text data_tests callsign test_expressions',
+        any   => 'data_text data_tests callsign test_expressions test_regen',
     };
 
 our $DATA;
@@ -66,32 +66,6 @@ sub test_expect {
     }
 }
 
-
-sub old_test_handler {
-    my ($test, $config) = @_;
-    my $engine = $config->{ engine }
-        ||= $ENGINE->new($config->{ config } || { });
-
-    if (my $use = $test->{ inflag }->{ use }) {
-        $engine = $config->{ engine } = $config->{ engines }->{ $use }
-            || die "Invalid engine specified: $use\nEngines available: ", 
-                    join(', ', keys %{ $config->{ engines } || { } }), 
-                    "\n";
-    }
-    my $in  = $test->{ input };
-    my $out = '';
-    
-    $engine->process(\$in, $config->{ vars }, \$out);
-
-    if ($test->{ exflag }->{ process }) {
-        my ($expin, $expout);
-        $expin = $test->{ expect };
-        $engine->process(\$expin, $config->{ vars }, \$expout);
-        $test->{ expect } = $expout;
-    }
-
-    return trim $out;
-}
 
 sub test_handler {
     my $test     = shift;
@@ -292,6 +266,47 @@ sub test_expressions {
             $output .= "$result\n";
         }
         chomp $output;
+        return $output;
+    };
+
+    test_expect($config);
+}
+
+sub test_regen {
+    my $config   = params(@_);
+    my $tclass   = $config->{ template  } || $TEMPLATE;
+    my $debug    = $config->{ debug } || 0;
+
+    $config->{ handler } = sub {
+        my $test   = shift;
+        my $input  = $test->{ input };
+        
+        # set the expected output to be the input
+        $test->{ expect } = $input;
+        
+        local $DEBUG = $test->{ inflag }->{ debug } ? 1 : $debug;
+
+        manager->debug(' INPUT: ', $input) if $DEBUG;
+        
+        my $output = eval {
+            my $template = $tclass->new( text => $input );
+            my $tokens   = $template->tokens;
+
+            manager->debug("TOKENS:\n", $template->tokens->view_debug) 
+                if $config->{ dump_tokens }
+                || $test->{ inflag }->{ dump_tokens };
+
+            $tokens->view_source;
+        };
+        if ($@) {
+            my $error = ref($@) ? $@->info : $@;
+            manager->debug(' ERROR: ', $error) if $DEBUG;
+            $output = "<ERROR:$error>";
+        }
+        elsif ($DEBUG) {
+            manager->debug('OUTPUT: ', $output);
+        }
+
         return $output;
     };
 

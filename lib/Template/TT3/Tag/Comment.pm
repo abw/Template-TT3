@@ -15,7 +15,7 @@ sub tokens {
         
     $self->debug("matched to end of comment tag: $2") if DEBUG;
 
-    $output->comment_token($1, $pos);
+    $output->comment_token($1 . $2, $pos);
 
     return $2;
 }

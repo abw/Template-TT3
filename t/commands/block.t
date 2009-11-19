@@ -93,12 +93,9 @@ foo(10, 20, a=30, b=40): x is 10, y is 20 and z has a, b
       if content.size {
           '>' content.join('') '</' name '>'
       }
-
-      # we haven't got elsif yet :-(
-      if not content.size {
+      else {
          '/>'
       }
-
     }
 -%]
 foo: [% html_element('foo') %]
