@@ -60,6 +60,7 @@ sub source {
     my $name = $self->[EXPR] 
         ? $self->[EXPR]->source
         : $self->[TOKEN];
+# TODO: make signature a proper element so we can view its source
 #    my $args = $self->[ARGS]
 #        ? $self->[ARGS]->source
 #        : ();

@@ -1,0 +1,374 @@
+=head1 NAME
+
+Template::TT3::Manual::Language - the TT3 template language
+
+=head1 INTRODUCTION
+
+This documentation describes the TT3 template language.
+
+=head1 TEMPLATES
+
+Templates are text documents with embedded tags that instruct the template
+processor to perform some action.  Here's the archetypal "Hello World" 
+template:
+
+    Hello World
+
+Ok, it's not much of a template but it illustrates the point - templates 
+generate text by default.  You don't need to type C<print>, for example,
+to make it output anything.
+
+Here's a slightly more useful template:
+
+    Hello [% name %]
+
+This template has a chunk of plain text ('C<Hello >') followed by a tag
+which outputs the value of the C<name> variable ('C<[% name %]>').  You can 
+create and run this template using the following Perl script:
+
+    use strict;
+    use warnings;
+    use Template::TT3::Template;
+    
+    my $template = Template::TT3::Template->new(
+        text => 'Hello [% name %]',
+    );
+    
+    print $template->fill( 
+        name => 'Badger',
+    );
+
+This will print the following output:
+
+    Hello Badger
+
+Note that there's still some work todo on cleaning up the TT3 front-end.
+For now, at least, you have to manually create each template as show above,
+but it will get nicer.
+
+=head1 TEMPLATE TAGS
+
+TT3 can embed any number of different tags in a template document. Each tag
+can implement it's own syntax, semantics, grammar, etc., effectively allowing
+you to embed several different languages into the same template.
+
+As scary as that sounds, the practical reality is more pragmatic. The default
+set of tags in TT3 templates implement more-or-less the same core language.
+The difference lies in the keywords that different tags support, when the tags
+are evaluated (at compile time or run time), or their tokenising behaviour.
+
+That all sounds rather complicated, but a few examples should illustrate the
+different template tags.
+
+=head2 Inline Tags
+
+First we have the regular TT tags delimited with C<[%> and C<%]>. In TT3 we
+call these "inline tags".  We've already seen an example of that:
+
+    Hello [% name %]
+
+Inline tags can contain more complex expressions and blocks of code.  For
+example, if we want to provide a default value in case the C<name> variable
+isn't defined then we can write this:
+
+    Hello [% name or 'World' %]
+
+You can put several commands inside a single tag.  The general rule is that
+each command should be separated from the next using a semi-colon. So instead of 
+writing this:
+
+    [% greeting or 'Hello' %] [% name or 'World' %]
+
+We can write this:
+
+    [% greeting or 'Hello'; ' '; name or 'World' %]
+
+Feel free to add as much or as little whitespace inside your tags as you need.
+All unquoted whitespace inside tags is ignored.
+
+    [% greeting or 'Hello'; 
+       ' '; 
+       name or 'World';
+    %]
+
+In practice you can usually omit the semi-colons as TT3 is smart enough to
+figure out where one command stops and the next starts.  
+
+    [% greeting or 'Hello'
+       ' '
+       name or 'World'
+    %]
+
+You can also add comments to your tags. A comment starts with a C<#> character
+and continues to the end of the line or the end of the tag, whichever comes
+first.
+
+    Hello [% name or 'World'    # your profound comment goes here %]
+
+    [% greeting or 'Hello'      # or here...
+       ' '                      # or here...
+       name or 'World'          # or here...
+    %]
+
+If you put a C<#> sign I<immediately> after the tag start token then the 
+entire tag will be ignored.
+
+    [%# this entire tag is now a comment
+        name or 'World'         # everything is ignored
+        blah or yada            # it's one big comment.
+    %]
+
+See also L<Comment Tags> below.
+
+Tags can also be used to enclose blocks of content.  Here's an example showing
+the C<if> and C<for> commands:
+
+    [% for x in 1 to 10 %]
+        [% if x < 5 %]
+           x is a small number: [% x %]
+        [% else %]
+           x is a large number: [% x %]
+        [% end %]
+    [% end %]
+
+=head2 Outline Tags
+
+TT3 also supports "outline tags".  These start with the '%%' token and 
+continue to the end of the line.  We can rewrite our previous example using
+outline tags:
+
+    %%  for x in 1 to 10
+    %%      if x < 5
+                x is a small number: [% x %]
+    %%      else
+                x is a large number: [% x %]
+    %%      end
+    %%  end
+
+=head2 Comment Tags
+
+TT3 also introduces "comment tags".  The are delimited with C<[#> and C<#]>
+and can contain any text, including other tags.  Everything between the 
+opening C<[#> and the I<first> C<#]> following it is ignored.  
+
+    [# Any other tags inside a comment tag will be ignored.  
+       This makes it ideal for longer comments where you want 
+       to include an example of use. e.g.
+       
+       This template spanglifies the frobnitz.  Use it like this:
+       
+           [% fill frobnitz/spanglifier %]
+      
+       Written by Arthur Dent.  Last updated April 20th 2008.
+    #]
+
+You can also use this to temporarily comment out blocks of code.
+
+    [# FIXME: This is broken
+    
+       [% if x < %]
+         blah blah
+    #]
+
+=head2 Control Tags
+
+If you don't like these tags you can easily change them with the C<TAGS>
+control directive. The C<TAGS> directive must take effect immediately (i.e. at
+compile time). TT3 has a new tag style specifically for compile time
+directives. They use C<[?> and C<?]> as delimiters. We call these the "control
+tags".
+
+So to change the inline tag style to use the C<E<lt>*> and C<*E<gt>>
+delimiters, you would write:
+
+    [? TAGS '<* *>' ?]
+
+(NOTE: For the moment I'm keeping TAGS in upper case as a further
+reinforcement that it's a special compile-time directive... but I may still
+switch it to lower case 'tags' like all the new runtime commands)
+
+This syntax (a single string containing whitespace delimited start/end tokens)
+is short-hand for a list of two separate tokens, which you can also write like
+this:
+
+    [? TAGS ['<*', '*>'] ?]
+
+The inline tags are the default tags modified by the TAGS command.  You can
+also be more explicit about which of the tags you want to change.
+
+    [? TAGS.inline ['<*', '*>'] ?]
+
+If it makes you more comfortable you can write this as an assignment.  It
+makes no difference.
+
+    [? TAGS.inline = '<* *>' ?]
+
+You can set other tag styles in the same way
+
+    [? TAGS.inline  = '<% %>'
+       TAGS.control = '<? ?>'
+       TAGS.comment = '<! !>'
+       TAGS.outline = '%='      # NOTE: some work still TODO on outline tags
+    ?]
+
+Or you can set them en masse like this:
+
+    [?  TAGS = {
+          inline  = '<% %>'
+          control = '<? ?>'
+          comment = '<! !>'
+          outline = '%='        # TODO: this may not work for outline tags
+        }
+    ?]
+
+You can also turn tags on or off.
+
+    [? TAGS off ?]      # turns off default inline tags only
+    [? TAGS.all off ?]  # turns off all tags, including control tags
+    [? TAGS = {         # turns some off, change others
+          inline  = off
+          outline = off
+          control = '<?? ??>'
+       }
+    ?]
+
+You can turn tags back on to restore them to their previous values.
+
+    [? TAGS on ?]       # restore default inline tags only
+    [? TAGS.all on ?]   # restore all tags
+    [? TAGS = {         # restore some tags
+         inline = on
+         outline = on
+       }
+    ?]
+
+=head2 Whitespace Chomping
+
+TT3 supports the same chomping options as TT2. You can add any of the C<->,
+C<+>, C<=>, or C<~> options immediately after the open token of the tag, or
+immediately before the closing token. These can also be automatically enabled
+using the C<pre_chomp> and C<post_chomp> configuration options.
+
+The C<-> flag removes any whitespace before/after the tag up to the next 
+newline character.
+
+    foo                     same as         foo[% bar %]baz
+    [%- bar -%] 
+    bar
+
+Note that it will only ever remove one line of whitespace at most.
+
+    foo                     same as         foo
+                                            [% bar %]
+    [%- bar -%]                             bar
+
+    bar
+
+If you've enabled chomping by default then you can use C<+> to temporarily
+override the chomping action and preserve the whitespace.
+
+    foo                     same as         foo
+    [%+ bar +%]                             [% bar %]
+    bar                                     baz
+
+The C<~> flag removes I<all> whitespace before/after the tag.
+
+    foo                     same as         foo[% bar %]baz
+    
+      [%~ bar ~%]
+    
+        baz
+
+The C<=> flag removes all whitespace before/after the tag and replaces it
+with a single space.
+
+    foo                     same as         foo [% bar %] baz
+    
+      [%= bar =%]
+    
+        baz
+
+The pre and post chomping flags (and options) are independent so you can 
+freely mix and match them.
+
+    [% foo ~%]
+       [% bar %]
+          [%= baz %]
+
+=head2 Custom Tags
+
+NOTE: This is a quick technical note, needs tidying up
+
+You can customise the above tags with numerous configuration options. You can
+also define your own tags. The Template::TT3::Scanner is responsible for
+scanning a template to find the text and tags. It uses a Template::TT3::Tagset
+which defines a set of named tags (e.g. inline, outline, control and comment).
+You can define your own custom tagset or just mix in a few extra tags into 
+an existing tagset.  The C<TAGS> control simply sends a message to the tagset.
+
+So this:
+
+    [% TAGS { inline => '<* *>' } %]
+
+Is equivalent to (something like) this:
+
+    $tagset->change_tags( { inline => '<* *>' } )
+
+NOTE: The name of the change_tags() method is subject to change (no pun
+intended).
+
+Custom tags can be particularly useful for doing compile time transformations.
+For example, you can define a tag that starts with C<E<lt>pic:>, ends with
+C<E<gt>> and expects a filename in the middle:
+
+    <pic:badger.jpg>
+
+In just a line or two of code, you can have the tag regenerate the filename
+as:
+
+    <img src="/pictures/badger.jpg">
+
+With another few lines of code you can lookup the image size and see if you've
+got any metadata defined for it:
+
+    <img src="/pictures/badger.jpg" width="420" height="390" alt="My Badger">
+
+Adding sizes and titles to image tags is tedious and error prone, so why 
+not let a dump computer do it for you instead?
+
+Of course you could always do something like this in TT2:
+
+    [% pic('badger.jpg') %]
+
+The nice thing about tags is that they are (initially) processed when the
+template is compiled. So the <pic:XXX> tag can be expanded when the template
+is compiled and there's no further runtime overhead involved.  Also, by 
+allowing you to define your own syntax for the tag you can keep the tags
+simpler to read and write. 
+
+    <pic:badger.jpg>                # compile time custom tag
+
+vs
+
+    [% pic('badger.jpg') %]         # runtime custom function
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

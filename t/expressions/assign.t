@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 3,
+    tests   => 4,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -47,6 +47,13 @@ foo = bar = baz = 10;
 'baz: ' baz
 -- expect --
 foo: 10  bar: 10  baz: 10
+
+-- test subroutine assignment --
+-- skip not yet grokking signatures on LHS of assign --
+bold(text) = "<b>$text</b>";  bold('hello world');
+-- expect --
+<b>hello world</b>
+
 
 __END__
 

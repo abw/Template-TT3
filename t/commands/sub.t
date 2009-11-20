@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 18,
+    tests   => 21,
     debug   => 'Template::TT3::Element::Command::Sub',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -139,82 +139,18 @@ foo(c=30, d=40, b=20, a=10, e=50, f=60): [% foo(c=30, d=40, b=20, a=10, e=50, f=
 foo(c=30, d=40, b=20, a=10, e=50, f=60): a=10  b=20  c={c=30, d=40, e=50, f=60}
 
 
-
--- stop --
-
-
-
--- test block with args --
-[% hello = block(name,@foo) { 'Hello ' name } -%]
-greeting: [% hello('World') %]
+-- test sub with string arguments --
+[% sub hello(name) "Hello $name"; hello('World') %]
 -- expect --
-greeting: Hello World
+Hello World
 
--- test named block --
-[% block lovers; r.ucfirst ' and ' j.ucfirst; end %]
-
--- test runtime block sub --
-[% foo = block(x,y) { 'x is ' x ' and y is ' y } -%]
-foo(10, 20): [% foo(10, 20) %]
+-- test sub with expression arguments --
+[% sub hello(name) "Hello $name"; hello('Wor' ~ 'ld') %]
 -- expect --
-foo(10, 20): x is 10 and y is 20
+Hello World
 
--- test runtime block sub with list collector --
-[% foo = block(x,y, @z) { 'x is ' x ', y is ' y ' and z is ' z.join(', ') } -%]
-foo(10, 20, 30, 40): [% foo(10, 20, 30, 40) %]
+-- test sub with command arguments --
+[% sub hello(name) "Hello $name"; hello(if a b else c) %]
 -- expect --
-foo(10, 20, 30, 40): x is 10, y is 20 and z is 30, 40
+Hello bravo
 
--- test runtime block sub with hash collector --
-[% foo = block(x,y, %z) { 'x is ' x ', y is ' y ' and z has ' z.keys.join(', ') } -%]
-foo(10, 20, a=30, b=40): [% foo(10, 20, a=30, b=40) %]
--- expect --
-foo(10, 20, a=30, b=40): x is 10, y is 20 and z has a, b
-
--- test HTML element --
-[%  html_element = block( name, %attrs, @content ) {
-      '<' name;
-      attrs.html_attrs;
-
-      if content.size {
-          '>' content.join('') '</' name '>'
-      }
-      else {
-         '/>'
-      }
-    }
--%]
-foo: [% html_element('foo') %]
-bar: [% html_element('foo', 'bar', 'baz') %]
-baz: [% html_element('foo', x=10, y=20, 'bar', 'baz') %]
--- expect --
-foo: <foo/>
-bar: <foo>barbaz</foo>
-baz: <foo x="10" y="20">barbaz</foo>
-
-
-
--- test HTML element text style --
-[%  html_element = block(name,@content) ~%]
-        <[% name %]
-        [%~ if content.size ~%]
-            >
-            [%~ content.join('') ~%]
-            </[% name %]>
-        [%~ end %]
-        [%~ if not content.size ~%]
-            />
-        [%~ end %]
-[%~ end ~%]
-
-foo: [% html_element('foo') %]
-bar: [% html_element('foo', 'bar', 'baz') %]
-
--- expect --
-foo: <foo/>
-bar: <foo>barbaz</foo>
-
-
-
-         
-         
