@@ -51,6 +51,7 @@ our $MESSAGES = {
     undefined_in    => "Undefined value returned by '<2>' expression: <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
     not_follow      => "'%s' cannot follow '%s'",
+    odd_pairs       => 'Cannot make pairs from an odd number of items (%s): %s',
 };
 
 
@@ -390,6 +391,17 @@ sub list_values {
         ? @$value
         : $value;
 #    shift->values(@_);
+}
+
+
+sub hash_values {
+    $_[0]->debug_caller();
+    $_[0]->error("called hash_values()");
+    $_[0]->debug("hash_values() calling values()") if DEBUG;
+    my $value = shift->value(@_);
+    return ref $value eq HASH
+        ? %$value
+        : $value;
 }
 
 

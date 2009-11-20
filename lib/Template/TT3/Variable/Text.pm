@@ -32,4 +32,13 @@ sub dot {
     }
 }
 
+
+# NOTE - this is evaluating the hash in list (values) context, so it's 
+# really equivalent to C<%hash>.  It is not the same thing as C<values %hash>
+#
+#sub values {
+#    $_[SELF]->debug("values()") if DEBUG;
+#    return ($_[SELF]->name, $_[SELF]->[VALUE]);
+#}
+
 1;

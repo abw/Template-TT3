@@ -13,6 +13,7 @@ use Template::TT3::Class
         source        => 'token',
         values        => \&value,       # default to scalar context
         variable_list => \&variable,    # subclasses may redefine
+#        pairs         => \&list_values,
     };
 
 
@@ -52,6 +53,16 @@ sub list_values {
     $_[SELF]->debug("variable values(): ", $_[SELF]->source) if DEBUG;
     # explicitly force list context
     $_[SELF]->variable( $_[CONTEXT] )->values;
+}
+
+
+sub pairs {
+    $_[SELF]->debug("variable pairs(): ", $_[SELF]->source) if DEBUG or 1;
+    # explicitly force list context
+    my @items = $_[SELF]->variable( $_[CONTEXT] )->values;
+    return @items % 2
+        ? $_[SELF]->error_msg( odd_pairs => scalar(@items) => $_[SELF]->source )
+        : @items;
 }
 
 

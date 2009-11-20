@@ -16,7 +16,9 @@ use Badger
 
 use Template::TT3::Test 
     tests   => 9,
-    debug   => 'Template::TT3::Element::Construct::Hash',
+    debug   => 'Template::TT3::Element::Construct::Hash 
+                Template::TT3::Element::Construct::List
+                Template::TT3::Element::Sigil::Hash',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
 
@@ -145,10 +147,24 @@ h3 = { %h1, %h2 };
 h3.keys.sort.join "\n"
 h3.values.sort.join
 -- expect --
-a b c d
+a b x y
 10 20 30 40
 
-# TODO
+-- test list as hash --
+list = [a => 10, b => 20];
+hash = { %list };
+hash.keys.sort.join;
+-- expect --
+a b
+
+-- test single item as hash --
+item = 20;
+hash = { %item };
+hash.keys.sort.join;
+-- expect --
+a b
+
+
 
 __END__
 

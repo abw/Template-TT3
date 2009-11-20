@@ -11,6 +11,7 @@ use Template::TT3::Class
 
 
 sub text {
+    $_[SELF]->debug('@list text(): ', $_[SELF]->source) if DEBUG;
     join(
         SPACE, 
         $_[SELF]->values($_[CONTEXT]) 
@@ -19,7 +20,7 @@ sub text {
 
 
 sub value {
-    $_[SELF]->debug('@list value()') if DEBUG;
+    $_[SELF]->debug('@list value(): ', $_[SELF]->source) if DEBUG;
     my @values = $_[SELF]->[EXPR]->list_values($_[CONTEXT]);
 
     # not sure if we should always return a list in scalar context?
@@ -31,7 +32,7 @@ sub value {
 
 
 sub values {
-    $_[SELF]->debug('@list values()') if DEBUG;
+    $_[SELF]->debug('@list values(): ', $_[SELF]->source) if DEBUG;
     $_[SELF]->[EXPR]->list_values($_[CONTEXT]);
 }
 

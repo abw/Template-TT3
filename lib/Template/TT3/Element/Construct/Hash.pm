@@ -47,7 +47,7 @@ sub text {
 
 
 sub value {
-    $_[SELF]->debug("hash value(): ", $_[SELF]->source) if DEBUG;
+    $_[SELF]->debug("{hash} value(): ", $_[SELF]->source) if DEBUG;
     return {
         $_[SELF]->[EXPR]->pairs($_[CONTEXT])
     };

@@ -9,6 +9,7 @@ use Template::TT3::Class
         type  => 'hash',
     };
 
+
 sub dot {
     my ($self, $name, $args) = @_;
 
@@ -33,6 +34,15 @@ sub dot {
             $args
         );
     }
+}
+
+
+# NOTE - this is evaluating the hash in list (values) context, so it's 
+# really equivalent to C<%hash>.  It is not the same thing as C<values %hash>
+
+sub values {
+    $_[SELF]->debug("values()") if DEBUG;
+    return %{ $_[SELF]->[VALUE] }
 }
 
 

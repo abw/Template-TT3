@@ -12,13 +12,19 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil::List',
-    constants => ':elements';
+    constants => ':elements',
+    alias     => {
+        pairs       => \&values,
+        hash_values => \&values,
+        list_values => \&values,
+    };
 
 our $TEXT_FORMAT = '%s: %s';
 our $TEXT_JOINT  = ', ';
 
 
 sub text {
+    $_[SELF]->debug('%hash text(): ', $_[SELF]->source) if DEBUG;
     my $hash = $_[SELF]->value($_[CONTEXT]);
     join(
         $TEXT_JOINT,
@@ -29,7 +35,7 @@ sub text {
 
 
 sub value {
-    $_[SELF]->debug('value()') if DEBUG;
+    $_[SELF]->debug('%hash value(): ', $_[SELF]->source) if DEBUG;
     return { 
         $_[SELF]->[EXPR]->hash_values($_[CONTEXT])
     };
@@ -37,10 +43,10 @@ sub value {
 
 
 sub values {
-    $_[SELF]->debug('values()') if DEBUG;
-    $_[SELF]->[EXPR]->hash_values($_[CONTEXT]);
+    $_[SELF]->debug('%hash values(): ', $_[SELF]->source) if DEBUG;
+    $_[SELF]->debug("calling on $_[SELF]->[EXPR]") if DEBUG;
+    $_[SELF]->[EXPR]->pairs($_[CONTEXT]);
 }
-
 
 
 

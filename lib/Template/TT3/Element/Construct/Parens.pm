@@ -61,11 +61,13 @@ sub as_signature {
 
 
 sub text {
+    $_[SELF]->debug('(parens) text(): ', $_[SELF]->source) if DEBUG;
     $_[SELF]->[EXPR]->text($_[CONTEXT])
 }
 
 
 sub value {
+    $_[SELF]->debug('(parens) value(): ', $_[SELF]->source) if DEBUG;
     my @values = $_[SELF]->[EXPR]->values($_[CONTEXT]);
     return @values > 1
         ? join('', @values)
@@ -74,11 +76,13 @@ sub value {
 
 
 sub values {
+    $_[SELF]->debug('(parens) values(): ', $_[SELF]->source) if DEBUG;
     return $_[SELF]->[EXPR]->values($_[CONTEXT]);
 }
 
 
 sub params {
+    $_[SELF]->debug('(parens) params(): ', $_[SELF]->source) if DEBUG;
     # This isn't being called in the right place.  Function application
     # stores args as raw block
     

@@ -23,11 +23,13 @@ use Template::TT3::Class
 # called in list context with no further unpacking being done.
 
 sub text {
+    $_[SELF]->debug('$item text(): ', $_[SELF]->source) if DEBUG;
     $_[SELF]->[EXPR]->text($_[CONTEXT]);
 }
 
 
 sub value {
+    $_[SELF]->debug('$item value(): ', $_[SELF]->source) if DEBUG;
     $_[SELF]->[EXPR]->value($_[CONTEXT]);
 }
 

@@ -39,18 +39,22 @@ sub constructor {
     };
 }
 
+
 sub configuration {
     $_[1];
 }
+
 
 sub new {
     my $class = shift;
     bless [@_], $class;
 }
 
+
 sub get {
     return $_[0]->[VALUE];
 }
+
 
 sub set {
     my ($self, $value) = @_;
@@ -79,13 +83,16 @@ sub text {
     }
 }
 
+
 sub ref {
     CORE::ref $_[0]->[VALUE];
 }
 
+
 sub dot {
     shift->not_implemented;
 }
+
 
 sub apply {
     # function application has no effect on things that aren't CODE refs
@@ -94,15 +101,18 @@ sub apply {
     $_[0];
 }
 
+
 sub TMP_expand {
     shift->not_implemented;
 }
+
 
 sub name {
     CORE::ref $_[0]->[NAME]
         ? $_[0]->[NAME]->source
         : $_[0]->[NAME];
 }
+
 
 sub names {
     my $self  = shift;
@@ -115,25 +125,31 @@ sub names {
         : \@names;
 }
 
+
 sub fullname {
     join('.', shift->names);
 }
+
 
 sub variables {
     shift->[META]->[VARS];
 }
 
+
 sub methods {
     shift->[META]->[METHODS];
 }
+
 
 sub config {
     shift->[META]->[CONFIG];
 }
 
+
 sub method_names {
     keys %{ $_[0]->[META]->[METHODS] };
 }
+
 
 sub no_method {
     my ($self, $name) = @_;
@@ -142,6 +158,7 @@ sub no_method {
 #        join(', ', sort $self->method_names)
      );
 }
+
 
 sub hush {
     # hush, hush, thought I heard her calling my name...

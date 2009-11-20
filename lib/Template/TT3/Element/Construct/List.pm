@@ -12,11 +12,14 @@ use Template::TT3::Class
     },
     alias     => {
         values => \&value,
+    },
+    messages => {
+        odd_number => 'Odd number of items (%s) in list converted to hash: %s',
     };
 
 
 sub text {
-    $_[SELF]->debug("list text(): ", $_[SELF]->source) if DEBUG;
+    $_[SELF]->debug("[list] text(): ", $_[SELF]->source) if DEBUG;
     return join(
         '',
         $_[SELF]->[EXPR]->text($_[CONTEXT])
@@ -25,10 +28,23 @@ sub text {
 
 
 sub value {
-    $_[SELF]->debug("list value(): ", $_[SELF]->source) if DEBUG;
+    $_[SELF]->debug("[list] value(): ", $_[SELF]->source) if DEBUG;
     return [
         $_[SELF]->[EXPR]->values($_[CONTEXT])
     ];
+}
+
+
+sub hash_values  {
+    $_[SELF]->debug("[list] hash_values(): ", $_[SELF]->source) if DEBUG or 1;
+    my $values = $_[SELF]->value;
+
+    return $_[SELF]->error_msg( 
+        odd_number => scalar(@$values), 
+        join(', ', @$values)
+    ) if @$values % 2;
+    
+    return { @$values };
 }
 
 
