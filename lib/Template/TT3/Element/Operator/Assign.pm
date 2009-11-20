@@ -40,7 +40,7 @@ sub as_postop {
     $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->missing( expression => $token );
     
-    $self->debug("assign LHS signature: ", $lhs->signature) if DEBUG;
+    $self->debug("assign LHS signature: ", $lhs->has_signature) if DEBUG;
 
     # TODO: negotiation between the LHS and RHS to work out what kind of
     # assignment this is.  Is the LHS has parens, e.g. foo(), then it's a 

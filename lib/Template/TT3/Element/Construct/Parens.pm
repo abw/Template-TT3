@@ -49,7 +49,7 @@ sub as_signature {
     
     while ($expr = $$token->skip_delimiter($token)
                           ->as_expr($token, $scope)) {
-        push(@exprs, $expr->signature($name, $signature));
+        push(@exprs, $expr->in_signature($name, $signature));
     }
 
     # check next token matches our FINISH token

@@ -37,7 +37,7 @@ sub values {
 }
 
 
-sub signature {
+sub in_signature {
     my ($self, $name, $signature) = @_;
     my $sigil = $self->[TOKEN];
     $signature ||= { };
@@ -116,7 +116,7 @@ L<Template::TT3::Base> and L<Badger::Base> base classes.
 
 An alias to L<values()>.
 
-=head2 signature()
+=head2 in_signature()
 
 =head1 AUTHOR
 

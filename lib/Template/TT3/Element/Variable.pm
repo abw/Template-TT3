@@ -98,7 +98,7 @@ sub assign {
 # shared hash array, or barfs if there's a conflict with an existing
 # argument.
 
-sub signature {
+sub in_signature {
     my ($self, $name, $signature) = @_;
     my $sigil = '$';
     $signature ||= { };

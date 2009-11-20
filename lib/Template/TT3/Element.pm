@@ -29,8 +29,9 @@ use Template::TT3::Class
         as_dotop        => \&null,
         as_word         => \&null,
         as_args         => \&null,
-        as_signature    => \&null,
         as_filename     => \&null,
+        as_signature    => \&null,
+        has_signature   => \&null,  # NOTE: prolly not needed
     };
 
 
@@ -441,7 +442,7 @@ sub number {
 }
 
 
-sub signature {
+sub in_signature {
     shift->bad_signature( bad_arg => @_ );
 }
 
