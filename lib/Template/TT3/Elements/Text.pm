@@ -4,7 +4,6 @@
 
 package Template::TT3::Element::Text;
 
-use Template::TT3::Elements::Literal;
 use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
     version   => 3.00,

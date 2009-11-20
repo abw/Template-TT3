@@ -3,7 +3,7 @@ package Template::TT3::Element::Control::Tags;
 use Template::TT3::Class 
     version    => 3.00,
     debug      => 0,
-    base       => 'Template::TT3::Element::Command',
+    base       => 'Template::TT3::Element::Keyword',
     constants  => ':elements DOT',
     constant   => {
         SKIP_WORDS => {

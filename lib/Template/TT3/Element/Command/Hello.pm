@@ -2,7 +2,7 @@ package Template::TT3::Element::Command::Hello;
 
 use Template::TT3::Class 
     version    => 2.71,
-    base       => 'Template::TT3::Element::Command',
+    base       => 'Template::TT3::Element::Keyword',
     as         => 'null_expr',
     alias      => {
         value  => \&text,

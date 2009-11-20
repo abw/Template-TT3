@@ -2,7 +2,7 @@ package Template::TT3::Element::Command::Is;
 
 use Template::TT3::Class 
     version    => 3.00,
-    base       => 'Template::TT3::Element::Command',
+    base       => 'Template::TT3::Element::Keyword',
     view       => 'is',
     constants  => ':elements',
     constant   => {

@@ -3,7 +3,7 @@ package Template::TT3::Element::Command::Block;
 use Template::TT3::Class 
     version    => 3.00,
     debug      => 0,
-    base       => 'Template::TT3::Element::Command',
+    base       => 'Template::TT3::Element::Keyword',
     utils      => 'tt_params',
     constants  => ':elements BLANK',
     alias      => {

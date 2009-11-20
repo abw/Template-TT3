@@ -3,7 +3,7 @@ package Template::TT3::Element::Command::Else;
 use Template::TT3::Class 
     version    => 3.00,
     debug      => 0,
-    base       => 'Template::TT3::Element::Command',
+    base       => 'Template::TT3::Element::Keyword',
     view       => 'else',
     constants  => ':elements',
     alias      => {

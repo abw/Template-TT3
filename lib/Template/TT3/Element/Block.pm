@@ -15,7 +15,6 @@ use Template::TT3::Class
     alias     => {
         exprs  => \&expressions,
         value  => \&text,
-#        values => \&text,
     };
 
 
@@ -109,3 +108,63 @@ sub source {
 
 
 1;
+
+__END__
+
+=head1 NAME
+
+Template:TT3::Element::Block - element representing a block of elements
+
+=head1 DESCRIPTION
+
+This module implements a subclass of L<Template::TT3::Element>. It acts as a
+container for a sequence of other elements.
+
+=head1 METHODS
+
+This module implements the following methods in addition to those inherited
+from the L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base>
+base classes.
+
+=head2 text()
+
+=head2 value()
+
+An alias to L<text()>.
+
+=head2 values()
+
+=head2 pairs()
+
+=head2 params()
+
+=head2 variable()
+
+=head2 expressions() / exprs()
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Badger::Base>,
+L<Template::TT3::Base>,
+L<Template::TT3::Element>.
+
+=cut
+
+# Local Variables:
+# mode: Perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,5 @@
 package Template::TT3::Element::Number;
 
-use Template::TT3::Elements::Literal;
 use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
     version   => 3.00,
