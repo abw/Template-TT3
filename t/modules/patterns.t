@@ -13,11 +13,11 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    tests => 9,
+    tests => 11,
     debug => 'Template::TT3::Patterns Badger::Exporter',
     args  => \@ARGV;
 
-use Template::TT3::Patterns ':punctuate $INTEGER';
+use Template::TT3::Patterns ':punctuate $INTEGER $SQUOTE';
 
 #-----------------------------------------------------------------------
 # test that Template::Patterns is exporting regexen for pattern matching
@@ -38,6 +38,18 @@ unlike( '|', $DELIMITER, 'delimiter not match' );
 
 like( 11, $INTEGER, '11 is an integer' );
 like( 11, qr/^$INTEGER$/, '11 is still an integer' );
+
+
+#-----------------------------------------------------------------------
+# test that tricky single quote matching regex.
+#-----------------------------------------------------------------------
+
+my $text = q{'single quote with \\ escaped backslash'};
+ok( $text =~ $SQUOTE, "matched: $2" );
+
+$text = q{'single quote with escaped backslash at end \\'};
+ok( $text =~ $SQUOTE, "matched: $2" );
+
 
 
 __END__

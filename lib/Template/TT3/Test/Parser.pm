@@ -1,13 +1,13 @@
 package Template::TT3::Test::Parser;
+die __PACKAGE__, " is deprecated - use Template::TT3::Test instead\n";
 
-use Template::TT3::Tag::Inline;
-use Template::TT3::Tokens;
+
 use Template::TT3::Test 'test_expect';
 use Template::TT3::Class
     version  => 3.00,
-    debug    => 0,
     base     => 'Template::TT3::Test',
     utils    => 'params',
+    import   => 'class',
     constant => {
         TAG    => 'Template::TT3::Tag::Inline',
         TOKENS => 'Template::TT3::Tokens',
@@ -20,6 +20,9 @@ use Template::TT3::Class
 
 sub test_parser {
     my $config = params(@_);
+
+    class(TAG)->load;
+    class(TOKENS)->load;
 
     my $block_mode = defined $config->{ block_mode } 
         ? $config->{ block_mode } 

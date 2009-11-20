@@ -3,6 +3,7 @@
 # t/parser/commands.t
 #
 # Parser tests for commands.  
+#
 # Run with '-h' option for help with command line arguments.
 #
 # Written by Andy Wardley <abw@wardley.org>
@@ -12,11 +13,13 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
-use Template::TT3::Test::Parser 
-    debug  => '',
-    args   => \@ARGV,
+use Badger 
+    lib => '../../lib';
+    
+use Template::TT3::Test 
     tests  => 7,
+    debug  => 'Template::TT3::Tag Template::TT3::Element',
+    args   => \@ARGV,
     import => 'test_parser';
 
 test_parser(
@@ -141,5 +144,17 @@ fill foo.tt3
 fill foo/bar.tt3
 -- expect -- 
 <fill:<filename:foo/bar.tt3>>
+
+
+
+__END__
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
 
 

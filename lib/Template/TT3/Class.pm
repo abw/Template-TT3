@@ -1,6 +1,5 @@
 package Template::TT3::Class;
 
-#use Template::TT3::Constants ':elements';
 use Badger::Class
     version   => 3.00,
     debug     => 0,

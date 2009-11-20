@@ -11,22 +11,21 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
-#use Badger::Debug modules => 'Template::TT3::Tag';
-use Template::TT3::Test::Parser 
-#    skip   => 'Not working yet',
-    tests  => 10,
-    debug  => 'Template::TT3::Tag',
-    args   => \@ARGV,
-    import => 'test_expressions callsign';
-    
+use Badger 
+    lib     => '../../lib';
+
+use Template::TT3::Test
+    tests   => 10,
+    debug   => 'Template::TT3::Tag',
+    args    => \@ARGV,
+    import  => 'test_expressions callsign';
+
 my $vars = {
     %{ callsign() },
     user => {
         name => 'Arthur Dent',
     },
 };
-
 
 test_expressions(
     debug     => $DEBUG,

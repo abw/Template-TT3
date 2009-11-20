@@ -16,9 +16,9 @@ use Template::TT3::Test
     tests  => 8,
     debug  => 'Template::TT3::Generator::Tokens::Source',
     args   => \@ARGV,
-    import => 'test_regen';
+    import => 'test_regenerate';
     
-test_regen();
+test_regenerate();
 
 __END__
 

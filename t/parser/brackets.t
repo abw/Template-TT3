@@ -3,6 +3,7 @@
 # t/parser/brackets.t
 #
 # Parser tests for [bracketed expressions]
+#
 # Run with '-h' option for help with command line arguments.
 #
 # Written by Andy Wardley <abw@wardley.org>
@@ -15,10 +16,10 @@
 use Badger 
     lib => '../../lib';
     
-use Template::TT3::Test::Parser 
-    debug  => 'Template::TT3::Tag',
-    args   => \@ARGV,
+use Template::TT3::Test
     tests  => 2,
+    debug  => 'Template::TT3::Tag Template::TT3::Element',
+    args   => \@ARGV,
     import => 'test_parser';
 
 test_parser(
@@ -51,4 +52,17 @@ __DATA__
     <number:4>
   >
 >
+
+
+__END__
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
+
+
 

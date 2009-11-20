@@ -2,7 +2,9 @@
 #
 # t/parser/strings.t
 #
-# Test the Template::Parser's ability to recognise strings.
+# Parser tests for strings.
+#
+# Run with '-h' option for help with command line arguments.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -11,15 +13,14 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
-#use Badger::Debug modules => 'Template::TT3::Tag';
-use Template::TT3::Test::Parser 
-#    skip   => 'Not working yet',
+use Badger 
+    lib => '../../lib';
+
+use Template::TT3::Test
     tests  => 9,
     debug  => 'Template::TT3::Tag Template::TT3::Scanner',
     args   => \@ARGV,
     import => 'test_parser';
-
 
 test_parser(
     debug => $DEBUG,
@@ -75,3 +76,14 @@ __DATA__
 -- expect --
 <squote:'foo\nbar\tbaz\/\/xyz'>
 
+
+
+__END__
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

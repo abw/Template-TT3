@@ -4,6 +4,8 @@
 #
 # Parser tests for textual operators.
 #
+# Run with '-h' option for help with command line arguments.
+#
 # Written by Andy Wardley <abw@wardley.org>
 #
 # This is free software; you can redistribute it and/or modify it
@@ -11,17 +13,17 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
-use Template::TT3::Test::Parser 
+use Badger 
+    lib => '../../lib';
+
+use Template::TT3::Test
     tests  => 12,
-    debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
+    debug  => 'Template::TT3::Tag Template::TT3::Element',
     args   => \@ARGV,
     import => 'test_parser';
 
 test_parser(
-#    parse_method => 'parse_term',
-#    view_method  => 'sexpr',
-    debug        => $DEBUG,
+    debug => $DEBUG,
 );
 
 __DATA__
@@ -119,7 +121,6 @@ __DATA__
 1 cmp 2
 -- expect --
 <binary:<op:cmp><number:1><number:2>>
-
 
 __END__
 

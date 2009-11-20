@@ -6,11 +6,16 @@ use Template::TT3::Class
     base      => 'Badger::Test',
 #    debug     => 0,
     utils     => 'params',
-    constants => 'HASH CODE',
     import    => 'class',
+    constants => 'HASH CODE',
+    constant => {
+        TAG    => 'Template::TT3::Tag::Inline',
+        TOKENS => 'Template::TT3::Tokens',
+    },
     exports   => {
         all   => 'test_expect',
-        any   => 'data_text data_tests callsign test_expressions test_regen',
+        any   => 'data_text data_tests callsign 
+                  test_parser test_expressions test_regenerate',
     };
 
 our $DATA;
@@ -20,6 +25,88 @@ our $HANDLER  = \&test_handler;
 our $TEMPLATE = 'Template::TT3::Template';
 our $METHOD   = 'fill';
 our $DEBUG;
+
+
+sub data_text {
+    return $DATA if defined $DATA;
+    local $/ = undef;
+    no warnings;
+    $DATA = <main::DATA>;
+    $DATA =~ s/^__END__.*//sm;
+    return $DATA;
+}
+
+
+sub data_tests {
+    my $source = shift || data_text();
+    my (@tests, $test, $input, $expect);
+    my $count = 0;
+
+    # remove any comment lines
+    $source =~ s/^#.*?\n//gm;
+
+    # remove the leading backslash from any escaped comments,
+    # e.g. \# this comment really should be in the input/output
+    $source =~ s/^\\#/#/gm;
+
+    # remove anything before '-- start --' and/or after '-- stop --'
+    $source =~ s/ .*? ^ $MAGIC start $MAGIC \n //smix;
+    $source =~ s/ ^ $MAGIC stop  $MAGIC \n .* //smix;
+
+    @tests = split(/ ^ $MAGIC test /mix, $source);
+
+    # if the first line of the file was '-- test --' (optional) then the 
+    # first test will be empty and can be discarded
+    shift(@tests) if $tests[0] =~ /^\s*$/;
+
+    foreach $test (@tests) {
+        $test =~ s/ ^ \s* (.*?) $MAGIC \n //x;
+        my $name = $1 || 'test ' . ++$count;
+        
+        # split input by a line like "-- expect --"
+        ($input, $expect) = 
+            split(/ ^ $MAGIC expect $MAGIC \n/mix, $test);
+        $expect = '' 
+            unless defined $expect;
+        
+        my (@inflags, $inflag, @exflags, $exflag, $param, $value);
+        while ($input =~ s/ ^ $MAGIC (.*?) $MAGIC \n //mx) {
+            $param = $1;
+            $value = ($param =~ s/^(\w+)\s+(.+)$/$1/) ? $2 : 1;
+            push(@inflags, $param);
+            $inflag->{ $param } = $value;
+        }
+
+        while ($expect =~ s/ ^ $MAGIC (.*?) $MAGIC \n //mx) {
+            $param = $1;
+            $value = ($param =~ s/^(\w+)\s+(.+)$/$1/) ? $2 : 1;
+            push(@exflags, $param);
+            $exflag->{ $param } = $value;
+        }
+        
+        # always chomp the expected result
+        chomp $expect;
+
+        unless ($inflag->{ preserve_ws }) {
+            for ($input, $expect) {
+                s/^\s+//;
+                s/\s+$//;
+            }
+        }
+
+        $test = {
+            name    => $name,
+            input   => $input,
+            expect  => $expect,
+            inflags => \@inflags,
+            inflag  => $inflag,
+            exflags => \@exflags,
+            exflag  => $exflag,
+        };
+    }
+
+    return wantarray ? @tests : \@tests;
+}
 
         
 sub test_expect {
@@ -116,97 +203,66 @@ sub test_handler {
 }
 
 
-sub data_text {
-    return $DATA if defined $DATA;
-    local $/ = undef;
-    no warnings;
-    $DATA = <main::DATA>;
-    $DATA =~ s/^__END__.*//sm;
-    return $DATA;
-}
+sub test_parser {
+    my $config = params(@_);
 
+    class(TAG)->load;
+    class(TOKENS)->load;
 
-sub data_tests {
-    my $source = shift || data_text();
-    my (@tests, $test, $input, $expect);
-    my $count = 0;
+    my $block_mode = defined $config->{ block_mode } 
+        ? $config->{ block_mode } 
+        : 0;
 
-    # remove any comment lines
-    $source =~ s/^#.*?\n//gm;
+    $config->{ handler } = sub {
+        my $test = shift;
+        my $output = '';
+        my @lines;
 
-    # remove the leading backslash from any escaped comments,
-    # e.g. \# this comment really should be in the input/output
-    $source =~ s/^\\#/#/gm;
-
-    # remove anything before '-- start --' and/or after '-- stop --'
-    $source =~ s/ .*? ^ $MAGIC start $MAGIC \n //smix;
-    $source =~ s/ ^ $MAGIC stop  $MAGIC \n .* //smix;
-
-    @tests = split(/ ^ $MAGIC test /mix, $source);
-
-    # if the first line of the file was '-- test --' (optional) then the 
-    # first test will be empty and can be discarded
-    shift(@tests) if $tests[0] =~ /^\s*$/;
-
-    foreach $test (@tests) {
-        $test =~ s/ ^ \s* (.*?) $MAGIC \n //x;
-        my $name = $1 || 'test ' . ++$count;
-        
-        # split input by a line like "-- expect --"
-        ($input, $expect) = 
-            split(/ ^ $MAGIC expect $MAGIC \n/mix, $test);
-        $expect = '' 
-            unless defined $expect;
-        
-        my (@inflags, $inflag, @exflags, $exflag, $param, $value);
-        while ($input =~ s/ ^ $MAGIC (.*?) $MAGIC \n //mx) {
-            $param = $1;
-            $value = ($param =~ s/^(\w+)\s+(.+)$/$1/) ? $2 : 1;
-            push(@inflags, $param);
-            $inflag->{ $param } = $value;
+        # -- block -- flag indicates one single test, otherwise we 
+        # split the block into separate lines and feed them to the
+        # parser/generator one by one.  $block_mode can also be set
+        if ($block_mode || $test->{ inflag }->{ block }) {
+            @lines = $test->{ input };
         }
-
-        while ($expect =~ s/ ^ $MAGIC (.*?) $MAGIC \n //mx) {
-            $param = $1;
-            $value = ($param =~ s/^(\w+)\s+(.+)$/$1/) ? $2 : 1;
-            push(@exflags, $param);
-            $exflag->{ $param } = $value;
+        else {
+            @lines  = split(/\n/, $test->{ input });
         }
         
-        # always chomp the expected result
-        chomp $expect;
+        if ($test->{ exflag }->{ collapse }) {
+            # collapse any whitespace in expected output
+            $test->{ expect } =~ s/\n\s*//sg;
+        }
 
-        unless ($inflag->{ preserve_ws }) {
-            for ($input, $expect) {
-                s/^\s+//;
-                s/\s+$//;
+        foreach my $line (@lines) {
+            my $result = eval {
+                my $tokens = TOKENS->new;
+                my $tag    = TAG->new;
+                my $text = $line;
+                $tag->tokenise(\$text, $tokens);
+                $tokens->eof_token();
+                $tokens->finish;
+
+                # parse into expression
+                my $token  = $tokens->first;
+                my $block  = $token->as_exprs(\$token);
+                my $remain = $token->remaining_text;
+                
+                if ($remain) {
+                    die "unparsed tokens: $remain";
+                }
+                join("\n", map { $_->sexpr } $block->exprs);
+            };
+            if ($@) {
+                my $error = ref($@) ? $@->info : $@;
+                $result = "<ERROR:$error>";
             }
+            $output .= "$result\n";
         }
+        chomp $output;
+        return $output;
+    };
 
-        $test = {
-            name    => $name,
-            input   => $input,
-            expect  => $expect,
-            inflags => \@inflags,
-            inflag  => $inflag,
-            exflags => \@exflags,
-            exflag  => $exflag,
-        };
-    }
-
-    return wantarray ? @tests : \@tests;
-}
-
-
-sub callsign {
-    return {
-        map { substr($_, 0, 1) => $_ }
-        qw( 
-            alpha bravo charlie delta echo foxtrot golf hotel india 
-            juliet kilo lima mike november oscar papa quebec romeo 
-            sierra tango umbrella victor whisky x-ray yankee zulu 
-        )
-    }
+    test_expect($config);
 }
 
 
@@ -217,8 +273,8 @@ sub test_expressions {
     my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
     my $debug    = $config->{ debug } || 0;
 
-    my $block_mode = defined $config->{ block_mode } 
-        ? $config->{ block_mode } 
+    my $block_mode = defined $config->{ block } 
+        ? $config->{ block } 
         : 0;
     
     $config->{ handler } = sub {
@@ -272,7 +328,8 @@ sub test_expressions {
     test_expect($config);
 }
 
-sub test_regen {
+
+sub test_regenerate {
     my $config   = params(@_);
     my $tclass   = $config->{ template  } || $TEMPLATE;
     my $debug    = $config->{ debug } || 0;
@@ -314,7 +371,21 @@ sub test_regen {
 }
 
 
+sub callsign {
+    return {
+        map { substr($_, 0, 1) => $_ }
+        qw( 
+            alpha bravo charlie delta echo foxtrot golf hotel india 
+            juliet kilo lima mike november oscar papa quebec romeo 
+            sierra tango umbrella victor whisky x-ray yankee zulu 
+        )
+    }
+}
+
+
+
 1;
+
 __END__
 
 =head1 NAME

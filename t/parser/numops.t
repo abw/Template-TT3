@@ -2,7 +2,8 @@
 #
 # t/parser/numbers.t
 #
-# Parser tests for numbers and numerical operators.  
+# Parser tests for numbers and numerical operators.
+#
 # Run with '-h' option for help with command line arguments.
 #
 # Written by Andy Wardley <abw@wardley.org>
@@ -12,17 +13,17 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
-use Template::TT3::Test::Parser 
-    debug  => 'Template::TT3::Parser Template::TT3::Test::Parser',
-    args   => \@ARGV,
+use Badger 
+    lib => '../../lib';
+    
+use Template::TT3::Test 
     tests  => 46,
+    debug  => 'Template::TT3::Tag Template::TT3::Element',
+    args   => \@ARGV,
     import => 'test_parser';
 
 test_parser(
-#    parse_method => 'parse_term',
-#    view_method  => 'sexpr',
-    debug        => $DEBUG,
+    debug => $DEBUG,
 );
 
 __DATA__
