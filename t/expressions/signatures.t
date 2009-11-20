@@ -21,6 +21,7 @@ use Template::TT3::Test
     import  => 'test_expressions callsign';
 
 test_expressions(
+    block     => 1,
     debug     => $DEBUG,
     variables => callsign,
 );
@@ -29,14 +30,12 @@ test_expressions(
 __DATA__
 
 -- test block with single arg --
--- block --
 hello = block(name) { 'Hello ' name }; 
 hello('World')
 -- expect --
 Hello World
 
 -- test block with list arg --
--- block --
 hello = block(@foo) { 'Hello ' foo.join(' and ') }; 
 hello('World', 'Badger')
 -- expect --
@@ -53,18 +52,17 @@ block wiz(@foo, @bar) { }
 <ERROR:Duplicate '@' argument in signature for wiz(): @bar>
 
 -- test hash collector --
--- block --
 wiz = block(%foo) { 'hello' foo.html_attrs };
 'wiz: ' wiz(x=10, y=20)
 -- expect --
 wiz: hello x="10" y="20"
 
 -- test hash collector keys --
--- block --
 foo = block(%hash) "You called foo() with $hash.keys.sort.join";
 foo(a=10,b=20);
 -- expect --
 You called foo() with a b
+
 
 
 

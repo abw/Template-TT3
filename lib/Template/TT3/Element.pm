@@ -52,6 +52,8 @@ our $MESSAGES = {
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
     not_follow      => "'%s' cannot follow '%s'",
     odd_pairs       => 'Cannot make pairs from an odd number of items (%s): %s',
+    bad_args        => "Unexpected positional arguments passed to %s: %s",
+    bad_params      => "Unexpected named parameters passed to %s: %s",
 };
 
 

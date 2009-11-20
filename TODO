@@ -6,10 +6,6 @@ a comprehensive list.
 
 OPS
 
-$   dollar
-@   at
-%   export
-.   dot
 ..  num_range
 to  num_to         # not just nums: 'A' to 'Z'
 by  num_by         # ditto
@@ -17,9 +13,7 @@ by  num_by         # ditto
 :   if_else
 ->  arrow
 =   assign
-=>  fat_arrow
-
-brackets: () [] {} <>
+<>
 
 Delete position() and other source methods from T::Type::Text
 
@@ -37,11 +31,6 @@ class.  Nor can we expect every block-based element to know about every
 possible output format (although asking them to know HTML wouldn't be so
 bad).  Smells a bit dirty.
 
-Make if look for elsif/else
-
-Handle the end / } terminator.  If it's 'end' then we shouldn't parse on
-to the next elsif / else.
-
 Figure out what non-chaining infix operators should do.
 
 Figure out why element classes aren't being loaded.  e.g. declaring 
@@ -56,7 +45,10 @@ consume newlines in comments, whitespace, etc.  Also make the end tag
 optional and accept a simple string as a start token which gets compiled
 to qr/^$start/.
 
-
 Change element 'list_values()' to 'items()', or figure out how to map it
 properly onto value/values.
+
+Add T::TT3::Element::Signature which defines the signature construct. We need
+this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
+
 

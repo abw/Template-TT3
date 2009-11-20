@@ -44,13 +44,21 @@ sub tt_params {
     }
     
     # store remaining positional arguments
-    $vars->{ $name } = \@args 
-        if $name = $sig->{'@'};
+    if ($name = $sig->{'@'}) {
+        $vars->{ $name } = \@args;
+    }
+    elsif (@args) {
+        $self->error_msg( bad_args => $self->source, join(', ', @args) );
+    }
 
     # store remaining named params
-    $vars->{ $name } = $opts 
-        if $name = $sig->{'%'};
-
+    if ($name = $sig->{'%'}) {
+        $vars->{ $name } = $opts;
+    }
+    elsif (%$opts) {
+        $self->error_msg( bad_params => $self->source, join(', ', keys %$opts) );
+    }
+    
     return $vars;
 }
 
