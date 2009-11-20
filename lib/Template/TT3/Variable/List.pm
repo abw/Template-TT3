@@ -38,8 +38,9 @@ sub dot {
 
 sub values {
     $_[SELF]->debug("values()") if DEBUG;
-    return @{ $_[SELF]->[VALUE] }
+    return @{ $_[SELF]->[VALUE] };
 }
+
 
 1;
 

@@ -7,6 +7,9 @@ use Template::TT3::Class
     constants => ':type_slots',
     constant  => {
         type  => 'hash',
+    },
+    alias     => {
+#        pairs => \&values,
     };
 
 

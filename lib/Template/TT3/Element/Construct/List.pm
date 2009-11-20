@@ -35,16 +35,13 @@ sub value {
 }
 
 
-sub hash_values  {
-    $_[SELF]->debug("[list] hash_values(): ", $_[SELF]->source) if DEBUG or 1;
-    my $values = $_[SELF]->value;
-
-    return $_[SELF]->error_msg( 
-        odd_number => scalar(@$values), 
-        join(', ', @$values)
-    ) if @$values % 2;
-    
-    return { @$values };
+sub pairs {
+    $_[SELF]->debug("[list] pairs(): ", $_[SELF]->source) if DEBUG or 1;
+    $_[SELF]->[EXPR]->pairs($_[CONTEXT]);
+#    my $values = $_[SELF]->value;
+ #   return @$values % 2
+ #       ? $_[SELF]->error_msg( odd_pairs => scalar(@$values) => $_[SELF]->source )
+ #       : @$values;
 }
 
 

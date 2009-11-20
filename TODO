@@ -56,3 +56,7 @@ consume newlines in comments, whitespace, etc.  Also make the end tag
 optional and accept a simple string as a start token which gets compiled
 to qr/^$start/.
 
+
+Change element 'list_values()' to 'items()', or figure out how to map it
+properly onto value/values.
+

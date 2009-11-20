@@ -15,7 +15,6 @@ use Template::TT3::Class
     constants => ':elements',
     alias     => {
         pairs       => \&values,
-        hash_values => \&values,
         list_values => \&values,
     };
 
@@ -37,7 +36,7 @@ sub text {
 sub value {
     $_[SELF]->debug('%hash value(): ', $_[SELF]->source) if DEBUG;
     return { 
-        $_[SELF]->[EXPR]->hash_values($_[CONTEXT])
+        $_[SELF]->[EXPR]->pairs($_[CONTEXT])
     };
 }
 

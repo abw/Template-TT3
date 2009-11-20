@@ -57,12 +57,12 @@ sub list_values {
 
 
 sub pairs {
-    $_[SELF]->debug("variable pairs(): ", $_[SELF]->source) if DEBUG or 1;
+    $_[SELF]->debug("variable pairs(): ", $_[SELF]->source) if DEBUG;
     # explicitly force list context
-    my @items = $_[SELF]->variable( $_[CONTEXT] )->values;
-    return @items % 2
-        ? $_[SELF]->error_msg( odd_pairs => scalar(@items) => $_[SELF]->source )
-        : @items;
+    my @values = $_[SELF]->variable( $_[CONTEXT] )->values;
+    return @values % 2
+        ? $_[SELF]->error_msg( odd_pairs => scalar(@values) => $_[SELF]->source )
+        : @values;
 }
 
 
