@@ -76,7 +76,7 @@ our $SYMBOLS  = [
     [ '->'      => arrow            => 230,   0 ],      # a -> a + 1
 
     # binary assignment operators
-    [ '='       => assign           => 220,   0 ],      # foo = bar
+    [ '='       => op_assign        => 220,   0 ],      # foo = bar
     [ '=>'      => op_pair          => 220,   0 ],      # foo => bar
     [ '~='      => txt_combine_set  => 220,   0 ],      # foo ~= bar
     [ '+='      => num_add_set      => 220,   0 ],      # foo += bar
