@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 9,
+    tests   => 13,
     debug   => 'Template::TT3::Element::Construct::Hash 
                 Template::TT3::Element::Construct::List
                 Template::TT3::Element::Sigil::Hash',
@@ -157,12 +157,19 @@ hash.keys.sort.join;
 -- expect --
 a b
 
--- test single item as hash --
-item = 20;
-hash = { %item };
+-- test list with odd number of items --
+list = [a => 10, 20];
+hash = { %list };
 hash.keys.sort.join;
 -- expect --
-a b
+<ERROR:Cannot make pairs from an odd number of items (3): list>
+
+-- test single item as hash --
+twenty = 20;
+hash = { %twenty };
+hash.keys.sort.join;
+-- expect --
+<ERROR:Cannot make pairs from an odd number of items (1): twenty>
 
 
 

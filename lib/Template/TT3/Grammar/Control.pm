@@ -10,7 +10,7 @@ use Template::TT3::Class
 our $SYMBOLS  = [
     [ '.'           => op_dot           => 340,   0 ],
     [ '*'           => num_multiply     => 280,   0 ],
-    [ '='           => assign           => 220,   0 ],
+    [ '='           => op_assign        => 220,   0 ],
     [ '=>'          => op_pair          => 220,   0 ],
     [ '('           => con_parens       =>   0,   0 ],
     [ '['           => con_list         =>   0,   0 ],

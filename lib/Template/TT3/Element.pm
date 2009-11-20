@@ -394,7 +394,7 @@ sub list_values {
 }
 
 
-sub hash_values {
+sub OLD_hash_values {
     $_[0]->debug_caller();
     $_[0]->error("called hash_values()");
     $_[0]->debug("hash_values() calling values()") if DEBUG;
