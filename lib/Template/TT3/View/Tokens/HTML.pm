@@ -38,7 +38,6 @@ sub span {
     HTML( span => { class => $css_class }, @_ );
 }
 
-
 class->methods(
     map {
         my $type = $_;              # lexical copy for closure
@@ -49,7 +48,7 @@ class->methods(
     qw(
         text comment padding html element terminator string
         literal word keyword number filename unary binary prefix
-        postfix squote dquote parens
+        postfix squote dquote parens list pair
     )
 );
 

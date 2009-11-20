@@ -479,8 +479,8 @@ sub tokenise_string {
             while ($content =~ /$DOT_WORD/cogx) {
                 $self->debug("double quoted dotop: [$1]") if DEBUG;
                 $branch = $branch
-                    ->then( dot  => '.', $pos++ )
-                    ->then( word => $1, $pos );
+                    ->then( op_dot => '.', $pos++ )
+                    ->then( word   => $1, $pos );
                 $pos += length $1;
             }
         }

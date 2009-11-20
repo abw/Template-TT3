@@ -1,8 +1,8 @@
 #============================================================= -*-perl-*-
 #
-# t/expressions/brackets.t
+# t/expressions/list.t
 #
-# Test script for [bracketed] expressions.
+# Test script for [list, list, list] expressions.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -30,7 +30,6 @@ __DATA__
 -- test empty list --
 [].join
 -- expect --
-
 
 -- test list creator --
 list = [a, b, c]; list.join

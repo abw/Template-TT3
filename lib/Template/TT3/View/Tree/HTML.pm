@@ -129,6 +129,21 @@ sub view_binary {
     );
 }
 
+sub view_pair {
+    my ($self, $elem) = @_;
+    my $lhs = $elem->[LHS]->view($self);
+    for ($lhs) {
+        s/(<div class=")variable/${1}word/;
+        s/(<span class="info type">)variable/${1}word/g;
+    }
+    $self->element( 
+        'binary pair expr' => $elem,
+        $self->div( 'lhs '      => $lhs ),
+        $self->div( 'operator element' => $elem->[TOKEN] ),
+        $self->div( 'rhs '      => $elem->[RHS]->view($self) ),
+    );
+}
+
 sub view_parens {
     my ($self, $elem) = @_;
     $self->element( 
@@ -136,6 +151,16 @@ sub view_parens {
         $self->div( 'operator element' => '(' ),
         $self->div( 'lhs'              => $elem->[EXPR]->view($self) ),
         $self->div( 'operator element' => ')' ),
+    );
+}
+
+sub view_list {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'list expr' => $elem,
+        $self->div( 'operator element' => '[' ),
+        $self->div( 'lhs'              => $elem->[EXPR]->view($self) ),
+        $self->div( 'operator element' => ']' ),
     );
 }
 

@@ -2,6 +2,8 @@
 
 package Template::TT3::Element::Block;
 
+die __PACKAGE__, ' is deprecated, use separate module';
+
 use Template::TT3::Type::Params 'PARAMS';
 use Template::TT3::Class 
     version   => 3.00,

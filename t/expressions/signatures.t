@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 5,
+    tests   => 6,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -58,6 +58,14 @@ wiz = block(%foo) { 'hello' foo.html_attrs };
 'wiz: ' wiz(x=10, y=20)
 -- expect --
 wiz: hello x="10" y="20"
+
+-- test hash collector keys --
+-- block --
+foo = block(%hash) "You called foo() with $hash.keys.sort.join";
+foo(a=10,b=20);
+-- expect --
+You called foo() with a b
+
 
 
 

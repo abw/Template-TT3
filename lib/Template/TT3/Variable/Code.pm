@@ -5,11 +5,13 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Variable',
     constants => ':type_slots',
+    constant  => {
+        type  => 'code',
+    },
     alias     => {
         apply => \&apply_scalar,
-    },
-    messages  => {
     };
+
 
 sub apply_scalar {
     my $self = shift;
@@ -49,6 +51,25 @@ sub values {
     # as well call it
     $_[SELF]->debug('values()') if DEBUG;
     return ($_[SELF]->[VALUE]->());
+}
+
+
+sub dot {
+    my ($self, $name, $args) = @_;
+
+    if (my $method = $self->[META]->[METHODS]->{ $name }) {
+        $self->debug("code vmethod: $name") if DEBUG;
+        return $self->[META]->[VARS]->use_var( 
+            $name,
+            $method->($self->[VALUE], $args ? @$args : ()),
+            $self
+        );
+    }
+    else {
+        # TODO: should we automaticallly call the code?
+        
+        return $self->no_method($name);
+    }
 }
 
 

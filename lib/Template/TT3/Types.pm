@@ -26,13 +26,13 @@ use Badger::Factory::Class
         TEXT   => 'Template::TT3::Type::Text',
         ARRAY  => 'Template::TT3::Type::List',
         HASH   => 'Template::TT3::Type::Hash',
-#       CODE   => 'Template::TT3::Type::Code',
+        CODE   => 'Template::TT3::Type::Code',
 #       OBJECT => 'Template::TT3::Type::Object',
         
         # lower case TT names
-        text   => 'Template::TT3::Type::Text',
-        list   => 'Template::TT3::Type::List',
-        hash   => 'Template::TT3::Type::Hash',
+#        text   => 'Template::TT3::Type::Text',
+#        list   => 'Template::TT3::Type::List',
+#        hash   => 'Template::TT3::Type::Hash',
 #       params => 'Template::TT3::Type::Params',
     };
 

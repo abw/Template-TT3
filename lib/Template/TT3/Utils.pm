@@ -8,8 +8,21 @@ use Badger::Class
         PARAMS => 'Template::TT3::Type::Params',
     },
     exports   => {
-        any   => 'tt_params',
+        any   => 'tt_params tt_args tt_self_args',
     };
+
+
+sub tt_args {
+    my $opts = pop @_ if @_ && ref $_[-1] eq PARAMS;
+    return ($opts, @_);
+}
+
+
+sub tt_self_args {
+    my $self = shift;
+    my $opts = pop @_ if @_ && ref $_[-1] eq PARAMS;
+    return ($self, $opts, @_);
+}
 
 
 sub tt_params {

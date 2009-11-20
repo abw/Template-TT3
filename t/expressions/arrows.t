@@ -1,8 +1,8 @@
 #============================================================= -*-perl-*-
 #
-# t/expressions/textops.t
+# t/expressions/arrows.t
 #
-# Test script for textual operators
+# Test script for => and -> arrows.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -15,48 +15,36 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 6,
+    tests   => 4,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
 
 test_expressions(
+    block     => 1,
     debug     => $DEBUG,
     variables => callsign,
 );
 
-
 __DATA__
 
--- test string concatenation --
-a ~ b
--- expect -- 
-alphabravo
-
--- test chained string concatenation --
-a ~ b ~ c
--- expect -- 
-alphabravocharlie
-
--- test string concatenation onto command --
-a ~ is { d e }
--- expect -- 
-alphadeltaecho
-
--- test string concatenation assignment --
-a ~= b; 'a: ' a
--- expect -- 
-a: alphabravo
-
--- test string concatenation with single quotes --
-'foo' ~ 'bar'
+-- test create list using fat arrow --
+arrow = a => 10;
+arrow.join
 -- expect --
-foobar
+a 10
 
--- test string concatenation with double quotes --
-"$a $b " ~ "$c $d"
+-- test create list using fat arrow --
+[a => 10].join
 -- expect --
-alpha bravo charlie delta
+a 10
 
+-- test multi arrows --
+[a => b => c => 10].join
+-- expect --
+a b c 10
 
-
+-- test multi arrows with quoted strings --
+['one' => "two" => "three four" => 10].join
+-- expect --
+one two three four 10

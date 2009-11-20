@@ -8,3 +8,6 @@ Hello [% name or "World" %]
 
 [% greeting %]
 
+[% arrow = a => 10 %]
+[% [a => b => c => 10].join %]
+

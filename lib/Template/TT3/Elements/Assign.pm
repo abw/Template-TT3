@@ -55,7 +55,6 @@ sub as_postop {
 
 
 sub value {
-#   $_[SELF]->debug("assign [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]");
     $_[SELF]->[LHS]
             ->variable( $_[CONTEXT] )        # fetch LHS as a variable
             ->set(                           # set it to RHS value

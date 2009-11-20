@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    tests => 8,
+    tests => 10,
     debug => 'Template::TT3::Elements',
     args  => \@ARGV;
 
@@ -43,3 +43,9 @@ is( $add->value, 111, 'addition: 42 + 69 = 111' );
 my $sub = $elems->construct('number.subtract' => '-', 4, $n2, $n1 );
 is( $sub->value, 27, 'subtraction: 69 - 42 = 27' );
 
+# test aliases 
+$sub = $elems->construct( num_subtract => '-', 4, $n2, $n1 );
+is( $sub->value, 27, 'num_subtract subtraction: 69 - 42 = 27' );
+
+$sub = $elems->construct( number_subtract => '-', 4, $n2, $n1 );
+is( $sub->value, 27, 'number_subtract subtraction: 69 - 42 = 27' );

@@ -10,27 +10,6 @@ use Template::TT3::Class
 # These are the command keywords that we recognise
 our $COMMANDS = 'do as is raw if elsif else for fill dot block encode decode';
 
-
-# We're lazy, so we rely on Badger::Factory (the base class of T::Elements
-# which in turn is the base class of T::Grammar) to convert a simple string 
-# like "foo_bar" into the appropriate T::Element::FooBar module name.  We
-# use dots to delimit namespaces, e.g. 'numeric.add' is expanded to 
-# T::Element::Numeric::Add.  However, because we're *really* lazy and can't
-# be bothered quoting lots of strings like 'numeric.add' (they have to be
-# quoted because the dot can't be bareworded on the left of =>) we define
-# a bunch of prefixes that get pre-expanded when the symbol table is imported.
-# e.g 'num_add' becomes 'numeric.add' becomes 'T::Element::Numeric::Add'
-
-our $PREFIXES = {
-    cmd_  => 'command.',
-    num_  => 'number.',
-    txt_  => 'text.',
-    sig_  => 'sigil.',
-    var_  => 'variable.',
-    bool_ => 'boolean.',
-};
-
-
 our $SYMBOLS  = [
 #   [ token => element_name => left_precedence, right_precedence ]
 
@@ -38,7 +17,7 @@ our $SYMBOLS  = [
     [ '$'       => sig_item         =>   0, 350 ],      # $foo
     [ '@'       => sig_list         =>   0, 350 ],      # @foo
 #   [ '%'       => sig_hash         =>   0, 350 ],      # %foo
-    [ '.'       => var_dot          => 340,   0 ],      # foo.bar
+    [ '.'       => op_dot           => 340,   0 ],      # foo.bar
     
     # ++/-- unary prefix/postfix self-modification operators
     [ '++'      => num_inc          => 295, 295 ],      # foo++, ++foo
@@ -98,7 +77,7 @@ our $SYMBOLS  = [
 
     # binary assignment operators
     [ '='       => assign           => 220,   0 ],      # foo = bar
-    [ '=>'      => fat_arrow        => 220,   0 ],      # foo => bar
+    [ '=>'      => op_pair          => 220,   0 ],      # foo => bar
     [ '~='      => txt_combine_set  => 220,   0 ],      # foo ~= bar
     [ '+='      => num_add_set      => 220,   0 ],      # foo += bar
     [ '-='      => num_sub_set      => 220,   0 ],      # foo -= bar
@@ -114,42 +93,23 @@ our $SYMBOLS  = [
     [ 'or'      => bool_or          => 205,   0 ],      # foo or bar
     [ 'nor'     => bool_nor         => 205,   0 ],      # foo nor bar
                                 
-    # directive keywords    
-#    [ 'do'      => cmd_do           => 150,   0 ],
-#    [ 'as'      => cmd_as           => 150,   0 ],
-#    [ 'is'      => cmd_is           => 150,   0 ],
-#    [ 'raw'     => cmd_raw          => 150,   0 ],
-#    [ 'if'      => cmd_if           => 150,   0 ],
-#    [ 'for'     => cmd_for          => 150,   0 ],
-#    [ 'fill'    => cmd_fill         => 150,   0 ],
-#    [ 'dot'     => cmd_dot          => 150,   0 ],
-#    [ 'block'   => cmd_block        => 150,   0 ],
-#    [ 'encode'  => cmd_encode       => 150,   0 ],
-#    [ 'decode'  => cmd_decode       => 150,   0 ],
-
-     [ 'end'     => end              =>   0,   0 ],
-
-#    [ "${COMMAND}::With"        => 150,   0, 'with', 'end' ],
-#    [ "${COMMAND}::Block"       =>   0,   0, 'block', 'end' ],
-#    [ "${COMMAND}::Dump"        =>   0,   0, 'dump' ],
-#    [ "${COMMAND}::Use"         =>   0,   0, 'use' ],
-#    [ "${COMMAND}::Tags"        =>   0,   0, 'TAGS' ],
-                                
-    # grouping constructs
-    [ '('       => parens           =>   0,   0 ],
-    [ '['       => list             =>   0,   0 ],
-    [ '{'       => hash             =>   0,   0 ],
+    # grouping constructs...
+    [ '('       => con_parens       =>   0,   0 ],
+    [ '['       => con_list         =>   0,   0 ],
+    [ '{'       => con_hash         =>   0,   0 ],
+    
+    # ...and their respective terminators
     [ ')'       => terminator       =>   0,   0 ],
     [ ']'       => terminator       =>   0,   0 ],
     [ '}'       => terminator       =>   0,   0 ],
-
-#    [ [']', ')', '}']
-#         => terminator     =>   0,   0 ],
 
     # Other punctuation marks
     [ ','       => separator        =>   0,   0 ],
     [ ';'       => delimiter        =>   0,   0 ],
     [ ':'       => terminator       =>   0,   0 ],
+    
+    # One token to end them all and in the darkness bind them
+    [ 'end'     => end              =>   0,   0 ],
 ];
 
 

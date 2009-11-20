@@ -179,6 +179,7 @@ use Template::TT3::Class
         SOURCE_FORMAT => '%s',
     },
     alias     => {
+        name   => \&text,
         value  => \&text,
         values => \&text,
     };
@@ -228,6 +229,7 @@ use Template::TT3::Class
     };
 
 
+
 #-----------------------------------------------------------------------
 # double quoted strings
 #-----------------------------------------------------------------------
@@ -242,6 +244,11 @@ use Template::TT3::Class
     constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<dquote:%s>', 
+    },
+    alias     => {
+        name   => \&text,
+        value  => \&text,
+        values => \&text,
     };
 
 
@@ -264,8 +271,9 @@ sub as_expr {
             $self->[BLOCK]->source,
         ) if DEBUG;
     }
-    
-    return $self;
+
+    return $$token->skip_ws($token)
+        ->as_postop($self, $token, $scope, $self->[META]->[LPREC]);
 }
 
 

@@ -3,7 +3,6 @@ use Template::TT3::Elements::Text;
 use Template::TT3::Elements::Number;
 use Template::TT3::Elements::Boolean;
 use Template::TT3::Elements::Assign;
-use Template::TT3::Elements::Structure;
 use Template::TT3::Elements::Variables;
 use Template::TT3::Elements::Whitespace;
 use Template::TT3::Elements::Punctuation;

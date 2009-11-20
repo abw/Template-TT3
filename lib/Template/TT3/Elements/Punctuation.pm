@@ -1,6 +1,5 @@
 package Template::TT3::Element::Punctuation;
 
-#use Template::TT3::Elements::Literal;
 use Template::TT3::Class 
     version   => 3.00,
     base      => 'Template::TT3::Element',
@@ -11,7 +10,7 @@ sub as_expr {
     return undef;
 }
 
-sub generate {
+sub OLD_generate {
     $_[1]->generate_punctuation(
         $_[0]->[TOKEN]
     );
@@ -38,11 +37,11 @@ use Template::TT3::Class
     };
 
 
-#sub as_expr {
-#    my ($self, $token, @args) = @_;
-#    $$token = $self->[NEXT] if $token;
-#    $self->[NEXT]->as_expr($token, @args);
-#}
+sub as_expr {
+    my ($self, $token, @args) = @_;
+    $$token = $self->[NEXT] if $token;
+    $self->[NEXT]->as_expr($token, @args);
+}
 
 
 #-----------------------------------------------------------------------
@@ -141,278 +140,6 @@ use Template::TT3::Class
 
 # TODO: as_terminator() to terminate and return preceeding block  
 
-
-
-#-----------------------------------------------------------------------
-# Template::TT3::Element::Construct
-#
-# Base class for data constructs: () {} []
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Construct;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Punctuation',
-    constants => ':elements';
-
-
-sub sexpr {
-    my $self = shift;
-    $self->[EXPR]->sexpr(
-        shift || $self->SEXPR_FORMAT
-    );
-}
-
-sub source {
-    my $self = shift;
-    sprintf(
-        $self->SOURCE_FORMAT, 
-        $self->[EXPR]->source(@_)
-    );
-}
-
-sub variable {
-    $_[CONTEXT]->{ variables }
-        ->use_var( $_[SELF] => $_[SELF]->value($_[CONTEXT]) );
-}
-
-sub as_expr {
-    my ($self, $token, $scope, $prec, $force) = @_;
-
-    # advance past opening token
-    $self->accept($token);
-
-    # parse expressions.  Any precedence (0), allow empty lists (1)
-    $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
-        || return $self->missing( expressions => $token );
-    
-#    $self->debug("list parsed expr: $self->[EXPR]");
-
-    # check next token matches our FINISH token
-    return $self->missing( $self->FINISH, $token)
-        unless $$token->is( $self->FINISH );
-    
-    # advance past finish token
-    $$token = $$token->next;
-
-    # list/hash constructs can be followed by postops 
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
-}
-
-
-#-----------------------------------------------------------------------
-# Constructs: [ ]  { }  ( )
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::List;
-
-use Template::TT3::Class 
-    base      => 'Template::TT3::Element::Construct',
-    debug     => 0,
-    constants => ':elements',
-    constant  => {
-        FINISH        => ']',
-        SEXPR_FORMAT  => "<list:%s>",
-        SOURCE_FORMAT => '[ %s ]',
-    },
-    alias     => {
-        values => \&value,
-    };
-
-
-sub generate {
-    $_[CONTEXT]->generate_list($_[SELF]);
-}
-
-
-sub value {
-    $_[SELF]->debug("called value() on list: ", $_[SELF]->source) if DEBUG;
-    return [
-        $_[SELF]->[EXPR]->values($_[CONTEXT])
-    ];
-}
-
-
-sub text {
-#    $_[SELF]->debug_caller;
-#    $_[SELF]->debug("called text() on list: ", $_[SELF]->source) if DEBUG;
-    return join(
-        '',
-        $_[SELF]->[EXPR]->text($_[CONTEXT])
-    );
-}
-
-
-#-----------------------------------------------------------------------
-# Curly braces denote literal hashes, or block of content in block scope
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Hash;
-
-use Template::TT3::Class 
-    debug     => 0,
-    base      => 'Template::TT3::Element::Construct',
-#    as        => 'block',
-    constants => ':elements',
-    constant  => {
-        FINISH        => '}',
-        SEXPR_FORMAT  => "<hash:%s>",
-        SOURCE_FORMAT => '{ %s }',
-    };
-
-
-sub value {
-    $_[SELF]->debug("called value() on hash: ", $_[SELF]->source) if DEBUG;
-    return {
-        $_[SELF]->[EXPR]->pairs($_[CONTEXT])
-    };
-}
-
-sub as_block {
-    my ($self, $token, $scope, $parent, $follow) = @_;
-    my (@exprs, $expr);
-    
-    $parent ||= $self;
-
-    $self->debug("as_block()") if DEBUG;
- 
-    # skip past token any whitespace, then parse expressions
-    my $block = $$token->next_skip_ws($token)->as_exprs($token, $scope)
-        || return $parent->missing( $self->ARG_BLOCK, $token );
-
-    # check next token matches our FINISH token
-    return $parent->missing( $self->FINISH, $token)
-        unless $$token->is( $self->FINISH, $token );
-    
-    # if the parent defines any follow-on blocks (e.g. elsif/else for if)
-    # then we look to see if the next token is one of them and activate it
-    if ($follow && $$token->skip_ws($token)->in($follow)) {
-        $self->debug("Found follow-on token: ", $$token->token) if DEBUG;
-        return $$token->as_follow($block, $token, $scope, $parent);
-    }
-
-    # return the $block we contain, not $self which is the { } container
-    return $block;
-}
-
-
-
-#-----------------------------------------------------------------------
-# parens
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Parens;
-
-use Template::TT3::Class 
-    debug     => 0,
-    base      => 'Template::TT3::Element::Construct',
-    view      => 'parens',
-    constants => ':elements',
-    constant  => {
-        FINISH        => ')',
-        SEXPR_FORMAT  => "<parens:%s>",
-        SOURCE_FORMAT => '( %s )',
-    };
-
-
-sub as_postfix {
-    shift->become('var_apply')->as_postfix(@_);
-}
-
-
-sub as_args {
-    my ($self, $token, $scope) = @_;
-
-    # advance past opening token
-    $self->accept($token);
-
-    # parse expressions, any precedence (0), allow empty blocks (1)
-    $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
-        || return $self->missing( expressions => $token );
-
-    # check next token matches our FINISH token
-    return $self->missing( $self->FINISH, $token)
-        unless $$token->is( $self->FINISH, $token );
-    
-    return $self;
-}
-
-
-sub as_signature {
-    my ($self, $token, $scope, $parent) = @_;
-    my (@exprs, $expr);
-    my $signature = { };
-
-    $parent ||= $self;
-    my $name = $parent->[TOKEN];
-    $self->debug("sign name: $name  parent is $parent") if DEBUG;
-
-    # advance past opening token
-    $self->accept($token);
-    
-    while ($expr = $$token->skip_delimiter($token)
-                          ->as_expr($token, $scope)) {
-        push(@exprs, $expr->signature($name, $signature));
-    }
-
-    # check next token matches our FINISH token
-    return $parent->missing( $self->FINISH, $token )
-        unless $$token->is( $self->FINISH, $token );
-
-    return $signature;
-}
-
-
-sub value {
-    my @values = $_[SELF]->[EXPR]->values($_[CONTEXT]);
-    return @values > 1
-        ? join('', @values)
-        : $values[0];
-}
-
-
-sub values {
-    return $_[SELF]->[EXPR]->values($_[CONTEXT]);
-}
-
-
-sub params {
-    # This isn't being called in the right place.  Function application
-    # stores args as raw block
-    
-    my ($self, $context) = @_;
-    $self->error('params() method needs some work');
-    
-    my ($posit, $named) = shift->[EXPR]->params(@_);
-    $self->debug("posit: $posit   named: $named");
-    
-    push(@$posit, $named) 
-        if $named && %$named;
-    return @$posit;
-}
-
-
-sub text {
-    $_[SELF]->[EXPR]->text($_[CONTEXT])
-}
-
-
-
-#-----------------------------------------------------------------------
-# args
-#-----------------------------------------------------------------------
-
-
-package Template::TT3::Element::Args;
-
-use Template::TT3::Class 
-    base      => 'Template::TT3::Element::Parens',
-    constant  => {
-        FINISH        => ')',
-        SEXPR_FORMAT  => "<args:%s>",
-        SOURCE_FORMAT => '( %s )',
-    };
 
 
 
