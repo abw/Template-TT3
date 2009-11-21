@@ -865,34 +865,37 @@ everything as an expression.  A template is little more than a sequence
 of expressions.  To process the template, we simply evaluate each expression
 and glue the resulting text into a single string.  
 
-Expressions are represented as trees of tokens.  In the simple case an 
-expression can be a solitary token.  So expressions are tokens, which means
-they also element.  Expressions are tokens are elements.  They're just 
-organised in a different way.  Organising the raw stream of tokens into 
-trees of expressions is the process of I<parsing> the template.  Note that
-we don't change the original linear sequence of tokens.  Rather, we add 
-additional links to describe the way that different tokens are connected
-together.
+Expressions are represented as trees of tokens. In the simple case an
+expression can be a solitary token. So expressions are tokens, which means
+they are also elements. Expressions are tokens are elements. They're just
+organised in a different way. Organising the raw stream of tokens into trees
+of expressions is the process of I<parsing> the template. Note that we don't
+change the original linear sequence of tokens. Rather, we add additional links
+to describe the way that different tokens are connected together.
 
 The first thing we need to consider is how we get rid of the whitespace
-tokens. Well that's easy. If you have a C<$token> you can call its L<skip_ws()>
+tokens. Well that's easy. If you have an C<$element> you can call its L<skip_ws()>
 method.  
 
-    $token = $token->skip_ws;
+    $element = $element->skip_ws;
 
-If C<$token> I<isn't> a whitespace token then the method will return C<$self>.
-In other words, no change. If it I<is> a whitespace token, then the token
-calls L<skip_ws()> on the token immediately following it (i.e. the next
+Of if you're using a reference to the element in C<$token>:
+
+    $$token = $$token->skip_ws;
+
+If the C<$element> I<isn't> a whitespace token then the method will return
+C<$self>. In other words, no change. If it I<is> a whitespace token, then the
+token calls L<skip_ws()> on the token immediately following it (i.e. the next
 token). Thus, the L<skip_ws()> method will merrily skip through any number of
 whitespace tokens and return a reference to the first non-whitespace token.
 
 You can also pass a reference to the current token as an argument. In this
-case the L<skip_ws()> method will automatically update your C<$token> variable
+case the L<skip_ws()> method will automatically update your C<$element> variable
 to reference the first non-whitespace token following.
 
-    $token->skip_ws(\$token);
+    $element->skip_ws(\$element);
 
-In fact, all the element parsing method expect a reference to the current
+Many of the element parsing methods expect a reference to the current
 token as the first argument.  This is effectively the "current token" pointer
 and parsing methods will automatically advance it as they consume tokens.
 It's optional for the L<skip_ws()> method and one or two other related methods, 
@@ -947,8 +950,8 @@ ask that to return itself as an expression.
     $expr = $$token->parse_expr($token, $scope);
 
 In this case the token is the C<[%> tag start token.  But that's just a 
-special kind of whitespace so it immediate skips over itself and asks the
-next token to C<parse_expr()>.  Guess what?  That's whitespace too.  But
+special kind of whitespace so it immediately skips over itself and asks the
+next token to C<parse_expr()>.  Guess what?  That's whitespace too!  But
 it all gets taken care of automatically.  The next non-whitespace token is the
 C<name> word.  When words appear in expressions like this they're treated as
 variable names.  So the word token also "knows" that it's an expression and
@@ -969,9 +972,6 @@ To avoid complicating matters, we'll just skip to the fact that there's a
 L<parse_exprs()> method which will parse a sequence of expressions.
 
     $exprs = $$token->parse_exprs($token, $scope);
-
-NOTE: this returns a block element... I'm considering re-factoring this so 
-it may yet change.
 
 There are a few element that aren't expressions. We already mentioned the C<;>
 delimiter. Tag end tokens like C<%]> are also considered a special kind of
@@ -1039,16 +1039,16 @@ To implement operator precedence we add an extra argument.
         my ($self, $lhs, $token, $scope, $prec) = @_;
 
 Each operator has it's own precedence level (defined in
-C<<$self->[META]->[LPREC]>>).  If the C<$prec> argument is specified and it
-is I<higher> that the operator's own precedence then it returns the C<$lhs>
-immediately.
+C<$self-E<gt>[META]-E<gt>[LPREC]>). If the C<$prec> argument is specified and
+it is I<higher> that the operator's own precedence then the method returns the
+C<$lhs> immediately.
 
         return $lhs
             if $prec && $prec > $self->[META]->[LPREC];
 
 If the operator's precedence is higher, or if C<$prec> is undefined then the
 method continues.  When it calls the C<parse_expr()> method to fetch an 
-expression for the C<RHS> it passed its own precedence level as the 
+expression for the C<RHS> it passes its own precedence level as the 
 extra argument. 
 
         $self->[RHS] = $$token->parse_expr(
@@ -1078,14 +1078,7 @@ To complete things, we need to change the final C<return> to be an additional
 call to C<parse_infix()> in case there are any other lower-precedence infix 
 operators following that have yielded to let us go first.
 
-bit - when it calls the method it passes its own precedence level (i.e. that of the C<+> operator) as the
-third argument.  The C<b> word that follows goes on to call the L<parse_infix()>
-method on the C<*> operator that follows it, forward this precedence level 
-along to it.  Now the C<*> operator has a decision to make.  If its own 
-precedence level is I<higher> than the one passed to it then it continues
-what it is doing and constructs a new binary expression.
-
-    return $$token->parse_infix($self, $token, $scope, $prec);
+TODO: more on this
 
 =head1 CONSTRUCTION AND CONFIGURATION METHODS
 
@@ -1336,7 +1329,7 @@ C<;> and any tag end tokens.
 =head2 parse_expr(\$element, $scope, $precedence, $force)
 
 This method parses an expression.  It returns C<undef> if the element
-can be parsed as an expression.
+cannot be parsed as an expression.
 
     my $expr = $$token->parse_expr($token);
 
@@ -1387,7 +1380,7 @@ command can be written as any of the following:
     [% if x y %]
 
 The delimiter elements, C<%]> and C<;>, respond to the C<parse_body()> method
-call by parsing a block of expression up to the terminating C<end> token. The
+call by parsing a block of expressions up to the terminating C<end> token. The
 left brace element, C<{>, responds by parsing a block of expressions up to the
 terminating C<}>. All other elements response by calling their own
 C<parse_expr()> method and returning themselves as a single expression (or
@@ -1483,12 +1476,12 @@ method simply returns the C<$lhs> expression.
 
 This method is called to parse binary infix operators.  The element on 
 the left of the operator is passed as the first argument, followed by the 
-usual element reference (C<\$element> / C<$token>), scope (C<$scope) and 
+usual element reference (C<\$element> / C<$token>), scope (C<$scope>) and 
 optional precedence level (C<$prec>).
 
-Elements that represent infix operators will parse them following expression
-and return themselves.  All other elements inherit the default method which
-returns the C<$lhs> argument.
+Elements that represent infix operators will parse their right hand side from
+the following expression and return themselves. All other elements inherit the
+default method which returns the C<$lhs> argument.
 
 =head2 parse_follow()
 
@@ -1524,10 +1517,6 @@ that yield their value to some other expression. e.g. values on the right hand
 side of an assignment such as the variable C<bar> in the following example:
 
     [% foo = bar %]         # $bar_element->value($context)
-
-, or arguments passed to a function or method call
-(the variable C<a> in the following snippets).
-
 
 =head2 values()
 
