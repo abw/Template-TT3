@@ -15,7 +15,7 @@ use Template::TT3::Class
     };
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -27,7 +27,7 @@ sub as_postop {
     $self->accept($token);
     
     # parse block
-    $self->[RHS] = $$token->as_block($token, $scope)
+    $self->[RHS] = $$token->parse_block($token, $scope)
         || return $self->missing( block => $token );
     
     # TODO: return assign node

@@ -22,7 +22,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # skip over the HTML keyword and any whitespace
@@ -32,7 +32,7 @@ sub as_expr {
     $$token->in(SKIP_WORDS, $token);
     
     # parse the next expression    
-    $self->[EXPR] = $$token->as_expr($token, $scope)
+    $self->[EXPR] = $$token->parse_expr($token, $scope)
         || return $self->missing( expression => $token );
     
     return $self;

@@ -11,23 +11,23 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # Check precedence and advance past 'block' keyword
     $self->accept_expr($token, $scope, $prec, $force)
         || return;
 
-    if ($self->[ARGS] = $$token->as_signature($token, $scope, $self)) {
+    if ($self->[ARGS] = $$token->parse_signature($token, $scope, $self)) {
         # Got a parenthesised function signature, e.g. sub(...)
     }
-    elsif ($self->[EXPR] = $$token->skip_ws($token)->as_filename($token, $scope)) {
+    elsif ($self->[EXPR] = $$token->skip_ws($token)->parse_filename($token, $scope)) {
         # Got a name, see if it's got an arguments signature, e.g. sub foo(...)
-        $self->[ARGS] = $$token->as_signature($token, $scope, $self->[EXPR]);
+        $self->[ARGS] = $$token->parse_signature($token, $scope, $self->[EXPR]);
     }
     
     # skip any whitespace then parse the following block
-    $self->[BLOCK] = $$token->skip_ws($token)->as_block($token, $scope, $self)
+    $self->[BLOCK] = $$token->skip_ws($token)->parse_block($token, $scope, $self)
         || return $self->missing( $self->ARG_BLOCK => $token );
 
     return $self;

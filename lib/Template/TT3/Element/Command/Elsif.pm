@@ -18,18 +18,18 @@ use Template::TT3::Class
     };
 
 
-sub as_follow {
+sub parse_follow {
     my ($self, $block, $token, $scope, $parent) = @_;
 
     # advance token
     $self->accept($token);
     
     # parse expression following
-    $self->[LHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
+    $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( expression => $token );
 
     # parse block following the expression, and any follow-on blocks after that
-    $self->[RHS] = $$token->as_block($token, $scope, $self, $self->FOLLOW)
+    $self->[RHS] = $$token->parse_block($token, $scope, $self, $self->FOLLOW)
         || return $self->missing( block => $token );
 
     # add $self as follow-on block of $parent

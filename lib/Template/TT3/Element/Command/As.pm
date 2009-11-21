@@ -11,7 +11,7 @@ use Template::TT3::Class
     };
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -25,7 +25,7 @@ sub as_postop {
     $self->accept($token);
 
     # parse variable name expression
-    $self->[EXPR] = $$token->as_expr($token, $scope)
+    $self->[EXPR] = $$token->parse_expr($token, $scope)
         || return $self->missing( expression => $token );
     
     return $self;

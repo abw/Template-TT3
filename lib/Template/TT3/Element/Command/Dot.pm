@@ -15,7 +15,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # Operator precedence.
@@ -23,14 +23,14 @@ sub as_expr {
         if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
 
     # parse next item as dotop   # FIXME: precedence?
-    $self->[RHS] = $$token->next_skip_ws($token)->as_dotop($token, $scope, $self->[META]->[LPREC])
+    $self->[RHS] = $$token->next_skip_ws($token)->parse_dotop($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( dotop => $token );
 
     # capture any args... 
-    $self->[ARGS] = $$token->as_args($token, $scope);
+    $self->[ARGS] = $$token->parse_args($token, $scope);
 
     # there may be other dotops following
-    my $result = $$token->skip_ws->as_postop($self, $token, $scope, $self->[META]->[LPREC]);
+    my $result = $$token->skip_ws->parse_postop($self, $token, $scope, $self->[META]->[LPREC]);
     
     if (DEBUG) {
         $self->debug("expr args: ", $self->[ARGS]);
@@ -38,7 +38,7 @@ sub as_expr {
     }
 
     # parse block following the expression
-    $self->[LHS] = $$token->as_block($token, $scope)
+    $self->[LHS] = $$token->parse_block($token, $scope)
         || return $self->missing( block => $token );
 
     $self->debug("dot command as expr: $self->[LHS] dot $self->[RHS]") if DEBUG;
@@ -49,7 +49,7 @@ sub as_expr {
 }
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -62,11 +62,11 @@ sub as_postop {
     my $other = $$token->next_skip_ws;
 
     # parse dotop name    # FIXME: precedence
-    $self->[RHS] = $$token->next_skip_ws($token)->as_dotop($token, $scope, $self->[META]->[LPREC])
+    $self->[RHS] = $$token->next_skip_ws($token)->parse_dotop($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( dotop => $token );
 
     # capture any args
-    $self->[ARGS] = $$token->as_args($token, $scope);
+    $self->[ARGS] = $$token->parse_args($token, $scope);
 
     if (DEBUG) {
         $self->debug("postop args: ", $self->[ARGS]);
@@ -76,7 +76,7 @@ sub as_postop {
     $self->debug("dot command as postop: $self->[LHS] dot $self->[RHS]") if DEBUG;
     
     # there may be other dotops following
-    return $$token->skip_ws->as_postop($self, $token, $scope, $self->[META]->[LPREC]);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $self->[META]->[LPREC]);
 }
 
 

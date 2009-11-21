@@ -6,14 +6,14 @@ use Template::TT3::Class
     constants => ':elements';
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # advance past opening token
     $self->accept($token);
 
     # parse expressions.  Any precedence (0), allow empty lists (1)
-    $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
+    $self->[EXPR] = $$token->parse_exprs($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
     
     # check next token matches our FINISH token
@@ -24,7 +24,7 @@ sub as_expr {
     $$token = $$token->next;
 
     # list/hash constructs can be followed by postops 
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -79,7 +79,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base>
 base classes.
 
-=head2 as_expr()
+=head2 parse_expr()
 
 =head2 variable()
 

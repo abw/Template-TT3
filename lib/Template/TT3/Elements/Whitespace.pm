@@ -23,15 +23,15 @@ sub skip_delimiter {
 }
 
 
-sub as_expr {
+sub parse_expr {
     # we can always skip whitespace to get to an expression
-    shift->next_skip_ws($_[0])->as_expr(@_);
+    shift->next_skip_ws($_[0])->parse_expr(@_);
 }
 
 
-sub as_block {
+sub parse_block {
     # same for a block
-    shift->next_skip_ws($_[0])->as_block(@_);
+    shift->next_skip_ws($_[0])->parse_block(@_);
 }
 
 
@@ -69,7 +69,7 @@ sub next_skip_ws {
     # So the tokeniser for these tags adds a BRANCH entry in the start token 
     # for the directive that points to the end token.  Whenever we skip_ws 
     # or next_skip_ws on one of these start tokens (as we always do when 
-    # a whitespace token as_expr() method is called) then we jump straight
+    # a whitespace token parse_expr() method is called) then we jump straight
     # down to the end token and continue from there.  For regular tags, we
     # just advance to the next token as usual.
     ($_[0]->[BRANCH] && $_[0]->[BRANCH]->skip_ws($_[1]))
@@ -125,7 +125,7 @@ use Template::TT3::Class
         eof   => 1,
     },
     alias     => {
-        as_expr => 'null',
+        parse_expr => 'null',
     };
 
 sub generate {

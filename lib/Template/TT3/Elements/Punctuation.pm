@@ -6,7 +6,7 @@ use Template::TT3::Class
     constants => ':elements';
     
 
-sub as_expr {
+sub parse_expr {
     return undef;
 }
 
@@ -37,10 +37,10 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, @args) = @_;
     $$token = $self->[NEXT] if $token;
-    $self->[NEXT]->as_expr($token, @args);
+    $self->[NEXT]->parse_expr($token, @args);
 }
 
 
@@ -71,23 +71,23 @@ sub skip_delimiter {
 }
 
 
-sub as_block {
+sub parse_block {
     my ($self, $token, $scope, $parent, $follow) = @_;
     my (@exprs, $expr);
     
     $parent ||= $self;
 
-    $self->debug("as_block()") if DEBUG;
+    $self->debug("parse_block()") if DEBUG;
  
     # skip past token any whitespace, then parse expressions
-    my $block = $$token->next_skip_ws($token)->as_exprs($token, $scope)
+    my $block = $$token->next_skip_ws($token)->parse_exprs($token, $scope)
         || return $parent->missing( $self->ARG_BLOCK, $token );
 
     # if the parent defines any follow-on blocks (e.g. elsif/else for if)
     # then we look to see if the next token is one of them and activate it
     if ($follow && $$token->skip_ws($token)->in($follow)) {
         $self->debug("Found follow-on token: ", $$token->token) if DEBUG;
-        return $$token->as_follow($block, $token, $scope, $parent);
+        return $$token->parse_follow($block, $token, $scope, $parent);
     }
 
     # otherwise the next token must be our FINISH token (end)
@@ -128,17 +128,17 @@ use Template::TT3::Class
         is_terminator => 1,
     },
     alias     => {
-        as_expr    => 'null',
-        as_block   => 'null',
-        as_postop  => 'reject',
+        parse_expr    => 'null',
+        parse_block   => 'null',
+        parse_postop  => 'reject',
         terminator => 'next_skip_ws',
     };
 
-#sub as_expr {
-#    shift->next_skip_ws($_[0])->as_expr(@_);
+#sub parse_expr {
+#    shift->next_skip_ws($_[0])->parse_expr(@_);
 #}
 
-# TODO: as_terminator() to terminate and return preceeding block  
+# TODO: parse_terminator() to terminate and return preceeding block  
 
 
 

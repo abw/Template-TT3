@@ -20,14 +20,14 @@ use Template::TT3::Class
 
 # TODO: check this isn't being inherited by text ops below...
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token) = @_;
     $$token = $self->[NEXT];        # don't use ${$_[1]} - aliasing problem
     return $self;
 }
 
 
-sub as_number {
+sub parse_number {
     shift->todo;   # need to generate numerical assertion op
     $_[0];
 }
@@ -184,7 +184,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec) = @_;
     
     # copy original TEXT into EXPR in case we don't already have a 
@@ -197,7 +197,7 @@ sub as_expr {
     
     # strings can be followed by postops (postfix and infix operators)
     return $$token->next_skip_ws($token)
-        ->as_postop($self, $token, $scope, $prec);
+        ->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -251,14 +251,14 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope) = @_;
     my $branch = $self->[BRANCH];
     
     $self->accept($token);
 
     if ($branch) {
-        $self->[BLOCK] = $branch->as_exprs(\$branch, $scope)
+        $self->[BLOCK] = $branch->parse_exprs(\$branch, $scope)
             || $self->missing( branch => $branch );
 
         my $junk = $branch->remaining_text;
@@ -272,7 +272,7 @@ sub as_expr {
     }
 
     return $$token->skip_ws($token)
-        ->as_postop($self, $token, $scope, $self->[META]->[LPREC]);
+        ->parse_postop($self, $token, $scope, $self->[META]->[LPREC]);
 }
 
 

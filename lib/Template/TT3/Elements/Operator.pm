@@ -23,12 +23,12 @@ use Template::TT3::Class
 
 
 
-sub as_dotop {
+sub parse_dotop {
     # Operators can't be dotops by default - this is really a nasty quick
-    # hack to mask the as_dotop() method in T::Element::Number which 
+    # hack to mask the parse_dotop() method in T::Element::Number which 
     # allows a number to be used as a dotop.  Because all our numeric
     # ops are subclasses of T::E::Number (the core problem, I think) that
-    # means they inherit the as_dotop() method and think they are valid
+    # means they inherit the parse_dotop() method and think they are valid
     # syntax after a dot, e.g. foo.**
 
     # FIXME: this include 'or' 'and', etc, and other keywords (unless we 
@@ -133,7 +133,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -145,11 +145,11 @@ sub as_expr {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[RPREC])
+    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[RPREC])
         || $self->no_rhs_expr($token);
 
     # carry on...
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -199,7 +199,7 @@ use Template::TT3::Class
     };
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -213,7 +213,7 @@ sub as_postop {
     $$token = $self->[NEXT];
     
     # carry on...
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -303,7 +303,7 @@ sub right_edge {
 }
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope) = @_;
     return undef;
 }
@@ -325,7 +325,7 @@ use Template::TT3::Class
     constants => ':elements';
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # Operator precedence - if our leftward binding precedence is less than
@@ -343,7 +343,7 @@ sub as_postop {
     # any operators with a higher precedence can bind tighter.  Note that 
     # we also set the $force (1) flag
     
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->missing( expression => $token );
 
     # CHECK: I originally thought that non-chaining ops should return here,
@@ -352,7 +352,7 @@ sub as_postop {
 
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
     
     # non-chaining infix operators always return at this point
     return $self;
@@ -374,7 +374,7 @@ use Template::TT3::Class
     constants => ':elements';
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # Operator precedence - if our leftward binding precedence is less than
@@ -392,12 +392,12 @@ sub as_postop {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->missing( expression => $token );
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -416,10 +416,10 @@ use Template::TT3::Class
     constants => ':elements';
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
-    # This is identical to as_postop() in T::E::O::InfixLeft all but one 
+    # This is identical to parse_postop() in T::E::O::InfixLeft all but one 
     # regard.  If we have an equal precedence between two consecutive 
     # operators then we bind the RHS pair tighter than the LHS pair, e.g.
     # "a = b = c" is parsed as "a = (b = c)".  To implement this we just 
@@ -436,13 +436,13 @@ sub as_postop {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->missing( expression => $token );
     
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
     # as the LHS
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -484,23 +484,23 @@ only define the one or two methods that are related specifically to it
 C<Template::TT3::Element::Operator::Infix> defines a base class for all
 non-chaining binary operators (NOTE: the non-chaining bit doesn't work at
 present - it behaves just like the regular chaining infix left operator - I
-need to look at this). It defines the C<as_postop()> method which subclasses
+need to look at this). It defines the C<parse_postop()> method which subclasses
 can inherit to implement the operator precedence parsing mechanism required
 for non-chaining (see earlier note) infix binary operators.
 
 C<Template::TT3::Element::Operator::InfixLeft> defines a base class
-for all leftward associative binary operators.  It defines the C<as_postop()>
+for all leftward associative binary operators.  It defines the C<parse_postop()>
 method to handle operator precedence parsing for left associative infix
 binary operators.
 
 C<Template::TT3::Element::Operator::InfixRight> defines a base class
-for all leftward associative binary operators.  It defines the C<as_postop()>
+for all leftward associative binary operators.  It defines the C<parse_postop()>
 method to handle operator precedence parsing for right associative infix
 binary operators.
 
-In all cases the C<as_postop()> method does more-or-less the same thing.
+In all cases the C<parse_postop()> method does more-or-less the same thing.
 
-    sub as_postop {
+    sub parse_postop {
         my ($self, $lhs, $token, $scope, $prec) = @_;
 
         # Operator precedence
@@ -514,16 +514,16 @@ In all cases the C<as_postop()> method does more-or-less the same thing.
         $$token = $self->[NEXT];
     
         # Parse the RHS expression
-        $self->[RHS] = $$token->as_expr(
+        $self->[RHS] = $$token->parse_expr(
             $token, $scope, $self->[META]->[LPREC], 1
         )
         || return $self->missing( expression => $token );
 
         # parse any more binary operators following
-        return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+        return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
     }
 
-The C<as_postop()> method is called with the following arguments:
+The C<parse_postop()> method is called with the following arguments:
 
     $self       # the current element object (a binary operator token)
     $lhs        # the expression element on the left of the operator
@@ -534,8 +534,8 @@ The C<as_postop()> method is called with the following arguments:
 The C<$prec> precedence limit is the key to operator precedence parsing.
 If the current operator has a precedence higher than the C<$prec> requested
 then it binds tighter than the preceding operator or expression.  In this
-case, C<as_postop()> should continue.  If on the other hand the current 
-operator has a lower precedence that that requested, the C<as_postop()> 
+case, C<parse_postop()> should continue.  If on the other hand the current 
+operator has a lower precedence that that requested, the C<parse_postop()> 
 method should return the C<$lhs> expression immediately.
 
 The difference between the infix, infix left and infix right methods all
@@ -551,7 +551,7 @@ precedence is equal.
     a = b = c       # parsed as: a = (b = c)
 
 In terms of code, the only difference is in the comparison operator in the 
-first line of (proper) code in the C<as_postop()> method.
+first line of (proper) code in the C<parse_postop()> method.
 
 C<Template::TT3::Element::Operator::InfixLeft>:
 
@@ -582,10 +582,10 @@ immediately following the current operator token (C<$self-E<gt>[NEXT]>).
         $$token = $self->[NEXT];
 
 On the right of the operator we expect another expression so we call the
-C<as_expr()> method on the next token.  
+C<parse_expr()> method on the next token.  
 
         # Parse the RHS expression
-        $self->[RHS] = $$token->as_expr(
+        $self->[RHS] = $$token->parse_expr(
             $token, $scope, $self->[META]->[LPREC], 1
         )
         || return $self->missing( expression => $token );
@@ -594,7 +594,7 @@ We pass it the reference to the current token, C<$token>, so that it can
 advance the token pointer to consume tokens from the input stream. We also
 pass it the current lexical scope, C<$scope>, although that isn't being used
 yet, so you can ignore it for now.  The next argument is the precedence of
-the current operator.  This ensures that the C<as_expr()> method will only 
+the current operator.  This ensures that the C<parse_expr()> method will only 
 consume any further binary operators that have a higher precedence (i.e.
 bind tighter).
 
@@ -633,7 +633,7 @@ Or this:
 
 In the usual case, the keywords following the C<=> assignment (C<if> and C<do>
 in these rather contrived examples) would decline and immediately return
-from the as_expr() method because their precedence is lower than that of
+from the parse_expr() method because their precedence is lower than that of
 the assignment operator.
 
 The additional C<$force> flag is a hint telling them that it's OK for them 
@@ -644,11 +644,11 @@ command keyword are then parsed as per the specified precedence.
 Now that we have an expression for the right hand side of the operator we are
 all done.  Well, almost.  There may be further infix binary operators following
 this one.  They haven't been consumed yet because their precedence was lower
-than ours.  So we finally call the C<as_postop()> method on the next token
+than ours.  So we finally call the C<parse_postop()> method on the next token
 (following any whitespace) and pass C<$self> as the left hand side expression,
 along with the current token reference, the scope and the precedence that 
 we were called with.
 
         # parse any more binary operators following
-        return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+        return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
     }

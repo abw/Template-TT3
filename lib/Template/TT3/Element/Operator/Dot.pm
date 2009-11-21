@@ -14,7 +14,7 @@ use Template::TT3::Class
     };
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # Operator precedence - if our leftward binding precedence is less than
@@ -30,19 +30,19 @@ sub as_postop {
     # advance token past operator
     $$token = $self->[NEXT];
     
-    # TODO: as_dotop() should fetch word/expression, then we look for args
+    # TODO: parse_dotop() should fetch word/expression, then we look for args
     $self->debug("asking $$token for dotop") if DEBUG;
     
-    $self->[RHS] = $$token->as_dotop($token, $scope, $self->[META]->[LPREC])
+    $self->[RHS] = $$token->parse_dotop($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( expression => $token );
 
-    $self->[ARGS] = $$token->as_args($token, $scope);
+    $self->[ARGS] = $$token->parse_args($token, $scope);
 
-    $self->debug("DOT as_postop() [$self->[LHS]] [$self->[RHS]] [$self->[ARGS]]") if DEBUG;
+    $self->debug("DOT parse_postop() [$self->[LHS]] [$self->[RHS]] [$self->[ARGS]]") if DEBUG;
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 

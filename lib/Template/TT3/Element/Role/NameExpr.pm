@@ -2,11 +2,11 @@ package Template::TT3::Element::Role::NameExpr;
 
 use Template::TT3::Class 
     version   => 2.718,
-    mixins    => 'as_expr',
+    mixins    => 'parse_expr',
     constants => ':elements';
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # Operator precedence.
@@ -15,7 +15,7 @@ sub as_expr {
 
     # advance past the keyword and whitespace then parse a filename
     $self->[EXPR] = $$token->next_skip_ws($token)
-        ->as_filename($token, $scope, $self->[META]->[LPREC])
+        ->parse_filename($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( $self->ARG_NAME => $token );
 
     return $self;

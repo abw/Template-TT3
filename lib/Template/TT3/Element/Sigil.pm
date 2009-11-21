@@ -14,7 +14,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec) = @_;
 
     # advance past sigil token
@@ -22,15 +22,15 @@ sub as_expr {
     
     # fetch next expression using our ultra-high RHS precedence, along with
     # the FORCE argument to ensure that we get at least one token if we can
-    # TODO: this should be as_variable() so that keywords are rejected
-    $self->[EXPR] = $$token->as_expr(
+    # TODO: this should be parse_variable() so that keywords are rejected
+    $self->[EXPR] = $$token->parse_expr(
         $token, $scope, $self->[META]->[RPREC], FORCE
     )   || return $self->missing( expression => $token );
     
     # TODO: allow other () [] {} to follow
-    #return $$token->as_postfix($self, $token, $scope, $prec);
+    #return $$token->parse_postfix($self, $token, $scope, $prec);
     
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -78,7 +78,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base>
 base classes.
 
-=head2 as_expr()
+=head2 parse_expr()
 
 =head1 AUTHOR
 

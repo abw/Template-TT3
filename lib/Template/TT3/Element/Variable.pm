@@ -16,7 +16,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec) = @_;
 
     # advance token
@@ -24,19 +24,19 @@ sub as_expr {
     
     # TODO ask scope to lookup variable from the symbol table
 
-    return $$token->as_postfix($self, $token, $scope, $prec);
+    return $$token->parse_postfix($self, $token, $scope, $prec);
     
-    #$self->[ARGS] = $$token->as_args($token, $scope);
+    #$self->[ARGS] = $$token->parse_args($token, $scope);
     
     # TODO: allow () [] {} following variable word
-    #return $$token->as_postfix($self, $token, $scope, $prec);
+    #return $$token->parse_postfix($self, $token, $scope, $prec);
     
     # variables can be followed by postops (postfix and infix operators)
-    #return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    #return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
-sub as_lvalue {
+sub parse_lvalue {
     return $_[0];
 }
 

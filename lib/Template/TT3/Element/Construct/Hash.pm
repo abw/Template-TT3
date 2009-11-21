@@ -15,14 +15,14 @@ use Template::TT3::Class
     };
 
 
-sub as_block {
+sub parse_block {
     my ($self, $token, $scope, $parent, $follow) = @_;
     my (@exprs, $expr);
     
     $parent ||= $self;
 
     # skip past token any whitespace, then parse expressions
-    my $block = $$token->next_skip_ws($token)->as_exprs($token, $scope)
+    my $block = $$token->next_skip_ws($token)->parse_exprs($token, $scope)
         || return $parent->missing( $self->ARG_BLOCK, $token );
 
     # check next token matches our FINISH token
@@ -33,7 +33,7 @@ sub as_block {
     # then we look to see if the next token is one of them and activate it
     if ($follow && $$token->skip_ws($token)->in($follow)) {
         $self->debug("Found follow-on token: ", $$token->token) if DEBUG;
-        return $$token->as_follow($block, $token, $scope, $parent);
+        return $$token->parse_follow($block, $token, $scope, $parent);
     }
 
     # return the $block we contain, not $self which is the { } container
@@ -75,7 +75,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element::Construct>, L<Template::TT3::Element>,
 L<Template::TT3::Base> and L<Badger::Base> base classes.
 
-=head2 as_block()
+=head2 parse_block()
 
 =head2 text()
 

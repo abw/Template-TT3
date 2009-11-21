@@ -12,25 +12,25 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # Check precedence and advance past 'block' keyword
     $self->accept_expr($token, $scope, $prec, $force)
         || return;
 
-    if ($self->[ARGS] = $$token->as_signature($token, $scope, $self)) {
+    if ($self->[ARGS] = $$token->parse_signature($token, $scope, $self)) {
         # We've got a parenthesised function signature immediately following 
         # the block keyword, e.g. hello = block(name) { 'Hello ' name }
     }
-    elsif ($self->[EXPR] = $$token->skip_ws($token)->as_filename($token, $scope)) {
+    elsif ($self->[EXPR] = $$token->skip_ws($token)->parse_filename($token, $scope)) {
         # We've got a name following the block keyword which might also have 
         # a function signature
-        $self->[ARGS] = $$token->as_signature($token, $scope, $self->[EXPR]);
+        $self->[ARGS] = $$token->parse_signature($token, $scope, $self->[EXPR]);
     }
     
     # skip any whitespace then parse the following block
-    $self->[BLOCK] = $$token->skip_ws($token)->as_block($token, $scope, $self)
+    $self->[BLOCK] = $$token->skip_ws($token)->parse_block($token, $scope, $self)
         || return $self->missing( $self->ARG_BLOCK => $token );
 
     if ($self->[EXPR]) {

@@ -21,7 +21,7 @@ use Template::TT3::Class
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # skip over the TAGS keyword and any whitespace
@@ -30,7 +30,7 @@ sub as_expr {
     # if the next token is a '.' then we parse a single word after it.
     # e.g. TAGS.inline
     if ($$token->is(DOT, $token)) {
-        $self->[LHS] = $$token->as_word($token, $scope)
+        $self->[LHS] = $$token->parse_word($token, $scope)
             || return $self->missing( 'tag name' => $token );
 
         $self->debug('got dotted TAGS: ', $self->[RHS]->[TOKEN]) if DEBUG;
@@ -41,7 +41,7 @@ sub as_expr {
     $$token->in(SKIP_WORDS, $token);
     
     # parse the next expression    
-    $self->[RHS] = $$token->as_expr($token, $scope)
+    $self->[RHS] = $$token->parse_expr($token, $scope)
         || return $self->missing( expression => $token );
     
     return $self;

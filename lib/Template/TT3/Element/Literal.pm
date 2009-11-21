@@ -17,7 +17,7 @@ use Template::TT3::Class
     };
 
 
-sub as_word {
+sub parse_word {
     my ($self, $token) = @_;
     $$token = $self->[NEXT];
     return $self;
@@ -63,7 +63,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base>
 base classes.
 
-=head2 as_word()
+=head2 parse_word()
 
 =head2 text()
 

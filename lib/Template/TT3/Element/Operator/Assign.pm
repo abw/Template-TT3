@@ -24,7 +24,7 @@ use constant {
 };
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     return $lhs 
@@ -37,11 +37,11 @@ sub as_postop {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
-    $self->[RHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC], 1)
+    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->missing( expression => $token );
     
-#    $self->debug("assign LHS signature: ", $lhs->has_signature) if DEBUG;
-    $lhs->as_lvalue($self, $self->[RHS], $scope);
+#    $self->debug("assign LHS signature: ", $lhs->hparse_signature) if DEBUG;
+    $lhs->parse_lvalue($self, $self->[RHS], $scope);
 
     # TODO: negotiation between the LHS and RHS to work out what kind of
     # assignment this is.  Is the LHS has parens, e.g. foo(), then it's a 
@@ -52,7 +52,7 @@ sub as_postop {
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
     # as the LHS
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -106,7 +106,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base>
 base classes.
 
-=head2 as_postop()
+=head2 parse_postop()
 
 =head2 number()
 

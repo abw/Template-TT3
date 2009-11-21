@@ -2,11 +2,11 @@ package Template::TT3::Element::Role::BlockExpr;
 
 use Template::TT3::Class 
     version   => 2.718,
-    mixins    => 'as_expr',
+    mixins    => 'parse_expr',
     constants => ':elements';
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # operator precedence
@@ -16,7 +16,7 @@ sub as_expr {
     # skip over the keywords and any trailing whitespace, then parse the 
     # following block
     $self->[BLOCK] = $$token->next_skip_ws($token)
-        ->as_block($token, $scope)
+        ->parse_block($token, $scope)
         || return $self->missing( $self->ARG_BLOCK => $token );
         
     return $self;

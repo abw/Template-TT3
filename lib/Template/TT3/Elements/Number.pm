@@ -11,20 +11,20 @@ use Template::TT3::Class
         SEXPR_FORMAT => '<number:%s>', 
     },
     alias     => {
-        as_number => 'self',        # this is already a number op
-        as_dotop  => 'accept',
+        parse_number => 'self',        # this is already a number op
+        parse_dotop  => 'accept',
         number    => 'value',       # our token contains the number
     };
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec) = @_;
 
     # advance token
     $$token = $self->[NEXT];
     
     # variables can be followed by postops (postfix and infix operators)
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
@@ -218,12 +218,12 @@ class->generate_number_assign_ops(
 # that can be either prefix operators or postfix operators.  e.g. '-'
 # and '+' can be prefix or postfix (infix).
 #
-# If the operator, say '+', is at the start of an expression (i.e. as_expr() 
+# If the operator, say '+', is at the start of an expression (i.e. parse_expr() 
 # is called on it) then it upgrades itself to a num_positive op and 
-# delegates to the new as_expr() method.  The num_positive op is 
+# delegates to the new parse_expr() method.  The num_positive op is 
 # Template::TT3::Element::Number::Positive, define as 'positive' in the 
 # earlier call to generate_number_ops().  If the operator appears on the 
-# right of an expression (i.e. as_postop() is called) then it does a 
+# right of an expression (i.e. parse_postop() is called) then it does a 
 # similar upgrade and delegates to num_add.
 #-----------------------------------------------------------------------
 

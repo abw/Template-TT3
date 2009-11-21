@@ -8,13 +8,13 @@ use Template::TT3::Class
     constants => ':elements';
 
 
-sub as_expr {
+sub parse_expr {
     # words become variables when requested as an expression
-    shift->become('variable')->as_expr(@_);
+    shift->become('variable')->parse_expr(@_);
 }
 
 
-sub as_dotop {
+sub parse_dotop {
     my ($self, $token) = @_;
     $$token = $self->[NEXT];
     $self->debug("using $self->[TOKEN] as dotop: $self\n") if DEBUG;
@@ -49,9 +49,9 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element::Literal>, L<Template::TT3::Element>,
 L<Template::TT3::Base> and L<Badger::Base> base classes.
 
-=head2 as_expr()
+=head2 parse_expr()
 
-=head2 as_dotop()
+=head2 parse_dotop()
 
 =head1 AUTHOR
 

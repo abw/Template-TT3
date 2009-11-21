@@ -15,7 +15,7 @@ use Template::TT3::Class
     };
 
 
-sub OLD_as_postop {
+sub OLD_parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     return $lhs 
@@ -23,10 +23,10 @@ sub OLD_as_postop {
 
     $self->[LHS] = $lhs;
     $self->[RHS] = $$token->next_skip_ws($token)
-        ->as_expr($token, $scope, $self->[META]->[LPREC], FORCE)
+        ->parse_expr($token, $scope, $self->[META]->[LPREC], FORCE)
         || return $self->missing( expression => $token );
 
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 

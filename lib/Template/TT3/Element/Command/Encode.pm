@@ -19,7 +19,7 @@ use Template::TT3::Class
 use Badger::Codecs 'Codec';
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -31,7 +31,7 @@ sub as_postop {
     $self->accept($token);
 
     # parse codec name 
-    $self->[LHS] = $$token->as_filename($token, $scope)
+    $self->[LHS] = $$token->parse_filename($token, $scope)
         || return $self->missing( $self->ARG_NAME => $token );
     
     return $self;

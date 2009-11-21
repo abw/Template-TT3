@@ -147,7 +147,7 @@ sub parse {
     my $tokens = $self->tokens;
     my $token  = $tokens->first;
     my $scope  = $self->scope;
-    my $exprs  = $token->as_exprs(\$token, $scope);
+    my $exprs  = $token->parse_exprs(\$token, $scope);
     my @leftover;
 
     while (! $token->eof) {

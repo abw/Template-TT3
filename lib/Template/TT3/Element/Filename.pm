@@ -4,7 +4,7 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::Literal',
     constants => ':elements',
-    as        => 'filename',        # mixin as_filename() role
+    as        => 'filename',        # mixin parse_filename() role
     view      => 'filename',
     constant  => {
         SEXPR_FORMAT => '<filename:%s>',

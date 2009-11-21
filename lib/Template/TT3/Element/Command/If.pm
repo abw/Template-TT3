@@ -34,7 +34,7 @@ sub sexpr {
 }
 
 
-sub as_expr {
+sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
     my $lprec = $self->[META]->[LPREC];
 
@@ -46,11 +46,11 @@ sub as_expr {
     $self->accept($token);
     
     # parse expression following
-    $self->[LHS] = $$token->as_expr($token, $scope, $lprec)
+    $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
         || return $self->missing( expression => $token );
 
     # parse block following the expression
-    $self->[RHS] = $$token->as_block($token, $scope, $self, $self->FOLLOW)
+    $self->[RHS] = $$token->parse_block($token, $scope, $self, $self->FOLLOW)
         || return $self->missing( block => $token );
 
     # TODO: look for elsif/else
@@ -59,7 +59,7 @@ sub as_expr {
 }
 
 
-sub as_postop {
+sub parse_postop {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -71,12 +71,12 @@ sub as_postop {
     $self->accept($token);
 
     # parse expression
-    $self->[LHS] = $$token->as_expr($token, $scope, $self->[META]->[LPREC])
+    $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( expression => $token );
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 #    return $self;
 }
 

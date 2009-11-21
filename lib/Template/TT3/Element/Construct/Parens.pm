@@ -12,19 +12,19 @@ use Template::TT3::Class
     };
 
 
-sub as_postfix {
-    shift->become('var_apply')->as_postfix(@_);
+sub parse_postfix {
+    shift->become('var_apply')->parse_postfix(@_);
 }
 
 
-sub as_args {
+sub parse_args {
     my ($self, $token, $scope) = @_;
 
     # advance past opening token
     $self->accept($token);
 
     # parse expressions, any precedence (0), allow empty blocks (1)
-    $self->[EXPR] = $$token->as_exprs($token, $scope, 0, 1)
+    $self->[EXPR] = $$token->parse_exprs($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
 
     # check next token matches our FINISH token
@@ -35,10 +35,10 @@ sub as_args {
 }
 
 
-sub as_signature {
+sub parse_signature {
     my ($self, $token, $scope, $parent) = @_;
 
-    $self->as_args($token, $scope, $parent) 
+    $self->parse_args($token, $scope, $parent) 
         || return;
 
     # compile function signature 
@@ -122,11 +122,11 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element::Construct>, L<Template::TT3::Element>,
 L<Template::TT3::Base> and L<Badger::Base> base classes.
 
-=head2 as_postfix()
+=head2 parse_postfix()
 
-=head2 as_args()
+=head2 parse_args()
 
-=head2 as_signature()
+=head2 parse_signature()
 
 =head2 text()
 

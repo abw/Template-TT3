@@ -256,11 +256,11 @@ sub generate_pre_post_ops {
             $name => [
                 base    => $self->{ name },
                 methods => {
-                    as_expr => sub { 
-                        shift->become($pre)->as_expr(@_);
+                    parse_expr => sub { 
+                        shift->become($pre)->parse_expr(@_);
                     },
-                    as_postop => sub { 
-                        shift->become($post)->as_postop(@_);
+                    parse_postop => sub { 
+                        shift->become($post)->parse_postop(@_);
                     },
                 },
             ]
@@ -577,10 +577,10 @@ used.  For example, the minus sign '-' can be used as a prefix operator
     )
 
 The above code creates a new C<Template::TT3::Element::Number::Minus> class.
-When used as a prefix operator (i.e. the C<as_expr()> method is called on it)
+When used as a prefix operator (i.e. the C<parse_expr()> method is called on it)
 the object will upgrade itself (via reblessing) to a
 C<Template::TT3::Element::Number::Negative> object. When used as an infix
-operator (or more generally any postfix operator, i.e. when C<as_postop()> is
+operator (or more generally any postfix operator, i.e. when C<parse_postop()> is
 called) it will upgrade itself to a
 C<Template::TT3::Element::Number::Subtract> object.
 

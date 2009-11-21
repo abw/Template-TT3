@@ -13,7 +13,7 @@ use Template::TT3::Class
         # TODO: do we need one for list_values and/or hash_values()?
     };
 
-# NOTE: I considered change the as_expr() / as_variable() methods to return 
+# NOTE: I considered change the parse_expr() / parse_variable() methods to return 
 # the next variable expression directly so we can avoid these indirections.
 # However, that's a path to FAIL because the '$' sigil should always force
 # scalar context.  Admittedly it's only required for edge cases like @$foo()

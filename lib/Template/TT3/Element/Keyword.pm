@@ -7,15 +7,15 @@ use Template::TT3::Class
     constants  => ':elements';
 
 
-sub as_word {
+sub parse_word {
     # keywords downgrade themselves to simple words when used after a dot
-    shift->become('word')->as_word(@_);
+    shift->become('word')->parse_word(@_);
 }
 
 
-sub as_dotop {
+sub parse_dotop {
     # keywords downgrade themselves to simple words when used after a dot
-    shift->become('word')->as_dotop(@_);
+    shift->become('word')->parse_dotop(@_);
 }
 
 
@@ -45,9 +45,9 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element::Literal>, L<Template::TT3::Element>,
 L<Template::TT3::Base> and L<Badger::Base> base classes.
 
-=head2 as_word()
+=head2 parse_word()
 
-=head2 as_dotop()
+=head2 parse_dotop()
 
 =head1 AUTHOR
 

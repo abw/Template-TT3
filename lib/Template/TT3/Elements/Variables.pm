@@ -24,14 +24,14 @@ use Template::TT3::Class
     };
 
 
-sub as_postfix {
+sub parse_postfix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     $self->accept($token);
 
     # TODO: should copy $lhs->[EXPR] and optimise away a whole layer
     $self->[EXPR] = $lhs;
-    $self->[ARGS] = $$token->as_exprs($token, $scope, 0, 1)
+    $self->[ARGS] = $$token->parse_exprs($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
 
     $$token->is( $self->FINISH )
@@ -41,13 +41,13 @@ sub as_postfix {
     
     $self->debug("EXPR: $self->[EXPR]   ARGS: $self->[ARGS]") if DEBUG;
 
-    return $$token->skip_ws->as_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
 }
 
 
-sub as_lvalue  {
+sub parse_lvalue  {
     my ($self, $op, $rhs, $scope) = @_;
-#    my $signature = $self->[ARGS]->as_sign
+#    my $signature = $self->[ARGS]->parse_sign
     $self->debug("I AM LAZY!");
     return $self;
 }
