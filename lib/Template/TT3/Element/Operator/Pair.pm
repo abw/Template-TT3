@@ -15,7 +15,7 @@ use Template::TT3::Class
     };
 
 
-sub OLD_parse_postop {
+sub OLD_parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     return $lhs 
@@ -26,7 +26,7 @@ sub OLD_parse_postop {
         ->parse_expr($token, $scope, $self->[META]->[LPREC], FORCE)
         || return $self->missing( expression => $token );
 
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

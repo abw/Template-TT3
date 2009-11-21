@@ -18,7 +18,7 @@ sub parse_follow {
     $self->accept($token);
     
     # parse block following the expression, and any follow-on blocks after that
-    $self->[RHS] = $$token->parse_block($token, $scope, $self)
+    $self->[RHS] = $$token->parse_body($token, $scope, $self)
         || return $self->missing( block => $token );
 
     # add $self as follow-on block of $parent

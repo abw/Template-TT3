@@ -4,6 +4,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Base',
+    view      => 'element',
     utils     => 'self_params numlike refaddr is_object',
     slots     => 'meta _next token pos',
     import    => 'class CLASS',
@@ -20,17 +21,22 @@ use Template::TT3::Class
         EOF             => 'end of file',
     },
     alias => {
+        # default parse method that decline
         parse_expr         => \&null,
-    
-        delimiter       => \&null,
-        terminator      => \&null,
-#        parse_expr         => \&null,
-        parse_dotop        => \&null,
         parse_word         => \&null,
         parse_args         => \&null,
+        parse_dotop        => \&null,
         parse_filename     => \&null,
         parse_signature    => \&null,
+        parse_infix        => \&reject,
+
+        # default evaluation method
+        pair               => 'not_implemented',
+        pairs              => 'not_implemented',
+
         has_signature   => \&null,  # NOTE: prolly not needed
+        delimiter       => \&null,
+        terminator      => \&null,
     };
 
 
@@ -99,6 +105,24 @@ sub become {
 }
 
 
+sub append {
+    my $self = shift;
+    my $element;
+    
+    if (@_ == 1 && is_object(CLASS, $_[1])) {
+        $element = shift;
+        $self->debug("adding passed element to branch: $element") if DEBUG;
+    }
+    else {
+        $element = $self->[META]->[ELEMS]->construct(@_);
+    }
+        
+    $self->[NEXT] = $element;
+    
+    return $element;
+}
+
+
 sub branch {
     # return existing branch when called without args
     return $_[SELF]->[BRANCH]
@@ -127,30 +151,6 @@ sub branch {
 }
 
 
-# Hmm... this is clumsy... we're already using next() to fetch the current
-# NEXT token and we can't overload it to accept an argument to set a new
-# NEXT (to make it work the same way as branch()) because it already accepts
-# an argument (a token ref, to advance the pointer).  Until I've had a 
-# chance to rethink the names I'm just going to call it then().
-
-sub then {
-    my $self = shift;
-    my $element;
-    
-    if (@_ == 1 && is_object(CLASS, $_[1])) {
-        $element = shift;
-        $self->debug("adding passed element to branch: $element") if DEBUG;
-    }
-    else {
-        $element = $self->[META]->[ELEMS]->construct(@_);
-    }
-        
-    $self->[NEXT] = $element;
-    
-    return $element;
-}
-
-
 
 #-----------------------------------------------------------------------
 # metadata methods
@@ -165,9 +165,9 @@ sub rprec { $_[0]->[META]->[RPREC]  }
 # nullop methods to use for aliases
 #-----------------------------------------------------------------------
 
-sub self { $_[0] }
-sub null { undef }
-
+sub null   { undef }
+sub self   { $_[0] }
+sub reject { $_[1] }
 
 #-----------------------------------------------------------------------
 # generic parse methods
@@ -194,12 +194,6 @@ sub accept_expr {
     $$token = $self->[NEXT];
 
     return $self;
-}
-
-
-sub reject {
-    # return the $token passed to us
-    $_[1];
 }
 
 
@@ -235,19 +229,10 @@ sub in {
 }
 
 
+
 #-----------------------------------------------------------------------
 # whitespace handling methods
 #-----------------------------------------------------------------------
-
-sub skip_ws { 
-    # Most tokens aren't whitespace so they simply return $self.  If a $token 
-    # reference is passed as the first argument then we update it to reference 
-    # the new token.  This advances the token pointer.
-    my ($self, $token) = @_;
-    $$token = $self if $token;
-    return $self;
-}
-
 
 sub next { 
     # next() returns the next token.  If a token reference is passed as the
@@ -263,9 +248,15 @@ sub next {
 }
 
 
-sub skip_delimiter { 
-    # Most tokens aren't delimiters so they simply return $self.  If a $token 
-    # reference is passed as the first argument then we update it to reference
+sub next_skip_ws {
+    # Delegate to the next token's skip_ws method
+    $_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]) 
+}
+
+
+sub skip_ws { 
+    # Most tokens aren't whitespace so they simply return $self.  If a $token 
+    # reference is passed as the first argument then we update it to reference 
     # the new token.  This advances the token pointer.
     my ($self, $token) = @_;
     $$token = $self if $token;
@@ -273,9 +264,13 @@ sub skip_delimiter {
 }
 
 
-sub next_skip_ws {
-    # Delegate to the next token's skip_ws method
-    $_[0]->[NEXT] && $_[0]->[NEXT]->skip_ws($_[1]) 
+sub skip_delimiter { 
+    # Most tokens aren't delimiters so they simply return $self.  If a $token 
+    # reference is passed as the first argument then we update it to reference
+    # the new token.  This advances the token pointer.
+    my ($self, $token) = @_;
+    $$token = $self if $token;
+    return $self;
 }
 
 
@@ -287,25 +282,17 @@ sub next_skip_ws {
 sub parse_postfix {
     # Most things aren't postfix operators.  The only things that are 
     # are () [] and { }.  So in most cases parse_postfix() skips any whitespace
-    # and delegates straight onto parse_postop() on the next non-whitespace 
+    # and delegates straight onto parse_infix() on the next non-whitespace 
     # token.
-    shift->skip_ws($_[1])->parse_postop(@_);
+    shift->skip_ws($_[1])->parse_infix(@_);
 }
 
 
-sub parse_postop {
-    # Args are: ($self, $lhs, $token, $scope, $prec)
-    # Default behaviour (for non-postop tokens) is to return $lhs without 
-    # advancing $token
-    return $_[1];
-}
-
-
-sub parse_block {
+sub parse_body {
     my ($self, $token, $scope, $parent, $follow) = @_;
     $parent ||= $self;
 
-    $self->debug("parse_block()") if DEBUG;
+    $self->debug("parse_body()") if DEBUG;
  
     # Any expression can be a single expression block.  We specify the command 
     # keyword precedence level, CMD_PRECEDENCE, so that the expression will 
@@ -344,11 +331,18 @@ sub parse_exprs {
         push(@exprs, $expr);
     }
 
-    return undef
-        unless @exprs || $force;
+    return @exprs || $force
+        ? \@exprs
+        : undef;
+}
+
+
+sub parse_block {
+    my $self  = shift;
+    my $exprs = $self->parse_exprs(@_) || return;
 
     return $self->[META]->[ELEMS]->construct(
-        block => $self->[TOKEN], $self->[POS], \@exprs
+        block => $self->[TOKEN], $self->[POS], $exprs
     );
 }
 
@@ -365,16 +359,27 @@ sub parse_lvalue {
     return $self->error_msg( bad_assign => $self->source );
 }
     
-#sub parse_filename {
-    # most elements aren't filenames
-#    return BLANK;
-#}
-
 
 
 #-----------------------------------------------------------------------
 # evaluation methods
 #-----------------------------------------------------------------------
+
+sub text {
+    shift->value(@_);
+}
+
+
+sub number {
+    my $self = shift;
+    my $text = $self->value(@_);
+
+    return 
+        ! defined $text ? $self->error_undef
+      : ! numlike $text ? $self->error_nan($text)
+      : $text;
+}
+
 
 sub value {
     shift->not_implemented('in element base class');
@@ -387,7 +392,7 @@ sub variable {
 
 
 sub values {
-    $_[0]->debug("values() calling value()") if DEBUG;
+    $_[0]->debug("values(): ", $_[0]->source) if DEBUG;
     shift->value(@_);
 }
 
@@ -413,37 +418,10 @@ sub OLD_hash_values {
 }
 
 
-sub pair {
-    shift->not_implemented;
-}
-
-
-sub pairs {
-#    $_[SELF]->debug_caller;
-    shift->not_implemented;
-}
-
-
 sub params {
     my ($self, $context, $posit) = @_;
     $posit ||= [ ];
     push(@$posit, $self->value($context));
-}
-
-
-sub text {
-    shift->value(@_);
-}
-
-
-sub number {
-    my $self = shift;
-    my $text = $self->value(@_);
-
-    return 
-        ! defined $text ? $self->error_undef
-      : ! numlike $text ? $self->error_nan($text)
-      : $text;
 }
 
 
@@ -452,13 +430,10 @@ sub in_signature {
 }
 
 
+
 #-----------------------------------------------------------------------
 # view / inspection methods
 #-----------------------------------------------------------------------
-
-sub view {
-    $_[CONTEXT]->view_element($_[SELF]);
-}
 
 
 sub view_guts {
@@ -481,6 +456,7 @@ sub remaining_text {
         ? join(BLANK, grep { defined } @text)
         : BLANK;
 }
+
 
 sub branch_text {
     my $self = shift;
@@ -516,6 +492,7 @@ sub error_undef {
     $self->error_msg( undefined => $self->source, @_ );
 }
 
+
 sub error_undef_in { 
     my $self = shift;
     $self->error_msg( undefined_in => $self->source, @_ );
@@ -538,28 +515,18 @@ sub missing {
 }
 
 
+
 1;
 
 __END__
 
-# default methods to access other items in a token instance or generate
-# view of it
-sub self    { $_[0] }
 sub source  { $_[0]->[TOKEN] }
 sub sexpr   { '<' . $_[0]->type . ':' . $_[0]->text . '>' }
 
+# methods to return the leftmost and rightmost leaf node of a subtree
+*left_edge  = \&self;
+*right_edge = \&self;
 
-# default behaviour for evaluating an op in list context is to return 
-# whatever it returns in scalar context
-sub values {
-#    $_[0]->debug("called: " . join(', ', (caller())[0..2]));
-    shift->value(@_);
-}
-
-# default behaviour for evaluating an op in scalar context in undefined
-sub value {
-    shift->not_implemented(" for $_[0] at " . join(', ', (caller())[0..2]));
-}
 
 # collapse a list of items down to a single string
 sub collapse {
@@ -591,17 +558,6 @@ sub expand {
     }
 }
 
-# some custom methods, effectively roles, that various op subclasses may
-# implement to do something meaningful
-
-sub assignment_methods {
-    shift->not_implemented;
-#    $_[0]->error_msg( bad_assign => $_[0]->source );
-}
-
-# methods to return the leftmost and rightmost leaf node of a subtree
-*left_edge  = \&self;
-*right_edge = \&self;
 
 
 1;
@@ -630,12 +586,25 @@ retire at this point and avail themselves of the leisure facilities.
 
 =head2 Things You Need to Know
 
-NOTE: This section contains a few rough notes.  It needs cleaning up.
+Before we get started there are some basic things you need to know for 
+the examples to make sense.
 
 =head3 Element Structure
 
-Elements are blessed array references.  The first four slots are the 
-same for all element types:
+Elements are implemented as blessed array references. Arrays are smaller and
+faster than hash arrays, the more traditional choice for basing objects on.
+
+Speed is absolutely of the essence in parsing and evaluating elements.  For
+that reason we are prepared to sacrifice a little readability for the sake
+of speed.  To make things more bearable, we define a number of constants
+that are hard-coded to numerical values representing the different array
+elements.  We call these element I<slots>.
+
+    $self->[4];         # Huh?  What's that then?
+    
+    $self->[EXPR];      # Oh right, it's the expression slot
+
+The first four slots are the same for all element types:
 
     [META, NEXT, TOKEN POS]
 
@@ -692,6 +661,22 @@ may have arguments (variables, and certain commands like C<with>) use C<ARGS>
 can have an optional branch, most notably C<if> that can be followed by an
 C<elsif> or C<else> branch.
 
+=head3 Keeping Track of the Current Element
+
+We need to keep track of the current element during scanning and parsing.
+We do this by using a reference to an element.  We use the C<$token> variable
+for this purpose (rather than C<$element>) to remind us that it's a reference
+to the current scanning/parsing token (which happens to be an element object).
+
+    # $element is an element object
+    $token = \$element;
+
+We pass this C<$token> reference around between methods so that any of them
+can advance the current token by updating the element it references.  For 
+example, to move the token onto the next element:
+
+    $$token = $$token->[NEXT];
+
 =head3 Parsing Method Arguments
 
 Element parsing methods fall into three broad categories: those that work
@@ -738,7 +723,7 @@ token goes right at the front.
 
 Methods that work on blocks expect the following arguments:
 
-    $$token->parse_block($token, $scope, $parent, $follow)
+    $$token->parse_body($token, $scope, $parent, $follow)
 
 The first two arguments are the same as for expression parsing methods.
 
@@ -1102,13 +1087,18 @@ what it is doing and constructs a new binary expression.
 
     return $$token->parse_infix($self, $token, $scope, $prec);
 
-=head1 METHODS
+=head1 CONSTRUCTION AND CONFIGURATION METHODS
 
 NOTE: This documentation is incomplete.
 
 =head2 new()
 
 Simple constructor blesses all arguments into list based object.
+
+=head2 init_meta()
+
+Internal method for initialising the element metadata that is referenced
+via the C<META> slot.
 
 =head2 constructor() 
 
@@ -1118,46 +1108,183 @@ Returns a constructor function.
 
 Stub configuration method for subclasses to redefine if they need to
 
-=head2 is($match,\$token)
+=head2 become($type)
 
-This method can be used to test if if a token matches a particular value.
-So instead of writing something like this:
+Used to change an element into a different type.
 
-    if ($token->token eq 'hello') {
+=head2 append($element)
+
+Used to append a new element to the current element.  You can either
+pass a reference to an element object, or the arguments required to 
+construct one.
+
+    $element->append( text => 'Hello', 42 );      # type, token, position
+
+=head2 branch($element)
+
+This is similar to the L<append()> method but attaches the new token to 
+its C<BRANCH> slot instead of the usual C<NEXT> slot. 
+
+    $element->branch( text => 'Hello', 42 );      # type, token, position
+
+=head1 ACCESSOR METHODS
+
+=head2 meta()
+
+This returns the metadata entry in the C<META> slot.
+
+=head2 next(\$element)
+
+This returns the element in the C<NEXT> slot that indicate the next token in
+the template source. If a token reference is passed as an argument then it
+will also be updated to reference the next token.  The following are equivalent:
+
+    $element = $element->next;
+    
+    $element->next(\$element);
+
+If C<$token> is a reference to an element (as is usually the case) then you
+would write:
+
+    $$token->next($token);
+
+=head2 token()
+
+This returns the original text of the element token.
+
+    print $element->token;
+
+=head2 pos()
+
+This return the character offset of the start of the token in the template
+source.
+
+    print " at offset ", $element->pos;
+
+=head2 self()
+
+This method simply returns the first argument, the element object itself.
+It exists only to provide a useful no-op method to create aliases to.
+
+=head2 lprec()
+
+Returns the leftward precedence of the element.  This is the value stored
+in the C<LPREC> slot of the C<META> data.  The leftward precedence is 
+used for all postfix and infix operators.
+
+=head2 rprec()
+
+Returns the rightward precedence of the element.  This is the value stored
+in the C<RPREC> slot of the C<META> data.  The rightward precedence is 
+used for all prefix operators.
+
+=head1 PARSING METHODS
+
+The following methods are used to parse a stream of token elements into a 
+tree of expressions.
+
+=head2 null()
+
+This method simply returns undef.  Like L<self()> it exists only for creating
+no-op method aliases.  For example, the default L<parse_word()> method is 
+an alias to C<null()>, effectively indicating that the element can't be 
+parsed as a word.  Elements that are words, or can be interpreted as words
+should define their own L<parse_word()> method to do something meaningful.
+
+=head2 reject($lhs, ...)
+
+This method of convenience simply returns the first argument.  It can be used
+as syntactic sugar for elements that decline a particular role.  For example,
+elements that aren't infix operators should implement a L<parse_infix()>
+method like this:
+
+    sub parse_infix {
+        my ($self, $lhs, $token, $scope, $prec) = @_;
+        
+        # we're not an infix operator so we just return the $lhs
+        return $lhs;
+    }
+
+However, it's a lot easier to define L<parse_infix()> as an alias to the 
+C<reject()> method.
+
+    package Template::TT3::Element::SomeElement;
+    
+    use Template::TT3::Class
+        base  => 'Template::TT3::Element',
+        alias = {
+            parse_infix => 'reject',
+        };
+
+The L<alias()|Template::TT3::Class/alias()> method will locate the 
+C<reject()> method defined in the C<Template::TT3::Element> base class
+and define C<parse_infix()> as a local alias to it.
+
+In fact, you don't need to do this at all because the
+C<Template::TT3::Element> base class already defines L<parse_infix()> as an
+alias to L<reject()>. However, you might be using another base class that
+defines a different L<parse_infix()> method that you want to over-ride with
+the C<reject()> method.
+
+=head2 accept(\$element)
+
+This is another simple method of convenience which advances the token
+reference to the next element and returns itself.
+
+    sub parse_expr {
+        my ($self, $token) = @_;
+        return $self->accept($token);
+    }
+
+This is short-hand for:
+
+    sub parse_expr {
+        my ($self, $token) = @_;
+        $$token = $self->[NEXT];
+        return $self;
+    }
+
+=head2 is($match,\$element)
+
+This method can be used to test if an element's token matches a particular
+value. So instead of writing something like this:
+
+    if ($element->token eq 'hello') {
         # ...
     }
 
 You can write:
 
-    if ($token->is('hello')) {
+    if ($element->is('hello')) {
         # ...
     }
 
 When you've matched successfully a token you usually want to do something
-meaningful and move onto the next token.  For example:
+meaningful and move onto the next token.  In this example, C<$token> is
+a reference to the current element:
 
-    if ($token->is('hello')) {
+    if ($$token->is('hello')) {
         # do something meaningful
         print "Hello back to you!";
 
         # advance to the next token
-        $token = $token->next;
+        $$token->next($token);
     }
     else {
-        die "Sorry, I don't understand '", $token->token, "\n";
+        die "Sorry, I don't understand '", $$token->token, "\n";
     }
 
-The C<is()> method accepts a reference to the current token as an optional
+The C<is()> method accepts a reference to the current element as an optional
 second argument. If the match is successful then the reference will be
 advanced to point to the next token. Thus the above example can be written
 more succinctly as:
 
-    if ($token->is('hello', \$token)) {
+    if ($$token->is('hello', $token)) {
         # do something meaningful
         print "Hello back to you!";
     }
     else {
-        die "Sorry, I don't understand '", $token->token, "\n";
+        die "Sorry, I don't understand '", $$token->token, "\n";
     }
 
 =head2 in(\%matches,\$token)
@@ -1174,18 +1301,300 @@ be returned.
         yo    => 'Yo Dawg',
     };
 
-    if ($response = $token->in($matches)) {
+    if ($response = $$token->in($matches)) {
         print $response;
     }
     else {
-        die "Sorry, I don't understand '", $token->token, "\n";
+        die "Sorry, I don't understand '", $$token->token, "\n";
     }
 
 As with C<is()>, you can pass a reference to the current token as the 
 optional second argument.  If the match is successful then the reference
 will be advanced to point to the next token.
 
+=head2 skip_ws(\$element)
+
+Used to skip over any whitespace tokens. 
+
+    $expr = $$token->skip_ws->parse_expr($token, $scope);
+
+=head2 next_skip_ws(\$element)
+
+Advances to the next token and then skips any whitespace
+
+    $expr = $$token->next_skip_ws->parse_expr($token, $scope);
+
+This is equivalent to:
+
+    $expr = $$token->next->skip_ws->parse_expr($token, $scope);
+
+=head2 skip_delimiter(\$element)
+
+Used to skip over any delimiter tokens.  These include the semi-colon
+C<;> and any tag end tokens.
+
+=head2 parse_expr(\$element, $scope, $precedence, $force)
+
+This method parses an expression.  It returns C<undef> if the element
+can be parsed as an expression.
+
+    my $expr = $$token->parse_expr($token);
+
+=head2 parse_exprs(\$element, $scope, $precedence, $force)
+
+This method parses a sequence of expressions separated by optional 
+delimiters (semi-colons and tag end tokens).
+
+    my $list = $$token->parse_exprs($token, $scope, $prec)
+        || die "No expressions!";
+
+The method returns a reference to a list of parsed expression elements. If no
+expressions can be parsed then it returns C<undef>. The optional C<$force>
+argument can be set to a true value to force it to always return a list
+reference, even if no expressions were parsed. This is required to parse
+expressions inside constructs that can be empty. e.g. empty lists (C<[ ]>),
+hash arrays (C<{ }>), argument lists (C<foo()>), etc.
+
+    # always returns a list reference with the $force option set
+    my $list = $$token->parse_exprs($token, $scope, $prec, 1);
+    
+    foreach my $expr (@$list) {
+        print "parsed expression: ", $expr->source, "\n";
+    }
+
+=head2 parse_block()
+
+This method is a wrapper around L<parse_exprs()> that creates a block 
+element (L<Template::TT3::Element::Block>) to represent the list of 
+expressions.  
+
+    my $block = $$token->parse_block($token, $scope, $prec, 1);
+    
+    print "parsed block: ", $block->source, "\n";
+
+=head2 parse_body()
+
+This method is the one usually called by command elements that expect a 
+block I<or> a single expression to follow them.  For example, the C<if>
+command can be written as any of the following:
+    
+    [% if x %][% y %][% end %]
+
+    [% if x; y; end %]
+
+    [% if x { y } %]
+
+    [% if x y %]
+
+The delimiter elements, C<%]> and C<;>, respond to the C<parse_body()> method
+call by parsing a block of expression up to the terminating C<end> token. The
+left brace element, C<{>, responds by parsing a block of expressions up to the
+terminating C<}>. All other elements response by calling their own
+C<parse_expr()> method and returning themselves as a single expression (or
+undef if they don't yield an expression).
+
+=head2 parse_word()
+
+This method parses the element as a word.  If an element can represent
+a word then it should return itself (C<$self>).  Otherwise it should 
+return C<undef>.  The default method in the base class returns C<undef>.
+
+=head2 parse_dotop()
+
+This method is called to parse a token immediately after a dotop.  In the 
+usual case we would expect to find a word after a dotop.  Hence, the 
+word element (L<Template::TT3::Element::Word>) responds to this method.
+Other elements that can appear after a dotop include numbers and the 
+C<$> and C<@> sigils.  
+
+    [% foo.bar       %]
+    [% items.0       %]
+    [% users.$uid    %]
+    [% album.@tracks %]
+
+All other elements inherit the default method which returns C<undef>
+
+=head2 parse_args()
+
+This method parses the elements as an argument list.  The only element
+that responds to this method is the left parenthesis (C<(> - implemented 
+in L<Template::TT3::Element::Construct::Parens>).  All other elements 
+inherit the default method which returns C<undef>.
+
+=head2 parse_signature()
+
+This is a wrapper around the L<parse_args()> method which is used in 
+place of L<parse_args()> when a function appears on the left side of 
+an assignment or in a named block/sub declaration.
+
+    [% bold(text) = "<b>$text</b>" %]
+    
+    [% sub add(x,y) { x + y } %]
+    
+    [% sub html_elem(name, %attrs, @content) {
+          '<' name attrs.html_attrs '>'
+            content.join
+          '</' name '>'
+       }
+    %]
+
+=head2 parse_filename()
+
+This method is called to parse an element as a filename.  Words, keywords
+and quoted strings all constitute valid filenames (or filename parts) and
+implement methods that respond accordingly.  The dot (C<.>) and slash 
+(C</>) may also appear in filenames.  
+
+Any of these elements will scan forwards for any other filename tokens and
+combine them into a single filename string. Consider the C<site/header.tt3>
+filename specified for the C<fill> command in the example below:
+
+    [% fill site/header.tt3 %]
+
+The filename is initially scanned as five separate tokens: 'site', '/',
+'header', '.', and 'tt3'.  The C<parse_filename()> method will reconstitute
+them into a single string.
+
+Elements that do not represent valid filename parts inherit the default
+method which returns C<undef>
+
+=head2 parse_postfix($lhs, \$element, $scope, $prec)
+
+This method is called to parse postfix operators that can appear after a
+variable name. This includes the C<--> post-decrement and C<++> post-increment
+operators, the C<()> parenthesis that denote function arguments, and the 
+C<[]> and C<{}> operators for accessing list and hash items.
+
+    foo--
+    bar++
+    bar(10,20)
+    score[n]
+    user{name}
+
+Technically speaking, those last three are I<post-circumfix> operators, but
+we're not too worried about technical details here. The important thing is
+that I<postfix> operators in this implementation are those that can only
+appear directly after a variable name with I<no> intervening whitespace.
+
+Most elements are I<not> postfix operators.  The default C<parse_postfix()>
+method simply returns the C<$lhs> expression.  
+
+=head2 parse_infix($lhs, \$element, $scope, $prec)
+
+This method is called to parse binary infix operators.  The element on 
+the left of the operator is passed as the first argument, followed by the 
+usual element reference (C<\$element> / C<$token>), scope (C<$scope) and 
+optional precedence level (C<$prec>).
+
+Elements that represent infix operators will parse them following expression
+and return themselves.  All other elements inherit the default method which
+returns the C<$lhs> argument.
+
+=head2 parse_follow()
+
+This is used to parse follow-on blocks, e.g. C<elsif> or C<else> following
+an C<if>.  It is probably going to be renamed as C<parse_branch()>.
+
+=head2 parse_lvalue()
+
+This is a temporary hack.  It may no longer be a temporary hack by the time
+you read this, but I just didn't get around to updating the documentation.
+
+=head1 EVALUATION METHODS
+
+The following methods are used to evaluate expressions to yield some value or
+values. Each expects a single argument - C<$context>. This is a reference to a
+L<Template::TT3::Context> object which encodes the state of the world (mostly
+in terms of variables defined) at a point in time.
+
+=head2 text($context)
+
+Evaluates the element expression in the context of C<$context> and returns
+the text generated by it.  Any non-text values will be coerced to text.
+This is the method that is called against expressions that are embedded
+in template blocks:
+
+    [% foo %]               # $foo_element->text($context)
+
+=head2 value()
+
+Evaluates the element expression in the context of C<$context> and returns the
+raw value generated by it. This is the method that is called on expression
+that yield their value to some other expression. e.g. values on the right hand
+side of an assignment such as the variable C<bar> in the following example:
+
+    [% foo = bar %]         # $bar_element->value($context)
+
+, or arguments passed to a function or method call
+(the variable C<a> in the following snippets).
+
+
+=head2 values()
+
+Evaluates the element expression in the context of C<$context> and returns the
+raw value or values generated by it. This is the method that is called on 
+expression that yield their values to some other expression. e.g. values 
+passed as arguments to a function or method call.
+
+    [% foo(bar) %]          # $bar_element->values($context)
+    [% foo(@bar) %]         # $at_bar_element->values($context)
+
+Most elements return the same thing from C<values()> as they do for C<value()>
+(one is usually an alias for the other).
+
+TODO: more on this
+
+=head2 list_values() (TODO: rename to items())
+
+TODO: more on this
+
+=head2 pairs()
+
+TODO: more on this
+
+=head2 VIEW METHODS
+
+=head2 view()
+
+=head2 view_guts()
+
+=head2 ERROR REPORTING AND DEBUGGING METHODS
+
+=head2 remaining_text()
+
+=head2 branch_text()
+
+=head2 bad_signature()
+
+=head2 error_undef()
+
+=head2 error_undef_in()
+
+=head2 error_nan()
+
 =head1 AUTHOR
 
-Andy Wardley  L<http://wardley.org/>
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Badger::Base>, L<Template::TT3::Base>, L<Template::TT3::Elements> and
+all the C<Template::TT3::Element::*> subclass modules.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
 

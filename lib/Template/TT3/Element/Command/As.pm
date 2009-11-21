@@ -11,7 +11,7 @@ use Template::TT3::Class
     };
 
 
-sub parse_postop {
+sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence

@@ -19,7 +19,7 @@ use Template::TT3::Class
 use Badger::Codecs 'Codec';
 
 
-sub parse_postop {
+sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence

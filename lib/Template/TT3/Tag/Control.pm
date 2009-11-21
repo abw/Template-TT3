@@ -46,7 +46,7 @@ sub parse {
     
     $self->debug("parsing control tag") if DEBUG;
 
-    if ($exprs = $token->parse_exprs(\$token)) {
+    if ($exprs = $token->parse_block(\$token)) {
         $self->debug("parsed control tag: ", $exprs->sexpr) if DEBUG;
 
         # Evaluate expressions in the current scope.  We call text() (rather
@@ -83,7 +83,7 @@ sub parse {
 __END__
     # we need to add a dummy EOF token to the end of the stream so that
     # our parse rules terminate properly
-    my $exprs = $token->parse_exprs(\$token);
+    my $exprs = $token->parse_block(\$token);
     while ($token = $token->next_skip_ws) {
         print "** ", $token->token, "\n";
         $last = $token;

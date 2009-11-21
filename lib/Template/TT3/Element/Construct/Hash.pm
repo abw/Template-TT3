@@ -15,14 +15,14 @@ use Template::TT3::Class
     };
 
 
-sub parse_block {
+sub parse_body {
     my ($self, $token, $scope, $parent, $follow) = @_;
     my (@exprs, $expr);
     
     $parent ||= $self;
 
     # skip past token any whitespace, then parse expressions
-    my $block = $$token->next_skip_ws($token)->parse_exprs($token, $scope)
+    my $block = $$token->next_skip_ws($token)->parse_block($token, $scope)
         || return $parent->missing( $self->ARG_BLOCK, $token );
 
     # check next token matches our FINISH token
@@ -75,7 +75,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element::Construct>, L<Template::TT3::Element>,
 L<Template::TT3::Base> and L<Badger::Base> base classes.
 
-=head2 parse_block()
+=head2 parse_body()
 
 =head2 text()
 

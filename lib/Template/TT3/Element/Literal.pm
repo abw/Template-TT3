@@ -10,18 +10,12 @@ use Template::TT3::Class
         SEXPR_FORMAT => '<literal:%s>',
     },
     alias      => {
-        name    => \&text,
-        value   => \&text,
-        values  => \&text,
-        source  => \&text,
+        parse_word  => 'accept',
+        name        => \&text,
+        value       => \&text,
+        values      => \&text,
+        source      => \&text,
     };
-
-
-sub parse_word {
-    my ($self, $token) = @_;
-    $$token = $self->[NEXT];
-    return $self;
-}
 
 
 sub text {

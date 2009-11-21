@@ -465,12 +465,12 @@ sub tokenise_string {
             $self->debug("double quoted variable: [$3]") if DEBUG;
             if (@text) {
                 $branch = $branch 
-                    ? $branch->then( text => join(BLANK, @text), $tpos )
+                    ? $branch->append( text => join(BLANK, @text), $tpos )
                     : $dquote->branch( text => join(BLANK, @text), $tpos );
                 @text = ();
             }
             $branch = $branch
-                ? $branch->then( word => $3, $pos )
+                ? $branch->append( word => $3, $pos )
                 : $dquote->branch( word => $3, $pos );
 
             $pos += length $3;
@@ -479,8 +479,8 @@ sub tokenise_string {
             while ($content =~ /$DOT_WORD/cogx) {
                 $self->debug("double quoted dotop: [$1]") if DEBUG;
                 $branch = $branch
-                    ->then( op_dot => '.', $pos++ )
-                    ->then( word   => $1, $pos );
+                    ->append( op_dot => '.', $pos++ )
+                    ->append( word   => $1, $pos );
                 $pos += length $1;
             }
         }
@@ -498,7 +498,7 @@ sub tokenise_string {
     if (@text) {
         if ($branch) {
             # if we've got a branch then we add any trailing text to it
-            $branch = $branch->then( text => join(BLANK, @text), $tpos );
+            $branch = $branch->append( text => join(BLANK, @text), $tpos );
         }
         else {
             # if we haven't got a branch then we've just got static text,
@@ -508,7 +508,7 @@ sub tokenise_string {
     }
     
     # if we created a branch then add a terminating EOF token
-    $branch->then('eof')
+    $branch->append('eof')
         if $branch;
 
     return $dquote;

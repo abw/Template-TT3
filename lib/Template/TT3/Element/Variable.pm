@@ -32,7 +32,7 @@ sub parse_expr {
     #return $$token->parse_postfix($self, $token, $scope, $prec);
     
     # variables can be followed by postops (postfix and infix operators)
-    #return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    #return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

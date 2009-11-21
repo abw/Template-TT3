@@ -45,7 +45,7 @@ sub parse_expr {
     $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
         || return $self->missing( expression => $token );
 
-    $self->[RHS] = $$token->parse_block($token, $scope, $self, $self->FOLLOW)
+    $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
         || return $self->missing( block => $token );
 
 #    $self->debug("RHS: $self->[RHS]");
@@ -56,7 +56,7 @@ sub parse_expr {
 }
 
 
-sub parse_postop {
+sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     return $lhs
@@ -69,7 +69,7 @@ sub parse_postop {
     $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( expression => $token );
     
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

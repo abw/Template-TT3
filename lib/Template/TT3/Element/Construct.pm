@@ -13,7 +13,7 @@ sub parse_expr {
     $self->accept($token);
 
     # parse expressions.  Any precedence (0), allow empty lists (1)
-    $self->[EXPR] = $$token->parse_exprs($token, $scope, 0, 1)
+    $self->[EXPR] = $$token->parse_block($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
     
     # check next token matches our FINISH token
@@ -24,7 +24,7 @@ sub parse_expr {
     $$token = $$token->next;
 
     # list/hash constructs can be followed by postops 
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

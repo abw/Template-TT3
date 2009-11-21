@@ -30,7 +30,7 @@ sub parse_expr {
     $self->[ARGS] = $$token->parse_args($token, $scope);
 
     # there may be other dotops following
-    my $result = $$token->skip_ws->parse_postop($self, $token, $scope, $self->[META]->[LPREC]);
+    my $result = $$token->skip_ws->parse_infix($self, $token, $scope, $self->[META]->[LPREC]);
     
     if (DEBUG) {
         $self->debug("expr args: ", $self->[ARGS]);
@@ -38,7 +38,7 @@ sub parse_expr {
     }
 
     # parse block following the expression
-    $self->[LHS] = $$token->parse_block($token, $scope)
+    $self->[LHS] = $$token->parse_body($token, $scope)
         || return $self->missing( block => $token );
 
     $self->debug("dot command as expr: $self->[LHS] dot $self->[RHS]") if DEBUG;
@@ -49,7 +49,7 @@ sub parse_expr {
 }
 
 
-sub parse_postop {
+sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # operator precedence
@@ -76,7 +76,7 @@ sub parse_postop {
     $self->debug("dot command as postop: $self->[LHS] dot $self->[RHS]") if DEBUG;
     
     # there may be other dotops following
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $self->[META]->[LPREC]);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $self->[META]->[LPREC]);
 }
 
 

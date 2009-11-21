@@ -24,7 +24,7 @@ use constant {
 };
 
 
-sub parse_postop {
+sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     return $lhs 
@@ -52,7 +52,7 @@ sub parse_postop {
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
     # as the LHS
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 
@@ -106,7 +106,7 @@ This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base>
 base classes.
 
-=head2 parse_postop()
+=head2 parse_infix()
 
 =head2 number()
 

@@ -29,9 +29,9 @@ sub parse_expr {
 }
 
 
-sub parse_block {
+sub parse_body {
     # same for a block
-    shift->next_skip_ws($_[0])->parse_block(@_);
+    shift->next_skip_ws($_[0])->parse_body(@_);
 }
 
 

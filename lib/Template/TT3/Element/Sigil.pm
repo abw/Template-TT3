@@ -30,7 +30,7 @@ sub parse_expr {
     # TODO: allow other () [] {} to follow
     #return $$token->parse_postfix($self, $token, $scope, $prec);
     
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

@@ -244,7 +244,7 @@ sub test_parser {
 
                 # parse into expression
                 my $token  = $tokens->first;
-                my $block  = $token->parse_exprs(\$token);
+                my $block  = $token->parse_block(\$token);
                 my $remain = $token->remaining_text;
                 
                 if ($remain) {

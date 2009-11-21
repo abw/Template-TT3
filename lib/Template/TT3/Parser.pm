@@ -83,11 +83,11 @@ sub parse {
     my $text = ref $source 
         ? $source
         : \$source;
-    return $self->parse_exprs($text);
+    return $self->parse_block($text);
 }
 
 
-sub parse_exprs {
+sub parse_block {
     my ($self, $text) = @_;
     my ($expr, @exprs);
     

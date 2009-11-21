@@ -14,7 +14,7 @@ use Template::TT3::Class
     };
 
 
-sub parse_postop {
+sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
     # Operator precedence - if our leftward binding precedence is less than
@@ -38,11 +38,11 @@ sub parse_postop {
 
     $self->[ARGS] = $$token->parse_args($token, $scope);
 
-    $self->debug("DOT parse_postop() [$self->[LHS]] [$self->[RHS]] [$self->[ARGS]]") if DEBUG;
+    $self->debug("DOT parse_infix() [$self->[LHS]] [$self->[RHS]] [$self->[ARGS]]") if DEBUG;
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

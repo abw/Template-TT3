@@ -31,7 +31,7 @@ sub parse_postfix {
 
     # TODO: should copy $lhs->[EXPR] and optimise away a whole layer
     $self->[EXPR] = $lhs;
-    $self->[ARGS] = $$token->parse_exprs($token, $scope, 0, 1)
+    $self->[ARGS] = $$token->parse_block($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
 
     $$token->is( $self->FINISH )
@@ -41,7 +41,7 @@ sub parse_postfix {
     
     $self->debug("EXPR: $self->[EXPR]   ARGS: $self->[ARGS]") if DEBUG;
 
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

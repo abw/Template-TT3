@@ -259,8 +259,8 @@ sub generate_pre_post_ops {
                     parse_expr => sub { 
                         shift->become($pre)->parse_expr(@_);
                     },
-                    parse_postop => sub { 
-                        shift->become($post)->parse_postop(@_);
+                    parse_infix => sub { 
+                        shift->become($post)->parse_infix(@_);
                     },
                 },
             ]
@@ -580,7 +580,7 @@ The above code creates a new C<Template::TT3::Element::Number::Minus> class.
 When used as a prefix operator (i.e. the C<parse_expr()> method is called on it)
 the object will upgrade itself (via reblessing) to a
 C<Template::TT3::Element::Number::Negative> object. When used as an infix
-operator (or more generally any postfix operator, i.e. when C<parse_postop()> is
+operator (or more generally any postfix operator, i.e. when C<parse_infix()> is
 called) it will upgrade itself to a
 C<Template::TT3::Element::Number::Subtract> object.
 

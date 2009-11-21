@@ -197,7 +197,7 @@ sub parse_expr {
     
     # strings can be followed by postops (postfix and infix operators)
     return $$token->next_skip_ws($token)
-        ->parse_postop($self, $token, $scope, $prec);
+        ->parse_infix($self, $token, $scope, $prec);
 }
 
 
@@ -258,7 +258,7 @@ sub parse_expr {
     $self->accept($token);
 
     if ($branch) {
-        $self->[BLOCK] = $branch->parse_exprs(\$branch, $scope)
+        $self->[BLOCK] = $branch->parse_block(\$branch, $scope)
             || $self->missing( branch => $branch );
 
         my $junk = $branch->remaining_text;
@@ -272,7 +272,7 @@ sub parse_expr {
     }
 
     return $$token->skip_ws($token)
-        ->parse_postop($self, $token, $scope, $self->[META]->[LPREC]);
+        ->parse_infix($self, $token, $scope, $self->[META]->[LPREC]);
 }
 
 

@@ -29,7 +29,7 @@ sub parse_follow {
         || return $self->missing( expression => $token );
 
     # parse block following the expression, and any follow-on blocks after that
-    $self->[RHS] = $$token->parse_block($token, $scope, $self, $self->FOLLOW)
+    $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
         || return $self->missing( block => $token );
 
     # add $self as follow-on block of $parent

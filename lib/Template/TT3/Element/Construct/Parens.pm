@@ -24,7 +24,7 @@ sub parse_args {
     $self->accept($token);
 
     # parse expressions, any precedence (0), allow empty blocks (1)
-    $self->[EXPR] = $$token->parse_exprs($token, $scope, 0, 1)
+    $self->[EXPR] = $$token->parse_block($token, $scope, 0, 1)
         || return $self->missing( expressions => $token );
 
     # check next token matches our FINISH token

@@ -4,10 +4,10 @@ use Template::TT3::Class
     debug      => 0,
     version    => 2.718,
     constants  => ':elements',
-    mixins     => 'parse_block';
+    mixins     => 'parse_body';
 
 
-sub parse_block {
+sub parse_body {
     my ($self, $token, $scope, $parent, $follow) = @_;
     my (@exprs, $expr);
     
@@ -15,13 +15,13 @@ sub parse_block {
     # We report all errors from this perspective.
     $parent ||= $self;
 
-    $self->debug("parse_block()") if DEBUG;
+    $self->debug("parse_body()") if DEBUG;
  
     # advance past opening block token
     $self->accept($token);
 
     # parse expressions
-    my $block = $$token->parse_exprs($token, $scope)
+    my $block = $$token->parse_block($token, $scope)
         || return $parent->missing( $self->ARG_BLOCK, $token );
 
     # check next token matches our FINISH token

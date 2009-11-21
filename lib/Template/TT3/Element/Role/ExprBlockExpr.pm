@@ -19,7 +19,7 @@ sub parse_expr {
         || return $self->missing( $self->ARG_EXPR => $token );
 
     # parse block following the expression
-    $self->[BLOCK] = $$token->parse_block($token, $scope)
+    $self->[BLOCK] = $$token->parse_body($token, $scope)
         || return $self->missing( $self->ARG_BLOCK => $token );
 
     return $self;

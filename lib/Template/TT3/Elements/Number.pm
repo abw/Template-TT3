@@ -24,7 +24,7 @@ sub parse_expr {
     $$token = $self->[NEXT];
     
     # variables can be followed by postops (postfix and infix operators)
-    return $$token->skip_ws->parse_postop($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 
@@ -223,7 +223,7 @@ class->generate_number_assign_ops(
 # delegates to the new parse_expr() method.  The num_positive op is 
 # Template::TT3::Element::Number::Positive, define as 'positive' in the 
 # earlier call to generate_number_ops().  If the operator appears on the 
-# right of an expression (i.e. parse_postop() is called) then it does a 
+# right of an expression (i.e. parse_infix() is called) then it does a 
 # similar upgrade and delegates to num_add.
 #-----------------------------------------------------------------------
 

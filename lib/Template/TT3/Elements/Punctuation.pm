@@ -71,16 +71,16 @@ sub skip_delimiter {
 }
 
 
-sub parse_block {
+sub parse_body {
     my ($self, $token, $scope, $parent, $follow) = @_;
     my (@exprs, $expr);
     
     $parent ||= $self;
 
-    $self->debug("parse_block()") if DEBUG;
+    $self->debug("parse_body()") if DEBUG;
  
     # skip past token any whitespace, then parse expressions
-    my $block = $$token->next_skip_ws($token)->parse_exprs($token, $scope)
+    my $block = $$token->next_skip_ws($token)->parse_block($token, $scope)
         || return $parent->missing( $self->ARG_BLOCK, $token );
 
     # if the parent defines any follow-on blocks (e.g. elsif/else for if)
@@ -129,8 +129,8 @@ use Template::TT3::Class
     },
     alias     => {
         parse_expr    => 'null',
-        parse_block   => 'null',
-        parse_postop  => 'reject',
+        parse_body   => 'null',
+        parse_infix  => 'reject',
         terminator => 'next_skip_ws',
     };
 
