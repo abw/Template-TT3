@@ -45,6 +45,14 @@ sub as_postfix {
 }
 
 
+sub as_lvalue  {
+    my ($self, $op, $rhs, $scope) = @_;
+#    my $signature = $self->[ARGS]->as_sign
+    $self->debug("I AM LAZY!");
+    return $self;
+}
+
+
 sub variable {
     $_[SELF]->[EXPR]->variable( $_[CONTEXT] )->apply( 
 #       $_[SELF]->[ARGS]->values( $_[CONTEXT] )

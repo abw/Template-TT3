@@ -11,6 +11,29 @@ use Template::TT3::Class
     };
 
 
+sub as_expr {
+    my ($self, $token, $scope, $prec, $force) = @_;
+
+    # Check precedence and advance past 'block' keyword
+    $self->accept_expr($token, $scope, $prec, $force)
+        || return;
+
+    if ($self->[ARGS] = $$token->as_signature($token, $scope, $self)) {
+        # Got a parenthesised function signature, e.g. sub(...)
+    }
+    elsif ($self->[EXPR] = $$token->skip_ws($token)->as_filename($token, $scope)) {
+        # Got a name, see if it's got an arguments signature, e.g. sub foo(...)
+        $self->[ARGS] = $$token->as_signature($token, $scope, $self->[EXPR]);
+    }
+    
+    # skip any whitespace then parse the following block
+    $self->[BLOCK] = $$token->skip_ws($token)->as_block($token, $scope, $self)
+        || return $self->missing( $self->ARG_BLOCK => $token );
+
+    return $self;
+}
+
+
 sub text {
     my $code = $_[SELF]->value($_[CONTEXT]);
     return $code && $code->();
@@ -22,21 +45,26 @@ sub value {
     my $args  = $self->[ARGS];
     my $block = $self->[BLOCK];
     my $vars  = $context->{ variables };
+    my $sub;
 
-    my $sub = $args
-        ? sub {
+    if ($args) {
+        my $sign  = $args->signature;
+        $sub = sub {
             local $vars->{ variables };
             $vars->set_vars(
-                tt_params($self, $args, undef, @_)
+                tt_params($self, $sign, undef, @_)
             );
             my @values = $block->values($context);
             return pop @values;
-        }
-        : sub {
+        };
+    }
+    else {
+        $sub = sub {
             local $vars->{ variables };
             my @values = $block->values($context);
             return pop @values;
         };
+    }
     
     if ($self->[EXPR]) {
         # subroutine has a name declared - we define the function and 

@@ -52,6 +52,7 @@ our $MESSAGES = {
     undefined_in    => "Undefined value returned by '<2>' expression: <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
     not_follow      => "'%s' cannot follow '%s'",
+    bad_assign      => "You cannot assign to %s",
     odd_pairs       => 'Cannot make pairs from an odd number of items (%s): %s',
     bad_args        => "Unexpected positional arguments passed to %s: %s",
     bad_params      => "Unexpected named parameters passed to %s: %s",
@@ -359,6 +360,11 @@ sub as_follow {
     return $self->error_msg( not_follow => $$token->[TOKEN], $parent->[TOKEN] );
 }
     
+
+sub as_lvalue {
+    my ($self, $op, $rhs, $scope) = @_;
+    return $self->error_msg( bad_assign => $self->source );
+}
     
 #sub as_filename {
     # most elements aren't filenames

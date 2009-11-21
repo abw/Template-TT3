@@ -1,3 +1,5 @@
+die "Template::TT3::Element::Args is deprecated\n";
+
 package Template::TT3::Element::Args;
 
 use Template::TT3::Class 

@@ -48,7 +48,7 @@ sub as_expr {
             $scope->{ blocks }->{ $name } = sub {
                 my $context = shift;
                 $self->debug("RUNNING BLOCK WITH ARGS!") if DEBUG;
-                my $params = tt_params($self, $self->[ARGS], undef, @_);
+                my $params = tt_params($self, $self->[ARGS]->signature, undef, @_);
                 $self->debug("got params: $params") if DEBUG;
                 return "TODO: real block subs";
             };
@@ -92,7 +92,7 @@ sub text {
         return sub {
             $self->debug("Running block with args: ", $self->dump_data($self->[ARGS]))
                 if DEBUG;
-            my $params = tt_params($self, $self->[ARGS], undef, @_);
+            my $params = tt_params($self, $self->[ARGS]->signature, undef, @_);
             $self->debug("got params: ", $self->dump_data($params)) if DEBUG;
             $context->{ variables }->set_vars($params);
             return $self->[BLOCK]->text( $context );

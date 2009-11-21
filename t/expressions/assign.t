@@ -49,7 +49,7 @@ foo = bar = baz = 10;
 foo: 10  bar: 10  baz: 10
 
 -- test subroutine assignment --
--- skip not yet grokking signatures on LHS of assign --
+#-- skip not yet grokking signatures on LHS of assign --
 bold(text) = "<b>$text</b>";  bold('hello world');
 -- expect --
 <b>hello world</b>

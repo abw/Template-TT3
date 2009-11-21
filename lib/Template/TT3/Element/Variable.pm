@@ -36,6 +36,11 @@ sub as_expr {
 }
 
 
+sub as_lvalue {
+    return $_[0];
+}
+
+
 sub text {
     $_[SELF]->debug("variable text(): ", $_[SELF]->source) if DEBUG;
     $_[SELF]->variable( $_[CONTEXT] )->text;

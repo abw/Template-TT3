@@ -37,26 +37,30 @@ sub as_args {
 
 sub as_signature {
     my ($self, $token, $scope, $parent) = @_;
-    my (@exprs, $expr);
-    my $signature = { };
 
+    $self->as_args($token, $scope, $parent) 
+        || return;
+
+    # compile function signature 
     $parent ||= $self;
-    my $name = $parent->[TOKEN];
-    $self->debug("sign name: $name  parent is $parent") if DEBUG;
+    $self->signature($parent->[TOKEN]);
 
-    # advance past opening token
-    $self->accept($token);
-    
-    while ($expr = $$token->skip_delimiter($token)
-                          ->as_expr($token, $scope)) {
-        push(@exprs, $expr->in_signature($name, $signature));
-    }
+    return $self;
+}
 
-    # check next token matches our FINISH token
-    return $parent->missing( $self->FINISH, $token )
-        unless $$token->is( $self->FINISH, $token );
 
-    return $signature;
+sub signature {
+    $_[0]->[BLOCK] ||= do {
+        my ($self, $name) = @_;
+        my $args = $self->[EXPR];
+        my $sign = { };
+        my $arg;
+
+        foreach $arg ($args->exprs) {
+            $arg->in_signature($name, $sign);
+        }
+        $sign;
+    };
 }
 
 
