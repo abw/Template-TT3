@@ -32,15 +32,17 @@ __DATA__
 -- test missing binary operand --
 [% a + %]
 -- error --
-TT3 Syntax Error at line 1 of "missing binary operand" test: Missing expression for '+'.  Got '%]'
-Source: [% a + %]
-               ^ here
+TT3 syntax error at line 1 of "missing binary operand" test:
+    Error: Missing expression for '+'.  Got '%]'
+   Source: [% a + %]
+                  ^ here
 
 -- test multi-line statement --
 [% a + 
    b + 
    c + ^^^   # hello world! %]
 -- error --
-TT3 Syntax Error at line 3 of "multi-line statement" test: Unexpected token: ^^^   # hello world! %]
-Source:    c + ^^^   # hello world! %]
-               ^ here
+TT3 syntax error at line 3 of "multi-line statement" test:
+    Error: Unexpected token: ^^^   # hello world! %]
+   Source:    c + ^^^   # hello world! %]
+                  ^ here

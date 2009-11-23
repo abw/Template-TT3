@@ -4,11 +4,17 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Badger::Exception',
-    utils      => 'self_params',
+    utils      => 'self_params random_advice',
     mutators   => 'file line position column element token source';
     
 
-our $FORMAT = 'TT3 Syntax Error at line <line> of <file>: <info>';
+our $FORMAT = 'TT3 syntax error at line <line> of <file>:<error><advice><source><marker>';
+our $ERROR  = "\n    Error: %s";
+our $SOURCE = "\n   Source: %s";
+our $ADVICE = "\n   Advice: %s";
+our $MARKER = "\n%s^ here";
+our $RANDOM = 0;
+
 #\n    <source>\n    <marker>';
 
 
@@ -36,16 +42,34 @@ sub whereabouts {
 
 # hack to over-ride default text() which adds file/line at end
 sub text {
-    my $self = shift;
-    my $text = shift || $self->class->any_var('FORMAT');
-    $text  =~ s/<(\w+)>/defined $self->{ $1 } ? $self->{ $1 } : "(no $1)"/eg;
+    my $self    = shift;
+    my $format  = shift || $self->class->any_var('FORMAT');
+    my $error   = shift || $self->class->any_var('ERROR');
+    my $source  = shift || $self->class->any_var('SOURCE');
+    my $marker  = shift || $self->class->any_var('MARKER');
     my $extract = $self->{ extract };
     my $column  = $self->{ column };
-#    $self->debug("source: [$source]   column: [$column]\n");
-    $text .= "\nSource: $extract" if defined $extract;
-    $text .= "\n       " . (' ' x $column) . '^ here' if defined $extract && defined $column;
-    $text .= "\n";
-    return $text;
+    my $vars    = { 
+        %$self,
+        error => sprintf($error, $self->{ info }),
+    }; 
+
+    $vars->{ source } = defined $extract
+        ? sprintf($SOURCE, $extract)
+        : '';
+
+    $vars->{ marker } = defined $extract && defined $column
+        ? sprintf($MARKER, ' ' x ($column + 10))
+        : '';
+    
+    # just for testing - there should be a hook for for further info
+    $vars->{ advice } = $RANDOM
+        ? sprintf($ADVICE, random_advice)
+        : '';
+        
+    $format =~ s/<(\w+)>/defined $vars->{ $1 } ? $vars->{ $1 } : "(no $1)"/eg;
+    $format .= "\n";
+    return $format;
 }
 
 

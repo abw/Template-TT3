@@ -44,19 +44,5 @@ sub syntax_error {
     shift->raise_error( syntax => @_ );
 }
 
-sub OLD_raise_error_msg {
-    my $self   = shift;
-    my $type   = shift;
-    my $token  = shift;
-    my $text   = $self->message(@_);
-    return $self->raise_error($type, $token, $text);
-}
-    
-        
-
-sub OLD_syntax_error_msg {
-    shift->raise_error_msg( syntax => @_ );
-}
-
 
 1;

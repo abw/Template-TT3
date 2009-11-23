@@ -8,8 +8,37 @@ use Badger::Class
         PARAMS => 'Template::TT3::Type::Params',
     },
     exports   => {
-        any   => 'tt_params tt_args tt_self_args',
+        any   => 'tt_params tt_args tt_self_args random_advice',
     };
+
+
+our @ADVICE = (
+    'Did you read the documentation?',
+    'Eat more fruit and vegetables.',
+    'Chew your food properly before swallowing.',
+    'Get lots of excercise.',
+    "Don't run with scissors.",
+    'Never look a gift horse in the mouth.',
+    "Don't give a badger vodka to drink.  They prefer beer.",
+    "Never look a gift badger in the mouth.",
+    "Don't try and carry a piano down the stairs by yourself.",
+    "Look both ways before crossing the road.  Then look again.",
+    "Never be afraid to say \"I don't know\".",
+    "Watch out for snakes.",
+    "Don't eat wild mushrooms unless you are an experienced mycologist.",
+    "Be careful with that axe, Eugene.",
+    "Keep most of your weight on your front foot.",
+    "Turn with your eyes.  The rest of your body will follow.",
+    'Give as you would like to receive.',
+    'Go placidly amidst the noise and haste.',
+    'Leave somewhere better than you found it.',
+    "Don't believe anything you read on the internet.  This especially.",
+    "Congratulations.  You have unlocked the bonus level.",
+    "Please try harder next time.",
+    "Find time to smell the roses every day.",
+    "Live long and prosper.",
+    "Don't try and melt cheese with an arc welder.",
+);
 
 
 sub tt_args {
@@ -60,6 +89,11 @@ sub tt_params {
     }
     
     return $vars;
+}
+
+
+sub random_advice {
+    return $ADVICE[int rand @ADVICE];
 }
 
 
