@@ -64,6 +64,7 @@ sub view {
     );
 }
 
+
 sub as {
     my ($self, $roles) = @_;
     my $base = $self->AS_ROLE;
@@ -176,6 +177,9 @@ sub subclass {
 }
 
 
+# TODO: change this to generate_elements() because it's no longer specific
+# to operators
+
 sub generate_ops {
     my $self = shift;
     my $spec = shift;
@@ -201,6 +205,7 @@ sub generate_ops {
         $name = shift @$args;
         $name = $self->{ name }.PKG.camel_case($name);
         
+        # TODO: change these bases to mixin roles
         while (@$args && ! ref $args->[0]) {
             $base = shift @$args;
             push(
@@ -271,7 +276,7 @@ sub generate_pre_post_ops {
 
 sub generate_number_ops {
     shift->generate_ops(
-        { id => 'num', methods => 'value values number text' },
+        { id => 'num', methods => 'text number value values' },
         @_
     );
 }
@@ -279,7 +284,7 @@ sub generate_number_ops {
 
 sub generate_number_assign_ops {
     shift->generate_ops(
-        { id => 'num', methods => 'value values number' },
+        { id => 'num', methods => 'number value values' },
         @_
     );
 }
@@ -287,7 +292,7 @@ sub generate_number_assign_ops {
 
 sub generate_text_ops {
     shift->generate_ops(
-        { id => 'txt', methods => 'value values text' },
+        { id => 'txt', methods => 'text value values' },
         @_
     );
 }
@@ -304,6 +309,14 @@ sub generate_text_assign_ops {
 sub generate_boolean_ops {
     shift->generate_ops(
         { id => 'bool', methods => 'value values' },
+        @_
+    );
+}
+
+
+sub generate_html_commands {
+    shift->generate_ops(
+        { id => 'html', methods => 'text value values' },
         @_
     );
 }

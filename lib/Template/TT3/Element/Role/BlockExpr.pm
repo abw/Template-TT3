@@ -15,7 +15,8 @@ sub parse_expr {
 
     # skip over the keywords and any trailing whitespace, then parse the 
     # following block
-    $self->[BLOCK] = $$token->next_skip_ws($token)
+    $self->[BLOCK] = $$token
+        ->next_skip_ws($token)
         ->parse_body($token, $scope)
         || return $self->missing( $self->ARG_BLOCK => $token );
         

@@ -22,7 +22,7 @@ use Badger::Factory::Class
     types   => {
         # Perl's names, and our made-up names to map different data types
         # to method providers
-#       UNDEF  => 'Template::TT3::Type::Undef',
+        UNDEF  => 'Template::TT3::Type::Undef',
         TEXT   => 'Template::TT3::Type::Text',
         ARRAY  => 'Template::TT3::Type::List',
         HASH   => 'Template::TT3::Type::Hash',

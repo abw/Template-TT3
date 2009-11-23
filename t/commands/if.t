@@ -15,7 +15,8 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 29,
+    tests   => 29
+    ,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -61,11 +62,11 @@ zulu
 foo = if a;
    'a is ' a
 end;
-bar = if not_defined;
+bar = if not_defined.defined;
    'b is ' b
-end;
+else '';
 foo 
-bar or ', no bar'
+bar.true or ', no bar'
 -- expect --
 a is alpha, no bar
 
@@ -75,7 +76,7 @@ a if b
 alpha
 
 -- test if as postop false --
-'[' a if not_defined ']'
+'[' a if not_defined.defined ']'
 -- expect --
 []
 

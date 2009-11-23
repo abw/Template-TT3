@@ -23,6 +23,9 @@ use constant {
     is_keyword => qr/^$IDENT$/
 };
 
+# quick hack
+our $FAIL_ON_DUPLICATES = 0;
+
 
 #*init = \&init_grammar;
 
@@ -137,6 +140,7 @@ sub commands {
     my (@commands, $command, $name, $element, $lprec, $rprec);
 
     $self->debug("adding commands: ", $self->dump_data($args), "\n") if DEBUG;
+    $self->debug("PRE SYMBOLS: ", $self->dump_data($symbols)) if DEBUG;
 
     @commands = map { 
         ref $_ eq ARRAY ? $_ : split(DELIMITER, $_) 
@@ -154,7 +158,11 @@ sub commands {
         }
         
         # check we haven't got an existing entry for a keyword
-        if ($symbols->{ $name }) {
+        if ($symbols->{ $name } && $FAIL_ON_DUPLICATES) {
+            if (DEBUG) {
+                $self->debug("FAILED TO INSTALL $name: ", $self->dump_data($command));
+                $self->debug("EXISTING ENTRY for $name: ", $self->dump_data($symbols->{ $name}));
+            }
             return $self->error_msg( 
                 symbol_dup => $name, $symbols->{ $name }->[ELEMENT], $name 
             );
@@ -166,10 +174,17 @@ sub commands {
         $keywords->{ $name  } = $command;
 
         $self->debug("added command $name => ", $self->dump_data($command))
-            if DEBUG;
+            if DEBUG ;
     }
     
     return $keywords;
+}
+
+
+sub add_commands {
+    # hack
+    local $FAIL_ON_DUPLICATES = 0;
+    shift->commands(@_);
 }
 
 

@@ -30,7 +30,7 @@ class->generate_boolean_ops(
             || $_[0]->[RHS]->value($_[1])
     },
     'nor' => infix_left => sub {                            # a !! b
-        my $value = $_[0]->[LHS]->value($_[1]);
+        my $value = $_[0]->[LHS]->maybe($_[1]);
         return defined $value
             ? $value
             : $_[0]->[RHS]->value($_[1])
@@ -50,7 +50,7 @@ class->generate_boolean_ops(
         )->value;
     },
     nor_set => infix_right => assignment => sub {           # a !!= b
-        my $value = $_[0]->[LHS]->value($_[1]);
+        my $value = $_[0]->[LHS]->maybe($_[1]);
         return defined $value
             ? $value
             : $_[0]->[LHS]->assign(

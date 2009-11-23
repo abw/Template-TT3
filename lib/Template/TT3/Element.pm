@@ -324,7 +324,7 @@ sub parse_exprs {
     my ($self, $token, $scope, $prec, $force) = @_;
     my (@exprs, $expr);
 
-    $token ||= do { my $this = $self; \$this };
+#    $token ||= do { my $this = $self; \$this };
  
     while ($expr = $$token->skip_delimiter($token)
                           ->parse_expr($token, $scope, $prec)) {
@@ -383,6 +383,11 @@ sub number {
 
 sub value {
     shift->not_implemented('in element base class');
+}
+
+
+sub maybe {
+    shift->value(@_);
 }
 
 
@@ -507,6 +512,7 @@ sub error_nan {
 
 sub missing {
     my ($self, $what, $token) = @_;
+    $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
     return $self->error_msg( 
         $$token->eof 
             ? (missing_for_eof => $what => $self->[TOKEN])

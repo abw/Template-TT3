@@ -51,4 +51,5 @@ properly onto value/values.
 Add T::TT3::Element::Signature which defines the signature construct. We need
 this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
 
+Allow HTML_CMDS to load only some commands.
 

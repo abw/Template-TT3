@@ -41,9 +41,20 @@ sub value {
 }
 
 sub variable {
-    $_[SELF]->[LHS]
+    $_[SELF]->[EXPR]
         ->variable( $_[CONTEXT] )
         ->set( $_[SELF]->[BLOCK]->text( $_[CONTEXT] ) );
+}
+
+sub params {
+    $_[3]->{ $_[SELF]->[EXPR]->name( $_[CONTEXT] ) }
+           = $_[SELF]->[BLOCK]->value( $_[CONTEXT] );
+}
+
+sub pairs {
+    $_[SELF]->debug("pairs [", $_[SELF]->[LHS]->source, "] [$_[SELF]->[RHS]]");
+    return $_[SELF]->[EXPR]->name( $_[CONTEXT] )     # fetch LHS as a name
+        => $_[SELF]->[BLOCK]->value( $_[CONTEXT] );   # fetch RHS as a value
 }
 
 

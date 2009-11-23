@@ -35,6 +35,7 @@ our $PREFIXES = {
     sig_        => 'sigil.',
     var_        => 'variable.',
     bool_       => 'boolean.',
+    html_       => 'HTML.',
 
     # long names
     operator_   => 'operator.',

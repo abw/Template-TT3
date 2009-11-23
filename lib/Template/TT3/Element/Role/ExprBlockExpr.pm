@@ -14,12 +14,14 @@ sub parse_expr {
         if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
 
     # advance past the keyword and whitespace then parse an expression
-    $self->[EXPR] = $$token->next_skip_ws($token)
+    $self->[EXPR] = $$token
+        ->next_skip_ws($token)
         ->parse_expr($token, $scope, $self->[META]->[LPREC])
         || return $self->missing( $self->ARG_EXPR => $token );
 
     # parse block following the expression
-    $self->[BLOCK] = $$token->parse_body($token, $scope)
+    $self->[BLOCK] = $$token
+        ->parse_body($token, $scope)
         || return $self->missing( $self->ARG_BLOCK => $token );
 
     return $self;

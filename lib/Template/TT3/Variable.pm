@@ -11,9 +11,10 @@ use Template::TT3::Class
     constants => ':type_slots BLANK',
     utils     => 'self_params',
     alias     => {
-        list     => \&get,
-        value    => \&get,
-        values   => \&get,
+        list      => \&get,
+        value     => \&get,
+        values    => \&get,
+        maybe     => \&get,
     },
     messages  => {
         undefined  => '"%s" is undefined',

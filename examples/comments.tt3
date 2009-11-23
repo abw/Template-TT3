@@ -1,0 +1,16 @@
+[%  # this is a comment because there is a space before the '#'
+    foo = 10
+%]
+
+[%  
+# this is a comment because it's at the start of a line
+    foo = 10
+%]
+
+
+[?  HTML_CMDS -?]
+[%  # this is a comment, but the fragment on the next line isn't because
+    # it's not at the start of a line and/or doesn't have a space before it
+    h1#ident 'Hello World'
+%]
+

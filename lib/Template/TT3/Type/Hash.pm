@@ -29,45 +29,70 @@ use Template::TT3::Class
     },
     exports   => {
         any   => 'HASH Hash',
+        fail  => \&export_hash_function,
+    },
+    messages  => {
+        bad_export => 'Invalid hash function specified to import: %s',
     };
 
 
 our $METHODS   = {
     # ref/type methods
-    ref      => __PACKAGE__->can('ref'),
-    type     => \&type,
+    ref         => __PACKAGE__->can('ref'),
+    type        => \&type,
 
     # constructor methods
-    new      => \&new,
-    clone    => \&clone,
+    new         => \&new,
+    clone       => \&clone,
 
     # converter methods
-    copy     => \&copy,
-    hash     => \&hash,
-    list     => \&list,
-    text     => \&text,
+    copy        => \&copy,
+    hash        => \&hash,
+    list        => \&list,
+    
+    # Oh fuck.  If vmethods mask values then you'll never be able to have a
+    # hash.text item which is just plain stupid.
+#    text        => \&text,
+    as_text        => \&text,
 
     # inspector methods
-    size     => \&size,
-    each     => \&each,
-    keys     => \&keys,
-    values   => \&values,
-    kvhash   => \&kvhash,
-    kvlist   => \&kvlist,
+    size        => \&size,
+    each        => \&each,
+    keys        => \&keys,
+    values      => \&values,
+    kvhash      => \&kvhash,
+    kvlist      => \&kvlist,
+    html_attrs  => \&html_attrs,
 
     # accessor methods
-    item     => \&item,
-    exists   => \&exists,
-    defined  => \&defined,
+    item        => \&item,
+    exists      => \&exists,
+    defined     => \&defined,
 
     # sorting methods
-    sort     => \&sort,
-    nsort    => \&nsort,
+    sort        => \&sort,
+    nsort       => \&nsort,
 
     # mutating methods
-    delete   => \&delete,
-    import   => \&hash_import,
+    delete      => \&delete,
+    import      => \&hash_import,
 };
+
+
+# TODO: generalise this and move it into type base class so all types can use it.
+
+sub export_hash_function {
+    my ($class, $target, $symbol, $more_symbols) = @_;
+    my $name = $symbol;
+    $name =~ s/^hash_//g;         # optional hash_ prefix
+    my $method = $METHODS->{ $name }
+        || return $class->error_msg( bad_export => $symbol );
+    $class->export_symbol($target, $symbol, $method);
+    return 1;
+}
+
+# For references - we need to do a final cleanup to make sure we've got as 
+# much backward compatibiity as possible.
 
 #our $TT2_HASH_VMETHODS = {
 #    item    => \&hash_item,

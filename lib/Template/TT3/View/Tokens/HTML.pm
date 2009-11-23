@@ -48,7 +48,7 @@ class->methods(
     qw(
         text comment padding html element terminator string
         literal word keyword number filename unary binary prefix
-        postfix squote dquote parens list pair
+        postfix squote dquote parens list pair variable
     )
 );
 
@@ -63,6 +63,11 @@ class->methods(
       is as if for raw
     )
 );
+
+sub view_html_element {
+    my ($self, $elem) = @_;
+    $self->span( 'html_element keyword' => $elem->[TOKEN] );
+}
 
 sub view_whitespace {
     my ($self, $elem) = @_;

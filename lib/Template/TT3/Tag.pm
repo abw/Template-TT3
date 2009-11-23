@@ -9,7 +9,7 @@ use Template::TT3::Class
     utils     => 'blessed params',
     patterns  => ':all',
     dumps     => 'start end style',
-    accessors => 'start end style',
+    accessors => 'start end style grammar',
     constants => 'HASH ARRAY REGEX NONE OFF ON BLANK CMD_PRECEDENCE :elements',
     constant  => {
         GRAMMAR   => 'Template::TT3::Grammar::TT3',
@@ -181,12 +181,12 @@ sub init_patterns {
     };
     
     # comments start '#' and extend to the end of line (or end of tag)
-    my $comment = qr/ \# $eol /sx;
+    my $comment = qr/ (?: ^\s*|\s+ ) \# $eol /msx;
 
     # whitespace can contain ignorable comments
     # TODO: fix this so that we don't gobble a newline that an outline 
     # token may be expecting
-    my $wspace = qr/ (?:\s+|$comment)+ /sx;
+    my $wspace = qr/ (?:$comment|\s+)+ /sx;
 
     # now construct table of regexen for matching various operators and 
     # other tokens, accounting for any whitespace/comments surrounding
@@ -315,6 +315,12 @@ sub commands {
     $self->{ keywords } = $self->{ grammar }->commands(@_);
     $self->debug("new keywords: ", $self->dump_data($self->{ keywords }))
         if DEBUG;
+}
+
+
+sub add_commands {
+    my $self = shift;
+    $self->{ keywords } = $self->{ grammar }->add_commands(@_);
 }
 
 

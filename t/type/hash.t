@@ -15,7 +15,7 @@ use Badger lib => '../../lib';
 use Template::TT3::Test 
     debug  => 'Template::TT3::Type::Hash',
     args   => \@ARGV,
-    tests  => 164;
+    tests  => 166;
 
 use Template::TT3::Type::Hash qw(HASH Hash);
 
@@ -509,6 +509,34 @@ hvm( hash_import => $hash, {
 
 $keys = hvm( nsort => $hash );
 is( join(', ', @$keys), 'first, second, third, fourth, fifth, sixth', 'nsorted' );
+
+
+#-----------------------------------------------------------------------
+# importing hash functions
+#-----------------------------------------------------------------------
+
+use Template::TT3::Type::Hash 'hash_html_attrs';
+
+$hash = {
+    name => 'Joe "Stumpy" Pepys',
+    email => 'joe@spinal_tap.com',
+};
+
+is( 
+    hash_html_attrs($hash), 
+    ' email="joe@spinal_tap.com" name="Joe &quot;Stumpy&quot; Pepys"',
+    'imported and used hash_html_attrs()'
+);
+
+eval "use Template::TT3::Type::Hash 'parp'";
+
+like( 
+    $@, 
+    qr/template.tt3.type.hash error - Invalid hash function specified to import: parp/,
+    'Invalid hash import'
+);
+    
+    
 
 
 __END__

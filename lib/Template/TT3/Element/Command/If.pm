@@ -106,6 +106,15 @@ sub values {
 }
 
 
+sub pairs {
+    return $_[SELF]->[LHS]->value($_[CONTEXT])
+         ? $_[SELF]->[RHS]->pairs($_[CONTEXT])
+         : $_[SELF]->[ELSE]
+            ? $_[SELF]->[ELSE]->pairs($_[CONTEXT])
+            : ();
+}
+
+
 sub source {
     my $self = shift;
     my $expr = $self->[LHS]->source;

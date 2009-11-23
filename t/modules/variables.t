@@ -13,7 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
-    tests => 22,
+    tests => 37,
     debug => 'Template::TT3::Variables',
     args  => \@ARGV;
 
@@ -102,6 +102,54 @@ is( $result->value, 1, 'one applied to give 1');
 
 is( $vars->var('inc')->apply(10)->value, 11, 'inc(10) gives 11');
 is( $vars->var('add')->apply(10,20)->value, 30, 'add(10,20) gives 30');
+
+
+
+#-----------------------------------------------------------------------
+# with()
+#-----------------------------------------------------------------------
+
+my $parent = VARS->new( data => { a => 10, b => 20  } );
+is( $parent->var('a')->value, 10, 'a is 10 in parent of with()' );
+is( $parent->var('b')->value, 20, 'b is 10 in parent of with()' );
+
+my $child = $parent->with( a => 15, c => 30 );
+is( $child->var('a')->value, 15, 'a is 15 in child of with()' );
+is( $child->var('b')->value, 20, 'b is 10 in child of with()' );
+is( $child->var('c')->value, 30, 'c is 10 in child of with()' );
+is( $parent->var('a')->value, 10, 'a is still 10 in parent of with()' );
+is( $parent->var('b')->value, 20, 'b is still 10 in parent of with()' );
+
+
+
+#-----------------------------------------------------------------------
+# just()
+#-----------------------------------------------------------------------
+
+$parent = VARS->new( data => { a => 10, b => 20  } );
+is( $parent->var('a')->value, 10, 'a is 10 in parent of just()' );
+is( $parent->var('b')->value, 20, 'b is 10 in parent of just()' );
+
+$child = $parent->just( a => 15, c => 30 );
+is( $child->var('a')->value, 15, 'a is 15 in child of just()' );
+ok( ! defined $child->var('b')->maybe, 'b is not defined in child of just()' );
+is( $child->var('c')->value, 30, 'c is 10 in child of just()' );
+is( $parent->var('a')->value, 10, 'a is still 10 in parent of just()' );
+is( $parent->var('b')->value, 20, 'b is still 10 in parent of just()' );
+
+
+
+#-----------------------------------------------------------------------
+# auto()
+#-----------------------------------------------------------------------
+
+sub auto {
+    my ($vars, $name) = @_;
+    return "default value for $name";
+}
+
+$child->auto(\&auto);
+is( $child->var('foo')->value, 'default value for foo', 'auto handler' );
 
 
 

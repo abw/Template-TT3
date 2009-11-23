@@ -25,4 +25,3 @@ ok( 1, 'loaded Template::TT3::Context' );
 my $context = CONTEXT->new;
 ok( $context, 'created context object' );
 
-

@@ -53,6 +53,12 @@ sub value {
 }
 
 
+sub maybe {
+    $_[SELF]->debug("variable maybe(): ", $_[SELF]->source) if DEBUG;
+    $_[SELF]->variable( $_[CONTEXT] )->maybe;
+}
+
+
 sub list_values {
     $_[SELF]->debug("variable values(): ", $_[SELF]->source) if DEBUG;
     # explicitly force list context

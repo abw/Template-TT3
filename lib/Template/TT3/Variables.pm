@@ -81,9 +81,26 @@ sub var {
     $self->debug("var($name)") if DEBUG;
     
     return  $self->{ vars }->{ $name } 
-        ||= $self->use_var( $name => $self->{ data }->{ $name } );
+#        ||= $self->use_var( $name => $self->{ data }->{ $name } );
+        ||= $self->get_var( $name );
 }
 
+sub get_var {
+    my ($self, $name) = @_;
+
+    if (exists $self->{ data }->{ $name }) {
+        $self->use_var( $name => $self->{ data }->{ $name } );
+    }
+    elsif ($self->{ auto }) {
+        $self->use_var( $name => $self->{ auto }->($self, $name) );
+    }
+    else {
+        # TODO: make this call undef_var() in case we want to re-define it
+        $self->use_var( $name => undef );
+    }
+}
+        
+    
 sub set_var {
     my ($self, $name, $value) = @_;
 
@@ -152,5 +169,40 @@ sub reset {
     delete $self->{ vars };
 }
 
+
+sub with {
+    my ($self, $params) = self_params(@_);
+    my $data  = $self->{ data };
+    my $class = ref $self || $self;
+    bless {
+        %$self,
+        data   => { %$data, %$params },
+        vars   => { },
+        parent => $self,
+    }, $class;
+}
+
+
+sub just {
+    my ($self, $params) = self_params(@_);
+    my $data  = $self->{ data };
+    my $class = ref $self || $self;
+    bless {
+        %$self,
+        data   => $params,
+        vars   => { },
+        parent => $self,
+    }, $class;
+}
+
+
+# tmp hack to try out automatically resolved data
+
+sub auto {
+    my ($self, $handler) = @_;
+    $self->{ auto } = $handler;
+}
+
+    
 1;
 

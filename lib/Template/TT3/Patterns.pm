@@ -45,7 +45,7 @@ use Template::TT3::Class
 #-----------------------------------------------------------------------
 
 our $TO_EOL     = qr/ (?-s).* /x;
-our $COMMENT    = qr/ \# $TO_EOL /ox;
+our $COMMENT    = qr/ [\a\s] \# $TO_EOL /mox;
 our $SPACE      = qr/ \G \s* /ox;
 our $WHITESPACE = qr/ \G \s* (?:$COMMENT\s*)* /ox;
 our $LAST_LINE  = qr/(?:\n|^)([^\n]*)\z/;

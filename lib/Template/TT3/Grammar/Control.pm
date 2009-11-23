@@ -7,6 +7,8 @@ use Template::TT3::Class
     base     => 'Template::TT3::Grammar';
 
 
+our $COMMANDS = 'as';
+
 our $SYMBOLS  = [
     [ '.'           => op_dot           => 340,   0 ],
     [ '*'           => num_multiply     => 280,   0 ],
@@ -24,6 +26,7 @@ our $SYMBOLS  = [
     [ 'TAGS'        => ctr_tags         =>   0,   0 ],
     [ 'HTML'        => ctr_html         =>   0,   0 ],
     [ 'COMMANDS'    => ctr_commands     =>   0,   0 ],
+    [ 'HTML_CMDS'   => ctr_html_cmds    =>   0,   0 ],
 ];
 
 1;

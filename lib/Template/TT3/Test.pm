@@ -198,6 +198,11 @@ sub test_handler {
         manager->debug('OUTPUT: ', $result);
     }
 
+    if ($test->{ exflag }->{ collapse }) {
+        # collapse any whitespace in expected output
+        $test->{ expect } =~ s/\n\s*//sg;
+    }
+
     chomp $result;
     return $result;
 }

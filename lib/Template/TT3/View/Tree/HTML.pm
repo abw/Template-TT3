@@ -10,6 +10,9 @@ use Template::TT3::Class
     constant  => {
         ATTR    => '%s="%s"',
         ELEMENT => "<%s%s>%s</%s>",
+    },
+    alias => {
+        view_html => \&view_text,
     };
 
 our $TRIM_TEXT = 128;
@@ -98,6 +101,15 @@ sub view_squote {
     );
 }
 
+sub view_html_element {
+    my ($self, $elem) = @_;
+    $self->element( 
+        "html keyword element", $elem,
+        $elem->[BLOCK]->view($self)
+    )
+}
+
+
 sub view_dquote {
     my ($self, $elem) = @_;
     my $block = $elem->[BLOCK];
@@ -182,6 +194,14 @@ sub view_raw {
     );
 }
 
+sub OLD_view_html {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'html keyword' => $elem,
+        $elem->[TOKEN] 
+    );
+}
+
 sub view_is {
     my ($self, $elem) = @_;
     $self->element( 
@@ -221,9 +241,6 @@ class->methods(
     }
     qw( keyword number variable word )
 );
-
-
-#        literal word keyword number filename unary binary prefix postfix
 
     
 1;

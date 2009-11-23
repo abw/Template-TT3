@@ -18,7 +18,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Base',
     import    => 'class',
-    constants => 'HASH',
+    constants => 'HASH TRUE FALSE',
     constant  => {
         # tell Badger what class to strip off to generate id()
         base_id => __PACKAGE__,
@@ -30,11 +30,17 @@ use Template::TT3::Class
     };
 
 our $METHODS = {
-    new     => __PACKAGE__->can('new'),
-    method  => \&method,       # TODO: can() as alias to method()?
-    methods => \&methods,
-    ref     => \&ref,
-    hush    => \&hush,
+    new       => __PACKAGE__->can('new'),
+    method    => \&method,       # TODO: can() as alias to method()?
+    methods   => \&methods,
+    ref       => \&ref,
+    hush      => \&hush,
+    def       => \&defined,
+    defined   => \&defined,
+    undefined => \&undefined,
+    undef     => \&undefined,
+    true      => \&true,
+    false     => \&false,
 };
 
 
@@ -68,6 +74,22 @@ sub ref {
 
 sub hush {
     return '';
+}
+
+sub defined {
+    CORE::defined $_[0] ? TRUE : FALSE;
+}
+
+sub undefined {
+    CORE::defined $_[0] ? FALSE : TRUE;
+}
+
+sub true {
+    $_[0] ? $_[0] : FALSE;
+}
+
+sub false {
+    $_[0] ? FALSE : TRUE;
 }
 
 
@@ -124,6 +146,22 @@ to do things in a stricter object-oriented style.
     [% text = Text.new('Hello World')  %]
     [% list = List.new(10, 20, 30)     %]
     [% hash = Hash.new(x = 10, y = 20) %]
+
+TT3 uses L<Template::TT3::Variable> objects to represent variables internally.
+When a variable is first accessed in a template, the L<Template::Variables>
+module responsible for managing variables creates a variable object to
+represent it. 
+
+Variables that contain scalar text (or numbers which we treat as just another
+kind of text for all intents and purposes) are represented using
+L<Template::TT3::Variable::Text> objects. Hash array references use
+L<Template::TT3::Variable::Hash> objects, list references use
+L<Template::TT3::Variable::List> reference, and so on. Undefined values get
+their own special variable type, L<Template::TT3::Variable::Undef>. 
+
+In each case, these variable objects have a corresponding
+L<Template::TT3::Type> module which defines the virtual methods applicable 
+to that type. 
 
 =head1 METHODS
 

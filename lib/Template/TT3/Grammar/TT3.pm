@@ -62,6 +62,8 @@ our $SYMBOLS  = [
     [ '!'       => bool_not         =>   0, 285 ],      # !foo
     [ '&&'      => bool_and         => 255,   0 ],      # foo && bar
     [ '||'      => bool_or          => 250,   0 ],      # foo || bar
+    
+    # TODO: '!!' as a prefix operator:   !!some_var_that_may_be_undefined
     [ '!!'      => bool_nor         => 250,   0 ],      # foo !! bar
 
     [ '..'      => num_range        => 240,   0 ],      # 1 .. 91
@@ -108,6 +110,7 @@ our $SYMBOLS  = [
     [ ','       => separator        =>   0,   0 ],
     [ ';'       => delimiter        =>   0,   0 ],
     [ ':'       => terminator       =>   0,   0 ],
+    [ '#'       => terminator       =>   0,   0 ],
     
     # One token to end them all and in the darkness bind them
     [ 'end'     => end              =>   0,   0 ],

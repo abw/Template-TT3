@@ -1,0 +1,119 @@
+[# HTML commands aren't enabled by default - you have to load them up using
+ # the HTML_CMDS compile time control.
+ #]
+   
+[?  HTML_CMDS ?]
+
+
+[# We also want to turn on HTML mode so we can see the results as raw HTML #]
+[? HTML on ?]
+
+
+[# 
+ # Now you have commands corresonding to all the HTML element types.
+ # The HTML element type is used as a keyword.  A single expression denoting
+ # the element content must follow
+ #]
+[%  b 'bold text'                    # generates <b>bold text</b> %]
+[%  b i 'bold and italic text'       # generates nexted <b><i>...</i></b> %]
+
+
+[# You can use any of the regular block construction techniques to define
+ # a block of content
+ #]
+
+[%  b %]Bold Text[% end %]
+
+[%  b { 'Bold' 'Text' } %]
+
+
+[# You can also use another HTML expression to nest content #]
+
+[%  ul li 'An item in an unordered list' %]
+
+
+[# Or you can have a block of other HTML element #]
+
+[%  ul {
+        li 'Item One'
+        li 'Item Two'
+        li 'Item Three'
+    }
+%]
+
+
+[# Attributes can be specified using either (...) or [...] immediately
+ # following the HTML element keyword 
+ #]
+
+[%  a(href="example.html") 'Hello World' %]
+
+[%  a[href="example.html"] 'Hello World' %]
+
+
+[# Attributes can be expressions.  As can the HTML element content #]
+
+[%  item = { 
+        url  = 'example.html'
+        text = 'Example Text'
+    }
+    a[href=item.url, class=item.class if item.class] item.text %]
+%]
+
+
+[# The HTML elements are full-blown keywords.  You can integrate them
+ # with other TT3 keywords
+ #]
+
+[%  items = [
+        { url = 'example1.html', text = 'Example One', class = 'warm' }
+        { url = 'example2.html', text = 'Example Two'   }
+        { url = 'example3.html', text = 'Example Three' }
+    ]
+    
+    ul {
+        for items {
+            a[href=item.url, class=item.class if item.class] item.text
+        }
+    }
+%]
+
+
+[%  ul %]
+
+[# For convenience, CSS classes can be specified using CSS selectors #]
+
+[%      li[class='menu'] 'Explicit Class Attribute'  # explicit 'class' attribute %]
+[%      li.menu 'Dotted Class Modifier'              # same thing %]
+
+
+[# The thing applies to element IDs #]
+
+[%      li[id='item1'] 'Hello World'    # explicit 'id' attribute %]
+[%      li#item1 'Hello World'          # same thing %]
+
+
+[# You can mix and match attributes, .class and #id modifiers #]
+
+[%      li[class="class1" styles="font-weight:bold"].class2.class3#item2 'Multiple classes and id' %]
+
+[% end %]
+
+
+[# A complete example #]
+
+[%  table.example { #math_constants {
+        tr.odd {
+            th 'pi'
+            td 3.142
+        }
+        tr.even {
+            th 'e'
+            td 2.718
+        }
+        tr.odd {
+            th 'phi'
+            td 1.618
+        }
+    }
+-%]
