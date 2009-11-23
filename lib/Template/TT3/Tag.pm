@@ -19,6 +19,7 @@ use Template::TT3::Class
         bad_style  => 'Invalid tag style specified: %s',
         no_token   => 'No token specified for %s of tag.',
         no_end     => 'Missing end token for tag: %s',
+        unexpected => 'Unexpected token: %s',
     };
  
 our $TAG_STYLES     = { };
@@ -364,6 +365,7 @@ sub tokenise {
         }
         elsif ($$input =~ /$IDENT/cog) {
             if ($type = $self->{ keywords }->{ $1 }) {
+                $self->debug("matched keyword: [$1]") if DEBUG;
                 $self->{ grammar }->matched($input, $output, $1, $pos);
                 # TMP HACK
                 # $output->keyword_token($1, $pos);
@@ -372,6 +374,7 @@ sub tokenise {
                 # $output->$type($1, $pos);
             }
             else {
+                $self->debug("matched word: [$1]") if DEBUG;
                 $output->word_token($1, $pos);
             }
         }
@@ -404,10 +407,11 @@ sub tokenise {
             $output->number_token($1, $pos);
         }
         elsif ($$input =~ /$self->{ match_whitespace }/cg) {
+            $self->debug("matched whitespace: $1") if DEBUG;
             $output->whitespace_token($1, $pos);
         }
         else {
-            return $self->error("Unexpected input: [", $self->remaining_text($input), "]");
+            return $self->unexpected($input);
         }
         
         $pos = pos $$input;
@@ -521,23 +525,6 @@ sub tokenise_string {
 }
 
 
-# TMP STUFF
-
-sub unescape {
-    my ($self, $text, $match, $replace) = @_;
-    
-    $match = quotemeta $match
-        unless ref $match eq REGEX;
-
-#    $match = qr/\\(\\|$match)/;
-    $match = qr/\\($match)/;
-#    $self->debug(" pre: $text");
-#    $self->debug("  qm: $match");
-    $text =~ s/$match/($replace && $replace->{ $1 }) || $1/ge;
-#    $self->debug("post: $text");
-    return $text;
-}
-
 
 #-----------------------------------------------------------------------
 # Token matching methods
@@ -579,6 +566,22 @@ sub remaining_text {
     return $result || '';
 }
 
+
+#-----------------------------------------------------------------------
+# error handling
+#-----------------------------------------------------------------------
+
+sub unexpected {
+    my ($self, $text) = @_;
+    my $remain = $text->lookahead(32, '...');
+    my $where  = $text->whereabouts;
+    my $msg    = $self->message( unexpected => $remain );
+
+    return $self->syntax_error(
+        %$where,
+        info => $msg,
+    );
+}
 
 1;
 

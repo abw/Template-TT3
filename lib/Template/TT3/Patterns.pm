@@ -126,7 +126,8 @@ our $INDEX    = qr/ \G ( -? \d+ ) /x;
 # identifier (e.g.  file:foo.txt).  $NAMESPACE is the prefix by itself.
 #------------------------------------------------------------------------
 
-our $BAREWORD  = qr/ [[:alpha:]^_] \w* /x;
+#our $BAREWORD  = qr/ [[:alpha:]^_] \w* /x;
+our $BAREWORD  = qr/ [[:alpha:]] \w* /x;
 our $IDENT     = qr/ \G ( $BAREWORD ) /x;
 our $KEYWORD   = qr/ \G $IDENT \b /x;
 our $STATIC    = qr/ \G ( [[:alpha:]] \w* | -? \d+ ) /x;

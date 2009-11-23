@@ -10,12 +10,14 @@ use Template::TT3::Class
     accessors   => 'text',
     constants   => 'GLOB',
     constant    => {
-        SOURCE  => 'Template::TT3::Type::Source',
-        SCOPE   => 'Template::TT3::Scope',
-        SCANNER => 'Template::TT3::Scanner',
-        VARS    => 'Template::TT3::Variables',
-        TREE    => 'Template::TT3::Type::Tree',
-        TAG     => 'Template::TT3::Tag',
+        SOURCE      => 'Template::TT3::Type::Source',
+        SCOPE       => 'Template::TT3::Scope',
+        SCANNER     => 'Template::TT3::Scanner',
+        VARS        => 'Template::TT3::Variables',
+        TREE        => 'Template::TT3::Type::Tree',
+        TAG         => 'Template::TT3::Tag',
+        FROM_TEXT   => 'template text',
+        FROM_FH     => 'template read from filehandle',
     };
 
 use Template::TT3::Type::Source 'Source';
@@ -28,20 +30,25 @@ sub init {
     my ($self, $config) = @_;
     my $file;
 
+    $self->{ name } = $config->{ name };
+    
     # quick hack for now
     if ($file = $config->{ file }) {
         if (ref $file eq GLOB) {
             local $/ = undef;
-            $self->{ text } = <$file>;
+            $self->{ text }   = <$file>;
+            $self->{ name } ||= FROM_FH;
         }
         else {
-            $self->{ file } = File($file)->must_exist;
-            $self->{ text } = $self->{ file }->text;
+            $self->{ file }   = File($file)->must_exist;
+            $self->{ text }   = $self->{ file }->text;
+            $self->{ name } ||= $file;
         }
     }
     elsif (defined $config->{ text }) {
         # TODO: should we alias or delete the original?
-        $self->{ text } = delete $config->{ text };
+        $self->{ text }   = delete $config->{ text };
+        $self->{ name } ||= FROM_TEXT;
     }
     else {
         return $self->error_msg( missing => 'text or file' );
@@ -143,11 +150,29 @@ sub fill {
 
 
 sub parse {
-    my $self   = shift;
-    my $tokens = $self->tokens;
-    my $token  = $tokens->first;
-    my $scope  = $self->scope;
-    my $exprs  = $token->parse_block(\$token, $scope);
+    my $self  = shift;
+    my ($tokens, $token, $scope, $exprs);
+        
+    $exprs = eval {
+        $tokens = $self->tokens;
+        $token  = $tokens->first;
+        $scope  = $self->scope;
+        $token->parse_block(\$token, $scope);
+    };
+    
+    unless ($exprs) {
+        my $error = $@;
+        die $error unless ref $error;           # TODO is_object
+        $error->file( $self->{ name } );
+        my $posn = $error->try->position;
+        if ($posn) {
+            $error->whereabouts(
+                $self->source->whereabouts( position => $posn )
+            );
+        }
+        $error->throw;
+    }
+    
     my @leftover;
 
     while (! $token->eof) {

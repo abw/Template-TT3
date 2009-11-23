@@ -65,6 +65,7 @@ our $MESSAGES = {
 
 
 
+
 #-----------------------------------------------------------------------
 # constructor / initialisation methods
 #-----------------------------------------------------------------------
@@ -483,6 +484,43 @@ sub branch_text {
 # error handling
 #-----------------------------------------------------------------------
 
+sub token_error {
+    my $self   = shift;
+    my $type   = shift;
+    my $token  = shift;
+    my $text  = join(BLANK, @_);
+    my $posn  = $token->pos;
+
+    $self->raise_error(
+        $type => {
+            info     => $text,
+            element  => $self,
+            token    => $token,
+            position => $posn,
+        },
+    );
+}
+
+
+sub token_error_msg {
+    my $self   = shift;
+    my $type   = shift;
+    my $token  = shift;
+    my $text   = $self->message(@_);
+    return $self->token_error($type, $token, $text);
+}
+
+
+sub syntax_error {
+    shift->token_error( syntax => @_ );
+}
+
+
+sub syntax_error_msg {
+    shift->token_error_msg( syntax => @_ );
+}
+
+
 sub bad_signature {
     my $self = shift;
     my $type = shift;
@@ -513,7 +551,8 @@ sub error_nan {
 sub missing {
     my ($self, $what, $token) = @_;
     $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
-    return $self->error_msg( 
+    return $self->syntax_error_msg(
+        $$token,
         $$token->eof 
             ? (missing_for_eof => $what => $self->[TOKEN])
             : (missing_for     => $what => $self->[TOKEN] => $$token->[TOKEN])

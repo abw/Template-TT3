@@ -115,7 +115,7 @@ sub scan {
         output  => $output,
     );
 
-    return $self->tokenise($input, $output, $scope);
+    return $self->tokenise( $input, $output, $scope );
 }
 
 

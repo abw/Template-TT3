@@ -1,0 +1,6 @@
+[% a + 
+   b + 
+   c + ^^^   # hello world! %]
+
+This is parsing successfully.  I'm not sure why the tag isn't detecting
+the unrecognised '^^^' characters.

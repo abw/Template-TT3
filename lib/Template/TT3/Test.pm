@@ -62,12 +62,20 @@ sub data_tests {
     foreach $test (@tests) {
         $test =~ s/ ^ \s* (.*?) $MAGIC \n //x;
         my $name = $1 || 'test ' . ++$count;
+        my $response;
         
         # split input by a line like "-- expect --"
-        ($input, $expect) = 
-            split(/ ^ $MAGIC expect $MAGIC \n/mix, $test);
+        foreach my $rtype (qw( expect error )) {
+            if ($test =~ / ^ $MAGIC $rtype $MAGIC \n /mix) {
+                ($input, $expect) = split(/ ^ $MAGIC $rtype $MAGIC \n/mix, $test);
+                $response = $rtype;
+                last;
+            }
+        }
         $expect = '' 
             unless defined $expect;
+        $input    ||= $test;
+        $response ||= 'expect';
         
         my (@inflags, $inflag, @exflags, $exflag, $param, $value);
         while ($input =~ s/ ^ $MAGIC (.*?) $MAGIC \n //mx) {
@@ -95,13 +103,14 @@ sub data_tests {
         }
 
         $test = {
-            name    => $name,
-            input   => $input,
-            expect  => $expect,
-            inflags => \@inflags,
-            inflag  => $inflag,
-            exflags => \@exflags,
-            exflag  => $exflag,
+            name      => $name,
+            input     => $input,
+            inflags   => \@inflags,
+            inflag    => $inflag,
+            exflags   => \@exflags,
+            exflag    => $exflag,
+            $response => $expect,
+#            expect  => $expect,
         };
     }
 
@@ -167,10 +176,14 @@ sub test_handler {
     my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
     my $debug    = $config->{ debug } || 0;
     my $source   = $test->{ input };
+    $test->{ inflag }->{ full_error } ||= $config->{ full_error };
     
     my $result   = eval {
         manager->debug(' INPUT: ', $source) if $DEBUG;
-        my $template = $tclass->new( text => $source );
+        my $template = $tclass->new( 
+            text => $source,
+            name => qq{"$test->{ name }" test},
+        );
 
         manager->debug("TOKENS:\n", $template->tokens->view_debug) 
             if $config->{ dump_tokens }
@@ -189,10 +202,19 @@ sub test_handler {
     if ($@) {
         my $error = $test->{ inflag }->{ show_error_type }
             ? $@
-            : ref($@) ? $@->info : $@;
+            : ref($@) 
+                ? ($test->{ inflag }->{ full_error } ? "$@" : $@->info)
+                : $@;
 #        my $error = $@;
         manager->debug(' ERROR: ', $error) if $DEBUG;
-        $result = "<ERROR:$error>";
+
+        if ($test->{ error }) {
+            $test->{ expect } = $test->{ error };
+            $result = $error;
+        }
+        else {
+            $result = "<ERROR:$error>";
+        }
     }
     elsif ($DEBUG) {
         manager->debug('OUTPUT: ', $result);

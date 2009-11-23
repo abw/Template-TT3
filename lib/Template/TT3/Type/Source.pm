@@ -68,7 +68,7 @@ sub position {
 
 sub line {
     my $self = shift;
-    my $pos  = pos $$self || return 1;
+    my $pos  = shift || pos $$self || return 1;
     my $text = substr($$self, 0, $pos);
     return 1 + $text =~ tr/\n/\n/;
 }
@@ -76,7 +76,7 @@ sub line {
 
 sub column {
     my $self = shift;
-    my $pos  = pos $$self || return 1;
+    my $pos  = shift || pos $$self || return 1;
     my $text = substr($$self, 0, $pos);
     $text =~ /$LAST_LINE/
         or return $self->error("Cannot determine column number");
@@ -86,7 +86,7 @@ sub column {
 
 sub line_column {
     my $self = shift;
-    my $pos  = pos $$self || return 1;
+    my $pos  = shift || pos $$self || return 1;
     my $text = substr($$self, 0, $pos);
     my $line = 1 + $text =~ tr/\n/\n/;
     $text =~ /$LAST_LINE/
@@ -101,7 +101,7 @@ sub whereabouts {
     my $args    = @_ && ref $_[0] eq HASH ? shift : { @_ };
     my $linelen = defined $args->{ line_length } ? $args->{ line_length } : $LINE_LENGTH;
     my $showaft = defined $args->{ show_after  } ? $args->{ show_after  } : $SHOW_AFTER;
-    my $pos     = pos $$self || 0;
+    my $pos     = defined $args->{ position    } ? $args->{ position    } : pos $$self || 0;
     my $before  = substr($$self, 0, $pos);
     my $after   = substr($$self, $pos, $linelen);
     my $line    = 1 + $before =~ tr/\n/\n/;
