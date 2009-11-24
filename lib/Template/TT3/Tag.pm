@@ -573,7 +573,7 @@ sub remaining_text {
 
 sub unexpected {
     my ($self, $text) = @_;
-    my $remain = $text->lookahead(32, '...');
+    my $remain = $text->lookahead(32, '...');  $remain =~ s/\n.*//s;
     my $where  = $text->whereabouts;
     my $msg    = $self->message( unexpected => $remain );
 

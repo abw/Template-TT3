@@ -19,7 +19,6 @@ use Badger::Class
         patterns => \&patterns,
         generate => \&generate,
         subclass => \&subclass,
-        alias    => \&alias,
         view     => \&view,
         as       => \&as,
     };
@@ -36,20 +35,6 @@ sub base_id {
 sub patterns {
     my $self = shift;
     _autoload($self->PATTERNS)->export($self->{ name }, @_);
-}
-
-
-sub alias {
-    my ($self, $params) = self_params(@_);
-    
-    while (my ($key, $value) = each %$params) {
-        my $method = ref $value eq CODE
-            ? $value
-            : $self->method($value)
-           || die "Invalid method specified for '$key' alias: $value";
-        $self->method( $key => $method );
-    }
-    return $self;
 }
 
 

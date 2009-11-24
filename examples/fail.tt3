@@ -1,6 +1,5 @@
 [% a + 
    b + 
-   c + ^^^   # hello world! %]
+   x + f * y / g + (c + ^^^)   # hello world! %]
 
-This is parsing successfully.  I'm not sure why the tag isn't detecting
-the unrecognised '^^^' characters.
+This should give a parse error.

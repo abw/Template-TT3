@@ -21,6 +21,28 @@ sub dot {
         $self->dump_data($args)
     ) if DEBUG;
 
+    # This is NFG.  It's just too damn inconvenient to have the virtual 
+    # methods masking data items.  Things like hash.text, hash.size, etc
+    # all resolve to virtual methods, not data.  The thing is, resolving
+    # the VMs first is the more predictable way to do things.  VMs change
+    # rarely, but data changes all the time.  If data resolved first then
+    # you'll never be sure what hash.text resolves to.  At least this way,
+    # hash.text *always* resolves to a virtual method, even if you weren't
+    # expecting it to.  It's also what Javascript does.  That doesn't mean
+    # we should necessarily do it, but there is at least a justification 
+    # there for following a popular language that many of TT's target 
+    # audience will be familiar with.  On the plus side, we'll eventually 
+    # support hash{text} (and hash['text'], like JS) which will always 
+    # resolve data items and never virtual methods.  Although it's not as
+    # clean as hash.text it does at least provide a work-around.  Another
+    # partial solution would be to severely limit the default set of hash
+    # virtual methods.  We might be able to hit the sweet spot of having 
+    # few enough VMs to be useful without blocking common data names (like
+    # 'text' and 'size', to name just two).  Another possibility is to have
+    # data resolve first and provide an explicit operator other than '.'
+    # to resolve vmethods.  I'm not sure what the right thing to do is.
+    
+    
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
         $self->debug("hash vmethod: $name") if DEBUG;
         return $self->[META]->[VARS]->use_var( 
