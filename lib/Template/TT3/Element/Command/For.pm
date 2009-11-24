@@ -40,7 +40,7 @@ sub parse_expr {
     return undef
         if $prec && ! $force && $lprec <= $prec;
 
-    $self->accept($token);
+    $self->advance($token);
     
     $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
         || return $self->missing( expression => $token );
@@ -62,7 +62,7 @@ sub parse_infix {
     return $lhs
         if $prec && $self->[META]->[LPREC] <= $prec;
 
-    $self->accept($token);
+    $self->advance($token);
 
     $self->[RHS] = $lhs;
 

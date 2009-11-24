@@ -10,7 +10,7 @@ sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # advance past opening token
-    $self->accept($token);
+    $self->advance($token);
 
     # parse expressions.  Any precedence (0), allow empty lists (1)
     $self->[EXPR] = $$token->parse_block($token, $scope, 0, 1)

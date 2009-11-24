@@ -12,8 +12,8 @@ use Template::TT3::Class
     },
     alias     => {
         parse_number => 'self',        # this is already a number op
-        parse_dotop  => 'accept',
-        number    => 'value',       # our token contains the number
+        parse_dotop  => 'advance',
+        number       => 'value',       # our token contains the number
     };
 
 

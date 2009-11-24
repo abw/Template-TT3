@@ -24,7 +24,7 @@ sub parse_infix {
 
     # store LHS and advance token past keyword
     $self->[LHS] = $lhs;
-    $self->accept($token);
+    $self->advance($token);
     
     # parse block
     $self->[RHS] = $$token->parse_body($token, $scope)

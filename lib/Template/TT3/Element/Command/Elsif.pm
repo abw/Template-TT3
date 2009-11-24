@@ -22,7 +22,7 @@ sub parse_follow {
     my ($self, $block, $token, $scope, $parent) = @_;
 
     # advance token
-    $self->accept($token);
+    $self->advance($token);
     
     # parse expression following
     $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])

@@ -27,15 +27,22 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Punctuation',
-#    view      => 'separator',
+#   view      => 'separator',
     constants => ':elements',
     constant  => {
-        is_delimiter => 1,
-    },
-    alias     => {
-        skip_delimiter => 'next_skip_ws',
+#        is_delimiter => 1,
     };
 
+
+sub skip_separator {
+    # we can always skip whitespace to skip over a delimiter
+    $_[0]->next_skip_ws($_[1])->skip_separator($_[1]);
+}
+
+sub skip_delimiter {
+    # we can always skip whitespace to skip over a delimiter
+    $_[0]->next_skip_ws($_[1])->skip_delimiter($_[1]);
+}
 
 sub parse_expr {
     my ($self, $token, @args) = @_;
@@ -60,9 +67,6 @@ use Template::TT3::Class
         is_delimiter => 1,
         FINISH       => 'end',
     };
-#    alias     => {
-#        skip_delimiter => 'next_skip_ws',
-#    };
 
 
 sub skip_delimiter {

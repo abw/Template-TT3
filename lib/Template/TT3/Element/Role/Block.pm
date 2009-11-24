@@ -18,7 +18,7 @@ sub parse_body {
     $self->debug("parse_body()") if DEBUG;
  
     # advance past opening block token
-    $self->accept($token);
+    $self->advance($token);
 
     # parse expressions
     my $block = $$token->parse_block($token, $scope)

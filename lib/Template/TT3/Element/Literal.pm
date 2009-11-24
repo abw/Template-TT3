@@ -10,7 +10,7 @@ use Template::TT3::Class
         SEXPR_FORMAT => '<literal:%s>',
     },
     alias      => {
-        parse_word  => 'accept',
+        parse_word  => 'advance',
         name        => \&text,
         value       => \&text,
         values      => \&text,

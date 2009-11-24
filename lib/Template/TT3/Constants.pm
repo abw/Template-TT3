@@ -23,6 +23,7 @@ use Badger::Class
         # misc symbols
         DOT                 => '.',
         
+        ARG_PRECEDENCE      => 200,
         CMD_PRECEDENCE      => 100,
         CMD_ELEMENT         => 'cmd_%s',
     },
@@ -32,7 +33,7 @@ use Badger::Class
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
-            precedence  => 'CMD_PRECEDENCE CMD_ELEMENT',
+            precedence  => 'ARG_PRECEDENCE CMD_PRECEDENCE CMD_ELEMENT',
             type_slots  => {
                 # variable slots
                 META    => '=0',

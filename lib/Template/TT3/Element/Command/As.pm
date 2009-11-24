@@ -22,7 +22,7 @@ sub parse_infix {
     # store the LHS argument as our RHS, because we usually expect the 
     # variable name to be on the LHS, e.g. C<as varname { ... }>
     $self->[BLOCK] = $lhs;
-    $self->accept($token);
+    $self->advance($token);
 
     # parse variable name expression
     $self->[EXPR] = $$token->parse_expr($token, $scope)

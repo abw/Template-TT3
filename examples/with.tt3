@@ -1,0 +1,3 @@
+[% "a is $a, b is $b, c is $c" with a=10 b=20 %]
+-- expect --
+a is 10, b is 20, c is charlie

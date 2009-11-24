@@ -43,7 +43,7 @@ sub parse_expr {
         if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
 
     # advance token
-    $self->accept($token);
+    $self->advance($token);
     
     # parse expression following
     $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
@@ -68,7 +68,7 @@ sub parse_infix {
 
     # store RHS and advance token past keyword
     $self->[RHS] = $lhs;
-    $self->accept($token);
+    $self->advance($token);
 
     # parse expression
     $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])

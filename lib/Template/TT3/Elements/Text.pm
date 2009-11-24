@@ -256,7 +256,7 @@ sub parse_expr {
     my ($self, $token, $scope) = @_;
     my $branch = $self->[BRANCH];
     
-    $self->accept($token);
+    $self->advance($token);
 
     if ($branch) {
         $self->[BLOCK] = $branch->parse_block(\$branch, $scope)

@@ -27,7 +27,7 @@ use Template::TT3::Class
 sub parse_postfix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
 
-    $self->accept($token);
+    $self->advance($token);
 
     # TODO: should copy $lhs->[EXPR] and optimise away a whole layer
     $self->[EXPR] = $lhs;

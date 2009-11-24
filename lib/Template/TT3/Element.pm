@@ -8,7 +8,7 @@ use Template::TT3::Class
     utils     => 'self_params numlike refaddr is_object',
     slots     => 'meta _next token pos',
     import    => 'class CLASS',
-    constants => ':elements CODE ARRAY HASH BLANK CMD_PRECEDENCE FORCE',
+    constants => ':elements :precedence CODE ARRAY HASH BLANK FORCE',
     constant  => {   
         # define a new base_type for the T::Base type() method to strip off
         # when generate a short type name for each subclass op
@@ -29,14 +29,18 @@ use Template::TT3::Class
         parse_filename     => \&null,
         parse_signature    => \&null,
         parse_infix        => \&reject,
+        
+        # default skip methods don't skip - they block on the current token
+        skip_separator     => \&accept,
+        skip_delimiter     => \&accept,
 
         # default evaluation method
         pair               => 'not_implemented',
         pairs              => 'not_implemented',
 
-        has_signature   => \&null,  # NOTE: prolly not needed
-        delimiter       => \&null,
-        terminator      => \&null,
+#        has_signature   => \&null,  # NOTE: prolly not needed
+#        delimiter       => \&null,
+#        terminator      => \&null,
     };
 
 
@@ -170,21 +174,28 @@ sub null   { undef }
 sub self   { $_[0] }
 sub reject { $_[1] }
 
+
 #-----------------------------------------------------------------------
 # generic parse methods
 #-----------------------------------------------------------------------
 
-sub accept {
+sub accept { 
     my ($self, $token) = @_;
-
-    # accept the current token and advance to the next one
-    $$token = $self->[NEXT];
-    
+    # set the $token to the current $self token
+    $$token = $self if $token;
     return $self;
 }
 
 
-sub accept_expr {
+sub advance {
+    my ($self, $token) = @_;
+    # accept the current token and advance to the next one
+    $$token = $self->[NEXT];
+    return $self;
+}
+
+
+sub advance_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # operator precedence
@@ -265,7 +276,7 @@ sub skip_ws {
 }
 
 
-sub skip_delimiter { 
+sub OLD_skip_delimiter { 
     # Most tokens aren't delimiters so they simply return $self.  If a $token 
     # reference is passed as the first argument then we update it to reference
     # the new token.  This advances the token pointer.
@@ -273,6 +284,7 @@ sub skip_delimiter {
     $$token = $self if $token;
     return $self;
 }
+
 
 
 
@@ -344,6 +356,38 @@ sub parse_block {
 
     return $self->[META]->[ELEMS]->construct(
         block => $self->[TOKEN], $self->[POS], $exprs
+    );
+}
+
+
+sub parse_params {
+    my ($self, $token, $scope, $prec, $force) = @_;
+    my (@exprs, $expr);
+    
+    $prec = ARG_PRECEDENCE
+        unless defined $prec;
+
+    # Just like parse_exprs() except that we only skip over separators
+    # and not delimiters.  We also use the explicit ARG_PRECEDENCE (defined
+    # to be the same as '=' so that the process stops on keywords, allowing
+    # us to write things like "with x=10 y=20 fill blah" and have the 'fill'
+    # be recognised as the end of the parameters.
+    
+    # This could probaby be named better to avoid confusion.  Perhaps this 
+    # should be parse_args() and parse_args() should be parse_paren_args() 
+    # (or something like it)
+
+    while ($expr = $$token->skip_separator($token)
+                          ->parse_expr($token, $scope, $prec)) {
+        $self->debug("parsed params expr: ", $expr->source) if DEBUG;
+        push(@exprs, $expr);
+    }
+    
+    return undef
+        unless @exprs || $force;
+
+    return $self->[META]->[ELEMS]->construct(
+        block => $self->[TOKEN], $self->[POS], \@exprs
     );
 }
 
@@ -1264,7 +1308,7 @@ alias to L<reject()>. However, you might be using another base class that
 defines a different L<parse_infix()> method that you want to over-ride with
 the C<reject()> method.
 
-=head2 accept(\$element)
+=head2 advance(\$element)
 
 This is another simple method of convenience which advances the token
 reference to the next element and returns itself.

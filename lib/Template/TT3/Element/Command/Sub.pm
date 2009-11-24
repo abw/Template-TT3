@@ -15,7 +15,7 @@ sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
 
     # Check precedence and advance past 'block' keyword
-    $self->accept_expr($token, $scope, $prec, $force)
+    $self->advance_expr($token, $scope, $prec, $force)
         || return;
 
     if ($self->[ARGS] = $$token->parse_signature($token, $scope, $self)) {

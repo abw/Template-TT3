@@ -21,7 +21,7 @@ sub parse_args {
     my ($self, $token, $scope) = @_;
 
     # advance past opening token
-    $self->accept($token);
+    $self->advance($token);
 
     # parse expressions, any precedence (0), allow empty blocks (1)
     $self->[EXPR] = $$token->parse_block($token, $scope, 0, 1)

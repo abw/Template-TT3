@@ -28,7 +28,7 @@ sub parse_infix {
 
     # store RHS and advance token past keyword 
     $self->[RHS] = $lhs;
-    $self->accept($token);
+    $self->advance($token);
 
     # parse codec name 
     $self->[LHS] = $$token->parse_filename($token, $scope)

@@ -8,8 +8,9 @@ use Template::TT3::Class
     base     => 'Template::TT3::Grammar';
 
 # These are the command keywords that we recognise
-our $COMMANDS = 'do as is raw if elsif else for fill dot block sub
-                 encode decode';
+our $COMMANDS = 'as is do dot sub block with just
+                 for if else elsif fill 
+                 encode decode raw';
 
 our $SYMBOLS  = [
 #   [ token => element_name => left_precedence, right_precedence ]
@@ -79,22 +80,22 @@ our $SYMBOLS  = [
     [ '->'      => arrow            => 230,   0 ],      # a -> a + 1
 
     # binary assignment operators
-    [ '='       => op_assign        => 220,   0 ],      # foo = bar
-    [ '=>'      => op_pair          => 220,   0 ],      # foo => bar
-    [ '~='      => txt_combine_set  => 220,   0 ],      # foo ~= bar
-    [ '+='      => num_add_set      => 220,   0 ],      # foo += bar
-    [ '-='      => num_sub_set      => 220,   0 ],      # foo -= bar
-    [ '*='      => num_mul_set      => 220,   0 ],      # foo *= bar
-    [ '/='      => num_div_set      => 220,   0 ],      # foo /= bar
-    [ '&&='     => bool_and_set     => 220,   0 ],      # foo &&= bar
-    [ '||='     => bool_or_set      => 220,   0 ],      # foo ||= bar
-    [ '!!='     => bool_nor_set     => 220,   0 ],      # foo !!= bar
+    [ '='       => op_assign        => 200,   0 ],      # foo = bar
+    [ '=>'      => op_pair          => 200,   0 ],      # foo => bar
+    [ '~='      => txt_combine_set  => 200,   0 ],      # foo ~= bar
+    [ '+='      => num_add_set      => 200,   0 ],      # foo += bar
+    [ '-='      => num_sub_set      => 200,   0 ],      # foo -= bar
+    [ '*='      => num_mul_set      => 200,   0 ],      # foo *= bar
+    [ '/='      => num_div_set      => 200,   0 ],      # foo /= bar
+    [ '&&='     => bool_and_set     => 200,   0 ],      # foo &&= bar
+    [ '||='     => bool_or_set      => 200,   0 ],      # foo ||= bar
+    [ '!!='     => bool_nor_set     => 200,   0 ],      # foo !!= bar
                                 
     # low precedence short-circuiting logical operators
-    [ 'not'     => bool_not         => 0,   215 ],      # not foo
-    [ 'and'     => bool_and         => 210,   0 ],      # foo and bar
-    [ 'or'      => bool_or          => 205,   0 ],      # foo or bar
-    [ 'nor'     => bool_nor         => 205,   0 ],      # foo nor bar
+    [ 'not'     => bool_not         => 0,   190 ],      # not foo
+    [ 'and'     => bool_and         => 180,   0 ],      # foo and bar
+    [ 'or'      => bool_or          => 170,   0 ],      # foo or bar
+    [ 'nor'     => bool_nor         => 170,   0 ],      # foo nor bar
                                 
     # grouping constructs...
     [ '('       => con_parens       =>   0,   0 ],
@@ -115,8 +116,6 @@ our $SYMBOLS  = [
     # One token to end them all and in the darkness bind them
     [ 'end'     => end              =>   0,   0 ],
 ];
-
-
 
 
 1;

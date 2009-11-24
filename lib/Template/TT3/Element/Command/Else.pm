@@ -15,7 +15,7 @@ sub parse_follow {
     my ($self, $block, $token, $scope, $parent) = @_;
 
     # advance token
-    $self->accept($token);
+    $self->advance($token);
     
     # parse block following the expression, and any follow-on blocks after that
     $self->[RHS] = $$token->parse_body($token, $scope, $self)
