@@ -52,8 +52,9 @@ sub source {
 
 sub variable {
     # text can be converted to a text variable in order to perform dotops on it
-    $_[CONTEXT]->{ variables }
-         ->use_var( $_[SELF], $_[SELF]->text( $_[CONTEXT] ) );
+    $_[CONTEXT]->use_var( 
+        $_[SELF], $_[SELF]->text( $_[CONTEXT] ) 
+    );
 }
 
 
@@ -202,9 +203,9 @@ sub parse_expr {
 
 
 sub variable {
-    # TODO: fixme so I'm not re-creating single quotes each time
-    $_[CONTEXT]->{ variables }
-         ->use_var( $_[SELF], $_[SELF]->[EXPR] );
+    $_[CONTEXT]->use_var( 
+        $_[SELF], $_[SELF]->[EXPR] 
+    );
 }
 
 
@@ -277,7 +278,7 @@ sub parse_expr {
 
 
 sub variable {
-    $_[CONTEXT]->{ variables }->use_var( 
+    $_[CONTEXT]->use_var( 
         $_[SELF], 
         $_[SELF]->text( $_[CONTEXT] )
     );

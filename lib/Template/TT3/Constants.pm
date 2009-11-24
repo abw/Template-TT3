@@ -36,9 +36,10 @@ use Badger::Class
             type_slots  => {
                 # variable slots
                 META    => '=0',
-                NAME    => '=1',
-                VALUE   => '=2',
-                PARENT  => '=3',
+                CONTEXT => '=1',
+                NAME    => '=2',
+                VALUE   => '=3',
+                PARENT  => '=4',
                 # variable metadata slots
                 CONFIG  => '=0',
                 VARS    => '=1',

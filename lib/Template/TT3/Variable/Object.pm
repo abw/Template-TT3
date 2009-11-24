@@ -55,7 +55,7 @@ sub dot {
         || return $self->error_msg( bad_method => $self->[NAME], $method )
             unless ref $method eq CODE;
 
-    $self->[META]->[VARS]->use_var( 
+    $self->[CONTEXT]->use_var( 
         $name,
         $self->[VALUE]->$method($args ? @$args : ()),
         $self, 

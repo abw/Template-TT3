@@ -19,7 +19,7 @@ sub dot {
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
         $self->debug("undef vmethod: $name") if DEBUG;
 
-        return $self->[META]->[VARS]->use_var( 
+        return $self->[CONTEXT]->use_var( 
             $name,
             $method->($self->[VALUE], $args ? @$args : ()),
             $self

@@ -28,8 +28,7 @@ sub value {
     
     # create a local variables stash that contains just the HTML element
     # name that map straight back to the element names
-    local $context->{ variables } = $context->{ variables }
-        ->just( $html->element_name_hash );
+    $context = $context->just( $html->element_name_hash );
     
     # Now evaluate the arguments list in the dummy context.  This allows us
     # to re-use the function parameter mechanism to collect positional 

@@ -87,8 +87,8 @@ sub name {
 
 sub variable {
     $_[SELF]->debug("variable variable(): ", $_[SELF]->source) if DEBUG;
-    $_[CONTEXT]->{ variables }
-         ->var( $_[SELF]->[TOKEN] );
+#    $_[SELF]->debug_callers;
+    $_[CONTEXT]->var( $_[SELF]->[TOKEN] );
 }
 
 

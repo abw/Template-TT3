@@ -30,8 +30,7 @@ use Template::TT3::Class
 class(TEMPLATE)->methods(
     html => sub {
         my ($self, $params) = self_params(@_);
-        my $vars = $self->VARS->new( data => $params );
-        my $context = { variables => $vars };
+        my $context = $self->CONTEXT->new( data => $params );
         $self->debug("fetching html from expressions") if DEBUG;
         return $self->exprs->html($context);
     },

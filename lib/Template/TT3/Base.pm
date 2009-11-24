@@ -45,4 +45,20 @@ sub syntax_error {
 }
 
 
+sub debug_callers {
+    my $self = shift;
+    my $i = 1;
+    while (1) {
+        my @info = caller($i);
+        last unless @info;
+        my ($pkg, $file, $line, $sub) = @info;
+        warn(
+            sprintf(
+                "%4s: Called from %s in %s at line %s\n",
+                '#' . $i++, $sub, $file, $line
+            )
+        );
+    }
+}
+
 1;

@@ -98,11 +98,10 @@ sub values {
 #    $self->debug("iterating over $value");
 
     my $rhs  = $self->[RHS];
-    my $vars = $context->{ variables };
     
     foreach my $item (@$value) {
 #        $self->debug("setting item to $item");
-        $vars->set_var( item => $item );
+        $context->set_var( item => $item );
         push(@values, $rhs->values($context));
     }
 

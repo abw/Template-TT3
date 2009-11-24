@@ -12,6 +12,7 @@ use Template::TT3::Class
     constant    => {
         SOURCE      => 'Template::TT3::Type::Source',
         SCOPE       => 'Template::TT3::Scope',
+        CONTEXT     => 'Template::TT3::Context',
         SCANNER     => 'Template::TT3::Scanner',
         VARS        => 'Template::TT3::Variables',
         TREE        => 'Template::TT3::Type::Tree',
@@ -24,6 +25,7 @@ use Template::TT3::Type::Source 'Source';
 use Template::TT3::Type::Tree 'Tree';
 use Template::TT3::Variables;
 use Template::TT3::Scanner;
+use Template::TT3::Context;
 use Template::TT3::Tag;
 
 sub init {
@@ -142,8 +144,8 @@ sub tree {
 
 sub fill {
     my ($self, $params) = self_params(@_);
-    my $vars    = $self->VARS->new( data => $params );
-    my $context = { variables => $vars };
+#    my $vars    = $self->VARS->new( data => $params );
+    my $context = $self->CONTEXT->new( data => $params );
     $self->debug("fetching text from expressions") if DEBUG;
     return $self->exprs->text($context);
 }

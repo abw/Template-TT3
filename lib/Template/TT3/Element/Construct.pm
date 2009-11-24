@@ -29,8 +29,9 @@ sub parse_expr {
 
 
 sub variable {
-    $_[CONTEXT]->{ variables }
-        ->use_var( $_[SELF] => $_[SELF]->value($_[CONTEXT]) );
+    $_[CONTEXT]->use_var( 
+        $_[SELF] => $_[SELF]->value($_[CONTEXT]) 
+    );
 }
 
 

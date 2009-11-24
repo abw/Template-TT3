@@ -45,8 +45,8 @@ sub context {
     # FIXME: we can't cache this context reference without creating a 
     # circular reference.  Either use weaken or do something else.
     return $self->CONTEXT->new(
-        scope     => $self,
-        variables => {
+        scope => $self,
+        data  => {
             %$self,
             
             # FIXME: these are required for "TAGS off" but they

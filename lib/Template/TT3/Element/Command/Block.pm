@@ -94,7 +94,7 @@ sub text {
                 if DEBUG;
             my $params = tt_params($self, $self->[ARGS]->signature, undef, @_);
             $self->debug("got params: ", $self->dump_data($params)) if DEBUG;
-            $context->{ variables }->set_vars($params);
+            $context->set_vars($params);
             return $self->[BLOCK]->text( $context );
         };
     }

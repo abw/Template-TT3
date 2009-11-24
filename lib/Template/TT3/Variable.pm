@@ -8,8 +8,11 @@ use Template::TT3::Class
     # Slot methods are read/write, but we want to make value() read only.  
     # So we use val() for the generated slot method and define value() below
     slots     => 'meta name_slot val parent args',
+    utils     => 'self_params weaken',
     constants => ':type_slots BLANK',
-    utils     => 'self_params',
+    constant  => {
+        VARIABLES => 'Template::TT3::Variables',
+    },
     alias     => {
         list      => \&get,
         value     => \&get,
@@ -22,21 +25,33 @@ use Template::TT3::Class
     };
         
 
+#-----------------------------------------------------------------------
+# constructor methods
+#-----------------------------------------------------------------------
 
-# c'est n'est pas un constructor.  It *returns* a constructor, so it's a
-# constructor constructor of sorts.
+sub new {
+    my $class = shift;
+    bless [@_], $class;
+}
+
 
 sub constructor {
     my ($self, $params) = self_params(@_);
     my $class   = ref $self || $self;
     my $config  = $self->configuration($params);
-    my $vars    = $config->{ variables };       # TODO: or barf?  or use a proto?
+#    my $vars    = $config->{ variables } 
+#               || class( $self->VARIABLES )->load->name->prototype;
+    my $vars = 'DEPRECATED';
+    
+    # TODO: shouldn't we be asking the types for our vmethods?
     my $methods = $self->class->hash_vars( METHODS => $config->{ methods } );
     my $meta    = [$config, $vars, $methods];
     
     return sub {
-#        $self->debug("args: ", $self->dump_data(\@_));
-        bless [$meta, @_], $class;
+        $self->debug("args: ", $self->dump_data(\@_)) if DEBUG;
+        my $var = bless [$meta, @_], $class;
+        weaken $var->[CONTEXT];
+        return $var;
     };
 }
 
@@ -46,10 +61,10 @@ sub configuration {
 }
 
 
-sub new {
-    my $class = shift;
-    bless [@_], $class;
-}
+
+#-----------------------------------------------------------------------
+# basic get/set methods for a variable.
+#-----------------------------------------------------------------------
 
 
 sub get {
@@ -60,7 +75,7 @@ sub get {
 sub set {
     my ($self, $value) = @_;
 #    $self->debug("setting variable $self->[NAME] to $value");
-    return $self->[META]->[VARS]->set_var( 
+    return $self->[CONTEXT]->set_var( 
         $self->[NAME],
         $value,
     );
@@ -133,7 +148,7 @@ sub fullname {
 
 
 sub variables {
-    shift->[META]->[VARS];
+    shift->[CONTEXT];
 }
 
 
@@ -167,3 +182,129 @@ sub hush {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Template::TT3::Variable - base class for template variable objects
+
+=head1 DESCRIPTION
+
+The C<Template::TT3::Variable> module defines a base class for objects used
+to represent variables in TT3.  A variable is a very small, lightweight
+object that encapsulates the name of a variable and its value, along with
+some other housekeeping metadata.
+
+Variables are typed. For example, variables that have hash references as
+values are represented by L<Template::TT3::Variable::Hash> variable objects,
+those that are list references are represented by
+L<Template::TT3::Variable::List> objects, and so on.
+
+The L<Template::TT3::Variables> factory module can be used to create 
+variable objects.
+
+    use Template::TT3::Variables;
+    
+    my $vars = Template::TT3::Variables->new;
+    
+    my $hash = $vars->var( 
+        user => { 
+            name  => 'Ford Prefect',
+            email => 'ford@heart-of-gold.com',
+        }
+    );
+
+These objects collectively implement the runtime functionality of variables
+in TT3.  The L<get()> method can be called to fetch the current value of the
+variable.
+
+    my $user = $hash->get;
+    print $user->{ name };      # Ford Prefect
+
+The L<set()> method can be used to set a new variable value.  However, it is 
+a non-destructive action that doesn't modify the variable object or the 
+original data.  Instead it returns a I<new> variable reference containing 
+the new value.  It is effectively syntactic sugar for creating a new variable
+with the same name as an existing one.
+
+    my $old = $vars->var( user => 'Arthur Dent' );
+    my $new = $old->set('Ford Prefect');
+    
+    print $old->value;          # Arthur Dent
+    print $new->value;          # Ford Prefect
+    
+The L<dot()> method can be called to perform dot operations on the hash.  
+This includes accessing hash items and calling virtual methods.
+
+    my $name = $hash->dot('name');
+    my $keys = $hash->dot('keys');
+
+The L<dot()> method returns a new L<Template::TT3::Variable> object to 
+represent the result.  Thus, a fragment of template code like this:
+
+    [% user.name.length %]
+
+Can be implemented in Perl like this:
+
+    $vars->var('user')->dot('name')->dot('length')->get;
+
+Note that we must call the L<get()> value right at the end to return the final
+variable value. Rather surprisingly, this gives slightly better performance
+than the current TT2 implementation for accessing variables, despite the fact
+that there's rather a lot of wrapping and delegating going on.
+
+=head1 METHODS
+
+=head2 new()
+
+This defines a default constructor method for creating variable objects.
+It exists for the sake of completeness but most if not all of the internal
+TT code uses the L<constructor()> method to return a constructor function
+that can then be called independently.
+
+=head2 constructor()
+
+This method returns a constructor function for variable instances.
+
+    # fetch a constructor function for hash variables
+    my $HashVar = Template::TT3::Variable::Hash->constructor;
+    
+    # call it to create a variable instance
+    my $hashvar = $HashVar->( 
+        user => { 
+            name => 'Ford Prefect' 
+        } 
+    )
+
+=head2 configuration(\%config)
+
+This method stub is provided for subclasses to examine or modify the
+configuration parameters that are bound inside the closure returned by the
+L<constructor()> method. In the base class this method simply returns
+unmodified the hash reference passed to it as an argument by the
+L<constructor()> method.
+
+=head1 get()
+
+Returns the current value of the variable.
+
+    my $var = $vars->var( user => 'Slartibartfast' );
+    
+    print $var->value;          # Slartibartfast
+
+=head1 set($value)
+
+Used to set a new variable value.  Note that this is a non-destructive 
+action that returns a I<new> variable reference containing the new value.
+
+    # create a variable called 'user' than contains a hash reference
+    my $old = $vars->use_var( user => { ... } );
+    
+    # $old is now a Template::TT3::Variable::Hash object
+    
+    # create a new value for the variable
+    my $new = $old->set('Ford Prefect');
+    
+    # $new is now a Template::TT3::Variable::Text object, $old is unchanged
+

@@ -13,6 +13,7 @@
 
 use Badger lib => '../../lib';
 use Template::TT3::Test 
+    skip  => 'Functionality has (mostly) moved to Template::TT3::Context',
     tests => 37,
     debug => 'Template::TT3::Variables',
     args  => \@ARGV;

@@ -17,7 +17,7 @@ sub apply_scalar {
     my $self = shift;
     $self->debug('apply_scalar(', join(', ', @_), ')') if DEBUG;
         
-    $self->[META]->[VARS]->use_var( 
+    $self->[CONTEXT]->use_var( 
         $self->[NAME], 
         scalar $self->[VALUE]->(@_), 
         $self,
@@ -28,7 +28,7 @@ sub apply_list {
     my $self = shift;
     $self->debug('apply_list(', join(', ', @_), ')') if DEBUG;
         
-    $self->[META]->[VARS]->use_var( 
+    $self->[CONTEXT]->use_var( 
         $self->[NAME], 
         [ $self->[VALUE]->(@_) ],
         $self,
@@ -59,7 +59,7 @@ sub dot {
 
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
         $self->debug("code vmethod: $name") if DEBUG;
-        return $self->[META]->[VARS]->use_var( 
+        return $self->[CONTEXT]->use_var( 
             $name,
             $method->($self->[VALUE], $args ? @$args : ()),
             $self

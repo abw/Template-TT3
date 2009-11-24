@@ -4,7 +4,7 @@ use Template::TT3::Class
     version   => 0.01,
     debug     => 0,
     import    => 'class',
-    base      => 'Template::TT3::Base',
+    base      => 'Template::TT3::Base Badger::Prototype',
     utils     => 'self_params',
     constants => 'HASH CODE',
     messages  => {
@@ -13,6 +13,9 @@ use Template::TT3::Class
     },
     constant  => {
         TYPES => 'Template::TT3::Types',
+    },
+    alias     => {
+        init  => \&init_variables,
     };
 
 use Template::TT3::Types;
@@ -25,7 +28,8 @@ our $TYPES = {
     OBJECT => 'Template::TT3::Variable::Object',
 };
 
-sub init {
+
+sub init_variables {
     my ($self, $config) = @_;
     my $types    = $self->class->hash_vars( TYPES => $config->{ types } );
     my $vmethods = $self->TYPES->vtables;
@@ -49,22 +53,80 @@ sub init {
             }
 
             $_ => class($module)->load->name->constructor(
-                variables => $self,
+#               variables => $self,
                 methods   => $vmethods->{ $_ },
                 %$config,
             );
         } 
         keys %$types
     };
-    
-    $self->{ data  } = $config->{ data } || { };
+
     $self->{ types } = $types;
-    $self->{ ctors } = $ctors;
-    $self->{ vars  } = { };
+    $self->{ type  } = $ctors;
+    
+#    $self->{ data  } = $config->{ data } || { };
+#    $self->{ vars  } = { };
     return $self;
 }
 
-sub value {
+
+sub variable {
+    my ($self, $name, $value, $parent, $args, @more) = @_;
+    my $ctor;
+
+    TYPE_SWITCH: {
+        $self->debug("var($name, $value)\n") if DEBUG;
+        
+        if (! defined $value) {
+            $ctor = $self->{ type }->{ UNDEF }
+                || return $self->error_msg( bad_type => $name, 'undef' );
+        }
+        elsif ($args && ref $value eq CODE) {
+            $value = $value->(@$args);
+            $self->debug(
+                "evaluated CODE with args ", 
+                $self->dump_data($args), 
+                " => $value"
+            ) if DEBUG;
+            $args = undef;
+            redo TYPE_SWITCH;
+        }
+        elsif (ref $value) {
+            $ctor = $self->{ type }->{ ref $value } 
+                 || $self->{ type }->{ OBJECT }
+                 || return $self->error_msg( bad_type => $name, ref $value );
+        }
+        else {
+            $ctor = $self->{ type }->{ TEXT }
+                 || return $self->error_msg( bad_type => $name, 'value' );
+        }
+    }
+
+    return $ctor->($name, $value, $parent, $args, @more);
+}
+
+
+sub types {
+    shift->prototype->{ types };
+}
+
+sub constructors {
+    shift->prototype->{ type };
+}
+
+
+
+#-----------------------------------------------------------------------
+# old stuff
+#-----------------------------------------------------------------------
+
+
+
+
+
+
+# TODO: rename these get() set() and use()
+sub OLD_value {
     my ($self, $name, $element) = @_;
     my $var = $self->{ vars }->{ $name };
 
@@ -73,9 +135,9 @@ sub value {
         || $self->{ data }->{ $name };
 }
 
-# TODO: rename these get() set() and use()
 
-sub var {
+
+sub OLD_var {
     my ($self, $name) = @_;
 
     $self->debug("var($name)") if DEBUG;
@@ -85,7 +147,7 @@ sub var {
         ||= $self->get_var( $name );
 }
 
-sub get_var {
+sub OLD_get_var {
     my ($self, $name) = @_;
 
     if (exists $self->{ data }->{ $name }) {
@@ -101,7 +163,7 @@ sub get_var {
 }
         
     
-sub set_var {
+sub OLD_set_var {
     my ($self, $name, $value) = @_;
 
     $self->debug("var($name)") if DEBUG;
@@ -113,7 +175,7 @@ sub set_var {
 
 }
 
-sub set_vars {
+sub OLD_set_vars {
     my ($self, $params) = self_params(@_);
     my $vars = $self->{ vars };
     
@@ -123,54 +185,14 @@ sub set_vars {
 }
 
 
-sub use_var {
-    my ($self, $name, $value, $parent, $args, @more) = @_;
-    my $ctor;
 
-    TYPE_SWITCH: {
-        $self->debug("use_var($name, $value)\n") if DEBUG;
-        
-        if (! defined $value) {
-            $ctor = $self->{ ctors }->{ UNDEF }
-                || return $self->error_msg( bad_type => $name, 'undef' );
-        }
-        elsif ($args && ref $value eq CODE) {
-            $value = $value->(@$args);
-            $self->debug(
-                "evaluated CODE with args ", 
-                $self->dump_data($args), 
-                " => $value"
-            ) if DEBUG;
-            $args = undef;
-            redo TYPE_SWITCH;
-        }
-        elsif (ref $value) {
-            $ctor = $self->{ ctors }->{ ref $value } 
-                 || $self->{ ctors }->{ OBJECT }
-                 || return $self->error_msg( bad_type => $name, ref $value );
-        }
-        else {
-            $ctor = $self->{ ctors }->{ TEXT }
-                 || return $self->error_msg( bad_type => $name, 'value' );
-        }
-    }
-
-    my $var = $ctor->($name, $value, $parent, $args, @more);
-    
-    $self->debug("use_var($name, $value) =>  [$var]") if DEBUG;
-    
-    return $var;
-    
-    return $ctor->($name, $value, $parent, $args, @more);
-}
-
-sub reset {
+sub OLD_reset {
     my $self = shift;
     delete $self->{ vars };
 }
 
 
-sub with {
+sub OLD_with {
     my ($self, $params) = self_params(@_);
     my $data  = $self->{ data };
     my $class = ref $self || $self;
@@ -183,7 +205,7 @@ sub with {
 }
 
 
-sub just {
+sub OLD_just {
     my ($self, $params) = self_params(@_);
     my $data  = $self->{ data };
     my $class = ref $self || $self;
@@ -206,3 +228,57 @@ sub auto {
     
 1;
 
+
+=head1 NAME
+
+Template::TT3::Variables - factory for template variable objects
+
+=head1 DESCRIPTION
+
+The C<Template::TT3::Variables> module defines a factory for creating 
+template variable objects.  Variable objects are subclasses of 
+L<Template::TT3::Variable> which acts as small, lightweight wrappers
+around data values.  They implement the additional behaviours that make
+TT variables different from basic Perl variables.
+
+For example, the following template fragment:
+
+    [% user.name.length %]
+
+Can be implemented in Perl like so:
+
+    $root->dot('user')->dot('name')->dot('length')->get;
+
+Here C<$root> is a C<Template::TT3::Varaib
+
+    my $vars = Template::TT3::Variables->new;
+    my $root = $vars->var( 
+        '' => {
+            user => {
+                name => 'Ford Prefect',
+            }
+        }
+    );
+
+
+Here C<$root>
+
+Rather surprisingly, this gives slightly better performance than the current
+TT2 implementation for accessing variables, despite the fact that there's
+rather a lot of wrapping and delegating going on.
+
+One obvious benefit of this approach is that it makes it easier to create a
+literal Perl translation of template code. This is important when compiling
+templates to Perl code.
+
+Another benefit
+
+=head1 METHODS
+
+=head2 new()
+
+Constructor method used to create a new C<Template::TT3::Variables> object.
+
+=head2 var($name, $value)
+
+This method is used to create a new variable object.  

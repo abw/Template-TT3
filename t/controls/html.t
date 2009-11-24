@@ -60,6 +60,7 @@ __DATA__
 # i.e. text chunks) - which we probably didn't want.
 &lt;b&gt;Marks &amp; Spencer&lt;/b&gt;
 
+
 -- test HTML on --
 -- method html --
 # The [? HTML on -?] control directive tells the scanner that all text chunks

@@ -16,7 +16,7 @@ sub dot {
 
     if (numlike $name) {
         $self->debug("numerical list index: $name") if DEBUG;
-        return $self->[META]->[VARS]->use_var( 
+        return $self->[CONTEXT]->use_var( 
             $name,
             $self->[VALUE]->[$name], 
             $self, 
@@ -25,7 +25,7 @@ sub dot {
     }
     elsif (my $method = $self->[META]->[METHODS]->{ $name }) {
         $self->debug("list vmethod: $name") if DEBUG;
-        return $self->[META]->[VARS]->use_var( 
+        return $self->[CONTEXT]->use_var( 
             $name,
             $method->($self->[VALUE], $args ? @$args : ()),
             $self
