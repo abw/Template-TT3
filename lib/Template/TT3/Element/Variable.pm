@@ -5,6 +5,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element',
     view      => 'variable',
+    as        => 'pair',
     constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<variable:%s>', 
@@ -38,6 +39,21 @@ sub parse_expr {
 
 sub parse_lvalue {
     return $_[0];
+}
+
+
+# We treat 'foo' as short-hand for 'foo=foo' when used in pair context
+
+sub as_pair {
+    my $self = shift;
+    my $elems = $self->[META]->[ELEMS];
+    my $name  = $elems->construct(
+        word => $self->[TOKEN], $self->[POS]
+    );
+    $self->debug("Creating pair from variable") if DEBUG;
+    return $elems->construct(
+        op_pair => "(=)", $self->[POS], $name, $self
+    );
 }
 
 

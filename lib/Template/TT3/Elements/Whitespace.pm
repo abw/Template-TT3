@@ -35,6 +35,12 @@ sub parse_body {
 }
 
 
+sub parse_pair {
+    # ditto pair
+    shift->next_skip_ws($_[0])->parse_pair(@_);
+}
+
+
 sub generate {
     $_[1]->generate_whitespace(
         $_[0]->[TOKEN]

@@ -9,8 +9,10 @@ use Template::TT3::Class
                   Template::TT3::Element',
     import    => 'class',
     view      => 'pair',
+    as        => 'pair',
     constants => ':elements FORCE BLANK',
     alias     => {
+        as_pair => 'self',          # I can do pairs, me
 #        number => \&value,
     };
 

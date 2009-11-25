@@ -5,7 +5,8 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Literal',
     view      => 'word',
-    constants => ':elements';
+    constants => ':elements',
+    as        => 'pair';
 
 
 sub parse_expr {

@@ -27,7 +27,7 @@ sub parse_infix {
     $self->advance($token);
 
     # parse parameter list into ARGS
-    $self->[ARGS] = $$token->parse_params($token, $scope);
+    $self->[ARGS] = $$token->parse_pairs($token, $scope);
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS

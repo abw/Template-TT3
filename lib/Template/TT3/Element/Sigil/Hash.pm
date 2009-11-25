@@ -13,7 +13,9 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil::List',
     constants => ':elements',
+    as        => 'pair',
     alias     => {
+        as_pair     => 'self',
         pairs       => \&values,
         list_values => \&values,
     };

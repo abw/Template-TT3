@@ -25,6 +25,7 @@ use Template::TT3::Class
         parse_expr         => \&null,
         parse_word         => \&null,
         parse_args         => \&null,
+        parse_pair         => \&null,
         parse_dotop        => \&null,
         parse_filename     => \&null,
         parse_signature    => \&null,
@@ -361,7 +362,7 @@ sub parse_block {
 }
 
 
-sub parse_params {
+sub parse_pairs {
     my ($self, $token, $scope, $prec, $force) = @_;
     my (@exprs, $expr);
     
@@ -379,8 +380,8 @@ sub parse_params {
     # (or something like it)
 
     while ($expr = $$token->skip_separator($token)
-                          ->parse_expr($token, $scope, $prec)) {
-        $self->debug("parsed params expr: ", $expr->source) if DEBUG;
+                          ->parse_pair($token, $scope, $prec)) {
+        $self->debug("parsed paired expr: ", $expr->source) if DEBUG;
         push(@exprs, $expr);
     }
     
@@ -391,6 +392,18 @@ sub parse_params {
         block => $self->[TOKEN], $self->[POS], \@exprs
     );
 }
+
+
+#sub parse_pair {
+#    my $self  = shift;
+#    my $token = $_[0];
+#    my $expr  = $self->parse_expr(@_) || return;
+#    return $expr->as_pair(@_) || do {
+#        # tmp hack - reset token
+#        $$token = $self;
+#        return undef;
+#    };
+#}
 
 
 sub parse_follow {
@@ -404,7 +417,12 @@ sub parse_lvalue {
     my ($self, $op, $rhs, $scope) = @_;
     return $self->error_msg( bad_assign => $self->source );
 }
-    
+
+
+sub as_pair {
+    my $self = shift;
+    $self->syntax_error_msg( $self, bad_pairs => $self->source );
+}
 
 
 #-----------------------------------------------------------------------

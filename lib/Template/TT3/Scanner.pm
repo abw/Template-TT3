@@ -157,7 +157,7 @@ sub tokenise {
     }
 
     # add the terminator that marks the end of file
-    $output->eof_token();
+    $output->eof_token('', pos $$input );
     
     return $output->finish;
 }

@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 3,
+    tests   => 6,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -54,14 +54,46 @@ a: alpha
 b: bravo
 c: charlie
 
--- test with naked variables --
-[% just a %]
+-- test with naked variable --
+[% just a -%]
 a: [% a %]
 b: [% b !! '<undef>' %]
 [% end %]
 -- expect --
 a: alpha
 b: <undef>
+
+-- test with mixed variables --
+[% just a b c=x d -%]
+a: [% a %]
+b: [% b %]
+c: [% c %]
+d: [% d %]
+e: [% e !! '<undef>' %]
+[% end %]
+-- expect --
+a: alpha
+b: bravo
+c: x-ray
+d: delta
+e: <undef>
+
+-- test with mixed variables in braces --
+[%  just a b c=x d {
+        'a: ' a "\n"
+        'b: ' b "\n"
+        'c: ' c "\n"
+        'd: ' d "\n"
+        'e: ' e !! '<undef>'
+    }
+%]
+-- expect --
+a: alpha
+b: bravo
+c: x-ray
+d: delta
+e: <undef>
+
 
 -- test with as infix operator --
 [% "a is $a, b is $b, c is $c.defined" just a=10 b=20 %]

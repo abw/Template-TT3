@@ -8,13 +8,15 @@ use Template::TT3::Class
                   Template::TT3::Element::Operator::Assignment
                   Template::TT3::Element',
     import    => 'class',
+    as        => 'pair',
     constants => ':elements',
     constant  => {
         SEXPR_FORMAT => '<assign:<%s><%s>>', 
     },
     alias     => {
-        number => \&value,      # FIXME
-        values => \&value,      # TODO: parallel assignment
+        as_pair => 'self',          # I can do pairs, me
+        number  => \&value,         # FIXME
+        values  => \&value,         # TODO: parallel assignment
     };
 
 use constant {

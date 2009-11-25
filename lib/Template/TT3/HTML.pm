@@ -32,7 +32,7 @@ class(TEMPLATE)->methods(
         my ($self, $params) = self_params(@_);
         my $context = $self->CONTEXT->new( data => $params );
         $self->debug("fetching html from expressions") if DEBUG;
-        return $self->exprs->html($context);
+        return $self->block->html($context);
     },
 );
 

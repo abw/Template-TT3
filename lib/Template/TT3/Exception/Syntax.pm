@@ -69,6 +69,7 @@ sub text {
         
     $format =~ s/<(\w+)>/defined $vars->{ $1 } ? $vars->{ $1 } : "(no $1)"/eg;
     $format .= "\n";
+    
     return $format;
 }
 

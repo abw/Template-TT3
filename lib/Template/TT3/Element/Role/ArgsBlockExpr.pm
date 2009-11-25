@@ -18,7 +18,7 @@ sub parse_expr {
     $$token = $self->[NEXT];
 
     # parse list of parameters
-    $self->[ARGS] = $$token->parse_params($token, $scope);
+    $self->[ARGS] = $$token->parse_pairs($token, $scope, undef, 1);
         
     # parse a block following the args
     $self->[BLOCK] = $$token
