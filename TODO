@@ -53,6 +53,7 @@ this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
 
 Allow HTML_CMDS to load only some commands.
 
-Holy fucking shitbag mother of hellfire.  There's a major fuckup in the 
-context chain logic when it comes to setting variables.  Oh fuckety fuckety
-fuckwipe.
+Fix the vars cache in the context chain so that child contexts can read 
+variables that have been set in a parent.  The original cached variable
+must be cloned to have a new context link pointing at the child context,
+not the parent context.
