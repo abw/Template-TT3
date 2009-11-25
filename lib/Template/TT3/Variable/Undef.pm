@@ -41,7 +41,7 @@ sub value {
     # against that so that it can decorate the exception with line 
     # number, source code, etc.  Otherwise we just throw a plain error.
     return $element
-        ? $element->undefined( $self->fullname )
+        ? $element->undefined_error( $self->fullname )
         : $self->error_msg( undefined => $self->fullname );
 }
 

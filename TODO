@@ -57,3 +57,7 @@ Fix the vars cache in the context chain so that child contexts can read
 variables that have been set in a parent.  The original cached variable
 must be cloned to have a new context link pointing at the child context,
 not the parent context.
+
+Figure out what to do with PARAMS.  They don't get recognised as HASH vars
+so they don't get the same behaviours that it has.  e.g. "a(%b) = c(%b)".
+Here the '%b' isn't expanded as a hash because it's a PARAMS not a HASH.

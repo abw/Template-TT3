@@ -32,7 +32,7 @@ sub parse_infix {
 
     # parse codec name 
     $self->[LHS] = $$token->parse_filename($token, $scope)
-        || return $self->missing( $self->ARG_NAME => $token );
+        || return $self->missing_error( $self->ARG_NAME => $token );
     
     return $self;
 }

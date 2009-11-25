@@ -51,7 +51,7 @@ our $MESSAGES = {
     sign_dup_sigil  => "Duplicate '<4>' argument in signature for %s: %s",
     undef_varname   => "Cannot use undefined value as a variable name: %s",
     undefined       => "Undefined value returned by expression: <1>",
-    undefined_in    => "Undefined value returned by '<2>' expression: <1>",
+#   undefined_in    => "Undefined value returned by '<2>' expression: <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
     not_follow      => "'%s' cannot follow '%s'",
     bad_assign      => "You cannot assign to %s",
@@ -270,17 +270,6 @@ sub skip_ws {
 }
 
 
-sub OLD_skip_delimiter { 
-    # Most tokens aren't delimiters so they simply return $self.  If a $token 
-    # reference is passed as the first argument then we update it to reference
-    # the new token.  This advances the token pointer.
-    my ($self, $token) = @_;
-    $$token = $self if $token;
-    return $self;
-}
-
-
-
 
 #-----------------------------------------------------------------------
 # parser rule matching methods
@@ -331,7 +320,8 @@ sub parse_exprs {
     my ($self, $token, $scope, $prec, $force) = @_;
     my (@exprs, $expr);
 
-#    $token ||= do { my $this = $self; \$this };
+# Do we ever get called without args?  
+#   $token ||= do { my $this = $self; \$this };
  
     while ($expr = $$token->skip_delimiter($token)
                           ->parse_expr($token, $scope, $prec)) {
@@ -367,10 +357,6 @@ sub parse_pairs {
     # us to write things like "with x=10 y=20 fill blah" and have the 'fill'
     # be recognised as the end of the parameters.
     
-    # This could probaby be named better to avoid confusion.  Perhaps this 
-    # should be parse_args() and parse_args() should be parse_paren_args() 
-    # (or something like it)
-
     while ($expr = $$token->skip_separator($token)
                           ->parse_pair($token, $scope, $prec)) {
         $self->debug("parsed paired expr: ", $expr->source) if DEBUG;
@@ -384,18 +370,6 @@ sub parse_pairs {
         block => $self->[TOKEN], $self->[POS], \@exprs
     );
 }
-
-
-#sub parse_pair {
-#    my $self  = shift;
-#    my $token = $_[0];
-#    my $expr  = $self->parse_expr(@_) || return;
-#    return $expr->as_pair(@_) || do {
-#        # tmp hack - reset token
-#        $$token = $self;
-#        return undef;
-#    };
-#}
 
 
 sub parse_follow {
@@ -425,6 +399,13 @@ sub as_pair {
 }
 
 
+sub in_signature {
+    shift->signature_error( bad_arg => @_ );
+}
+
+
+
+
 #-----------------------------------------------------------------------
 # evaluation methods
 #-----------------------------------------------------------------------
@@ -439,8 +420,8 @@ sub number {
     my $text = $self->value(@_);
 
     return 
-        ! defined $text ? $self->undefined
-      : ! numlike $text ? $self->not_a_number($text)
+        ! defined $text ? $self->undefined_error
+      : ! numlike $text ? $self->nan_error($text)
       : $text;
 }
 
@@ -461,18 +442,15 @@ sub variable {
 
 
 sub values {
-    $_[0]->debug("values(): ", $_[0]->source) if DEBUG;
     shift->value(@_);
 }
 
 
 sub list_values {
-    $_[0]->debug("list_values() calling values()") if DEBUG;
     my $value = shift->value(@_);
     return ref $value eq ARRAY
         ? @$value
         : $value;
-#    shift->values(@_);
 }
 
 
@@ -497,10 +475,6 @@ sub params {
 sub pairs {
     my $self = shift;
     $self->syntax_error_msg( $self, bad_pairs => $self->source );
-}
-
-sub in_signature {
-    shift->bad_signature( bad_arg => @_ );
 }
 
 
@@ -549,10 +523,8 @@ sub branch_text {
 
 
 #-----------------------------------------------------------------------
-# error handling
+# error handling - see also methods in Template::TT3::Base
 #-----------------------------------------------------------------------
-
-# TODO: clean these up wrt same methods in base class
 
 sub token_error {
     my $self   = shift;
@@ -572,7 +544,7 @@ sub token_error {
 }
 
 
-sub missing {
+sub missing_error {
     my ($self, $what, $token) = @_;
     $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
     return $self->syntax_error_msg(
@@ -584,37 +556,42 @@ sub missing {
 }
 
 
-sub undefined { 
+sub undefined_error { 
+    my ($self, $source) = @_;
+    
+    return $self->undef_error_msg(
+        $self,
+        undefined => $source || $self->source,
+    );
+}
+
+sub undefined_in_error { 
     my $self = shift;
     return $self->undef_error_msg(
         $self,
-        undefined => $self->source, @_ 
+        undefined_in => $self->source, @_ 
     );
 }
 
 
-sub bad_signature {
+
+sub signature_error {
     my $self = shift;
     my $type = shift;
     my $name = shift;
     $name = $name ? "$name()" : 'function';
-    $self->error_msg( "sign_$type" => $name, $self->source, @_ );
+#    $self->error_msg( "sign_$type" => $name, $self->source, @_ );
+
+    return $self->syntax_error_msg(
+        $self,
+        "sign_$type" => $name, $self->source, @_ 
+    );
 }
 
 
-#sub error_undef { 
-#    my $self = shift;
-#    $self->error_msg( undefined => $self->source, @_ );
-#}
 
 
-sub error_undef_in { 
-    my $self = shift;
-    $self->error_msg( undefined_in => $self->source, @_ );
-}
-
-
-sub not_a_number { 
+sub nan_error { 
     my $self = shift;
     $self->error_msg( nan => $self->source, @_ );
 }
@@ -1660,11 +1637,11 @@ TODO: more on this
 
 =head2 branch_text()
 
-=head2 bad_signature()
+=head2 signature_error()
 
-=head2 error_undef()
+=head2 undefined_error()
 
-=head2 error_undef_in()
+=head2 undefined_in_error()
 
 =head2 error_nan()
 

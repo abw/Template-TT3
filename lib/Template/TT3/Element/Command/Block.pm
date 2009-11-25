@@ -31,7 +31,7 @@ sub parse_expr {
     
     # skip any whitespace then parse the following block
     $self->[BLOCK] = $$token->skip_ws($token)->parse_body($token, $scope, $self)
-        || return $self->missing( $self->ARG_BLOCK => $token );
+        || return $self->missing_error( $self->ARG_BLOCK => $token );
 
     if ($self->[EXPR]) {
         # this is a named block so we need to define a block at compile time

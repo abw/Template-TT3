@@ -72,10 +72,10 @@ sub parse_expr {
     if ($end_paren = $$token->in(ATTR_PARENS, $token)) {
         # parse expressions.  Any precedence (0), allow empty lists (1)
         $self->[ARGS] = $$token->parse_block($token, $scope, 0, 1)
-            || return $self->missing( expressions => $token );
+            || return $self->missing_error( expressions => $token );
     
         # check the next token matches the closing bracket
-        return $self->missing( $end_paren, $token)
+        return $self->missing_error( $end_paren, $token)
             unless $$token->is( $end_paren, $token );
     }
     
@@ -83,7 +83,7 @@ sub parse_expr {
     # 'a[class="menu"]'
     while ($$token->is(CLASS_DOT, $token)) {
         $class = $$token->parse_word($token, $scope)
-            || return $self->missing( word => $token );
+            || return $self->missing_error( word => $token );
         push(@classes, $class->text);           # FIXME: no context
     }
     if (@classes) {
@@ -93,7 +93,7 @@ sub parse_expr {
     # look for #ident, e.g. 'a#home' is sugar for 'a[id="home"]'
     if ($$token->is(ID_HASH, $token)) {
         $id = $$token->parse_word($token, $scope)
-            || return $self->missing( word => $token );
+            || return $self->missing_error( word => $token );
         $id = $id->text;                        # FIXME - no context
     }
 
@@ -111,7 +111,7 @@ sub parse_expr {
     $self->[BLOCK] = $$token
         ->skip_ws($token)
         ->parse_body($token, $scope, $self)
-        || return $self->missing( $self->ARG_BLOCK => $token );
+        || return $self->missing_error( $self->ARG_BLOCK => $token );
 
     $self->debug("got block for $self->[TOKEN]") if DEBUG;
         

@@ -99,7 +99,7 @@ sub text {
 # Undef take care of it?
 #        my $element = shift;
         
-        return $self->error_msg( undefined => $self->fullname );
+        return $self->error_msg( undefined => "var:" . $self->fullname );
     }
 }
 

@@ -34,7 +34,7 @@ sub parse_infix {
     $self->debug("asking $$token for dotop") if DEBUG;
     
     $self->[RHS] = $$token->parse_dotop($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing( expression => $token );
+        || return $self->missing_error( expression => $token );
 
     $self->[ARGS] = $$token->parse_args($token, $scope);
 
@@ -48,7 +48,7 @@ sub parse_infix {
 
 sub value {
     $_[SELF]->debug("fetching value()") if DEBUG;
-    return $_[SELF]->variable($_[CONTEXT])->value;
+    return $_[SELF]->variable($_[CONTEXT])->value($_[SELF]);
 }
 
 sub variable {

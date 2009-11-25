@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 12,
+    tests   => 13,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -23,6 +23,7 @@ use Template::TT3::Test
 my $vars = callsign;
 $vars->{ foo } = 10;
 $vars->{ bar } = 20;
+$vars->{ wiz } = { waz => undef };
 
 test_expressions(
     debug     => $DEBUG,
@@ -88,6 +89,12 @@ item: alpha  item: bravo  done
 for failage yak
 -- expect --
 <ERROR:Undefined value returned by expression: failage>
+
+-- test undefined dotted value --
+-- block --
+for wiz.waz yak
+-- expect --
+<ERROR:Undefined value returned by expression: wiz.waz>
 
 -- test for else --
 -- block --

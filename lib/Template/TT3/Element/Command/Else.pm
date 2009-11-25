@@ -19,7 +19,7 @@ sub parse_follow {
     
     # parse block following the expression, and any follow-on blocks after that
     $self->[RHS] = $$token->parse_body($token, $scope, $self)
-        || return $self->missing( block => $token );
+        || return $self->missing_error( block => $token );
 
     # add $self as follow-on block of $parent
     # TODO: decide on the correct name: follow/else

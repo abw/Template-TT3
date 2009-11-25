@@ -21,10 +21,10 @@ sub parse_postfix {
     # TODO: should copy $lhs->[EXPR] and optimise away a whole layer
     $self->[EXPR] = $lhs;
     $self->[ARGS] = $$token->parse_block($token, $scope, 0, 1)
-        || return $self->missing( expressions => $token );
+        || return $self->missing_error( expressions => $token );
 
     $$token->is( $self->FINISH )
-        || return $self->missing( $self->FINISH, $token);
+        || return $self->missing_error( $self->FINISH, $token);
 
     $$token = $$token->next;
     

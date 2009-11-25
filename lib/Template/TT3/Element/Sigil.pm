@@ -25,7 +25,7 @@ sub parse_expr {
     # TODO: this should be parse_variable() so that keywords are rejected
     $self->[EXPR] = $$token->parse_expr(
         $token, $scope, $self->[META]->[RPREC], FORCE
-    )   || return $self->missing( expression => $token );
+    )   || return $self->missing_error( expression => $token );
     
     # TODO: allow other () [] {} to follow
     #return $$token->parse_postfix($self, $token, $scope, $prec);

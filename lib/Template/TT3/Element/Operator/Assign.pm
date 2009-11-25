@@ -40,10 +40,10 @@ sub parse_infix {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
 #    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
-#        || return $self->missing( expression => $token );
+#        || return $self->missing_error( expression => $token );
 
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
-        || return $self->missing( expression => $token );
+        || return $self->missing_error( expression => $token );
     
 #    $self->debug("assign LHS signature: ", $lhs->hparse_signature) if DEBUG;
 

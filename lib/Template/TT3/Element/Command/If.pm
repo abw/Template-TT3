@@ -47,11 +47,11 @@ sub parse_expr {
     
     # parse expression following
     $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
-        || return $self->missing( expression => $token );
+        || return $self->missing_error( expression => $token );
 
     # parse block following the expression
     $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
-        || return $self->missing( block => $token );
+        || return $self->missing_error( block => $token );
 
     # TODO: look for elsif/else
         
@@ -72,7 +72,7 @@ sub parse_infix {
 
     # parse expression
     $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing( expression => $token );
+        || return $self->missing_error( expression => $token );
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS

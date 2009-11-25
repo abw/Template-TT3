@@ -26,11 +26,11 @@ sub parse_follow {
     
     # parse expression following
     $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing( expression => $token );
+        || return $self->missing_error( expression => $token );
 
     # parse block following the expression, and any follow-on blocks after that
     $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
-        || return $self->missing( block => $token );
+        || return $self->missing_error( block => $token );
 
     # add $self as follow-on block of $parent
     # TODO: decide on the correct name: follow/else

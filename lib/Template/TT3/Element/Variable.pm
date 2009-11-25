@@ -136,12 +136,12 @@ sub in_signature {
 
     # we can't be an argument in a function signature if we have args
     # or we have a dynamic name, e.g. $$foo
-    return $self->bad_signature( bad_arg => $name )
+    return $self->signature_error( bad_arg => $name )
         if $self->[ARGS] || $self->[EXPR];
 
     # fail if there's an existing argument with same name
     my $token = $self->[TOKEN];
-    return $self->bad_signature( dup_arg => $name, $token )
+    return $self->signature_error( dup_arg => $name, $token )
         if $signature->{ $token };
 
     # save (name => type) pair

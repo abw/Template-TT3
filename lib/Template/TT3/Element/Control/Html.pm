@@ -33,7 +33,7 @@ sub parse_expr {
     
     # parse the next expression    
     $self->[EXPR] = $$token->parse_expr($token, $scope)
-        || return $self->missing( expression => $token );
+        || return $self->missing_error( expression => $token );
     
     return $self;
 }

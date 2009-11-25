@@ -44,7 +44,7 @@ sub in_signature {
 
     # we can't be an argument in a function signature if we have args
     # or we have a dynamic name, e.g. $$foo
-#    return $self->bad_signature( bad_arg => $name )
+#    return $self->signature_error( bad_arg => $name )
 #        if $self->[ARGS] || $self->[EXPR];
 
     # fail if there's an existing list argument
@@ -54,7 +54,7 @@ sub in_signature {
 
     # check that there isn't already an argument with a '@' sigil - we 
     # can't have two
-    return $self->bad_signature( dup_sigil => $name, $token, $sigil )
+    return $self->signature_error( dup_sigil => $name, $token, $sigil )
         if $signature->{ $sigil };
 
     # save (name => type) pair

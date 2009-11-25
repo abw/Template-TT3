@@ -17,12 +17,12 @@ sub parse_expr {
     $self->[EXPR] = $$token
         ->next_skip_ws($token)
         ->parse_filename($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing( $self->ARG_NAME => $token );
+        || return $self->missing_error( $self->ARG_NAME => $token );
 
     # parse a block following the expression
     $self->[BLOCK] = $$token
         ->parse_body($token, $scope)
-        || return $self->missing( $self->ARG_BLOCK => $token );
+        || return $self->missing_error( $self->ARG_BLOCK => $token );
 
     return $self;
 }

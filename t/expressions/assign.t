@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 4,
+    tests   => 8,
     debug   => 'Template::TT3::Context',
     args    => \@ARGV,
     import  => 'test_expect callsign';

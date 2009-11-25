@@ -25,10 +25,10 @@ sub parse_args {
 
     # parse expressions, any precedence (0), allow empty blocks (1)
     $self->[EXPR] = $$token->parse_block($token, $scope, 0, 1)
-        || return $self->missing( expressions => $token );
+        || return $self->missing_error( expressions => $token );
 
     # check next token matches our FINISH token
-    return $self->missing( $self->FINISH, $token)
+    return $self->missing_error( $self->FINISH, $token)
         unless $$token->is( $self->FINISH, $token );
     
     return $self;

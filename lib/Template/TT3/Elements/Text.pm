@@ -260,7 +260,7 @@ sub parse_expr {
 
     if ($branch) {
         $self->[BLOCK] = $branch->parse_block(\$branch, $scope)
-            || $self->missing( branch => $branch );
+            || $self->missing_error( branch => $branch );
 
         my $junk = $branch->remaining_text;
         return $self->error("Trailing text in double quoted string branch: $junk")

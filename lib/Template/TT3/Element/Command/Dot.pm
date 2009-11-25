@@ -24,7 +24,7 @@ sub parse_expr {
 
     # parse next item as dotop   # FIXME: precedence?
     $self->[RHS] = $$token->next_skip_ws($token)->parse_dotop($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing( dotop => $token );
+        || return $self->missing_error( dotop => $token );
 
     # capture any args... 
     $self->[ARGS] = $$token->parse_args($token, $scope);
@@ -39,7 +39,7 @@ sub parse_expr {
 
     # parse block following the expression
     $self->[LHS] = $$token->parse_body($token, $scope)
-        || return $self->missing( block => $token );
+        || return $self->missing_error( block => $token );
 
     $self->debug("dot command as expr: $self->[LHS] dot $self->[RHS]") if DEBUG;
 
@@ -63,7 +63,7 @@ sub parse_infix {
 
     # parse dotop name    # FIXME: precedence
     $self->[RHS] = $$token->next_skip_ws($token)->parse_dotop($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing( dotop => $token );
+        || return $self->missing_error( dotop => $token );
 
     # capture any args
     $self->[ARGS] = $$token->parse_args($token, $scope);

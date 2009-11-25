@@ -23,10 +23,10 @@ sub parse_body {
 
     # skip past token any whitespace, then parse expressions
     my $block = $$token->next_skip_ws($token)->parse_block($token, $scope)
-        || return $parent->missing( $self->ARG_BLOCK, $token );
+        || return $parent->missing_error( $self->ARG_BLOCK, $token );
 
     # check next token matches our FINISH token
-    return $parent->missing( $self->FINISH, $token)
+    return $parent->missing_error( $self->FINISH, $token)
         unless $$token->is( $self->FINISH, $token );
     
     # if the parent defines any follow-on blocks (e.g. elsif/else for if)
