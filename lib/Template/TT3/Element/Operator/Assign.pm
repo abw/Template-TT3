@@ -32,18 +32,25 @@ sub parse_infix {
     return $lhs 
         if $prec && $self->[META]->[LPREC] < $prec;
 
-    $self->[LHS]   = $lhs;
+    $self->[LHS] = $lhs;
     
     # advance token past operator
     $$token = $self->[NEXT];
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
+#    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
+#        || return $self->missing( expression => $token );
+
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->missing( expression => $token );
     
 #    $self->debug("assign LHS signature: ", $lhs->hparse_signature) if DEBUG;
-    $lhs->parse_lvalue($self, $self->[RHS], $scope);
+
+    # Call the lvalue to set our LHS and RHS for us.  This allows the lvalue
+    # to create a lazy (subroutine) wrapper around the RHS if it has a 
+    # function signature like [% bold(text) = "<b>$text</b>" %]
+    my $assign = $lhs->as_lvalue($self, $scope);
 
     # TODO: negotiation between the LHS and RHS to work out what kind of
     # assignment this is.  Is the LHS has parens, e.g. foo(), then it's a 
@@ -54,16 +61,29 @@ sub parse_infix {
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
     # as the LHS
-    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
+    return $$token->skip_ws->parse_infix($assign, $token, $scope, $prec);
 }
 
 
 sub value {
+    $_[SELF]->debug("assign value(): ", $_[SELF]->source) if DEBUG;
     $_[SELF]->[LHS]
             ->variable( $_[CONTEXT] )        # fetch LHS as a variable
             ->set(                           # set it to RHS value
                 $_[SELF]->[RHS]->value( $_[CONTEXT] )
-              )->value;
+              )->value($_[SELF]);
+
+#    $_[SELF]->debug("assign value(): ", $_[SELF]->source) if DEBUG;
+#    $_[SELF]->debug("about to fetch LHS variable: $_[SELF]->[LHS]");
+#    my $var = $_[SELF]->[LHS]->variable( $_[CONTEXT] );
+#    $_[SELF]->debug("got LHS value(): $var");
+#    $_[SELF]->debug("RHS is $_[SELF]->[RHS]: ", $_[SELF]->[RHS]->source) if DEBUG;
+#    my $result = $_[SELF]->[RHS]->value( $_[CONTEXT] );
+#    $_[SELF]->debug("got RHS value(): $result");
+#    $var->set( $result );
+#    $_[SELF]->debug("set value");
+#    
+#    return $var->value;
 }
 
 

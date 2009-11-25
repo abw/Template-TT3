@@ -578,9 +578,9 @@ sub unexpected {
     my $where  = $text->whereabouts;
     my $msg    = $self->message( unexpected => $remain );
 
-    return $self->syntax_error(
-        %$where,
-        info => $msg,
+    return $self->raise_error(
+        syntax => %$where,
+        info   => $msg,
     );
 }
 

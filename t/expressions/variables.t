@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 42,
+    tests   => 43,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expressions callsign';
@@ -87,6 +87,11 @@ called foo()
 
 -- test foo() --
 foo()
+-- expect --
+called foo()
+
+-- test a = foo() --
+a = foo(); a
 -- expect --
 called foo()
 

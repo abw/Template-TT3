@@ -37,7 +37,7 @@ sub value {
 
 sub pairs {
     $_[SELF]->error("Invalid list definition where a pair of values is expected");
-    $_[SELF]->debug("[list] pairs(): ", $_[SELF]->source) if DEBUG or 1;
+    $_[SELF]->debug("[list] pairs(): ", $_[SELF]->source) if DEBUG;
     $_[SELF]->[EXPR]->pairs($_[CONTEXT]);
 #    my $values = $_[SELF]->value;
  #   return @$values % 2

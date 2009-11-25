@@ -95,6 +95,10 @@ sub text {
         return $value;
     }
     else {
+# TODO: Look for element.  Does this branch ever get called or does 
+# Undef take care of it?
+#        my $element = shift;
+        
         return $self->error_msg( undefined => $self->fullname );
     }
 }

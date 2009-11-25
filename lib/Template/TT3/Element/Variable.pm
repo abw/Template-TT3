@@ -37,8 +37,11 @@ sub parse_expr {
 }
 
 
-sub parse_lvalue {
-    return $_[0];
+sub as_lvalue {
+    # my ($self, $op, $rhs, $scope) = @_;
+    # nothing special here, but other elements may modify/wrap either
+    # the LHS or RHS before stuffing them into $op
+    return $_[1];
 }
 
 
@@ -59,26 +62,26 @@ sub as_pair {
 
 sub text {
     $_[SELF]->debug("variable text(): ", $_[SELF]->source) if DEBUG;
-    $_[SELF]->variable( $_[CONTEXT] )->text;
+    $_[SELF]->variable( $_[CONTEXT] )->text($_[SELF]);
 }
 
 
 sub value {
     $_[SELF]->debug("variable value(): ", $_[SELF]->source) if DEBUG;
-    $_[SELF]->variable( $_[CONTEXT] )->value;
+    $_[SELF]->variable( $_[CONTEXT] )->value($_[SELF]);
 }
 
 
 sub maybe {
     $_[SELF]->debug("variable maybe(): ", $_[SELF]->source) if DEBUG;
-    $_[SELF]->variable( $_[CONTEXT] )->maybe;
+    $_[SELF]->variable( $_[CONTEXT] )->maybe($_[SELF]);
 }
 
 
 sub list_values {
     $_[SELF]->debug("variable values(): ", $_[SELF]->source) if DEBUG;
     # explicitly force list context
-    $_[SELF]->variable( $_[CONTEXT] )->values;
+    $_[SELF]->variable( $_[CONTEXT] )->values($_[SELF]);
 }
 
 
@@ -86,7 +89,7 @@ sub pairs {
     $_[SELF]->debug("variable pairs(): ", $_[SELF]->source) if DEBUG;
 
     # explicitly force list context
-    my @values = $_[SELF]->variable( $_[CONTEXT] )->values;
+    my @values = $_[SELF]->variable( $_[CONTEXT] )->values($_[SELF]);
 
     # check we got an even number of items
     return @values % 2
@@ -103,14 +106,13 @@ sub name {
 
 sub variable {
     $_[SELF]->debug("variable variable(): ", $_[SELF]->source) if DEBUG;
-#    $_[SELF]->debug_callers;
     $_[CONTEXT]->var( $_[SELF]->[TOKEN] );
 }
 
 
 sub assign {
     $_[SELF]->debug("variable assign(): ", $_[SELF]->source) if DEBUG;
-    $_[SELF]->variable($_[CONTEXT])->set($_[2]);
+    $_[SELF]->variable($_[CONTEXT])->set($_[2], $_[SELF]);
 #    return ();
 }
 

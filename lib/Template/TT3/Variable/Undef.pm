@@ -8,6 +8,10 @@ use Template::TT3::Class
     constant  => {
         type  => 'undef',
     },
+    alias     => {
+        text   => \&value,
+        values => \&value,
+    },
     messages  => {
         bad_dot => 'Invalid dot operation: <1>.<2> (<1> is undefined)',
     };
@@ -31,8 +35,14 @@ sub dot {
 
 
 sub value {
-    my $self  = shift;
-    return $self->error_msg( undefined => $self->fullname );
+    my ($self, $element) = @_;
+
+    # If we were passed an element reference then we raise the error 
+    # against that so that it can decorate the exception with line 
+    # number, source code, etc.  Otherwise we just throw a plain error.
+    return $element
+        ? $element->undefined( $self->fullname )
+        : $self->error_msg( undefined => $self->fullname );
 }
 
 

@@ -41,7 +41,7 @@ Hello alpha
 [? TAGS invalid -?]
 Hello World
 -- expect --
-<ERROR:"invalid" is undefined>
+<ERROR:Undefined value returned by expression: invalid>
 #<ERROR:Undefined value returned by TAGS expression: invalid>
 
 -- test tags single string --

@@ -22,6 +22,7 @@ sub _exceptions {
     class($_[0]->EXCEPTIONS)->load->name;
 }
 
+
 sub _exception {
     my $self = shift;
     
@@ -32,6 +33,7 @@ sub _exception {
         : $self->SUPER::exception;
 }
 
+
 sub raise_error {
     my $self   = shift;
     my $type   = shift;
@@ -40,8 +42,50 @@ sub raise_error {
     $self->_exception( $type => $params )->throw;
 }
 
+
+sub token_error {
+    my $self   = shift;
+    my $type   = shift;
+    my $token  = shift;
+    my $text   = join(BLANK, @_);
+    my $posn   = $token && $token->pos;
+    
+    $self->raise_error(
+        $type => {
+            info     => $text,
+            token    => $token,
+            position => $posn,
+        },
+    );
+}
+
+
+sub token_error_msg {
+    my $self   = shift;
+    my $type   = shift;
+    my $token  = shift;
+    my $text   = $self->message(@_);
+    return $self->token_error($type, $token, $text);
+}
+
+
 sub syntax_error {
-    shift->raise_error( syntax => @_ );
+    shift->token_error( syntax => @_ );
+}
+
+
+sub syntax_error_msg {
+    shift->token_error_msg( syntax => @_ );
+}
+
+
+sub undef_error {
+    shift->token_error( undef => @_ );
+}
+
+
+sub undef_error_msg {
+    shift->token_error_msg( undef => @_ );
 }
 
 
@@ -59,6 +103,13 @@ sub debug_callers {
             )
         );
     }
+}
+
+
+sub dump_data_depth {
+    my ($self, $data, $depth) = @_;
+    local $Badger::Debug::MAX_DEPTH = $depth || 1;
+    $self->dump_data($data);
 }
 
 1;

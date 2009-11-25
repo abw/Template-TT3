@@ -192,15 +192,19 @@ sub _scan {
 sub catch {
     my $self    = shift;
     my $handler = shift;
-
-    return $self->try(@_) 
-        || $self->$handler( $self->reason );
+    my $result  = $self->try(@_);
+    
+    return $@ 
+        ? $self->$handler( $@ )
+        : $result;
 }
 
 
 sub decorate_error {
     my $self  = shift;
     my $error = shift || $self->reason;
+
+    $self->debug("decorating error: $error") if DEBUG;
 
     # we can only decorate exception objects (TODO: test type)
     die $error unless ref $error;
@@ -216,6 +220,10 @@ sub decorate_error {
         $error->try->whereabouts(
             $self->source->whereabouts( position => $posn )
         );
+        $self->debug("decorated error: $error") if DEBUG;
+    }
+    elsif (DEBUG) {
+        $self->debug("could not decorate error (no pos)");
     }
 
     $error->throw;

@@ -22,26 +22,18 @@ use Template::TT3::Class
     },
     alias => {
         # default parse method that decline
-        parse_expr         => \&null,
-        parse_word         => \&null,
-        parse_args         => \&null,
+        parse_expr         => \&null,       # The usual case is to return 
+        parse_word         => \&null,       # undef (which is all null() does)
+        parse_args         => \&null,       # to decline a parse request.
         parse_pair         => \&null,
         parse_dotop        => \&null,
         parse_filename     => \&null,
         parse_signature    => \&null,
-        parse_infix        => \&reject,
+        parse_infix        => \&reject,     # Special case returns LHS
         
-        # default skip methods don't skip - they block on the current token
-        skip_separator     => \&accept,
-        skip_delimiter     => \&accept,
-
-        # default evaluation method
-#       pair               => 'not_implemented',
-#       pairs              => 'not_implemented',
-
-#        has_signature   => \&null,  # NOTE: prolly not needed
-#        delimiter       => \&null,
-#        terminator      => \&null,
+        # default skip method don't skip but block on $self
+        skip_separator     => \&accept,     # only separators skip here
+        skip_delimiter     => \&accept,     # ditto for delimiters
     };
 
 
@@ -413,9 +405,17 @@ sub parse_follow {
 }
     
 
-sub parse_lvalue {
+
+#-----------------------------------------------------------------------
+# Methods to coerce parsed element expressions to a particular role.
+# The default behaviour is to throw a syntax error if they can't fulfill
+# the role.  Those that can fulfill a role should implement their own 
+# versions of the relevant method.
+#-----------------------------------------------------------------------
+
+sub as_lvalue {
     my ($self, $op, $rhs, $scope) = @_;
-    return $self->error_msg( bad_assign => $self->source );
+    return $self->syntax_error_msg( $self, bad_assign => $self->source );
 }
 
 
@@ -439,8 +439,8 @@ sub number {
     my $text = $self->value(@_);
 
     return 
-        ! defined $text ? $self->error_undef
-      : ! numlike $text ? $self->error_nan($text)
+        ! defined $text ? $self->undefined
+      : ! numlike $text ? $self->not_a_number($text)
       : $text;
 }
 
@@ -552,6 +552,8 @@ sub branch_text {
 # error handling
 #-----------------------------------------------------------------------
 
+# TODO: clean these up wrt same methods in base class
+
 sub token_error {
     my $self   = shift;
     my $type   = shift;
@@ -570,22 +572,24 @@ sub token_error {
 }
 
 
-sub token_error_msg {
-    my $self   = shift;
-    my $type   = shift;
-    my $token  = shift;
-    my $text   = $self->message(@_);
-    return $self->token_error($type, $token, $text);
+sub missing {
+    my ($self, $what, $token) = @_;
+    $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
+    return $self->syntax_error_msg(
+        $$token,
+        $$token->eof 
+            ? (missing_for_eof => $what => $self->[TOKEN])
+            : (missing_for     => $what => $self->[TOKEN] => $$token->[TOKEN])
+    );
 }
 
 
-sub syntax_error {
-    shift->token_error( syntax => @_ );
-}
-
-
-sub syntax_error_msg {
-    shift->token_error_msg( syntax => @_ );
+sub undefined { 
+    my $self = shift;
+    return $self->undef_error_msg(
+        $self,
+        undefined => $self->source, @_ 
+    );
 }
 
 
@@ -598,10 +602,10 @@ sub bad_signature {
 }
 
 
-sub error_undef { 
-    my $self = shift;
-    $self->error_msg( undefined => $self->source, @_ );
-}
+#sub error_undef { 
+#    my $self = shift;
+#    $self->error_msg( undefined => $self->source, @_ );
+#}
 
 
 sub error_undef_in { 
@@ -610,22 +614,12 @@ sub error_undef_in {
 }
 
 
-sub error_nan { 
+sub not_a_number { 
     my $self = shift;
     $self->error_msg( nan => $self->source, @_ );
 }
 
 
-sub missing {
-    my ($self, $what, $token) = @_;
-    $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
-    return $self->syntax_error_msg(
-        $$token,
-        $$token->eof 
-            ? (missing_for_eof => $what => $self->[TOKEN])
-            : (missing_for     => $what => $self->[TOKEN] => $$token->[TOKEN])
-    );
-}
 
 
 

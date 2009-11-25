@@ -37,6 +37,7 @@ sub apply_list {
 
 sub text {
     my $self = shift;
+    my $elem = shift;                   # FIXME - this is scary
     $self->debug('text()') if DEBUG;
     scalar $self->[VALUE]->(@_);
 }

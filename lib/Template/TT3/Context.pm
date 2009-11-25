@@ -43,7 +43,7 @@ sub init {
 
 sub var {
     my $self = shift;
-
+    
     return @_ > 1
         ? $self->set_var(@_)
         : $self->{ vars }->{ $_[0] } 
@@ -53,16 +53,25 @@ sub var {
 
 sub get_var {
     my ($self, $name, $context) = @_;
-    my $value;
+    my ($var, $value);
 
     # If we need to lookup a variable in a parent context then we pass the
     # child context as an argument so that the parent creates a new variable
     # bound to the child context, not the parent.  Otherwise we use $self.
     $context ||= $self;
 
-    $self->debug("get_var($name)") if DEBUG;
+    $self->debug("$self get_var($name)") if DEBUG;
 
-    if (exists $self->{ data }->{ $name }) {
+    if ($var = $self->{ vars }->{ $name }) {
+        # FIXME: had to add this to fix the gnarly old goat bug that prevented
+        # expressions in a child context from seeing new variables created
+        # in a parent context
+        $self->debug("found $name in vars cache: $var") 
+            if DEBUG;
+
+        return $var;
+    }
+    elsif (exists $self->{ data }->{ $name }) {
         $self->debug("found $name in data: $self->{ data }->{ $name }") 
             if DEBUG;
             
@@ -80,11 +89,11 @@ sub get_var {
         );
     }
     elsif ($self->{ lookup }) {
-        $self->debug("asking lookup for $name") if DEBUG;
+        $self->debug("asking lookup ($self->{ lookup }) for $name") if DEBUG;
         return $self->{ lookup }->get_var($name, $self);
     }
     else {
-        $self->debug("$name is missing") if DEBUG;
+        $self->debug("$self $name is missing") if DEBUG;
         return $self->no_var($name);
     }
 }
@@ -214,7 +223,19 @@ sub scope {
     return $self->{ scope }
         || $self->error_msg( missing => 'scope' );
 }
-    
+ 
+
+sub dump_up {
+    my $self  = shift;
+    my $n     = shift || 0;
+    my $vars  = $self->dump_data_depth($self->{ vars }, 1);
+    my $data  = $self->dump_data_depth($self->{ data }, 1);
+    for ($vars, $data) {
+        s/\n/\n    /g;
+    }
+    return "$n $self {\n    vars => $vars\n    data => $data\n}\n"
+        . ($self->{ parent } ? $self->{ parent }->dump_up($n+1) : '');
+}
     
 
 1;

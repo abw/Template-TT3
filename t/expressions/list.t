@@ -42,7 +42,6 @@ alpha bravo charlie
 alpha bravo charlie
 
 -- test list join --
--- skip vmethods don't accept arguments yet --
 list = [a, b, c]; list.join(', ')
 -- expect --
 alpha, bravo, charlie

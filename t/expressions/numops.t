@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 54,
+    tests   => 55,
     debug   => 'Template::TT3::Grammar',
     args    => \@ARGV,
     import  => 'test_expressions';
@@ -36,6 +36,11 @@ __DATA__
 # numbers
 #------------------------------------------------------------------------
 
+-- test zero --
+0
+-- expect -- 
+0
+
 -- test integers --
 0
 1
@@ -46,6 +51,7 @@ __DATA__
 1
 123
 123445
+
 
 -- test floating point numbers --
 0

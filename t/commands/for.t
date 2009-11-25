@@ -87,7 +87,7 @@ item: alpha  item: bravo  done
 -- block --
 for failage yak
 -- expect --
-<ERROR:"failage" is undefined>
+<ERROR:Undefined value returned by expression: failage>
 
 -- test for else --
 -- block --

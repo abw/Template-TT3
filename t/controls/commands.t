@@ -34,7 +34,7 @@ __DATA__
 -- test hello command before loading --
 [% hello %]
 -- expect --
-<ERROR:"hello" is undefined>
+<ERROR:Undefined value returned by expression: hello>
 
 -- test using COMMANDS to load hello --
 [% hello = 'Hi'-%]
