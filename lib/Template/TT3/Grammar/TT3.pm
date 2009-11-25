@@ -18,7 +18,7 @@ our $SYMBOLS  = [
     # variable sigils and other super-duper high precedence operators
     [ '$'       => sig_item         =>   0, 350 ],      # $foo
     [ '@'       => sig_list         =>   0, 350 ],      # @foo
-#   [ '%'       => sig_hash         =>   0, 350 ],      # %foo
+    [ '%'       => sig_hash         =>   0, 350 ],      # %foo
     [ '.'       => op_dot           => 340,   0 ],      # foo.bar
     
     # ++/-- unary prefix/postfix self-modification operators
@@ -31,7 +31,7 @@ our $SYMBOLS  = [
     [ '-'       => num_minus        => 275, 285 ],      # foo - bar, -foo
     [ '*'       => num_multiply     => 280,   0 ],      # foo * bar
     [ '/'       => num_divide       => 280,   0 ],      # foo / bar
-    [ '%'       => num_percent      => 280, 350 ],      # foo % bar, %bar
+    [ qr/\s%\s/ => num_percent      => 280,   0 ],      # foo % bar
     [ div       => num_div_int      => 280,   0 ],      # foo div bar
     [ mod       => num_modulus      => 280,   0 ],      # foo mod bar
     

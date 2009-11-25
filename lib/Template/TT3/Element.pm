@@ -35,8 +35,8 @@ use Template::TT3::Class
         skip_delimiter     => \&accept,
 
         # default evaluation method
-        pair               => 'not_implemented',
-        pairs              => 'not_implemented',
+#       pair               => 'not_implemented',
+#       pairs              => 'not_implemented',
 
 #        has_signature   => \&null,  # NOTE: prolly not needed
 #        delimiter       => \&null,
@@ -63,6 +63,7 @@ our $MESSAGES = {
     not_follow      => "'%s' cannot follow '%s'",
     bad_assign      => "You cannot assign to %s",
     odd_pairs       => 'Cannot make pairs from an odd number of items (%s): %s',
+    bad_pairs       => "Bare expression found where named parameters were expected: %s",
     bad_args        => "Unexpected positional arguments passed to %s: %s",
     bad_params      => "Unexpected named parameters passed to %s: %s",
 };
@@ -475,6 +476,11 @@ sub params {
 }
 
 
+sub pairs {
+    my $self = shift;
+    $self->syntax_error_msg( $self, bad_pairs => $self->source );
+}
+
 sub in_signature {
     shift->bad_signature( bad_arg => @_ );
 }
@@ -531,7 +537,7 @@ sub branch_text {
 sub token_error {
     my $self   = shift;
     my $type   = shift;
-    my $token  = shift;
+    my $token  = shift || $self;
     my $text  = join(BLANK, @_);
     my $posn  = $token->pos;
 

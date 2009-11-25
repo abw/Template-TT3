@@ -400,6 +400,7 @@ sub tokenise {
             return $1;
         }
         elsif ($$input =~ /$self->{ match_nw }/cg) {
+            $self->debug("matched nonword: $1") if DEBUG;
             $self->{ grammar }->matched($input, $output, $1, $pos);
         }
         elsif ($$input =~ /$NUMBER/cog) {

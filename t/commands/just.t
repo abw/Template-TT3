@@ -31,7 +31,7 @@ test_expect(
 
 __DATA__
 
--- test one --
+-- test just variables --
 a: [% a %]
 b: [% b %]
 c: [% c %]
@@ -53,6 +53,15 @@ c: 0
 a: alpha
 b: bravo
 c: charlie
+
+-- test with naked variables --
+[% just a %]
+a: [% a %]
+b: [% b !! '<undef>' %]
+[% end %]
+-- expect --
+a: alpha
+b: <undef>
 
 -- test with as infix operator --
 [% "a is $a, b is $b, c is $c.defined" just a=10 b=20 %]

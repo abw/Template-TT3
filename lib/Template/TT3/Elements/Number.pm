@@ -232,7 +232,12 @@ class->generate_pre_post_ops(
     dec     => ['num_pre_dec',  'num_post_dec'],
     plus    => ['num_positive', 'num_add'],
     minus   => ['num_negative', 'num_subtract'],
-    percent => ['sig_hash',     'num_modulus'],
+
+# NOTE: We no longer have '%' masquerading as two different operators based
+# on being a prefix operator (hash expansion: %foo) or an infix operator
+# (modulus: a % 10).  Now we have two separate operators, '%' for prefix
+# hash expansion and ' % ' for infix modulus.
+#    percent => ['sig_hash',     'num_modulus'],
 );
 
 

@@ -16,7 +16,7 @@ use Badger
 
 use Template::TT3::Test 
     tests   => 54,
-    debug   => 'Template::TT3::Template',
+    debug   => 'Template::TT3::Grammar',
     args    => \@ARGV,
     import  => 'test_expressions';
 
@@ -279,15 +279,19 @@ __DATA__
 80
 
 -- test integer modulus: % -- 
-20%7
+20 % 7
 21 % 7
 7.4 % 1.2
 4e5 % 5e6
+20% 7       # error
+20 %7       # error
 -- expect --
 6
 0
 0
 400000
+<ERROR:Bare expression found where named parameters were expected: 7>
+<ERROR:Bare expression found where named parameters were expected: 7>
 
 -- test integer modulus: mod -- 
 20 mod 7

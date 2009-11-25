@@ -52,8 +52,13 @@ sub var {
 
 
 sub get_var {
-    my ($self, $name) = @_;
+    my ($self, $name, $context) = @_;
     my $value;
+
+    # If we need to lookup a variable in a parent context then we pass the
+    # child context as an argument so that the parent creates a new variable
+    # bound to the child context, not the parent.  Otherwise we use $self.
+    $context ||= $self;
 
     $self->debug("get_var($name)") if DEBUG;
 
@@ -61,7 +66,7 @@ sub get_var {
         $self->debug("found $name in data: $self->{ data }->{ $name }") 
             if DEBUG;
             
-        return $self->use_var( 
+        return $context->use_var( 
             $name => $self->{ data }->{ $name } 
         );
     }
@@ -70,13 +75,13 @@ sub get_var {
         $self->debug("got $name from auto handler: $value") 
             if DEBUG;
 
-        return $self->use_var( 
+        return $context->use_var( 
             $name => $value 
         );
     }
     elsif ($self->{ lookup }) {
         $self->debug("asking lookup for $name") if DEBUG;
-        return $self->{ lookup }->get_var($name);
+        return $self->{ lookup }->get_var($name, $self);
     }
     else {
         $self->debug("$name is missing") if DEBUG;
@@ -178,7 +183,11 @@ sub with {
     my $class = ref $self || $self;
     bless {
         %$self,
-        data   => { %$data, %$params },
+# NOTE: we have two options here.  We can either pre-merge all the parent's
+# data with the new params or we can leave it in the parent and rely on the
+# child->parent lookup to find it later.  TODO: benchmark different approaches
+#       data   => { %$data, %$params },
+        data   => $params,
         vars   => { },
         parent => $self,
         lookup => $self,

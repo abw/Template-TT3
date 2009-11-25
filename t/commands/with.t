@@ -16,7 +16,7 @@ use Badger
 
 use Template::TT3::Test 
     tests   => 3,
-    debug   => 'Template::TT3::Template',
+    debug   => 'Template::TT3::Context',
     args    => \@ARGV,
     import  => 'test_expect callsign';
 
@@ -31,7 +31,7 @@ test_expect(
 
 __DATA__
 
--- test one --
+-- test with variables --
 a: [% a %]
 b: [% b %]
 c: [% c %]
@@ -59,6 +59,50 @@ a: alpha
 b: bravo
 c: charlie
 d: delta
+
+-- test with expressions in block form --
+[%  with a = b ~ c d = e ~ f;
+        "a: $a\nd: $d"
+    end
+%]
+-- expect --
+a: bravocharlie
+d: echofoxtrot
+
+-- test with arrows, commas and quotes --
+[%  with a =>  'A', b => 'B';
+        "a: $a\nb: $b"
+    end
+%]
+-- expect --
+a: A
+b: B
+
+
+-- test with braced block --
+[%  with a=10 {
+        'a: ' a
+    }
+%]
+-- expect --
+a: 10
+
+-- test with hash expansion -- 
+[% one = { a => 10, b => 20 };
+   two = { c=30 d=40 };
+   with %one %two;
+      "a: $a\n";
+      "b: $b\n";
+      "c: $c\n";
+      "d: $d\n";
+   end;
+%]
+-- expect --
+a: 10
+b: 20
+c: 30
+d: 40
+
 
 -- test with as infix operator --
 [% "a is $a, b is $b, c is $c" with a=10 b=20 %]

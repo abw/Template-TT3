@@ -43,7 +43,10 @@ sub init_grammar {
     my $class = $self->class;
 
     $self->init_factory($config);
-    
+
+    $self->{ has_regex } = 0;
+    $self->{ regexen   } = [ ];
+
     $self->{ keywords } = $class->hash_vars( 
         KEYWORDS => $config->{ keywords }
     );
@@ -74,6 +77,7 @@ sub symbols {
     my $args     = @_ == 1 && ref $_[0] eq ARRAY ? shift : [ @_ ];
     my $nonwords = $self->{ nonwords };
     my $keywords = $self->{ keywords };
+    my $regexen  = $self->{ regexen  };
     my $names    = $self->{ element_names };
     my ($symbol, $token, $name, $lprec, $rprec, $existing);
 
@@ -117,6 +121,12 @@ sub symbols {
         if ($token =~ /^$IDENT$/) { #is_keyword) {
             $self->debug("keyword: $token") if DEBUG;
             $keywords->{ $token } = $symbol;
+        }
+        elsif (ref $token eq REGEX) {
+            $self->debug("regex: $token") if DEBUG;
+            $self->{ has_regex }++;
+            # create a triplet of [$regex, $anchored_regex, $symbol]
+            push(@$regexen, [$token, qr/^$token$/, $symbol]);
         }
         else {
             $self->debug("nonword: $token") if DEBUG;
@@ -192,20 +202,23 @@ sub nonword_regex {
     my $self = shift;
 
     return $self->{ nonword_regex } ||= do {
-        my (@single, @multiple, @regex, $regex);
+        my (@single, @multiple, $regex);
+        my @regex = map { $_->[0] } @{ $self->{ regexen } };
 
         # construct a regex to match all start symbols 
         foreach my $token (keys %{ $self->{ nonwords } }) {
             # partition all symbols into single/multi character tokens 
-            if (ref $token eq REGEX) {
-                push(@regex, $token);
-            }
-            elsif (length $token == 1) {
+            if (length $token == 1) {
                 push(@single, quotemeta $token);
             }
             else {
                 push(@multiple, quotemeta $token);
             }
+        }
+        if (DEBUG) {
+            $self->debug("regex ops: ", join(', ', @regex));
+            $self->debug("single char ops: ", join(', ', @single));
+            $self->debug("multi-char ops: ", join(', ', @multiple));
         }
 
         # sort multi-character symbols according to length, longest first.
@@ -273,18 +286,34 @@ sub token_constructor {
         my ($symbol, $element, $config);
 
         if ($symbol = $self->{ symbols }->{ $token }) {
-            $config = {
-                elements => $self,
-                lprec    => $symbol->[LPREC],
-                rprec    => $symbol->[RPREC],
-            };
-            $element = $symbol->[ELEMENT];
+            # good
         }
-        else {
-            return $self->error_msg( invalid => symbol => $token );
+        elsif ($self->{ has_regex }) {
+            foreach my $triplet (@{ $self->{ regexen } }) {
+                # we use the ^...$ anchored match here
+                if ($token =~ $triplet->[1]) {     
+                    $self->debug("matched token via regex: $triplet->[0]") if DEBUG;
+                    # add matched token to static lookup table for next time
+                    # NOTE: this could explode the symbol table if there
+                    # are lots and lots of different valid matches, e.g. 
+                    # qr/a+/ could match an infinite number of operators
+                    # named 'a', 'aa', 'aaa', etc.  But you would have to
+                    # be pretty stupid (or malicious) if you did that.
+                    # TODO: probably should make this configurable
+                    $symbol = $self->{ symbols }->{ $token } = $triplet->[2];
+                    last;
+                }
+            }
         }
-        $self->element_class($element)
-             ->constructor($config);
+
+        return $self->error_msg( invalid => symbol => $token )
+            unless $symbol;
+
+        $self->element_class($symbol->[ELEMENT])->constructor(
+            elements => $self,
+            lprec    => $symbol->[LPREC],
+            rprec    => $symbol->[RPREC],
+        );
     };
 }
 
