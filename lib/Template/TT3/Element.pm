@@ -38,30 +38,39 @@ use Template::TT3::Class
 
 
 our $MESSAGES = {
-    no_rhs_expr     => "Missing expression after '%s'",
-    no_rhs_expr_msg => "Missing expression after '%s' (%s)",
-    no_dot_expr     => "Missing expression after dotop %s",
-    missing_match   => "Missing '%s' to match '%s'",
+    # syntax errors
     missing_for     => "Missing %s for '%s'.  Got '%s'",
     missing_for_eof => "Missing %s for '%s'.  End of file reached.",
-    bad_assign      => "Invalid assignment to expression: %s",
-    bad_method      => "The %s() method is not implemented by %s.",
+    missing_match   => "Missing '%s' to match '%s'",
+
     sign_bad_arg    => "Invalid argument in signature for %s: %s",
     sign_dup_arg    => "Duplicate argument in signature for %s: %s",
     sign_dup_sigil  => "Duplicate '<4>' argument in signature for %s: %s",
-    undef_varname   => "Cannot use undefined value as a variable name: %s",
-#    undefined       => "Undefined value returned by expression: <1>",
-#    undefined_in    => "Undefined value in '<2>' expression: <1>",
+
+    # runtime data errors
     undef_data      => "Undefined value returned by expression: <1>",
     undef_expr      => "Undefined value in '<2>': <1>",
     undef_dot       => "Undefined value in '<1>.<2>': <1>",
-    nan             => 'Non-numerical value "<2>" returned by expression: <1>',
+    nan             => "Non-numerical value '<2>' returned by expression: <1>",
+
+    pairs_odd       => 'Cannot make pairs from an odd number (<2>) of items: <1>',
+    pairs_bad       => 'Cannot make pairs from expression: %s',
+
+    args_posit      => "Unexpected positional arguments in call to %s: %s",
+    args_named      => "Unexpected named parameters in call to %s: %s",
+    args_missing    => "Missing value for '<2>' named parameter in call to %s",
+
+
+    # stuff to cleanup/rationalise
+    bad_assign      => "Invalid assignment to expression: %s",
+    bad_method      => "The %s() method is not implemented by %s.",
     not_follow      => "'%s' cannot follow '%s'",
     bad_assign      => "You cannot assign to %s",
-    odd_pairs       => 'Cannot make pairs from an odd number of items (%s): %s',
+#    no_pairs        => 'Unable to make pairs from expression: %s',
+#    odd_pairs       => 'Cannot make pairs from an odd number of items (%s): %s',
     bad_pairs       => "Bare expression found where named parameters were expected: %s",
-    bad_args        => "Unexpected positional arguments passed to %s: %s",
-    bad_params      => "Unexpected named parameters passed to %s: %s",
+#    bad_args        => "Unexpected positional arguments passed to %s: %s",
+#    bad_params      => "Unexpected named parameters passed to %s: %s",
 };
 
 
@@ -471,7 +480,7 @@ sub OLD_hash_values {
 sub params {
     my ($self, $context, $posit) = @_;
     $posit ||= [ ];
-    push(@$posit, $self->value($context));
+    push(@$posit, $self->value($context, $self));
 }
 
 
@@ -549,6 +558,7 @@ sub token_error {
 
 sub fail_missing {
     my ($self, $what, $token) = @_;
+    $token ||= \$self;
     $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
     return $self->syntax_error_msg(
         $$token,
@@ -568,6 +578,27 @@ sub fail_undef {
     );
 }
 
+
+sub fail_pairs { 
+    my ($self, $what, $source, @args) = @_;
+    
+    return $self->syntax_error_msg(
+        $self,
+        "pairs_$what" => $source || $self->source, @args
+    );
+}
+
+
+sub fail_args { 
+    my ($self, $what, $source, @args) = @_;
+    
+    return $self->syntax_error_msg(
+        $self,
+        "args_$what" => $source || $self->source, @args
+    );
+}
+
+
 sub fail_undef_data {
     shift->fail_undef( data => @_ );
 }
@@ -581,6 +612,40 @@ sub fail_undef_expr {
 sub fail_undef_dot { 
     shift->fail_undef( dot => @_ );
 }
+
+
+sub fail_pairs_odd {
+    my $self = shift;
+    $self->fail_pairs( odd => $self->source, @_ );
+}
+
+
+sub fail_pairs_bad {
+    my $self = shift;
+    $self->fail_pairs( bad => @_ );
+}
+
+
+sub fail_args_posit {
+    my $self = shift;
+#    $self->fail_args( posit => $self->source, @_ );
+    $self->fail_args( posit => @_ );
+}
+
+
+sub fail_args_named {
+    my $self = shift;
+#    $self->fail_args( named => $self->source, @_ );
+    $self->fail_args( named => @_ );
+}
+
+
+sub fail_args_missing {
+    my $self = shift;
+#    $self->fail_args( missing => $self->source, @_ );
+    $self->fail_args( missing => @_ );
+}
+
 
 
 sub signature_error {

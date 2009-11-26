@@ -1,5 +1,6 @@
 package Template::TT3::Element::Block;
 
+use Template::TT3::Utils;
 use Template::TT3::Type::Params 'PARAMS';
 use Template::TT3::Class 
     version   => 3.00,
@@ -48,7 +49,13 @@ sub params {
 
     my ($self, $context, $posit, $named) = @_;
     $posit ||= [ ];
-    $named ||= bless { }, PARAMS;
+    
+    # FIXME: this is a temporary hack during development to try out 
+    # different approaches for identifying named parameters supplied by
+    # TT
+    $named ||= $Template::TT3::Utils::TT_PARAMS_BLESS 
+        ? (bless { }, $Template::TT3::Utils::TT_PARAMS_BLESS)
+        : { };
     
     $_->params($context, $posit, $named)
         for @{ $_[SELF]->[EXPR] };
@@ -56,7 +63,7 @@ sub params {
     push(@$posit, $named) 
         if $named && %$named;
 
-    $self->debug("returning ", $self->dump_data($posit)) if DEBUG;
+    $self->debug("returning [$named]", $self->dump_data($posit)) if DEBUG;
     return @$posit;
 }
 

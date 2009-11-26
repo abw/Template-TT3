@@ -92,7 +92,7 @@ __DATA__
 -- test unary no term error --
 -
 -- expect --
-<ERROR:Missing expression after '-'>
+<ERROR:Missing expression for '-'.  End of file reached.>
 
 -- test negative integers --
 -123

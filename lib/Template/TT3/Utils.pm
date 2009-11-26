@@ -4,13 +4,18 @@ use Badger::Class
     version   => 0.01,
     debug     => 0,
     base      => 'Badger::Utils',
+    constants => 'HASH',
     constant  => {
-        PARAMS => 'Template::TT3::Type::Params',
+#        PARAMS => 'Template::TT3::Type::Params',   # causes too many problems
+        PARAMS => 'HASH',
     },
     exports   => {
-        any   => 'tt_params tt_args tt_self_args random_advice',
+        any   => 'tt_params tt_args tt_self_args random_advice hashlike',
     };
 
+
+our $TT_PARAMS_CALLER;
+our $TT_PARAMS_BLESS = PARAMS unless PARAMS eq HASH;
 
 our @ADVICE = (
     'Did you read the documentation?',
@@ -41,8 +46,14 @@ our @ADVICE = (
 );
 
 
+sub hashlike($) {
+    ref $_[0] && ref $_[0] eq HASH || ref $_[0] eq PARAMS;
+}
+ 
 sub tt_args {
     my $opts = pop @_ if @_ && ref $_[-1] eq PARAMS;
+#    print "TT_ARGS: (", join(', ', @_), ")\n";
+#    print PARAMS, " check: got opts: $opts\n"; # if $opts;
     return ($opts, @_);
 }
 
@@ -56,18 +67,27 @@ sub tt_self_args {
 
 sub tt_params {
     my ($self, $sig, $vars, @args) = @_;
-    my $opts = @args && ref $args[-1] eq PARAMS ? pop @args : { };
+    my $opts = @_ && ref $args[-1] eq PARAMS ? pop @args : { };
+    my $from = $TT_PARAMS_CALLER || $self;      # hack to allow remote poking
     $vars ||= { };
     my ($name, $value);
 
+    if (DEBUG) {
+        $self->debug("sig: ", $self->dump_data($sig));
+        $self->debug("vars: ", $self->dump_data($vars));
+        $self->debug("args: ", $self->dump_data(\@args));
+        $self->debug("self is $self: ", $self->source);
+    }
+
     # look for each scalar positional argument
     foreach $name (@{ $sig->{'$'} }) {
-        $self->debug("looking for $name in args...\n") if DEBUG;
+        $self->debug("looking for $name in args...") if DEBUG;
+
         $value = exists $opts->{ $name }
             ? delete $opts->{ $name }
             : @args 
                 ? shift @args 
-                : $self->error("Missing argument for $name\n"); # TODO: warn/throw
+                : $from->fail_args_missing( $self->source, $name );
         $vars->{ $name } = defined $value
             ? $value : warn "Undefined value for $name argument\n";
     }
@@ -77,7 +97,7 @@ sub tt_params {
         $vars->{ $name } = \@args;
     }
     elsif (@args) {
-        $self->error_msg( bad_args => $self->source, join(', ', @args) );
+        $from->fail_args_posit( $self->source, join(', ', @args) );
     }
 
     # store remaining named params
@@ -85,7 +105,7 @@ sub tt_params {
         $vars->{ $name } = $opts;
     }
     elsif (%$opts) {
-        $self->error_msg( bad_params => $self->source, join(', ', keys %$opts) );
+        $from->fail_args_named( $self->source, join(', ', keys %$opts) );
     }
     
     return $vars;

@@ -102,7 +102,7 @@ __DATA__
 -- test unary no term error --
 -
 -- expect --
-<ERROR:Missing expression after '-' (got '%]')>
+<ERROR:Missing expression for '-'.  Got '%]'>
 
 -- test negative integers --
 -123

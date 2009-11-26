@@ -6,9 +6,10 @@ use Template::TT3::Class
     base      => 'Template::TT3::Variable',
     constants => ':type_slots CODE',
     constant  => {
-        type    => 'object',
-        PRIVATE => '_',
-        PUBLIC  => '*',
+        type        => 'object',
+        PRIVATE     => '_',
+        PUBLIC      => '*',
+        TT_PAIRS    => 'tt_pairs',
     },
     messages => {
         denied     => 'Access denied to object method: %s.%s',
@@ -20,6 +21,7 @@ our $METHODS = {
     '*' => 1,
     '_' => 0,
 };
+
 
 sub configuration {
     my ($self, $config) = @_;
@@ -39,6 +41,7 @@ sub configuration {
     
     return $config;
 }
+
 
 sub dot {
     my ($self, $name, $args) = @_;
@@ -62,5 +65,34 @@ sub dot {
     );
 }
 
-    
+
+sub pairs {
+    my ($self, $element) = @_;
+
+    my $tt_pairs = $self->method(TT_PAIRS)
+        || return $element
+            ? $element->fail_pairs_bad
+            : $self->error_msg( bad_pairs => $self->fullname );
+
+    return $self->[VALUE]->$tt_pairs($self, $element);
+}
+
+
+sub method {
+    my ($self, $name) = @_;
+    my $method 
+        = $self->[META]->[METHODS]->{ $name }
+       || $self->[META]->[METHODS]->{ 
+            $name =~ $self->[META]->[CONFIG]->{ private } ? PRIVATE : PUBLIC
+          }
+       || return;
+              
+    $method = $name if $method eq '1';
+
+    return ref $method eq CODE
+        ? $method
+        : $self->[VALUE]->can($method);
+}           
+
+
 1;

@@ -42,10 +42,6 @@ sub text {
     scalar $self->[VALUE]->(@_);
 }
 
-sub OLD_list {
-    return shift->apply_list(@_);
-    # [ $_[SELF]->[VALUE]->() ];
-}
 
 sub values {
     # this is called when a function appears in a text block... might 

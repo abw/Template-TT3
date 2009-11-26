@@ -26,6 +26,7 @@ our $TYPES = {
     ARRAY  => 'Template::TT3::Variable::List',
     CODE   => 'Template::TT3::Variable::Code',
     OBJECT => 'Template::TT3::Variable::Object',
+#    'Template::TT3::Type::Params' => 'Template::TT3::Variable::Hash',
 };
 
 

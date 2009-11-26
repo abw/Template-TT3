@@ -88,12 +88,17 @@ sub list_values {
 sub pairs {
     $_[SELF]->debug("variable pairs(): ", $_[SELF]->source) if DEBUG;
 
+    $_[SELF]->debug(
+        "variable '", $_[SELF]->source, "' is ", 
+        $_[SELF]->variable( $_[CONTEXT] )
+    ) if DEBUG;
+
     # explicitly force list context
-    my @values = $_[SELF]->variable( $_[CONTEXT] )->values($_[SELF]);
+    my @values = $_[SELF]->variable( $_[CONTEXT] )->pairs($_[SELF]);
 
     # check we got an even number of items
     return @values % 2
-        ? $_[SELF]->error_msg( odd_pairs => scalar(@values) => $_[SELF]->source )
+        ? $_[SELF]->fail_pairs_odd( scalar(@values) )
         : @values;
 }
 

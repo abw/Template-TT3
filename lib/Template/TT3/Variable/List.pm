@@ -8,6 +8,9 @@ use Template::TT3::Class
     constants => ':type_slots',
     constant  => {
         type  => 'list',
+    },
+    alias     => {
+        pairs => \&values,
     };
     
 

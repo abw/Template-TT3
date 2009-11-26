@@ -45,10 +45,17 @@ sub value {
 
 sub values {
     $_[SELF]->debug('%hash values(): ', $_[SELF]->source) if DEBUG;
-    $_[SELF]->debug("calling on $_[SELF]->[EXPR]") if DEBUG;
+#    $_[SELF]->debug("calling pairs() on $_[SELF]->[EXPR]") if DEBUG;
     $_[SELF]->[EXPR]->pairs($_[CONTEXT]);
 }
 
+
+sub params {
+#   my ($self, $context, $posit, $named) = @_;
+    my $named = $_[3] || { };
+    my $hash  = { $_[SELF]->[EXPR]->pairs($_[CONTEXT]) };
+    @$named{ keys %$hash } = CORE::values %$hash;
+}
 
 
 1;

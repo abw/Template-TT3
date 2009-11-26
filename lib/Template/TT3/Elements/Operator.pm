@@ -15,11 +15,7 @@ use Template::TT3::Class
     version   => 3.00,
     constants => ':elements',
     utils     => 'xprintf',
-    view      => 'operator',
-    messages  => {
-        no_rhs_expr     => "Missing expression after '%s'",
-        no_rhs_expr_got => "Missing expression after '%s' (got '%s')",
-    };
+    view      => 'operator';
 
 
 
@@ -38,7 +34,8 @@ sub parse_dotop {
     return undef;
 }
 
-sub no_rhs_expr { 
+
+sub OLD_no_rhs_expr { 
     my ($self, $token) = @_;
     
     # We throw an error for now.  It's conceivable that we might want to
@@ -50,7 +47,8 @@ sub no_rhs_expr {
         && $$token->skip_ws->[TOKEN]
         || '';
     
-    $self->error_msg( 
+    $self->syntax_error_msg( 
+        $$token,
         length $next
             ? ( no_rhs_expr_got => $self->[TOKEN], $next )
             : ( no_rhs_expr     => $self->[TOKEN] )
@@ -146,7 +144,7 @@ sub parse_expr {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[RPREC])
-        || $self->no_rhs_expr($token);
+        || $self->fail_missing( expression => $token );
 
     # carry on...
     return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);

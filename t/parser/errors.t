@@ -17,7 +17,7 @@ use Badger
     lib => '../../lib';
 
 use Template::TT3::Test
-    tests  => 5,
+    tests  => 6,
     debug  => 'Template::TT3::Scanner Template::TT3::Tag',
     args   => \@ARGV,
     import => 'test_expect callsign';
@@ -29,6 +29,14 @@ test_expect(
 );
 
 __DATA__
+
+-- test missing unary operand error --
+[% not %]
+-- error --
+TT3 syntax error at line 1 of "missing unary operand error" test:
+    Error: Missing expression for 'not'.  Got '%]'
+   Source: [% not %]
+                  ^ here
 
 -- test missing binary operand --
 [% a + %]

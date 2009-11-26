@@ -19,12 +19,6 @@ use Template::TT3::Class
         values  => \&value,         # TODO: parallel assignment
     };
 
-use constant {
-    ARITY      => RHS + 1,
-    LHS_METHOD => RHS + 2,
-    RHS_METHOD => RHS + 3,
-};
-
 
 sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
@@ -39,25 +33,15 @@ sub parse_infix {
     
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
-#    $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
-#        || return $self->fail_missing( expression => $token );
-
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
         || return $self->fail_missing( expression => $token );
     
-#    $self->debug("assign LHS signature: ", $lhs->hparse_signature) if DEBUG;
-
-    # Call the lvalue to set our LHS and RHS for us.  This allows the lvalue
-    # to create a lazy (subroutine) wrapper around the RHS if it has a 
-    # function signature like [% bold(text) = "<b>$text</b>" %]
+    # Call the lvalue to either manipulate $self or replace it with something
+    # different.  This allows the lvalue to create a subroutine wrapper around 
+    # the RHS if it has a function signature, e.g.  [% b(t) = "<b>$t</b>" %]
+    # or if it requires parallel assignment, e.g. [% @foo = @bar %]
     my $assign = $lhs->as_lvalue($self, $scope);
 
-    # TODO: negotiation between the LHS and RHS to work out what kind of
-    # assignment this is.  Is the LHS has parens, e.g. foo(), then it's a 
-    # "lazy" assignment (e.g. create a subroutine).  If the LHS is a list
-    # term (e.g. (foo, bar) or @baz) then we need to treat the RHS different
-#   push(@$self, $lhs->assignment($rhs));
-    
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
     # as the LHS
@@ -67,11 +51,16 @@ sub parse_infix {
 
 sub value {
     $_[SELF]->debug("assign value(): ", $_[SELF]->source) if DEBUG;
-    $_[SELF]->[LHS]
-            ->variable( $_[CONTEXT] )        # fetch LHS as a variable
-            ->set(                           # set it to RHS value
-                $_[SELF]->[RHS]->value( $_[CONTEXT] )
-              )->value($_[SELF]);
+
+    $_[SELF]
+        ->[LHS]
+        ->variable( $_[CONTEXT] )        # fetch LHS as a variable
+        ->set(                           # set it to RHS value
+            $_[SELF]
+                ->[RHS]
+                ->value( $_[CONTEXT] )
+        )
+        ->value( $_[SELF] );
 
 #    $_[SELF]->debug("assign value(): ", $_[SELF]->source) if DEBUG;
 #    $_[SELF]->debug("about to fetch LHS variable: $_[SELF]->[LHS]");
@@ -88,7 +77,6 @@ sub value {
 
 
 sub pairs {
-    $_[SELF]->debug("pairs [$_[SELF]->[LHS]] [$_[SELF]->[RHS]]") if DEBUG;
     return $_[SELF]->[LHS]->name( $_[CONTEXT] )     # fetch LHS as a name
         => $_[SELF]->[RHS]->value( $_[CONTEXT] );   # fetch RHS as a value
 }
@@ -97,14 +85,42 @@ sub pairs {
 sub params {
     $_[3]->{ $_[SELF]->[LHS]->name( $_[CONTEXT] ) }
            = $_[SELF]->[RHS]->value( $_[CONTEXT] );
-           
-    # my ($self, $context, $posit, $named) = @_;
-#    $named ||= { };
-#    my $name  = $_[SELF]->[LHS]->name( $_[CONTEXT] );
-#    my $value = $_[SELF]->[RHS]->value( $_[CONTEXT] );
-#    $self->debug("adding named parameter: $name => $value") if DEBUG;
-#    $named->{ $name } = $value;
 }
+
+
+1;
+
+__END__
+package Template::TT3::Element::Operator::AssignLazy::NOT_USED;
+
+use Template::TT3::Class 
+    version   => 3.00,
+    debug     => 0,
+    base      => 'Template::TT3::Element::Operator::Assign';
+
+
+sub value {
+    $_[SELF]->debug("assign value(): ", $_[SELF]->source) if DEBUG;
+
+    # We pass $self->[LHS] to the RHS value() method so that the Sub 
+    # element on the right can call tt_params() against it so that 
+    # errors are reported in context.
+    
+    $_[SELF]
+        ->[LHS]
+        ->variable( $_[CONTEXT] )
+        ->set(
+            $_[SELF]
+                ->[RHS]
+                ->value( 
+                    $_[CONTEXT], 
+                    $_[SELF]->[LHS]         # extra
+                )
+        )
+        ->value( $_[SELF] );
+}
+
+
 
 
 1;

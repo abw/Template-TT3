@@ -17,22 +17,6 @@ use Template::TT3::Class
     };
 
 
-sub OLD_parse_infix {
-    my ($self, $lhs, $token, $scope, $prec) = @_;
-
-    return $lhs 
-        if $prec && $self->[META]->[LPREC] < $prec;
-
-    $self->[LHS] = $lhs;
-    $self->[RHS] = $$token->next_skip_ws($token)
-        ->parse_expr($token, $scope, $self->[META]->[LPREC], FORCE)
-        || return $self->fail_missing( expression => $token );
-
-    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
-}
-
-
-
 sub values {
     return (
         $_[SELF]->[LHS]->name( $_[CONTEXT] ),

@@ -12,8 +12,9 @@ use Template::TT3::Class
 sub value {
     my ($self, $context) = @_;
 
+    my $name  = $self->[EXPR];
     my $block = $self->[BLOCK];
-    my $sign  = $self->[ARGS];
+    my $sign  = $self->[ARGS] ||= $name->signature;
 
     if (DEBUG) {
         $self->debug("activating lazy sub wrapper, signature is ", $self->dump_data($sign));
@@ -25,7 +26,7 @@ sub value {
     return sub {
         $block->text(
             $context->with(
-                tt_params($self, $sign, undef, @_)
+                tt_params($name || $self, $sign, undef, @_)
             )
         );
     };
@@ -38,7 +39,7 @@ sub NOT_values {
 }
 
 sub source {
-    $_[SELF]->debug_callers;
+#    $_[SELF]->debug_callers;
     $_[SELF]->[BLOCK]->source;
 }
 

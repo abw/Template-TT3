@@ -82,13 +82,13 @@ five: 5
 [%  sub foo(a, b) { "a=$a  b=$b" } -%]
 foo(10, 20, 30, 40): [% foo(10, 20, 30, 40) %]
 -- expect --
-<ERROR:Unexpected positional arguments passed to foo(): 30, 40>
+<ERROR:Unexpected positional arguments in call to foo(): 30, 40>
 
 -- test sub with too many args in the wrong order --
 [%  sub foo(a, b) { "a=$a  b=$b" } -%]
 foo(10, 20, a=30, b=40): [% foo(10, 20, a=30, b=40) %]
 -- expect --
-<ERROR:Unexpected positional arguments passed to foo(): 10, 20>
+<ERROR:Unexpected positional arguments in call to foo(): 10, 20>
 
 -- test sub with list collector #1 --
 [%  sub foo(a, b, @c) {  "a=$a  b=$b  c=[$c.join]" } -%]
@@ -109,31 +109,31 @@ foo(30, 40, b=20, a=10, 50, 60): [% foo(30, 40, b=20, a=10, 50, 60) %]
 foo(30, 40, b=20, a=10, 50, 60): a=10  b=20  c=[30 40 50 60]
 
 -- test sub with hash collector #1 --
-[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.text}" } -%]
+[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.as_text}" } -%]
 foo(10, 20, c=30, d=40): [% foo(10, 20, c=30, d=40) %]
 -- expect --
 foo(10, 20, c=30, d=40): a=10  b=20  c={c=30, d=40}
 
 -- test sub with hash collector #2 --
-[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.text}" } -%]
+[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.as_text}" } -%]
 foo(b=20, a=10, c=30, d=40): [% foo(b=20, a=10, c=30, d=40) %]
 -- expect --
 foo(b=20, a=10, c=30, d=40): a=10  b=20  c={c=30, d=40}
 
 -- test sub with hash collector #3 --
-[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.text}" } -%]
+[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.as_text}" } -%]
 foo(b=20, a=10, 30, 40): [% foo(b=20, a=10, 30, 40) %]
 -- expect --
-<ERROR:Unexpected positional arguments passed to foo(): 30, 40>
+<ERROR:Unexpected positional arguments in call to foo(): 30, 40>
 
 -- test sub with hash collector #4 --
-[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.text}" } -%]
+[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.as_text}" } -%]
 foo(30, 40, b=20, a=10, c=50, d=60): [% foo(30, 40, b=20, a=10, c=50, d=60) %]
 -- expect --
-<ERROR:Unexpected positional arguments passed to foo(): 30, 40>
+<ERROR:Unexpected positional arguments in call to foo(): 30, 40>
 
 -- test sub with hash collector #5 --
-[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.text}" } -%]
+[%  sub foo(a, b, %c) { "a=$a  b=$b  c={$c.as_text}" } -%]
 foo(c=30, d=40, b=20, a=10, e=50, f=60): [% foo(c=30, d=40, b=20, a=10, e=50, f=60) %]
 -- expect --
 foo(c=30, d=40, b=20, a=10, e=50, f=60): a=10  b=20  c={c=30, d=40, e=50, f=60}

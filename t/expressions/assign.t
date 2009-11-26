@@ -14,6 +14,9 @@
 use Badger 
     lib     => '../../lib';
 
+#use Badger::Debug modules => 'Template::TT3::Utils';
+
+
 use Template::TT3::Test 
     tests   => 8,
     debug   => 'Template::TT3::Context',
@@ -85,6 +88,7 @@ pi is 3.14
 <b>Hello World</b>
 <a href="index.html">Home Page</a>
 <i class="emph">Hello Badger</i>
+
 
 -- test subroutine assignment with remerge --
 -- block --

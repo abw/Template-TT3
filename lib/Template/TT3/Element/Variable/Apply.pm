@@ -44,12 +44,11 @@ sub as_lvalue  {
     $op->[LHS] = $self->[EXPR];
     $op->[RHS] = $self->[META]->[ELEMS]->construct(
         sub => '<sub: ' . $self->[ARGS]->source . '>', 
-            $self->[POS], 
-            undef,                  # EXPR
-            $op->[RHS],             # BLOCK
-            $self->signature,       # ARGS
+            $self->[POS] + 1,       # POS   - skip past '(' 
+            $self,                  # EXPR  - this element is sub name(args)
+            $op->[RHS],             # BLOCK - body content
+            $self->signature,       # ARGS  - summarised signature
     );
-    
     $self->debug("created new sub wrapper for $op rhs: ", $op->[RHS]) if DEBUG;
     
     return $op;
@@ -72,6 +71,16 @@ sub signature {
 
 
 sub variable {
+    $_[SELF]->debug('calling variable: ', $_[SELF]->source) if DEBUG;
+    
+    # temporarily save ourselves in $TT_PARAMS_CALLER so that tt_params()
+    # can report parameter errors from the perspective of the caller
+    local $Template::TT3::Utils::TT_PARAMS_CALLER = $_[SELF];
+
+#    print "*** DUMP ****\n", $_[CONTEXT]->dump_up, "\n";
+    
+#    $_[SELF]->debug("asking ARGS for params: $_[SELF]->[ARGS] => ", $_[SELF]->[ARGS]->source);
+    
     $_[SELF]->[EXPR]->variable( $_[CONTEXT] )->apply( 
         $_[SELF]->[ARGS]->params( $_[CONTEXT] )
     );

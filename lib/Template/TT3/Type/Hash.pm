@@ -317,7 +317,7 @@ sub html_attrs {
         $_ . '="' . encode($self->{ $_ }) . '"'
     } 
     CORE::sort(CORE::keys(%$self));
-    
+
     return @attrs
         ? SPACE . join(SPACE, @attrs)
         : BLANK;

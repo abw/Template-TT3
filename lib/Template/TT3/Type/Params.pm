@@ -25,6 +25,13 @@ sub Params {
 }
 
 
+sub tt_pairs {
+    my $self = shift;
+    $self->debug("called tt_pairs() on params object") if DEBUG;
+    %$self;
+}
+
+
 1;
 
 __END__

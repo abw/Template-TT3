@@ -17,11 +17,13 @@ use Template::TT3::Class
         list      => \&get,
         value     => \&get,
         values    => \&get,
+#       pairs     => \&get,
         maybe     => \&get,
     },
     messages  => {
         undefined  => '"%s" is undefined',
         no_vmethod => '"<2>" is not a valid <1> method in "<3>.<2>"', 
+        bad_pairs  => 'Cannot make pairs from variable expression: %s',
     };
         
 
@@ -109,6 +111,15 @@ sub text {
         
         return $self->error_msg( undefined => "var:" . $self->fullname );
     }
+}
+
+
+sub pairs {
+    my ($self, $element) = @_;
+    $self->debug("variable pairs not allowed");
+    return $element
+        ? $element->fail_pairs_bad
+        : $self->error_msg( bad_pairs => $self->fullname );
 }
 
 

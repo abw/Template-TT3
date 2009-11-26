@@ -9,7 +9,7 @@ use Template::TT3::Class
         type  => 'hash',
     },
     alias     => {
-#        pairs => \&values,
+        pairs => \&values,
     };
 
 

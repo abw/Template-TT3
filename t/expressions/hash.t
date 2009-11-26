@@ -152,6 +152,7 @@ a b x y
 
 -- test list as hash --
 list = [a => 10, b => 20];
+#'type: ' list.type ' / ' list.ref "\n"
 hash = { %list };
 hash.keys.sort.join;
 -- expect --
@@ -162,14 +163,15 @@ list = [a => 10, 20];
 hash = { %list };
 hash.keys.sort.join;
 -- expect --
-<ERROR:Cannot make pairs from an odd number of items (3): list>
+<ERROR:Cannot make pairs from an odd number (3) of items: list>
 
 -- test single item as hash --
 twenty = 20;
 hash = { %twenty };
-hash.keys.sort.join;
+hash.keys.sort.join ': ' hash.twenty
 -- expect --
-<ERROR:Cannot make pairs from an odd number of items (1): twenty>
+<ERROR:Cannot make pairs from an odd number (1) of items: twenty>
+#twenty: 20
 
 
 
