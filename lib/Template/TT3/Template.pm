@@ -68,7 +68,7 @@ sub init {
 # the important methods that do shit
 #-----------------------------------------------------------------------
 
-sub fill {
+sub _fill {
     my ($self, $params) = self_params(@_);
 
     return $self->block->text(
@@ -128,7 +128,7 @@ class->methods(
             shift->catch( decorate_error => $priv  => @_ ) 
         }
     }
-    qw( tree block parse tokens scan )
+    qw( fill tree block parse tokens scan )
 );
 
 

@@ -22,10 +22,10 @@ sub parse_body {
 
     # parse expressions
     my $block = $$token->parse_block($token, $scope)
-        || return $parent->missing_error( $self->ARG_BLOCK, $token );
+        || return $parent->fail_missing( $self->ARG_BLOCK, $token );
 
     # check next token matches our FINISH token
-    return $parent->missing_error( $self->FINISH, $token)
+    return $parent->fail_missing( $self->FINISH, $token)
         unless $$token->is( $self->FINISH, $token );
 #       unless $$token->is( $self->FINISH );
 

@@ -28,7 +28,7 @@ sub parse_infix {
     
     # parse block
     $self->[RHS] = $$token->parse_body($token, $scope)
-        || return $self->missing_error( block => $token );
+        || return $self->fail_missing( block => $token );
     
     # TODO: return assign node
     return $self;

@@ -31,7 +31,7 @@ sub parse_expr {
     # e.g. TAGS.inline
     if ($$token->is(DOT, $token)) {
         $self->[LHS] = $$token->parse_word($token, $scope)
-            || return $self->missing_error( 'tag name' => $token );
+            || return $self->fail_missing( 'tag name' => $token );
 
         $self->debug('got dotted TAGS: ', $self->[RHS]->[TOKEN]) if DEBUG;
     }
@@ -42,7 +42,7 @@ sub parse_expr {
     
     # parse the next expression    
     $self->[RHS] = $$token->parse_expr($token, $scope)
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
     
     return $self;
 }

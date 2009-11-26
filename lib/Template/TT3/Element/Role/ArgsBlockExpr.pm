@@ -23,7 +23,7 @@ sub parse_expr {
     # parse a block following the args
     $self->[BLOCK] = $$token
         ->parse_body($token, $scope)
-        || return $self->missing_error( $self->ARG_BLOCK => $token );
+        || return $self->fail_missing( $self->ARG_BLOCK => $token );
 
     return $self;
 }

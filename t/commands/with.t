@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 7,
+    tests   => 9,
     debug   => 'Template::TT3::Context',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -115,3 +115,24 @@ a is 10, b is 20, c is charlie
 -- expect --
 TODO: fill blah
 
+-- test with using naked dotted variables --
+[% user = { name => 'Ford Prefect', email => 'ford@heart-of-gold.com' };
+   with user.name, user.email;
+      "name: $name\n";
+      "email: $email\n";
+   end;
+%]
+-- expect --
+name: Ford Prefect
+email: ford@heart-of-gold.com
+
+-- test with using naked multi-dotted variables --
+[% users = [ { name => 'Ford Prefect', email => 'ford@heart-of-gold.com' } ];
+   with users.first.name, mailto=users.first.email;
+      "name: $name\n";
+      "email: $mailto\n";
+   end;
+%]
+-- expect --
+name: Ford Prefect
+email: ford@heart-of-gold.com

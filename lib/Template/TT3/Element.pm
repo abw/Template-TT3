@@ -50,8 +50,11 @@ our $MESSAGES = {
     sign_dup_arg    => "Duplicate argument in signature for %s: %s",
     sign_dup_sigil  => "Duplicate '<4>' argument in signature for %s: %s",
     undef_varname   => "Cannot use undefined value as a variable name: %s",
-    undefined       => "Undefined value returned by expression: <1>",
-#   undefined_in    => "Undefined value returned by '<2>' expression: <1>",
+#    undefined       => "Undefined value returned by expression: <1>",
+#    undefined_in    => "Undefined value in '<2>' expression: <1>",
+    undef_data      => "Undefined value returned by expression: <1>",
+    undef_expr      => "Undefined value in '<2>': <1>",
+    undef_dot       => "Undefined value in '<1>.<2>': <1>",
     nan             => 'Non-numerical value "<2>" returned by expression: <1>',
     not_follow      => "'%s' cannot follow '%s'",
     bad_assign      => "You cannot assign to %s",
@@ -544,7 +547,7 @@ sub token_error {
 }
 
 
-sub missing_error {
+sub fail_missing {
     my ($self, $what, $token) = @_;
     $self->debug("[$self] missing [$what] [$token = $self->[TOKEN]]") if DEBUG;
     return $self->syntax_error_msg(
@@ -556,23 +559,28 @@ sub missing_error {
 }
 
 
-sub undefined_error { 
-    my ($self, $source) = @_;
+sub fail_undef { 
+    my ($self, $what, $source, @args) = @_;
     
     return $self->undef_error_msg(
         $self,
-        undefined => $source || $self->source,
+        "undef_$what" => $source || $self->source, @args
     );
 }
 
-sub undefined_in_error { 
-    my $self = shift;
-    return $self->undef_error_msg(
-        $self,
-        undefined_in => $self->source, @_ 
-    );
+sub fail_undef_data {
+    shift->fail_undef( data => @_ );
 }
 
+
+sub fail_undef_expr { 
+    shift->fail_undef( expr => @_ );
+}
+
+
+sub fail_undef_dot { 
+    shift->fail_undef( dot => @_ );
+}
 
 
 sub signature_error {
@@ -1639,7 +1647,7 @@ TODO: more on this
 
 =head2 signature_error()
 
-=head2 undefined_error()
+=head2 fail_undef_data()
 
 =head2 undefined_in_error()
 

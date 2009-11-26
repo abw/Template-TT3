@@ -344,7 +344,7 @@ sub parse_infix {
     # we also set the $force (1) flag
     
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
 
     # CHECK: I originally thought that non-chaining ops should return here,
     # but that scuppers an expression like: "x < 10 && y > 30" as the '<'
@@ -393,7 +393,7 @@ sub parse_infix {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher precedence can bind tighter
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
     
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
@@ -437,7 +437,7 @@ sub parse_infix {
     # parse the RHS as an expression, passing our own precedence so that 
     # any operators with a higher or equal precedence can bind tighter
     $self->[RHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC], 1)
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
     
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
@@ -517,7 +517,7 @@ In all cases the C<parse_infix()> method does more-or-less the same thing.
         $self->[RHS] = $$token->parse_expr(
             $token, $scope, $self->[META]->[LPREC], 1
         )
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
 
         # parse any more binary operators following
         return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
@@ -588,7 +588,7 @@ C<parse_expr()> method on the next token.
         $self->[RHS] = $$token->parse_expr(
             $token, $scope, $self->[META]->[LPREC], 1
         )
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
 
 We pass it the reference to the current token, C<$token>, so that it can
 advance the token pointer to consume tokens from the input stream. We also

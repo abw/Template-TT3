@@ -4,16 +4,17 @@ a comprehensive list.
 
 -----------------------------------------------------------------------
 
-OPS
-
-..  num_range
-to  num_to         # not just nums: 'A' to 'Z'
-by  num_by         # ditto
-?   if_then
+Elements
+--------
+..  num_range       
+to  num_to          # not just nums: 'A' to 'Z'
+by  num_by          # ditto - needs iterator
+?   if_then         #
 :   if_else
-->  arrow
-=   assign
-<>
+->  arrow           # needs LHS signature recognition (almost there)
+=   assign          # parallel assignment is TODO: @a = @b
+<spec>              # template uri path query
+
 
 Delete position() and other source methods from T::Type::Text
 
@@ -50,13 +51,6 @@ properly onto value/values.
 
 Add T::TT3::Element::Signature which defines the signature construct. We need
 this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
-
-Allow HTML_CMDS to load only some commands.
-
-Fix the vars cache in the context chain so that child contexts can read 
-variables that have been set in a parent.  The original cached variable
-must be cloned to have a new context link pointing at the child context,
-not the parent context.
 
 Figure out what to do with PARAMS.  They don't get recognised as HASH vars
 so they don't get the same behaviours that it has.  e.g. "a(%b) = c(%b)".

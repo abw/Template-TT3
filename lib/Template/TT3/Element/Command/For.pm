@@ -43,10 +43,10 @@ sub parse_expr {
     $self->advance($token);
     
     $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
 
     $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
-        || return $self->missing_error( block => $token );
+        || return $self->fail_missing( block => $token );
 
 #    $self->debug("RHS: $self->[RHS]");
 #    $self->debug("token: $$token->[TOKEN]");
@@ -67,7 +67,7 @@ sub parse_infix {
     $self->[RHS] = $lhs;
 
     $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
     
     return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
@@ -85,8 +85,7 @@ sub values {
     my $value = $self->[LHS]->value($context);
     my @values;
 
-    # value must be defined (or should we short-circuit?
-    return $self->[LHS]->undefined_error($self->[TOKEN])
+    return $self->[LHS]->fail_undef_data
         unless defined $value;
     
     $value = [ $value ] 

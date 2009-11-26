@@ -69,7 +69,12 @@ sub get_var {
         $self->debug("found $name in vars cache: $var") 
             if DEBUG;
 
-        return $var;
+        # If we're returning a cache variable to a context that isn't our
+        # own (typically a child context in a 'with' or 'just' block) then 
+        # we need to graft a clone of the variable onto the new context.
+        return ($self == $context)
+            ? $var
+            : $var->graft($context);
     }
     elsif (exists $self->{ data }->{ $name }) {
         $self->debug("found $name in data: $self->{ data }->{ $name }") 

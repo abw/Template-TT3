@@ -9,8 +9,9 @@ use Template::TT3::Class
     as        => 'filename',        # dots allowed in filenames, e.g. foo.tt3
     constants => ':elements',
     constant  => {
-        SEXPR_FORMAT => '<dot:%s%s%s>',
-        SEXPR_ARGS   => "<args:%s>",
+        SEXPR_FORMAT  => '<dot:%s%s%s>',
+        SEXPR_ARGS    => "<args:%s>",
+        SOURCE_FORMAT => '%s%s%s', 
     };
 
 
@@ -19,8 +20,8 @@ sub parse_infix {
 
     # Operator precedence - if our leftward binding precedence is less than
     # or equal to the precedence requested then we return the LHS.  
-    # The 'or equal' part gives us left asociativity so that "a + b + c"
-    # is parsed as "(a + b) + c"
+    # The 'or equal' part gives us left asociativity so that "a . b . c"
+    # is parsed as "(a . b) . c"
     return $lhs 
         if $prec && $self->[META]->[LPREC] <= $prec;
 
@@ -34,7 +35,7 @@ sub parse_infix {
     $self->debug("asking $$token for dotop") if DEBUG;
     
     $self->[RHS] = $$token->parse_dotop($token, $scope, $self->[META]->[LPREC])
-        || return $self->missing_error( expression => $token );
+        || return $self->fail_missing( expression => $token );
 
     $self->[ARGS] = $$token->parse_args($token, $scope);
 
@@ -43,6 +44,19 @@ sub parse_infix {
     # at this point the next token might be a lower precedence operator, so
     # we give it a chance to continue with the current operator as the LHS
     return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
+}
+
+
+sub as_pair {
+    my $self = shift;
+    my $elems = $self->[META]->[ELEMS];
+    my $name  = $elems->construct(
+        word => $self->[RHS]->name, $self->[POS]
+    );
+    $self->debug("Creating pair from dotop: $name") if DEBUG;
+    return $elems->construct(
+        op_pair => "[=>]", $self->[POS], $name, $self
+    );
 }
 
 
@@ -56,7 +70,8 @@ sub variable {
         $_[SELF]->[RHS]->value($_[CONTEXT]),
         $_[SELF]->[ARGS]
             ? [$_[SELF]->[ARGS]->values($_[CONTEXT])]
-            : ()
+            : undef,
+        $_[SELF],
     );
 }
 

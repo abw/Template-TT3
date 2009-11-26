@@ -35,13 +35,21 @@ sub new {
 }
 
 
+sub graft {
+    my ($self, $context) = @_;
+    my $clone = [@$self];
+    $clone->[CONTEXT] = $context;
+    bless $clone, ref $self || $self;
+}
+
+
 sub constructor {
     my ($self, $params) = self_params(@_);
     my $class   = ref $self || $self;
     my $config  = $self->configuration($params);
 #    my $vars    = $config->{ variables } 
 #               || class( $self->VARIABLES )->load->name->prototype;
-    my $vars = 'DEPRECATED';
+    my $vars = 'TODO: VARS SLOT IS DEPRECATED';
     
     # TODO: shouldn't we be asking the types for our vmethods?
     my $methods = $self->class->hash_vars( METHODS => $config->{ methods } );
@@ -266,6 +274,19 @@ This defines a default constructor method for creating variable objects.
 It exists for the sake of completeness but most if not all of the internal
 TT code uses the L<constructor()> method to return a constructor function
 that can then be called independently.
+
+=head2 graft($context)
+
+Clones a variable and grafts it onto a new context.  This is used when a 
+child context (e.g. in a C<with> or C<just> block) accesses a variable
+defined in a parent context (i.e. the outer block).  We can't re-use the 
+cached variable (shame) because it's bound to the outer context.  If we
+did re-use it then any subsequent updates to that variable (e.g. L<set()>) 
+in the inner context would affect the C<vars> cache in the outer context.
+That would be bad.
+
+So instead we clone the variable and update the C<CONTEXT> slot to point
+to the new inner context.
 
 =head2 constructor()
 

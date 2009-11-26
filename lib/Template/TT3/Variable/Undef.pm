@@ -13,12 +13,13 @@ use Template::TT3::Class
         values => \&value,
     },
     messages  => {
+        # this is backup in case we don't have an $element passed to us
         bad_dot => 'Invalid dot operation: <1>.<2> (<1> is undefined)',
     };
 
 
 sub dot {
-    my ($self, $name, $args) = @_;
+    my ($self, $name, $args, $element) = @_;
  
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
         $self->debug("undef vmethod: $name") if DEBUG;
@@ -30,7 +31,11 @@ sub dot {
         );
     }
  
-    return $self->error_msg( bad_dot => $self->fullname, $name );
+    return $element
+        ? $element->fail_undef_dot( $self->fullname, $name )
+        : $self->error_msg( bad_dot => $self->fullname, $name );
+
+#    return $self->error_msg( bad_dot => $self->fullname, $name );
 }
 
 
@@ -41,7 +46,7 @@ sub value {
     # against that so that it can decorate the exception with line 
     # number, source code, etc.  Otherwise we just throw a plain error.
     return $element
-        ? $element->undefined_error( $self->fullname )
+        ? $element->fail_undef_data #( $self->fullname )
         : $self->error_msg( undefined => $self->fullname );
 }
 

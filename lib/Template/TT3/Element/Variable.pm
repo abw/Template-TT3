@@ -55,7 +55,7 @@ sub as_pair {
     );
     $self->debug("Creating pair from variable") if DEBUG;
     return $elems->construct(
-        op_pair => "(=)", $self->[POS], $name, $self
+        op_pair => "[=>]", $self->[POS], $name, $self
     );
 }
 

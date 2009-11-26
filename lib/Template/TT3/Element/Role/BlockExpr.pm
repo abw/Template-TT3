@@ -18,7 +18,7 @@ sub parse_expr {
     $self->[BLOCK] = $$token
         ->next_skip_ws($token)
         ->parse_body($token, $scope)
-        || return $self->missing_error( $self->ARG_BLOCK => $token );
+        || return $self->fail_missing( $self->ARG_BLOCK => $token );
         
     return $self;
 }
