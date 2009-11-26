@@ -439,6 +439,7 @@ sub tokenise_string {
     my $dquote = $output->dquote_token($token, $pos);
     my (@text, $tpos, $branch);
     my $n = 0;
+    $pos += length $delim;
     
     $self->debug("created dquote string token: $dquote") if DEBUG;
     
@@ -480,6 +481,7 @@ sub tokenise_string {
                     : $dquote->branch( text => join(BLANK, @text), $tpos );
                 @text = ();
             }
+            $pos++;     # account for leading '$'
             $branch = $branch
                 ? $branch->append( word => $3, $pos )
                 : $dquote->branch( word => $3, $pos );

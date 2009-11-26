@@ -17,14 +17,15 @@ use Badger
     lib => '../../lib';
 
 use Template::TT3::Test
-    tests  => 2,
+    tests  => 5,
     debug  => 'Template::TT3::Scanner Template::TT3::Tag',
     args   => \@ARGV,
-    import => 'test_expect';
+    import => 'test_expect callsign';
 
 test_expect(
     full_error => 1,
     debug      => $DEBUG,
+    variables  => callsign,
 );
 
 __DATA__
@@ -46,3 +47,27 @@ TT3 syntax error at line 3 of "multi-line statement" test:
     Error: Unexpected token: ^^^   # hello world! %]
    Source:    c + ^^^   # hello world! %]
                   ^ here
+
+-- test error at start of string --
+[% "$oops" %]
+-- error --
+TT3 undefined data error at line 1 of "error at start of string" test:
+    Error: Undefined value returned by expression: oops
+   Source: [% "$oops" %]
+                ^ here
+
+-- test error in string --
+[% "blah$oops" %]
+-- error --
+TT3 undefined data error at line 1 of "error in string" test:
+    Error: Undefined value returned by expression: oops
+   Source: [% "blah$oops" %]
+                    ^ here
+
+-- test error at end of string --
+[% "blah $a $b $c $a.length $b.length $yak" %]
+-- error --
+TT3 undefined data error at line 1 of "error at end of string" test:
+    Error: Undefined value returned by expression: yak
+   Source: [% "blah $a $b $c $a.length $b.length $yak" %]
+                                                  ^ here
