@@ -15,7 +15,30 @@ use Template::TT3::Class
     },
     alias     => {
         _params => \&Badger::Utils::params,
+    },
+    messages  => {
+        no_hub => '%s object is not attached to a hub',
     };
+
+# This is the default hub that all subclasses can attach to when used in
+# stand-alone mode.
+our $HUB = 'Template::TT3::Hub';
+
+
+sub hub {
+    my $self = shift;
+
+    return $self->{ hub } 
+        ||= return $self->error_msg( no_hub => ref $self || $self );
+}
+
+
+sub self {
+    # This is a dummy method that simply returns $_[0], i.e. $self.
+    # It is provided as a convenient do-nothing method that subclasses can
+    # alias to.
+    $_[0];
+}
 
 
 sub _exceptions {
