@@ -8,6 +8,7 @@ use Badger::Class
     constants => 'ARRAY HASH CODE DELIMITER PKG BLANK',
     constant  => {
         CONSTANTS   => 'Template::TT3::Constants',
+        MODULES     => 'Template::TT3::Modules',
         PATTERNS    => 'Template::TT3::Patterns',
 #       CONFIG      => 'Template::TT3::Config',
         UTILS       => 'Template::TT3::Utils',
@@ -17,6 +18,7 @@ use Badger::Class
     },
     hooks => {
         patterns => \&patterns,
+        modules  => \&modules,
         generate => \&generate,
         subclass => \&subclass,
         view     => \&view,
@@ -29,6 +31,12 @@ our $DEBUG_OPS = 0;
 
 sub base_id {
     shift->{ name }->base_id;
+}
+
+
+sub modules {
+    my $self = shift;
+    _autoload($self->MODULES)->export($self->{ name }, @_);
 }
 
 
