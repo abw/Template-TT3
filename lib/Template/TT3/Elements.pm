@@ -1,6 +1,5 @@
 package Template::TT3::Elements;
 
-#use Template::TT3::Element::Operator::Dot;          # TMP
 use Badger::Factory::Class
     version   => 3.00,
     debug     => 0,
@@ -9,9 +8,6 @@ use Badger::Factory::Class
     utils     => 'params',
     path      => ['Template::TT3::Element', 'TemplateX::TT3::Element'],
     constants => 'PKG';
-#    elements  => {
-#        dot => 'Template::TT3::Element::Operator::Dot',     # TMP
-#    };
 
 
 # We're lazy, so we rely on Badger::Factory (the base class of T::Elements
