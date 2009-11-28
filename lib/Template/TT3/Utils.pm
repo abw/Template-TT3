@@ -10,7 +10,7 @@ use Badger::Class
         PARAMS => 'HASH',
     },
     exports   => {
-        any   => 'tt_params tt_args tt_self_args random_advice hashlike',
+        any   => 'tt_params tt_args tt_self_args random_advice hashlike'
     };
 
 
@@ -115,6 +115,8 @@ sub tt_params {
 sub random_advice {
     return $ADVICE[int rand @ADVICE];
 }
+
+
 
 
 1;

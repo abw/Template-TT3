@@ -4,19 +4,27 @@ use Template::TT3::Class
     version  => 3.00,
     base     => 'Badger::Constants',
     constant => {
+        # Badger modules we use directly
         FILESYSTEM_MODULE => 'Badger::Filesystem',
-        HUB_MODULE        => 'Template::TT3::Hub',
+
+        # TT3 modules
         CACHE_MODULE      => 'Template::TT3::Cache',
-        STORE_MODULE      => 'Template::TT3::Store',
+        DIALECT_MODULE    => 'Template::TT3::Dialect',
         DIALECTS_MODULE   => 'Template::TT3::Dialects',
+        EXCEPTIONS_MODULE => 'Template::TT3::Exceptions',
+        HUB_MODULE        => 'Template::TT3::Hub',
+        PLUGINS_MODULE    => 'Template::TT3::Plugins',
+        PROVIDERS_MODULE  => 'Template::TT3::Providers',
+        SCANNER_MODULE    => 'Template::TT3::Scanner',
+        STORE_MODULE      => 'Template::TT3::Store',
+        TAGSET_MODULE     => 'Template::TT3::Tagset',
         TEMPLATE_MODULE   => 'Template::TT3::Template',
         TEMPLATES_MODULE  => 'Template::TT3::Templates',
-        PROVIDERS_MODULE  => 'Template::TT3::Providers',
-        PLUGINS_MODULE    => 'Template::TT3::Plugins',
-        EXCEPTIONS_MODULE => 'Template::TT3::Exceptions',
     },
     exports => {
-        any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE',
+        any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
+                 DIALECT_MODULE SCANNER_MODULE DIALECT_CLASS
+                 TAGSET_MODULE',
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE',

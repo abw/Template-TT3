@@ -248,7 +248,9 @@ sub init_grammar {
     my $grammar = $config->{ grammar } 
                || $self->class->any_var('GRAMMAR')
                || $self->GRAMMAR;
-    
+
+    # TODO: change this to use Template::Grammars so we get clean name
+    # translation
     $grammar = class($grammar)->load->instance($config)
         unless blessed $grammar;
     

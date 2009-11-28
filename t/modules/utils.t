@@ -18,7 +18,7 @@ use Template::TT3::Test
     debug => 'Template::TT3::Class',
     args  => \@ARGV;
 
-use Template::TT3::Utils 'random_advice';
+use Template::TT3::Utils 'random_advice permute_fragments';
 
 {
     local @Template::TT3::Utils::ADVICE = ('This is the only advice');
@@ -27,3 +27,4 @@ use Template::TT3::Utils 'random_advice';
     is( random_advice(), 'This is the only advice', 'even more random_advice()' );
     is( random_advice(), 'This is the only advice', 'yet another piece of random_advice()' );
 }
+
