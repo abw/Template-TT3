@@ -55,3 +55,15 @@ this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
 Figure out what to do with PARAMS.  They don't get recognised as HASH vars
 so they don't get the same behaviours that it has.  e.g. "a(%b) = c(%b)".
 Here the '%b' isn't expanded as a hash because it's a PARAMS not a HASH.
+
+Avoid adding the default path to template_path so we can avoid creating
+default file provider if we're only using text-based templates.
+
+
+
+Template::TT3::Templates/Hub/Config
+-----------------------------------
+
+Config needs to amalgamate arguments.  Decide if things like storage should
+be enabled or not.  Hub needs to heed its call.
+
