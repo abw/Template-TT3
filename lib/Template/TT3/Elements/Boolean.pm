@@ -19,14 +19,14 @@ use Template::TT3::Class
 class->generate_boolean_ops(
     'not' => prefix => sub {                                # ! a
         return 
-            ! $_[0]->[RHS]->value($_[1])
+            ! $_[0]->[RHS]->maybe($_[1])
     },
     'and' => infix_left => sub {                            # a && b
         return $_[0]->[LHS]->value($_[1])
             && $_[0]->[RHS]->value($_[1])
     },
     'or' => infix_left => sub {                             # a || b
-        return $_[0]->[LHS]->value($_[1])
+        return $_[0]->[LHS]->maybe($_[1])
             || $_[0]->[RHS]->value($_[1])
     },
     'nor' => infix_left => sub {                            # a !! b
@@ -45,7 +45,7 @@ class->generate_boolean_ops(
     or_set => infix_right => assignment => sub {            # a ||= b
         return $_[0]->[LHS]->assign(
             $_[1], 
-            $_[0]->[LHS]->value($_[1])
+            $_[0]->[LHS]->maybe($_[1])
          || $_[0]->[RHS]->value($_[1])
         )->value;
     },
