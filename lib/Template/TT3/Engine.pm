@@ -10,7 +10,9 @@ use Template::TT3::Class
 
 
 sub template {
-    shift->templates->template( @_ );
+    my $self = shift;
+    return $self->templates->template( @_ )
+        || $self->error( $self->templates->reason );
 }
 
 

@@ -6,11 +6,12 @@ use Template::TT3::Class
     debug       => 0,
     import      => 'class',
     base        => 'Template::TT3::Base',
-    utils       => 'params self_params is_object',
+    utils       => 'params self_params is_object refaddr',
     filesystem  => 'File',
     accessors   => 'text',
     constants   => 'GLOB',
     constant    => {
+        # TODO: rework all this to use Template::TT3::Modules
         SOURCE      => 'Template::TT3::Type::Source',
         SCOPE       => 'Template::TT3::Scope',
         CONTEXT     => 'Template::TT3::Context',
@@ -33,6 +34,9 @@ use Template::TT3::Tag;
 sub init {
     my ($self, $config) = @_;
     my $file;
+
+    $self->debug("init() with ", $self->dump_data($config))
+        if DEBUG;
 
     $self->{ name } = $config->{ name };
     
@@ -70,6 +74,9 @@ sub init {
 
 sub _fill {
     my ($self, $params) = self_params(@_);
+
+    $self->debug("filling with params: ", $self->dump_data($params))
+        if DEBUG;
 
     return $self->block->text(
         $self->context( data => $params )

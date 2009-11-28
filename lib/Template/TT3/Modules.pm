@@ -4,15 +4,22 @@ use Template::TT3::Class
     version  => 3.00,
     base     => 'Badger::Constants',
     constant => {
-        HUB_MODULE       => 'Template::TT3::Hub',
-        DIALECTS_MODULE  => 'Template::TT3::Dialects',
-        TEMPLATES_MODULE => 'Template::TT3::Templates',
-        PLUGINS_MODULE   => 'Template::TT3::Plugins',
+        FILESYSTEM_MODULE => 'Badger::Filesystem',
+        HUB_MODULE        => 'Template::TT3::Hub',
+        CACHE_MODULE      => 'Template::TT3::Cache',
+        STORE_MODULE      => 'Template::TT3::Store',
+        DIALECTS_MODULE   => 'Template::TT3::Dialects',
+        TEMPLATE_MODULE   => 'Template::TT3::Template',
+        TEMPLATES_MODULE  => 'Template::TT3::Templates',
+        PROVIDERS_MODULE  => 'Template::TT3::Providers',
+        PLUGINS_MODULE    => 'Template::TT3::Plugins',
+        EXCEPTIONS_MODULE => 'Template::TT3::Exceptions',
     },
     exports => {
-        any  => 'HUB_MODULE',
+        any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE',
         tags => {
-            hub => 'DIALECTS_MODULE TEMPLATES_MODULE PLUGINS_MODULE',
+            hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
+                    CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE',
         },
     };
 

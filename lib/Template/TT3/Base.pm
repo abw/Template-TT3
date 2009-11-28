@@ -9,9 +9,9 @@ use Template::TT3::Class
     base      => 'Badger::Base',
     constants => 'BLANK',
     import    => 'class',
+    modules   => 'EXCEPTIONS_MODULE HUB_MODULE',
     constant  => {
         base_id     => 'Template',
-        EXCEPTIONS  => 'Template::TT3::Exceptions',
     },
     alias     => {
         _params => \&Badger::Utils::params,
@@ -19,10 +19,6 @@ use Template::TT3::Class
     messages  => {
         no_hub => '%s object is not attached to a hub',
     };
-
-# This is the default hub that all subclasses can attach to when used in
-# stand-alone mode.
-our $HUB = 'Template::TT3::Hub';
 
 
 sub hub {
@@ -33,27 +29,26 @@ sub hub {
 }
 
 
+sub init_hub {
+    my ($self, $config) = @_;
+
+    # Look for a hub reference passed to us in the config, otherwise load and
+    # instantiate the HUB_MODULE. We lookup HUB_MODULE via the $self reference 
+    # so that subclasses can redefine the method to return a different hub 
+    # module, otherwise we end up with the default value imported as the 
+    # HUB_MODULE constant via the 'modules' import hook above.
+    $self->{ hub } = $config->{ hub } 
+        || class( $self->HUB_MODULE )->load->name;
+        
+    return $self;
+}
+
+
 sub self {
     # This is a dummy method that simply returns $_[0], i.e. $self.
     # It is provided as a convenient do-nothing method that subclasses can
     # alias to.
     $_[0];
-}
-
-
-sub _exceptions {
-    class($_[0]->EXCEPTIONS)->load->name;
-}
-
-
-sub _exception {
-    my $self = shift;
-    
-    # account for the fact that Badger::Base's error()/throw() methods will
-    # want to call this argless
-    return @_
-        ? $self->_exceptions->item(@_)
-        : $self->SUPER::exception;
 }
 
 
@@ -134,5 +129,23 @@ sub dump_data_depth {
     local $Badger::Debug::MAX_DEPTH = $depth || 1;
     $self->dump_data($data);
 }
+
+
+sub _exceptions {
+    class( $_[0]->EXCEPTIONS_MODULE )->load->name;
+}
+
+
+sub _exception {
+    my $self = shift;
+    
+    # account for the fact that Badger::Base's error()/throw() methods will
+    # want to call this argless
+    return @_
+        ? $self->_exceptions->item(@_)
+        : $self->SUPER::exception;
+}
+
+
 
 1;

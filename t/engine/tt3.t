@@ -14,12 +14,14 @@
 #========================================================================
 
 use Badger 
-    lib     => '../../lib';
+    lib        => '../../lib',
+    Filesystem => 'Bin';
 
 use Template::TT3::Test 
-    debug   => 'Template::TT3::Engine::TT3',
+    debug   => 'Template::TT3::Engine::TT3 Template::TT3::Templates',
     args    => \@ARGV,
-    tests   => 5;
+    tests   => 12;
+
 
 
 #-----------------------------------------------------------------------
@@ -57,13 +59,52 @@ my $hub = $tt3->hub;
 ok( $hub, "got hub from engine: $hub" );
 
 
-exit;
-
-
 #-----------------------------------------------------------------------
 # fetch a template from text
 #-----------------------------------------------------------------------
 
-my $template = $tt3->template( text => 'Hello [% name or "World" %]' );
+my $template = $tt3->template( text => 'Hello [% name or "World" %]!' )
+    || die $tt3->reason;
 ok( $template, 'fetched template from text' );
 
+is( 
+    $template->fill,                        # A bit of TT3 history in the 
+    'Hello World!',                         # making - this was the first full
+    'processed Hello World template text'   # template TT3 ever processed!
+);
+is( 
+    $template->fill( name => 'Badger' ), 
+    'Hello Badger!', 
+    'processed Hello Badger template text'
+);
+
+
+
+#-----------------------------------------------------------------------
+# create an engine with a template_path
+#-----------------------------------------------------------------------
+
+package main;
+
+$tt3 = TT3->new( 
+    template_path => Bin->dir('templates') 
+);
+ok( $tt3, 'created template engine with custom template_path' );
+
+
+$template = $tt3->template( file => 'hello.tt3' )
+    || die $tt3->reason;
+    
+ok( $template, 'fetched hello.tt3 template from file' );
+
+
+is( 
+    $template->fill,                    # This was the first template file
+    "Hello World!\n",                   # TT3 ever processed.
+    'processed Hello World template file'
+);
+is( 
+    $template->fill( name => 'Badger' ), 
+    "Hello Badger!\n", 
+    'processed Hello Badger template file'
+);

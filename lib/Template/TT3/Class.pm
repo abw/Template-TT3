@@ -17,12 +17,13 @@ use Badger::Class
         VIEW_METHOD => 'view_%s',
     },
     hooks => {
-        patterns => \&patterns,
-        modules  => \&modules,
-        generate => \&generate,
-        subclass => \&subclass,
-        view     => \&view,
-        as       => \&as,
+        patterns    => \&patterns,
+        modules     => \&modules,
+        generate    => \&generate,
+        subclass    => \&subclass,
+        hub_methods => \&hub_methods,
+        view        => \&view,
+        as          => \&as,
     };
 
 
@@ -71,6 +72,23 @@ sub as {
     );
 }
 
+
+sub hub_methods {
+    my ($self, $methods) = @_;
+
+    $methods = [ split(DELIMITER, $methods) ]
+        unless ref $methods eq ARRAY;
+
+    $self->methods(
+        map {
+            my $name = $_;              # lexical copy for closure
+            $name => sub {
+                shift->hub->$name(@_);
+            }
+        }
+        @$methods
+    );
+}
 
 
 # I think the list_vars() in Badger::Class is broken.
@@ -318,7 +336,8 @@ sub generate_html_commands {
 sub _debug {
     print STDERR @_;
 }
-    
+
+
 1;
 
 __END__

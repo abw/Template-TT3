@@ -16,22 +16,26 @@ use Badger::Class
         # correlate to CHOMP_NONE, the 1st to CHOMP_ONE, and so on
         PRE_CHOMP_FLAGS     => [ qw( + - ~ = ), '#' ],
         POST_CHOMP_FLAGS    => [ qw( + - ~ = ) ],
+
+        # cache controls
+        CACHE_ALL           => -1,       # no limit to size of template cache
+        CACHE_NONE          =>  0,       # no caching
         
         # flags used by elements
         FORCE               => 1,   # used to override operator precedence
-        
-        # misc symbols
-        DOT                 => '.',
-        
+
+        # parsing constants
         ARG_PRECEDENCE      => 200,
         CMD_PRECEDENCE      => 100,
         CMD_ELEMENT         => 'cmd_%s',
+        
     },
     exports => {
-        any  => 'FORCE DOT',
+        any  => 'FORCE',
         tags => {
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
+            cache       => 'CACHE_ALL CACHE_NONE',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
             precedence  => 'ARG_PRECEDENCE CMD_PRECEDENCE CMD_ELEMENT',
             type_slots  => {

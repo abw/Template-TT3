@@ -1,7 +1,7 @@
 package Template::TT3::Engine::TT3;
 
 use Template::TT3::Class
-    version     => 2.718,
+    version     => 2.71,
     debug       => 0,
     base        => 'Template::TT3::Engine',
     import      => 'class',
@@ -10,19 +10,21 @@ use Template::TT3::Class
         TT3     => __PACKAGE__,
     },
     exports     => {
-        any         => 'TT3',
+        any     => 'TT3',
     },
     config      => [
-        'hub_module|class:HUB_MODULE|method:HUB_MODULE',
+        'hub_module|class:HUB_MODULE', # can't add "|method:HUB_MODULE here...
     ],
-    init_method => 'configure',
-    mutators    => 'hub_module',
     alias       => {
         fill        => 'todo',
         process     => 'todo',
         resource    => 'todo',
-    };
-#    auto_can    => 'hub_can';
+    },
+    auto_can    => 'hub_can',          # ...because the auto_can gets it
+    init_method => 'configure',
+    mutators    => 'hub_module';
+
+our $HUB_MODULE = HUB_MODULE;
 
 sub templates {
     shift->hub->templates(@_);
