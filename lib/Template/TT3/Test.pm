@@ -176,7 +176,7 @@ sub test_handler {
     my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
     my $debug    = $config->{ debug } || 0;
     my $source   = $test->{ input };
-    $test->{ inflag }->{ full_error } ||= $config->{ full_error };
+    $test->{ inflag }->{ verbose } ||= $config->{ verbose };
     
     my $result   = eval {
         manager->debug(' INPUT: ', $source) if $DEBUG;
@@ -203,7 +203,7 @@ sub test_handler {
         my $error = $test->{ inflag }->{ show_error_type }
             ? $@
             : ref($@) 
-                ? ($test->{ inflag }->{ full_error } ? "$@" : $@->info)
+                ? ($test->{ inflag }->{ verbose } ? "$@" : $@->info)
                 : $@;
 #        my $error = $@;
         manager->debug(' ERROR: ', $error) if $DEBUG;

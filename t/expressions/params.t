@@ -23,7 +23,7 @@ use Template::TT3::Test
     import  => 'test_expect callsign';
 
 test_expect(
-    full_error => 1,
+    verbose    => 1,
     debug      => DEBUG,
     variables  => callsign,
 );

@@ -32,7 +32,7 @@ our $vars  = {
 };
 
 test_expect(
-    full_error => 1,
+    verbose   => 1,
     debug     => $DEBUG,
     variables => $vars,
 );
