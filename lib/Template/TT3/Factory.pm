@@ -36,16 +36,15 @@ Template::TT3::Factory - base class for factory modules
 
     # This module is used internally to create factory modules responsible 
     # for loading other modules.  e.g. Template::TT3::Engines.
-
+    
     package Template::TT3::Engines;
-
-    use Badger::Factory::Class
+    
+    use Template::TT3::Factory::Class
         version   => 3.00,
         debug     => 0,
         item      => 'engine',
-        base      => 'Template::TT3::Factory',
         path      => 'Template(X)::(TT3::|)Engine';
-    
+
 =head1 DESCRIPTION
 
 This module is a common base class for all TT3 factory modules that are
@@ -56,6 +55,10 @@ C<Template::TT3::Engine::*> modules.
 C<Template::TT3::Factory> is a thin subclass of L<Badger::Factory>.  It
 exists to provide a convenient place to define any functionality or 
 declarations that are common to all TT3 factory modules.
+
+The L<Template::TT3::Factory::Class> module is defined as a thin wrapper
+around L<Badger::Factory::Class> to aid in the construction of factory
+modules.
 
 =head1 METHODS
 
@@ -80,7 +83,7 @@ declarations in C<$MAP> accessible to subclasses.
 This module defines the following package variables.  These are declarations
 that are used by the L<Badger::Factory> base class.
 
-=head2 $MAP
+=head2 $NAMES
 
 This defines a lookup table for resolving modules with alternate spellings or
 unusual capitalisations (where "unusual" is defined as anything that can't 
@@ -109,16 +112,17 @@ In the case of modules whose names include capitalised acronyms, specifically
 or "html" will generate incorrect capitalisations of "Tt2", "Tt3" and "Html"
 respectively.
 
-The C<$MAP> table define correct capitalisations for these values.  These
+The C<$NAMES> table define correct capitalisations for these values.  These
 definitions are then inherited by all other TT3 factory modules. 
 
-    our $MAP = {
+    our $NAMES = {
         tt2     => 'TT2',
         tt3     => 'TT3',
-        default => 'TT3',
     }
 
-Note that we also define the C<default> value for factories that support it.
+=head2 $DEFAULT
+
+This defines the C<default> value for TT3 factort modules to be C<TT3>.
 e.g. the default engine returned by L<Template::TT3::Engines> is the C<TT3>
 engine implemented as L<Template::TT3::Engine::TT3>.
 
