@@ -8,8 +8,8 @@ use Template::TT3::Class
     base        => 'Template::TT3::Base',
     utils       => 'params self_params is_object refaddr',
     filesystem  => 'File',
-    accessors   => 'text file uri',
-    config      => 'templates dialect uri',
+    accessors   => 'file uri name',
+    config      => 'templates dialect uri source',
     constants   => 'GLOB',
     constant    => {
         # TODO: rework all this to use Template::TT3::Modules
@@ -18,7 +18,11 @@ use Template::TT3::Class
         CONTEXT     => 'Template::TT3::Context',
         TREE        => 'Template::TT3::Type::Tree',
         FROM_TEXT   => 'template text',
+        FROM_CODE   => 'template code',
         FROM_FH     => 'template read from filehandle',
+    },
+    messages => {
+        no_text    => 'The text is not available for %s',
     };
 
 use Template::TT3::Type::Source 'Source';
@@ -39,7 +43,9 @@ sub init {
 
     $self->{ name } = $config->{ name };
     
-    # quick hack for now
+    # look for the sources items we can accept in order from "highest"
+    # to "lowest": file, text, code, block
+    
     if ($file = $config->{ file }) {
         if (ref $file eq GLOB) {
             local $/ = undef;
@@ -57,8 +63,18 @@ sub init {
         $self->{ text }   = delete $config->{ text };
         $self->{ name } ||= FROM_TEXT;
     }
+    elsif (defined $config->{ code }) {
+        $self->{ text }   = delete $config->{ text };
+        $self->{ name } ||= FROM_CODE;
+        $self->{ code }   = $config->{ code };
+    }
+    elsif (defined $config->{ block }) {
+        $self->{ text  }   = delete $config->{ text };
+        $self->{ name  } ||= FROM_CODE;
+        $self->{ block }   = $config->{ block };
+    }
     else {
-        return $self->error_msg( missing => 'text or file' );
+        return $self->error_msg( missing => 'text, file or code' );
     }
 
     $self->{ config } = $config;
@@ -77,9 +93,19 @@ sub _fill {
     $self->debug("filling with params: ", $self->dump_data($params))
         if DEBUG;
 
-    return $self->block->text(
+    return $self->_fill_in(
         $self->context( data => $params )
     );
+}
+
+
+sub _fill_in {
+    my ($self, $context) = @_;
+
+    $self->debug("filling in context: $context")
+        if DEBUG;
+
+    return $self->code->($context);
 }
 
 
@@ -88,11 +114,19 @@ sub _fill {
 # methods to fetch/create delegates
 #-----------------------------------------------------------------------
 
+sub text {
+    my $self = shift;
+    return $self->error_msg( no_text => $self->name )
+        unless defined $self->{ text };
+    return $self->{ text };
+}
+
 sub source {
     my $self = shift;
     return $self->{ source }
         ||= Source( $self->text );
 }
+
 
 sub dialect {
     my $self    = shift;
@@ -119,14 +153,23 @@ sub scanner {
 sub scope {
     my $self = shift;
     return $self->{ scope }
-       ||= $self->SCOPE->new( template => $self );
+       ||= $self->SCOPE->new( 
+           template => $self,
+           source   => $self->source,
+       );
+
        # TODO: need to pass other stuff, like constants, etc.
        # $self->{ config } );
 }
 
 
 sub context {
-    shift->CONTEXT->new(@_);
+    my $self = shift;
+    return $self->CONTEXT->new(
+        templates => $self->{ templates },
+        hub       => $self->{ hub },
+        @_
+    );
 }
 
 sub templates {
@@ -153,8 +196,24 @@ class->methods(
             shift->catch( decorate_error => $priv  => @_ ) 
         }
     }
-    qw( fill tree block parse tokens scan )
+    qw( fill fill_in code compile tree block parse tokens scan )
 );
+
+
+sub _code {
+    my $self = shift;
+    return $self->{ code }
+        ||= $self->_compile;
+}   
+
+
+sub _compile {
+    my $self  = shift;
+    my $block = $self->_block;
+    return sub {
+        $block->text(@_)
+    };
+}        
 
 
 sub _tree {
@@ -176,6 +235,10 @@ sub _parse {
     my $tokens  = $self->_tokens;
     my $token   = $tokens->first;
     my $scope   = $self->scope;
+
+    $self->debug("Parsing tokens in $self->{ name }") 
+        if DEBUG;
+
     my $block   = $token->parse_block(\$token, $scope);
     my $remains = $token->remaining_text;
     
@@ -184,8 +247,8 @@ sub _parse {
         $self->error("unparsed tokens: $remains");
     }
     
-    $self->debug("template blocks: ", $self->dump_data($scope->{ blocks }))
-        if DEBUG && $scope->{ blocks };
+#    $self->debug("template blocks: ", $self->dump_data($scope->{ blocks }))
+#        if DEBUG && $scope->{ blocks };
 
     return $block;
 }
@@ -201,6 +264,10 @@ sub _tokens {
 sub _scan {
     my $self    = shift;
     my $scanner = $self->scanner;
+
+    $self->debug("Scanning source of $self->{ name }") 
+        if DEBUG;
+
     return $self->scanner->scan(
         $self->source,
         undef,

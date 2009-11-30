@@ -59,6 +59,8 @@ our $MESSAGES = {
     args_posit      => "Unexpected positional arguments in call to %s: %s",
     args_named      => "Unexpected named parameters in call to %s: %s",
     args_missing    => "Missing value for '<2>' named parameter in call to %s",
+    
+    resource_missing => 'Requested %s resource not found: %s',
 
 
     # stuff to cleanup/rationalise
@@ -490,6 +492,39 @@ sub pairs {
 }
 
 
+sub fetch_template {
+    my ($self, $name, $context, $scope) = @_;
+    my ($blocks, $block);
+    
+    # FIXME: not sure about making this 'file'.  Feels too hard-coded.
+    # Should be something generic like 'template' which all providers
+    # respond to regardless of type.  Or perhaps 'any' and/or 'all'???
+    my @args = ( file => $name );
+
+    # Before asking for the template, we do a local lookup for a block
+    # in this scope.  If we find an entry then we use that single item
+    # as an argument to the context's template() method.
+    if ($scope && ($blocks = $scope->{ blocks })) {
+        if ($block = $blocks->{ $name }) {
+            @args = ($block);
+            $self->debug(
+                "found block for $name: ", 
+                $self->dump_data($block)
+            ) if DEBUG;
+        }
+    }
+    
+    $self->debug(
+        "asking context for $name template: ", 
+        $self->dump_data(\@args)
+    ) if DEBUG;
+
+    return $context->template(@args)
+        || $self->fail_resource_missing( template => $name );
+}
+
+
+
 
 #-----------------------------------------------------------------------
 # view / inspection methods
@@ -599,6 +634,16 @@ sub fail_args {
 }
 
 
+sub fail_resource { 
+    my ($self, $what, $source, @args) = @_;
+    
+    return $self->resource_error_msg(
+        $self,
+        "resource_$what" => $source || $self->source, @args
+    );
+}
+
+
 sub fail_undef_data {
     shift->fail_undef( data => @_ );
 }
@@ -646,6 +691,14 @@ sub fail_args_missing {
     $self->fail_args( missing => @_ );
 }
 
+
+sub fail_resource_missing {
+    shift->fail_resource( missing => @_ );
+}
+
+sub fail_template_missing {
+    shift->fail_resource( missing => template => @_ );
+}
 
 
 sub signature_error {

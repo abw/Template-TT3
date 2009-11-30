@@ -24,7 +24,10 @@ sub sexpr {
     
 
 sub text {
-    return "TODO: fill ", $_[SELF]->[EXPR]->filename;
+    my ($self, $context) = @_;
+    my $template = $self->[EXPR]->template($context, $self->[ARGS]);
+    return $template->fill_in($context);
+#    return "TODO: fill $template";
 }
 
 

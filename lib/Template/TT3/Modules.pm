@@ -11,6 +11,7 @@ use Template::TT3::Class
         CACHE_MODULE      => 'Template::TT3::Cache',
         DIALECT_MODULE    => 'Template::TT3::Dialect',
         DIALECTS_MODULE   => 'Template::TT3::Dialects',
+        ENGINES_MODULE    => 'Template::TT3::Engines',
         EXCEPTIONS_MODULE => 'Template::TT3::Exceptions',
         HUB_MODULE        => 'Template::TT3::Hub',
         PLUGINS_MODULE    => 'Template::TT3::Plugins',
@@ -24,7 +25,7 @@ use Template::TT3::Class
     exports => {
         any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
                  DIALECT_MODULE SCANNER_MODULE DIALECT_CLASS
-                 TAGSET_MODULE',
+                 TAGSET_MODULE ENGINES_MODULE',
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE',
@@ -55,6 +56,10 @@ various TT3 modules.
 =head2 HUB_MODULE
 
 Defined as C<Template::TT3::Hub>.
+
+=head1 TODO
+
+This documentation is incompl
 
 =head1 AUTHOR
 

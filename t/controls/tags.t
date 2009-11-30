@@ -9,6 +9,11 @@
 # This is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
+# NOTE: this got broken when I plugged in the high-level template engine.
+# The problem is almost certainly related to the fact that we're now 
+# caching scanner and tagset.  It's probably due to the tagset not being
+# reset correctly.
+#
 #========================================================================
 
 use Badger 
@@ -119,7 +124,7 @@ Hello india
 Hello [# i #]
 Hello !
 
--- test dotted tags --
+-- test dotted inline tags --
 [? TAGS.inline '<* *>' -?]
 Romeo and [% j.ucfirst %]
 Romeo and <* j.ucfirst *>
@@ -127,13 +132,20 @@ Romeo and <* j.ucfirst *>
 Romeo and [% j.ucfirst %]
 Romeo and Juliet
 
--- test dotted tags --
+-- test dotted comment tags --
 [? TAGS.comment '<* *>' -?]
 Romeo and [% j.ucfirst %] are lovers
 Romeo and <* j.ucfirst *> are lovers
 -- expect --
 Romeo and Juliet are lovers
 Romeo and  are lovers
+
+-- test tags reset tags --
+Romeo and [% j.ucfirst %] are lovers
+Romeo and <* j.ucfirst *> are lovers
+-- expect --
+Romeo and Juliet are lovers
+Romeo and <* j.ucfirst *> are lovers
 
 -- test TAGS.all --
 [? TAGS.all off -?]

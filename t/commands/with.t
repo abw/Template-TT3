@@ -111,9 +111,9 @@ d: 40
 a is 10, b is 20, c is charlie
 
 -- test keyword detection --
-[% with x=10 y=20 fill blah %]
+[% block blah { "blah $x blah $y" }; with x=10 y=20 fill blah %]
 -- expect --
-TODO: fill blah
+blah 10 blah 20
 
 -- test with using naked dotted variables --
 [% user = { name => 'Ford Prefect', email => 'ford@heart-of-gold.com' };

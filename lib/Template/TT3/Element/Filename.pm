@@ -1,7 +1,8 @@
 package Template::TT3::Element::Filename;
 
 use Template::TT3::Class 
-    version   => 3.00,
+    version   => 2.71,
+    debug     => 0,
     base      => 'Template::TT3::Element::Literal',
     constants => ':elements',
     as        => 'filename',        # mixin parse_filename() role
@@ -16,12 +17,10 @@ use Template::TT3::Class
     };
 
 
-sub OLD_generate {
-    $_[1]->generate_filename(
-        $_[0]->[EXPR],
-    );
+sub template {
+    my $self = shift;
+    $self->fetch_template($self->[EXPR], @_);
 }
-
 
 sub sexpr {
     sprintf(

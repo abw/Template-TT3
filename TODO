@@ -71,3 +71,18 @@ Also need to think *VERY* carefully about what different components may be
 attaching to a prototype hub.  I'm concerned that creating a "leaf node"
 template for temporary use in a subroutine might pull the whole framework
 into persistence. 
+
+
+Final Cleanup List
+------------------
+
+The following modules are believed to be complete, clean, tested and
+documented.
+
+   Template::TT3::Factory
+   Template::TT3::Factory::Class
+   Template::TT3::Engines
+   Template::TT3::Dialects
+   Template::TT3::Providers
+
+

@@ -24,6 +24,9 @@ sub parse_expr {
         ->parse_body($token, $scope)
         || return $self->fail_missing( $self->ARG_BLOCK => $token );
 
+    # save the scope in case we need to lookup blocks later
+    $self->[ARGS] = $scope;
+
     return $self;
 }
 

@@ -6,7 +6,7 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Base',
     utils       => 'self_params',
-    config      => 'scanner input output',
+    config      => 'scanner input output template source',
     init_method => 'configure',
     accessors   => 'scanner input output tag',
     constants   => 'OFF ON',
@@ -27,6 +27,7 @@ sub clone {
     my ($self, $params) = self_params(@_);
     my $class = ref $self 
         || return $self->SUPER::new($params);
+
     return $class->SUPER::new(
         %$self,
         %$params,

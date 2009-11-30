@@ -179,9 +179,10 @@ use Template::TT3::Class
         SOURCE_FORMAT => '%s',
     },
     alias     => {
-        name   => \&text,
-        value  => \&text,
-        values => \&text,
+        name           => \&text,
+        value          => \&text,
+        values         => \&text,
+        parse_filename => \&parse_expr,
     };
 
 
@@ -193,12 +194,14 @@ sub parse_expr {
     $self->[EXPR] = $self->[TOKEN]
         unless defined $self->[EXPR];
     
-    # advance token
-#    $$token = $self->[NEXT];
-    
     # strings can be followed by postops (postfix and infix operators)
     return $$token->next_skip_ws($token)
         ->parse_infix($self, $token, $scope, $prec);
+}
+
+
+sub filename {
+    $_[SELF]->[EXPR];
 }
 
 
@@ -224,9 +227,16 @@ use Template::TT3::Class
     version   => 3.00,
     base      => 'Template::TT3::Element::String',
     view      => 'squote',
+    constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<squote:%s>', 
     };
+
+
+sub template {
+    my $self = shift;
+    $self->fetch_template($self->[EXPR], @_);
+}
 
 
 
@@ -249,6 +259,7 @@ use Template::TT3::Class
         name   => \&text,
         value  => \&text,
         values => \&text,
+        parse_filename => \&parse_expr,
     };
 
 
@@ -293,7 +304,11 @@ sub text {
         : $_[SELF]->[EXPR]
 }
 
-
-# TODO: source()
+sub template {
+    my $self = shift;
+    return $self->fetch_template(
+        $self->text(@_), @_
+    );
+}
 
 1;

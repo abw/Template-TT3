@@ -1,6 +1,7 @@
 package Template::TT3::Test;
 
 use Badger::Test ':default manager';           # to import ok(), is(), etc.
+use Template::TT3::Engines;
 use Template::TT3::Class
     version   => 0.01,
     base      => 'Badger::Test',
@@ -8,6 +9,7 @@ use Template::TT3::Class
     utils     => 'params',
     import    => 'class',
     constants => 'HASH CODE',
+    modules   => 'ENGINES_MODULE',
     constant => {
         TAG    => 'Template::TT3::Tag::Inline',
         TOKENS => 'Template::TT3::Tokens',
@@ -19,12 +21,12 @@ use Template::TT3::Class
     };
 
 our $DATA;
+our $DEBUG;
 our $MAGIC    = '\s* -- \s*';
 our $ENGINE   = 'Template::TT3';
-our $HANDLER  = \&test_handler;
 our $TEMPLATE = 'Template::TT3::Template';
 our $METHOD   = 'fill';
-our $DEBUG;
+our $HANDLER  = \&test_handler;
 
 
 sub data_text {
@@ -166,9 +168,8 @@ sub test_expect {
 sub test_handler {
     my $test     = shift;
     my $config   = params(@_);
-    my $tclass   = $test->{ inflag }->{ template }
-                || $config->{ template } 
-                || $TEMPLATE;
+    my $engine   = $test->{ inflag }->{ engine }
+                || $config->{ engine };
     my $method   = $test->{ inflag }->{ method } 
                 || $config->{ method }
                 || $METHOD;
@@ -177,10 +178,15 @@ sub test_handler {
     my $debug    = $config->{ debug } || 0;
     my $source   = $test->{ input };
     $test->{ inflag }->{ verbose } ||= $config->{ verbose };
+
+    my $engine_conf = $config->{ config };
+    $engine = $config->{ engine } = ENGINES_MODULE->engine(
+        $engine => $config->{ config } || ()
+    ) unless ref $engine;
     
     my $result   = eval {
         manager->debug(' INPUT: ', $source) if $DEBUG;
-        my $template = $tclass->new( 
+        my $template = $engine->template( 
             text => $source,
             name => qq{"$test->{ name }" test},
         );

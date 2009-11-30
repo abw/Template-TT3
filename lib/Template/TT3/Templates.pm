@@ -216,9 +216,21 @@ sub template {
     my $name = shift;
     my ($params, $dialect);
     
-    if ($type eq TEXT) {
+    $self->debug(
+        "template(", 
+            $self->dump_list([$type, $name]), 
+        ")"
+    ) if DEBUG;
+    
+    if (ref $type eq HASH) {
+        $params = $type;
+        $type   = $params->{ type };
+        $name ||= $params->{ name };
+    }
+    elsif ($type eq TEXT) {
         # No worries mate, we can do text.
         $params = {
+            @_,
             text => $name, 
             uri  => $self->text_uri($name),
         };

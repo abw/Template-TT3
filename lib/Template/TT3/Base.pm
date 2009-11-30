@@ -107,6 +107,16 @@ sub undef_error_msg {
 }
 
 
+sub resource_error {
+    shift->token_error( resource => @_ );
+}
+
+
+sub resource_error_msg {
+    shift->token_error_msg( resource => @_ );
+}
+
+
 sub debug_callers {
     my $self = shift;
     my $i = 1;

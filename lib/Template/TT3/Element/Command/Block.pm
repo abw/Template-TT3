@@ -43,21 +43,28 @@ sub parse_expr {
             # TODO: I think named blocks can't have args.  They're creating
             # runtime templates which need a context to work in.  Hmmm...
             # unless they inherit the context of the point at which they're
-            # defined....
+            # defined.  We'll just throw an error for now...
+
+            $self->not_implemented('named block with arguments');
             
-            $scope->{ blocks }->{ $name } = sub {
-                my $context = shift;
-                $self->debug("RUNNING BLOCK WITH ARGS!") if DEBUG;
-                my $params = tt_params($self, $self->[ARGS]->signature, undef, @_);
-                $self->debug("got params: $params") if DEBUG;
-                return "TODO: real block subs";
-            };
+            # old code
+            #$scope->{ blocks }->{ $name } = {
+            #    source => $scope->{ source },
+            #    name   => $name,
+            #    code   => sub {
+            #        my $context = shift;
+            #        $self->debug("RUNNING BLOCK WITH ARGS!") if DEBUG;
+            #        my $params = tt_params($self, $self->[ARGS]->signature, undef, @_);
+            #        $self->debug("got params: $params") if DEBUG;
+            #        return "TODO: real block subs";
+            #    },
+            #};
         }
         else {
-            $scope->{ blocks }->{ $name } = sub {
-                my $context = shift;
-                $self->debug("RUNNING BLOCK WITH NO ARGS!");
-                return "TODO: real block subs";
+            $scope->{ blocks }->{ $name } = {
+                source => $scope->{ source },
+                name   => $name, 
+                block  => $self->[BLOCK],
             };
         }
             

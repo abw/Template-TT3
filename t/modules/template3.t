@@ -17,7 +17,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template3',
     args  => \@ARGV,
-    tests => 5;
+    tests => 3;
 
 use Template3;
 
@@ -29,8 +29,7 @@ my $fill = $tt3->template( text => 'Hello [% name %]' )->fill( name => 'Badger' 
 is( $fill, 'Hello Badger', 'filled template' );
 
 
-package Template::TT3::Test::TT2Engine;
-
-use Template3 'TT2';
+#package Template::TT3::Test::TT2Engine;
+#use Template3 'TT2';
 
 

@@ -101,7 +101,7 @@ e: <undef>
 a is 10, b is 20, c is 0
 
 -- test keyword detection --
-[% just x=10 y=20 fill blah %]
+%% block blah { "x is $x, a is ", a or '<undef>' }
+%% just x=10 y=20 fill blah 
 -- expect --
-TODO: fill blah
-
+x is 10, a is <undef>

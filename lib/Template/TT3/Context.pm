@@ -6,7 +6,7 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Base',
     import      => 'class',
-    accessors   => 'variables scanner parent lookup',
+    accessors   => 'variables scanner parent',
     utils       => 'self_params',
     constants   => 'HASH CODE',
     constant    => {
@@ -21,9 +21,12 @@ use Template::TT3::Class
 sub init {
     my ($self, $config) = @_;
 
+    $self->init_hub($config);
+
     my $vars = $self->VARIABLES->new($config);
 
-    $self->{ VARS  } = $vars;
+#    $self->{ VARS  } = $vars;
+    # TODO: merge in these last few methods or otherwise jiggle them about
     $self->{ types } = $vars->types;
     $self->{ type  } = $vars->constructors;
     $self->{ data  } = $config->{ data } || { };
@@ -34,12 +37,17 @@ sub init {
 #        data => $config->{ variables },
 #    );
     
-    $self->{ scanner } = $config->{ scanner };
-    $self->{ scope   } = $config->{ scope };
+    $self->{ templates } = $config->{ templates };
+    $self->{ scanner   } = $config->{ scanner };
+    $self->{ scope     } = $config->{ scope };
     
     return $self;
 }
 
+
+#-----------------------------------------------------------------------
+# variables
+#-----------------------------------------------------------------------
 
 sub var {
     my $self = shift;
@@ -102,8 +110,8 @@ sub get_var {
         return $self->no_var($name);
     }
 }
-        
-    
+
+
 sub set_var {
     my ($self, $name, $value) = @_;
 
@@ -118,10 +126,8 @@ sub set_var {
 sub set_vars {
     my ($self, $params) = self_params(@_);
     my $vars = $self->{ vars };
-#    my $VARS = $self->{ VARS };
     
     while (my ($name, $value) = each %$params) {
-#        $vars->{ $name } = $VARS->variable( $name => $value );
         $vars->{ $name } = $self->use_var( $name => $value );
     }
 }
@@ -172,7 +178,6 @@ sub use_var {
 }
 
 
-
 sub no_var {
     my ($self, $name) = @_;
     return $self->use_var( $name => undef );
@@ -221,6 +226,42 @@ sub just {
         lookup => undef,
     }, $class;
 }
+
+
+#-----------------------------------------------------------------------
+# templates
+#-----------------------------------------------------------------------
+
+sub template {
+    shift->templates->template(@_);
+}
+
+sub templates {
+    my $self = shift;
+    return $self->{ templates } 
+        ||= $self->lookup('templates');
+}
+
+sub lookup {
+    my $self   = shift;
+    my $lookup = $self->{ lookup };
+    
+    # act as a simple accessor when called without arguments
+    return $lookup unless @_;
+ 
+    # otherwise lookup the named item
+    my $item = shift;
+ 
+    # walkup through the parent chain looking for the item
+    while ($lookup) {
+        $lookup->{ $item } && return;
+    }
+    
+    # failing that ask the hub to provide it
+    return $self->hub->$item;
+}
+    
+        
 
 
 sub scope {

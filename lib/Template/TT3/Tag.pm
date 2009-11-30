@@ -79,6 +79,7 @@ sub init_tag {
             $self->debug("turned tag off") if DEBUG;
             $self->{ off } = 1;
             ($style, $start, $end) = @$self{ qw( style start end ) };
+#            $self->debug("TURNED OFF ($style, $start, $end)");
         }
         elsif ($style eq ON) {
             $self->debug("turned tag on") if DEBUG;
@@ -275,7 +276,10 @@ sub reset {
     my $grammar = $self->{ grammar };
 
     # call init_tag() to reset the tag start/end tokens
+#    $self->debug("reseting tag");
+    $self->{ off } = 0;
     $self->init_tag;
+#    $self->debug("reset tag: ", $self->dump);
     
     # reload the original keywords 
     $self->{ keywords } = $grammar->keywords

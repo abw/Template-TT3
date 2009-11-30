@@ -127,6 +127,9 @@ sub tokenise {
     my ($self, $input, $output, $scope) = @_;
     my ($pos, $text, $start, $tag);
 
+    $self->reset
+        if $self->{ dirty };
+
     while (1) {
         $pos = pos $$input || 0;
         
@@ -158,8 +161,8 @@ sub tokenise {
             last;
 #            return $self->error("Run out of text");
         }
-    }
-
+    };
+    
     # add the terminator that marks the end of file
     $output->eof_token('', pos $$input );
     
@@ -205,8 +208,14 @@ sub tags {
     my ($self, $tags) = @_;
     $self->debug("setting tags: ", $self->dump_data($tags)) if DEBUG;
     $self->{ tagset }->change($tags);
+    $self->{ dirty  } = 1;
     $self->init_tags;
 }
-    
+
+sub reset {
+    my $self = shift;
+    $self->{ tagset }->reset;
+    $self->{ dirty } = 0;
+}
 
 1;
