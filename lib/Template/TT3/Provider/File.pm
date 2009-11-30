@@ -6,7 +6,7 @@ use Template::TT3::Class
     base       => 'Template::TT3::Provider',
     filesystem => 'VFS',
     messages   => {
-        no_path => 'No path (or root) specified for template file provider',
+        no_path => 'No path (or root) specified for file provider',
     };
 
 

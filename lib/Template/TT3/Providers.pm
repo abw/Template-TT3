@@ -5,7 +5,7 @@ use Badger::Factory::Class
     debug     => 0,
     item      => 'provider',
     base      => 'Template::TT3::Base',
-    path      => 'Template(X)::(TT3::)Provider',
+    path      => 'Template(X)::(TT3::|)Provider',
     providers => {
         default => 'Template::TT3::Provider::Cwd',
     };

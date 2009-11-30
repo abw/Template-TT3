@@ -20,6 +20,7 @@ use Template::TT3::Class
         'tagset|class:TAGSET|method:TAGSET',
         'tokens|class:TOKENS|method:TOKENS',
         'scope|class:SCOPE|method:SCOPE',
+        'tag_style|tags',
     ],
     messages   => { 
         no_tag => 'No tag found matching start token: %s',
@@ -36,10 +37,13 @@ our $TAGSET = 'Template::TT3::Tagset::TT3';
 sub init_scanner {
     my ($self, $config) = @_;
     $self->debug("INIT: ", $self->dump_data($config)) if DEBUG;
-    $self->configure($config);
-    $self->init_tagset($config);
-    $self->init_tags($config);
+
     $self->{ config } = $config;
+
+    $self->configure($config)
+         ->init_tagset($config)
+         ->init_tags($config);
+
     return $self;
 }
 
@@ -67,8 +71,8 @@ sub init_tagset {
         $tagset = $tagset->new( tags => $config->{ tagset } );
     } 
     
-    $tagset->change( $config->{ tags } )
-        if $config->{ tags };
+    $tagset->change( $self->{ tag_style } )
+        if $self->{ tag_style };
     
     $self->{ tagset } = $tagset;
     $self->{ tags   } = $tagset->tags;

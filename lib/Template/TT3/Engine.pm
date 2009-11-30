@@ -3,10 +3,22 @@ package Template::TT3::Engine;
 use Template::TT3::Class
     version   => 2.718,
     debug     => 0,
-    base      => 'Template::TT3::Base Badger::Prototype',
+    base      => 'Template::TT3::Base Badger::Prototype Badger::Exporter',
+    exports  => {
+        hooks => {
+            as => [\&_as_hook, 1],
+        },
+    },
     messages  => {
         not_implemented => '%s is not implemented in the base class template engine.',
     };
+
+
+sub _as_hook {
+    my ($class, $target, $as, $alias, $symbols) = @_;
+    my $delegate = $class->load;
+    $class->export_symbol( $target, $alias, sub () { $delegate } );
+}
 
 
 sub template {
@@ -18,6 +30,11 @@ sub template {
 
 sub templates {
     shift->not_implemented;
+}
+
+
+sub load {
+    return $_[0];
 }
 
 

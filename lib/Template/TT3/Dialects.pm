@@ -6,12 +6,13 @@ use Badger::Factory::Class
     constants   => 'HASH',
     item        => 'dialect',
     base        => 'Template::TT3::Base',
-    path        => 'Template::TT3::Dialect  Template::Dialect 
-                    TemplateX::TT3::Dialect TemplateX::Dialect',
+    path        => 'Template(X)::(TT3::|)Dialect',
+    constants   => DEFAULT,
     map         => {
         # special cases for capitalisation
         TT3     => 'TT3',
         tt3     => 'TT3',
+        default => 'TT3',
     };
 
 
@@ -22,6 +23,13 @@ sub init {
     $self->{ config } = $config->{ dialects } || $config;
     $self->debug("dialects config: ", $self->dump_data($self->{ config })) if DEBUG;
     return $self;
+}
+
+
+sub type_args {
+    my $self = shift;
+    my $type = shift || DEFAULT;
+    return ($type, @_);
 }
 
 
@@ -64,6 +72,9 @@ sub found {
             "instantiating dialect $type as $module using config: ", 
             $self->dump_data($params)
         ) if DEBUG;
+        
+        # add default name for dialect
+        $params->{ name } ||= $type;
 
         $module->new($params);
     };

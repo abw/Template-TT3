@@ -8,27 +8,22 @@ use Template::TT3::Class
     base        => 'Template::TT3::Base',
     utils       => 'params self_params is_object refaddr',
     filesystem  => 'File',
-    accessors   => 'text',
+    accessors   => 'text file uri',
+    config      => 'templates dialect uri',
     constants   => 'GLOB',
     constant    => {
         # TODO: rework all this to use Template::TT3::Modules
         SOURCE      => 'Template::TT3::Type::Source',
         SCOPE       => 'Template::TT3::Scope',
         CONTEXT     => 'Template::TT3::Context',
-        SCANNER     => 'Template::TT3::Scanner',
-        VARS        => 'Template::TT3::Variables',
         TREE        => 'Template::TT3::Type::Tree',
-        TAG         => 'Template::TT3::Tag',
         FROM_TEXT   => 'template text',
         FROM_FH     => 'template read from filehandle',
     };
 
 use Template::TT3::Type::Source 'Source';
 use Template::TT3::Type::Tree 'Tree';
-use Template::TT3::Variables;
-use Template::TT3::Scanner;
 use Template::TT3::Context;
-use Template::TT3::Tag;
 
 
 sub init {
@@ -37,6 +32,10 @@ sub init {
 
     $self->debug("init() with ", $self->dump_data($config))
         if DEBUG;
+
+    # attach to the hub and link up to any templates provider
+    $self->init_hub($config)
+         ->configure($config);
 
     $self->{ name } = $config->{ name };
     
@@ -95,12 +94,25 @@ sub source {
         ||= Source( $self->text );
 }
 
+sub dialect {
+    my $self    = shift;
+    my $dialect = $self->{ dialect };
+
+    # updgrade a dialect name, e.g. 'TT3' to a dialect object
+    $dialect = $self->{ dialect } = $self->hub->dialect( $dialect )
+        unless ref $dialect;
+    
+    return $dialect;
+}
+
 
 sub scanner {
     my $self = shift;
-    # TODO: ask dialect for scanner
+    # TODO: do we need to cache the scanner?  Isn't it just one more thing
+    # to worry about?
     return $self->{ scanner }
-        ||= $self->SCANNER->new( $self->{ config } );
+#        ||= $self->SCANNER->new( $self->{ config } );
+        ||= $self->dialect->scanner;
 }
 
 
@@ -117,6 +129,12 @@ sub context {
     shift->CONTEXT->new(@_);
 }
 
+sub templates {
+    my $self = shift;
+    return $self->{ templates }
+       ||= $self->{ config }->{ templates }
+       ||= $self->hub->templates;
+}
 
 
 #-----------------------------------------------------------------------
@@ -247,6 +265,27 @@ sub sexpr {
 }
 
 
+#-----------------------------------------------------------------------
+# cleanup methods
+#-----------------------------------------------------------------------
+
+sub destroy_tokens {
+    # TODO
+}
+
+
+sub destroy {
+    my $self = shift;
+    $self->destroy_tokens;
+    delete $self->{ templates };
+    delete $self->{ config    };
+    delete $self->{ hub       };
+}
+
+
+sub DESTROY {
+    shift->destroy;
+}
 
 
 1;

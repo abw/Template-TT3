@@ -13,6 +13,7 @@
 #
 #========================================================================
 
+use lib '/home/abw/projects/badger/lib';
 use Badger 
     lib        => '../../lib',
     Filesystem => 'Bin';
@@ -20,7 +21,7 @@ use Badger
 use Template::TT3::Test 
     debug   => 'Template::TT3::Engine::TT3 Template::TT3::Templates',
     args    => \@ARGV,
-    tests   => 12;
+    tests   => 16;
 
 
 
@@ -66,6 +67,10 @@ ok( $hub, "got hub from engine: $hub" );
 my $template = $tt3->template( text => 'Hello [% name or "World" %]!' )
     || die $tt3->reason;
 ok( $template, 'fetched template from text' );
+ok( $template->uri, 'template uri is ' . $template->uri );
+ok( $template->hub, 'template hub is ' . $template->hub );
+ok( $template->dialect, 'template dialect is ' . $template->dialect );
+ok( $template->templates, 'template templates is ' . $template->templates );
 
 is( 
     $template->fill,                        # A bit of TT3 history in the 
@@ -108,3 +113,6 @@ is(
     "Hello Badger!\n", 
     'processed Hello Badger template file'
 );
+
+
+

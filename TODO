@@ -67,3 +67,7 @@ Template::TT3::Templates/Hub/Config
 Config needs to amalgamate arguments.  Decide if things like storage should
 be enabled or not.  Hub needs to heed its call.
 
+Also need to think *VERY* carefully about what different components may be
+attaching to a prototype hub.  I'm concerned that creating a "leaf node"
+template for temporary use in a subroutine might pull the whole framework
+into persistence. 

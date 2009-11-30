@@ -7,22 +7,25 @@ use Template::TT3::Class
     import      => 'class',
     utils       => 'textlike md5_hex',
     constants   => 'ARRAY HASH DELIMITER',
-    modules     => 'TEMPLATE_MODULE',
-    hub_methods => 'dialect filesystem',
+ #   modules     => 'TEMPLATE_MODULE',
+    hub_methods => 'dialects dialect filesystem',
     mutators    => 'cache store',
     constant    => {
         TEXT    => 'text',
         FILE    => 'file',
         COLON   => ':',
+        DIALECT => 'TT3',
     },
     config      => [
-        'hub|class:HUB',
-        'template_path|path|class:TEMPLATE_PATH',
-        'template_providers|providers',
-        'template_scheme|scheme|class:SCHEME|method:FILE',
-        'template_module|class:TEMPLATE_MODULE|method:TEMPLATE_MODULE',
+        'path|template_path|class:PATH',
+        'providers|template_providers',
+        'scheme|template_scheme|class:SCHEME|method:FILE',
+        'dialect|class:DIALECT|method:DIALECT',
         'cache|class:CACHE',
         'store|class:STORE',
+#       'hub|class:HUB',
+#       'template_module|class:TEMPLATE_MODULE|method:TEMPLATE_MODULE',
+
     ],
     messages    => {
         bad_path    => 'Invalid template path specified: %s',
@@ -43,12 +46,14 @@ sub init {
 
     $self->configure($config)
          ->init_hub($config)
+            # TODO: allow provider list to be pre-defined
          ->init_path($config)
          ->init_providers($config);
 
-    # ask the hub to provide us with cache/store if they're undefined (but
+    # Ask the hub to provide us with cache/store if they're undefined (but
     # not if they're zero - that means "No caching/storing")
     my $hub = $self->hub;
+    # disabled for now...
 #   $self->{ cache } = $hub->cache unless defined $self->{ cache };
 #   $self->{ store } = $hub->store unless defined $self->{ store };
     
@@ -67,11 +72,11 @@ sub init {
     # very slim.
     $self->{ lookup } = { };
 
-    # load up the template module (quick hack to get things working)
-    $self->debug("loading template module: $self->{ template_module }")
-        if DEBUG;
-        
-    class( $self->{ template_module } )->load;
+    # Load up the template module (quick hack to get things working)
+#    $self->debug("loading template module: $self->{ template_module }")
+#        if DEBUG;
+#        
+#    class( $self->{ template_module } )->load;
 
     return $self;
 }
@@ -80,16 +85,16 @@ sub init {
 sub init_path {
     my $self    = shift; 
     my $config  = shift || $self->{ config };
-    my $tpaths  = $config->{ template_path } || [ ];
+    my $tpaths  = $self->{ path } || [ ];
     my $tconfig = $config->{ template } || $config;
     my (@paths, $path, $args);
 
     $self->debug("tpaths: $tpaths\n", $self->dump_data($tpaths)) if DEBUG;
 
-#   I did consider preserving Badger::Filesystem file objects in the 
-#   template_path, but I think that for now it's simpler to just let it
-#   be squished to text and treated as a convenient way to get a path
-#   $tpaths = [ ref $tpaths ? $tpaths : split(DELIMITER, $tpaths) ] 
+    # I did consider preserving Badger::Filesystem file objects in the path 
+    # but I think that for now it's simpler to just let it be squished to text 
+    # and treated as a convenient way to get a path.  We used todo this:
+    #    $tpaths = [ ref $tpaths ? $tpaths : split(DELIMITER, $tpaths) ] 
 
     # Split template_path on whitespace if specified as a string.  It 
     $tpaths = [ split(DELIMITER, $tpaths) ] 
@@ -106,38 +111,43 @@ sub init_path {
         if DEBUG;
     
     while (@$tpaths) {
+        # pull one off (fnnarr)
         $path = shift @$tpaths;
 
         if (ref $path eq HASH) {
-            # got a hash
+            # got a hash - that's a complete definition
             $args = $path;
         }
         elsif (ref $path) {
-            # got a non-hash ref: throw error for now, but consider things like sub refs / path generators
+            # got a non-hash ref: throw error for now, but consider things 
+            # like sub refs / path generators for the future
             return $self->error_msg( bad_path => $path );
         }
         elsif (@$tpaths && ref $tpaths->[0] eq HASH) {
-            # got a non-ref item, and the next item is a hash
+            # got a non-ref item, and the next item is a hash so merge them
             $args = shift @$tpaths;
             $args->{ path } = $path;
         }
         else {
-            # got a non-ref item, and the next item isn't a hash (or there isn't a next item)
+            # got a non-ref item, and the next item isn't a hash (or there 
+            # isn't a next item), so it's a bare path.
             $args = { 
                 path => $path,
             };
         }
 
-        push(@paths, { %$tconfig, %$args } );   # quick hack for now
+        # merge the path-specific options with the general config 
+        # TODO: check that this doesn't cause conflicts...
+        push(@paths, { %$tconfig, %$args } );
     }
 
-    $self->{ template_path } = @paths
+    $self->{ path } = @paths
         ? \@paths
         : $self->default_path($config);
 
     $self->debug(
-        "set template_path to ", 
-        $self->dump_data($self->{ template_path })
+        "set templates path to ", 
+        $self->dump_data($self->{ path })
     ) if DEBUG;
     
     return $self;
@@ -147,33 +157,46 @@ sub init_path {
 sub init_providers {
     my $self      = shift; 
     my $config    = shift || $self->{ config };
-    my $tpaths    = shift || $self->{ template_path };
-    my $default   = $self->{ template_scheme };         # 'file'
-    my $pfactory  = $self->hub->providers;
+    my $tpaths    = shift || $self->{ path   };
+
+    # First clean up any existing providers
+    $self->destroy_providers;
+
+    # OK, you're good to go
+    my $default   = $self->{ scheme        };         # 'file'
     my $providers = $self->{ providers     } = [ ];
     my $ptype     = $self->{ provider_type } = { };
     my $pname     = $self->{ provider_name } = { };
+    my $pfactory  = $self->hub->providers;
     my (@providers, $provider, $chain, $item, $type, $name);
     
-    $self->debug("init_providers() with ", $self->dump_list($tpaths), "\n") 
-        if DEBUG;
+    $self->debug(
+        "init_providers() with ", 
+        $self->dump_list($tpaths), 
+        "\n"
+    ) if DEBUG;
 
-    $self->destroy_providers;
-    
+    # Build a provider for each item in the template path
     foreach $item (@$tpaths) {
+        # TODO: Merge consecutive paths of the same type, so that 
+        # ['foo', 'bar'] gets handled by a single provider 
+        # (hmmm... maybe that's not such a good idea..)
+
         $self->debug("init_providers() for ", $self->dump_data($item))
             if DEBUG;
-            
+
+        # Create a provider for the specified (or default) type
         $type = $item->{ type } ||= $item->{ scheme } || $default;
         $provider = $pfactory->provider( $type => $item );
         
-        # add provider to the list of all providers
+        # Add provider to the list of all providers
         push(@$providers, $provider);
         
-        # also add it to the chain of providers for it's type and name
+        # Also add it to the chain of providers for it's type...
         $chain = $ptype->{ $type } ||= [ ];
         push(@$chain, $provider);
         
+        # ...and name, if it has one
         if ($name = $item->{ name }) {
             $chain = $pname->{ $name } ||= [ ];
             push(@$chain, $provider);
@@ -183,12 +206,6 @@ sub init_providers {
             if DEBUG;
     }
     
-    # TODO:
-    #  * merge with the master config 
-    #  * map prefix to provider
-
-#    $self->todo;
-    
     return $self;
 }
 
@@ -197,23 +214,29 @@ sub template {
     my $self = shift;
     my $type = shift;
     my $name = shift;
-    my $params;
+    my ($params, $dialect);
     
     if ($type eq TEXT) {
+        # No worries mate, we can do text.
         $params = {
             text => $name, 
             uri  => $self->text_uri($name),
         };
     }
     else {
+        # Ask each provider in turn
         PROVIDER: foreach my $provider (@{ $self->{ providers } }) {
             $self->debug("asking provider $provider for template $name")
                 if DEBUG;
-                
+            
+            # Yo!  Provider!  Wazzup?
             if ($params = $provider->fetch($name, @_)) {
-                $params->{ uri } ||= $type.COLON.$name;
+                $params->{ uri      } ||= $type.COLON.$name;
+                $params->{ provider } ||= $provider;
                 last PROVIDER;
             }
+            
+            # Nobody loves me. Everybody hates me. Think I'll go eat worms...
             return $self->decline_msg( not_found => $name );
         }
     }
@@ -221,32 +244,48 @@ sub template {
     $self->debug("template params: ", $self->dump_data($params))
         if DEBUG;
     
-    return $self->{ template_module }->new($params);
-        
-#    $self->todo;
+    # The provider can tell us what dialect it thinks the template is (e.g.
+    # by looking at a file extension, consulting a database or lookup table,
+    # or if the dialect is pre-defined for a particular provider).  Otherwise
+    # we use the default dialect.
+    $dialect = $params->{ dialect }
+           ||=   $self->{ dialect };
+
+    # fetch a dialect object for the dialect name
+    $dialect = $self->{ dialects }->{ $dialect }
+           ||= $self->dialect($dialect);
+           # check that dialect() throws an error or catch decline
+
+    # create back-reference to us and the hub so that templates can talk 
+    # back to us and/or reach other parts of the framework
+    $params->{ templates } = $self;
+    $params->{ hub       } = $self->{ hub };
+
+    # finally have the dialect create us a template
+    return $dialect->template($params);
 }
 
 
-#sub dialects {
-#    shift->hub->dialects(@_);
-#}
-
 sub default_path {
+    # The default template_path is the current working dir
     return [
-#        { path => shift->filesystem->root }
         { type => 'cwd' }
     ];
 }
 
+
 sub text_uri {
     my ($self, $text) = @_;
+    # generate a unique (for practical purposes) uri for text-based templates
+    # based on an MD5 hex string, e.g. text:1a2b3c4da5e6f7e8d
     return TEXT.COLON.md5_hex(ref $text ? $$text : $text);
 }
 
 
 sub destroy_providers {
     my $self = shift;
-    return $self->{ template_providers }
+    
+    return $self->{ providers }
         ? $self->todo
         : $self;
 }
@@ -255,12 +294,14 @@ sub destroy_providers {
 sub destroy {
     my $self = shift;
 
+    # I'll fetch my coat...
     $self->destroy_providers;
 
     # delete references to the cache/store that could be pointing back at us
     delete $self->{ cache };
     delete $self->{ store };
 }
+
 
 1;
 
