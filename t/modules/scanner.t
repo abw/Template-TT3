@@ -1,41 +1,56 @@
-#use Badger::Debug modules => 'Badger::Factory';
-use Badger lib => '../../lib';
+#============================================================= -*-perl-*-
+#
+# t/modules/scanner.t
+#
+# Test the Template::TT3::Scanner module.
+#
+# Run with -h option for help.
+#
+# Written by Andy Wardley <abw@wardley.org>
+#
+# This is free software; you can redistribute it and/or modify it
+# under the same terms as Perl itself.
+#
+#========================================================================
+
+use Badger 
+    lib => '../../lib';
 
 use Template::TT3::Test 
-    skip  => 'Work in progress...',
-    tests => 6,
     debug => 'Template::TT3::Scanner',
-    args  => \@ARGV;
+    args  => \@ARGV,
+    tests => 4;
 
 use utf8;
 use Template::TT3::Scanner;
-use Template::TT3::Generator::Debug;
-use Template::TT3::Generator::Source;
-use Template::TT3::Generator::DebugExpr;
 use constant {
-    SCANNER   => 'Template::TT3::Scanner',
-    TAG       => 'Template::TT3::Tag',
-    TLIST     => 'Template::TT3::Tokens',
-    GENERATOR => 'Template::TT3::Generator::Debug',
-    SOURCE    => 'Template::TT3::Generator::Source',
-    GENEXPR   => 'Template::TT3::Generator::DebugExpr',
+    SCANNER => 'Template::TT3::Scanner',
 };
 
+pass( 'loaded Template::TT3::Scanner' );
 
-my $scanner = SCANNER->new();
+my $scanner = SCANNER->new;
 ok( $scanner, 'created scanner' );
 
-$text =<<'EOF';
+my $text =<<'EOF';
 not [% not a + b %]
 not [% ! a + b %]
 EOF
 
+my $tokens = $scanner->scan($text);
+ok( $tokens, 'got tokens from scanner' );
+
+my $regen = $tokens->text;
+is( $regen, $text, 'regenerated token text matches input' );
+
 exit();
 
 __END__
-#-----------------------------------------------------------------------
-# setup
-#-----------------------------------------------------------------------
+
+# These are some old tests from the early days of getting the scanner 
+# working.  Much more has been built around the scanner now and some 
+# things have changed.  These tests need adapting to properly test the
+# scanner with different tagset, tags, and any other options.
 
 my $dirtag = TAG->new(
     start => '[%',

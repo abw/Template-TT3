@@ -234,6 +234,10 @@ sub text_token {
     return $token;
 }
 
+sub text {
+    shift->first->remaining_text;
+}
+
 
 sub can {
     my ($self, $name, @args) = @_;
@@ -263,6 +267,11 @@ sub AUTOLOAD {
     return $self->error_msg( bad_method => $name, ref $self, (caller())[1,2] );
 }
 
+
+
+#-----------------------------------------------------------------------
+# old stuff needs cleaning up
+#-----------------------------------------------------------------------
 
 use Template::TT3::Generators;
 use constant GENERATORS => 'Template::TT3::Generators';

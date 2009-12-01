@@ -11,12 +11,6 @@
 #
 #========================================================================
 
-#use lib
-#    '/home/abw/projects/badger/lib';
-
-#use Badger::Debug
-#    modules => 'Badger::Factory';
-
 use Badger 
     lib => '../../lib';
 
