@@ -4,15 +4,14 @@
 #
 # Test script for the 'fill' command.
 #
+# Run with -h option for help.
+#
 # Written by Andy Wardley <abw@wardley.org>
 #
 # This is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
 #========================================================================
-
-#use lib 
-#    '/home/abw/projects/badger/lib';
 
 use Badger 
     lib         => '../../lib',

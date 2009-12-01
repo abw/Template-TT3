@@ -9,7 +9,7 @@ use Template::TT3::Class
 
 # These are the command keywords that we recognise
 our $COMMANDS = 'as is do dot sub block with just
-                 for if else elsif fill 
+                 for if else elsif fill into
                  encode decode raw';
 
 our $SYMBOLS  = [

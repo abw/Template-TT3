@@ -1,0 +1,8 @@
+<html>
+  <head>
+    <title>[% title or 'Default Title' %]</title>
+  </head>
+  <body>
+%% content
+  </body>
+</html>
