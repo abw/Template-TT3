@@ -7,6 +7,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Base',
     import    => 'class',
     utils     => 'params',
+    dumps     => 'tags',
     constants => 'HASH ARRAY REGEX DEFAULT ALL',
     constant  => {
         TAGS  => 'Template::TT3::Tags',
@@ -54,7 +55,7 @@ sub init_tagset {
             unless @pending;
             
         $spec = shift @pending;
-        $self->debug("spec: $spec") if DEBUG;
+        $self->debug("spec: ", $self->dump_data($spec)) if DEBUG;
 
         $spec = { style => $spec } 
             unless ref $spec eq HASH;

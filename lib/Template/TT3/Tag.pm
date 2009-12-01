@@ -8,7 +8,7 @@ use Template::TT3::Class
 #   throws    => 'tt3.tag',
     utils     => 'blessed params',
     patterns  => ':all',
-    dumps     => 'start end style',
+    dumps     => 'start end style off',
     accessors => 'start end style grammar',
     constants => 'HASH ARRAY REGEX NONE OFF ON BLANK CMD_PRECEDENCE :elements',
     constant  => {

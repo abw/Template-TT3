@@ -111,6 +111,9 @@ sub scan {
     # create a T::Tokens object to collect output if we weren't passed one
     $output ||= $self->{ tokens }->new($self->{ config });
 
+    $self->reset
+        if $self->{ dirty };
+
     # define a new scope for this scanner and an output list if undefined
     $scope ||= $self->{ scope };
     $scope   = $scope->new(
@@ -126,9 +129,6 @@ sub scan {
 sub tokenise {
     my ($self, $input, $output, $scope) = @_;
     my ($pos, $text, $start, $tag);
-
-    $self->reset
-        if $self->{ dirty };
 
     while (1) {
         $pos = pos $$input || 0;
@@ -216,6 +216,9 @@ sub reset {
     my $self = shift;
     $self->{ tagset }->reset;
     $self->{ dirty } = 0;
+    $self->init_tags;
+    $self->debug("Reset tagset: ", $self->dump_data($self->{ tagset }))
+        if DEBUG;
 }
 
 1;
