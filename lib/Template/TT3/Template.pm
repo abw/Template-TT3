@@ -121,6 +121,7 @@ sub text {
     return $self->{ text };
 }
 
+
 sub source {
     my $self = shift;
     return $self->{ source }
@@ -300,6 +301,9 @@ sub decorate_error {
 
     # we can only decorate exception objects (TODO: test type)
     die $error unless ref $error;
+    
+    # don't try and decorate an error twice
+    $error->throw if $error->try->decorated;
         
     # add the template name to the exception object
     $error->file( $self->{ name } );

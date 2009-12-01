@@ -5,7 +5,7 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Badger::Exception',
     utils      => 'self_params random_advice',
-    mutators   => 'file line position column element token source';
+    mutators   => 'file line position column element token source decorated';
     
 
 our $FORMAT = 'TT3 syntax error at line <line> of <file>:<error><advice><source><marker>';
@@ -23,11 +23,12 @@ sub init {
     $self->SUPER::init($config);
 #    my $element = $config->{ element };
 #    my $token   = $config->{ token   };
-    $self->{ element  } = $config->{ element  };
-    $self->{ token    } = $config->{ token    };
-    $self->{ extract  } = $config->{ extract  };
-    $self->{ position } = $config->{ position };
-    $self->{ column   } = $config->{ column   };
+    $self->{ element   } = $config->{ element   };
+    $self->{ token     } = $config->{ token     };
+    $self->{ extract   } = $config->{ extract   };
+    $self->{ position  } = $config->{ position  };
+    $self->{ column    } = $config->{ column    };
+    $self->{ decorated } = $config->{ decorated } || 0;
     return $self;
 }
 
@@ -36,6 +37,7 @@ sub whereabouts {
     my ($self, $params) = self_params(@_);
     # quick hack
     @$self{ keys %$params } = values %$params;
+    $self->{ decorated }++;
     return $self;
 }
 
