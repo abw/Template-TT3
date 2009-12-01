@@ -11,6 +11,9 @@
 #
 #========================================================================
 
+#use lib '/home/abw/projects/badger/lib';                    # abw testing
+#use Badger::Debug modules => 'Badger::Class::Config';       # abw testing
+
 use Badger 
     lib     => '../../lib';
 

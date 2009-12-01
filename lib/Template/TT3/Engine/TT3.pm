@@ -15,20 +15,17 @@ use Template::TT3::Class
     config      => [
         'hub_module|class:HUB_MODULE', # can't add "|method:HUB_MODULE here...
     ],
-    alias       => {
-        fill        => 'todo',
-        process     => 'todo',
-        resource    => 'todo',
-    },
+    hub_methods => 'templates',
     auto_can    => 'hub_can',          # ...because the auto_can gets it
     init_method => 'configure',
     mutators    => 'hub_module';
 
 our $HUB_MODULE = HUB_MODULE;
 
-sub templates {
-    shift->hub->templates(@_);
-}
+
+#sub templates {
+#    shift->hub->templates(@_);
+#}
 
 
 sub hub {

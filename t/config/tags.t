@@ -16,24 +16,73 @@ use Badger
 
 use Template::TT3::Test 
     tests   => 2,
-    debug   => 'Template::TT3::Tagset',
+    debug   => 'Template::TT3::Tagset Template::TT3::Scanner',
     args    => \@ARGV,
     import  => 'callsign :all';
 
-use Template::TT3::Template;
-use constant
-    TEMPLATE => 'Template::TT3::Template';
+use Template3;
+use Badger::Debug ':debug :dump';
 
-my $template = TEMPLATE->new(
+my ($tt3, $template, $input, $output);
+
+#-----------------------------------------------------------------------
+# create engine, fetch template, fill it
+#-----------------------------------------------------------------------
+
+$tt3 = Template3->new(
     tags => '<* *>',
+);    
+ok( $tt3, 'created TT3 engine with custom tags' );
+
+$template = $tt3->template(
     text => 'Hello <* a *>',
 );
+ok( $template, 'created text template' );
 
+$output = $template->fill( callsign );
 is( 
-    $template->fill(callsign), 
+    $output, 
     'Hello alpha', 
     'processed template with custom style for default tags'
 );
+
+
+#-----------------------------------------------------------------------
+# all in one fill()
+#-----------------------------------------------------------------------
+
+$output = $tt3->fill(
+    text => 'Hello <* b *>',
+    data => callsign(),
+);
+
+is( 
+    $output, 
+    'Hello bravo', 
+    'processed template via fill()'
+);
+
+
+#-----------------------------------------------------------------------
+# all in one process()
+#-----------------------------------------------------------------------
+
+$output = '';
+$input = 'Hello <* c *>', 
+
+ok( 
+    $tt3->process(\$input, callsign(), \$output), 
+    'processed template via process()',
+);
+
+is( 
+    $output, 
+    'Hello charlie', 
+    'got output from process()'
+);
+
+
+__END__
 
 $template = TEMPLATE->new(
     tagset => [

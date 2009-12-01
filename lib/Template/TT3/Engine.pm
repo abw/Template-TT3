@@ -3,8 +3,10 @@ package Template::TT3::Engine;
 use Template::TT3::Class
     version   => 2.718,
     debug     => 0,
-    base      => 'Template::TT3::Base Badger::Prototype Badger::Exporter',
-    exports  => {
+    base      => 'Template::TT3::Base Badger::Prototype',
+    utils     => 'params',
+    constants => 'HASH',
+    exports   => {
         hooks => {
             as => [\&_as_hook, 1],
         },
@@ -14,6 +16,10 @@ use Template::TT3::Class
     };
 
 
+#-----------------------------------------------------------------------
+# import hooks
+#-----------------------------------------------------------------------
+
 sub _as_hook {
     my ($class, $target, $as, $alias, $symbols) = @_;
     my $delegate = $class->load;
@@ -21,10 +27,63 @@ sub _as_hook {
 }
 
 
+#-----------------------------------------------------------------------
+# template methods
+#-----------------------------------------------------------------------
+
+sub process {
+    shift->todo;
+}
+
+
+sub fill {
+    my $self = shift;
+    my ($template, $params) = $self->template_params(@_);
+
+    $self->debug(
+        "filling template $template with ", 
+        $self->dump_data($params)
+    ) if DEBUG;
+    
+    return $template->fill( $params->{ data } );
+}
+
+
+sub resource {
+    shift->todo;
+}
+
+
 sub template {
     my $self = shift;
     return $self->templates->template( @_ )
         || $self->error( $self->templates->reason );
+}
+
+
+sub template_params {
+    my $self = shift;
+    my @args;
+    
+    # This is a bit smelly.  The template() method accepts either a single
+    # hash ref, e.g. $self->template({ text => '...', name => '...', etc }) 
+    # or a pair of ($type, $name), e.g. $self->template( text => '...' ).  We
+    # have to know about that kind of shit and clean it up so that we can 
+    # get to any parameters coming after it.
+    if (@_ && ref $_[0] eq HASH) {
+        @args = (shift);
+    }
+    else {
+        @args = (shift, shift);
+    }
+    
+    $self->debug("args are: (", $self->dump_list(\@args), ')')
+        if DEBUG;
+
+    return (
+        $self->template(@args),         # fetch a template object
+        params(@_),                     # fold remaining args into hash
+    );
 }
 
 
