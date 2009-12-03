@@ -11,11 +11,13 @@
 #
 #========================================================================
 
+use lib '/home/abw/projects/badger/lib';   # abw testing
+
 use Badger 
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 2,
+    tests   => 6,
     debug   => 'Template::TT3::Tagset Template::TT3::Scanner',
     args    => \@ARGV,
     import  => 'callsign :all';

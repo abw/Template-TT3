@@ -319,9 +319,18 @@ sub keywords {
 sub commands {
     # FIXME: this messes up the grammar
     my $self = shift;
+
+#    $self->debug("new commands: ", $self->dump_data(\@_))
+#        if DEBUG;
+    
     $self->{ keywords } = $self->{ grammar }->commands(@_);
     $self->debug("new keywords: ", $self->dump_data($self->{ keywords }))
         if DEBUG;
+
+    $self->debug(
+        "$self installed keywords: ", 
+        join(', ', keys %{ $self->{ keywords } })
+    );
 }
 
 
@@ -370,6 +379,11 @@ sub tokenise {
             $self->namespace_token($input, $output, $scope, $1, $pos);
         }
         elsif ($$input =~ /$IDENT/cog) {
+            $self->debug(
+                "$self looking for keyword [$1] in keywords: ", 
+                join(', ', keys %{ $self->{ keywords }})
+            ) if DEBUG;
+            
             if ($type = $self->{ keywords }->{ $1 }) {
                 $self->debug("matched keyword: [$1]") if DEBUG;
                 $self->{ grammar }->matched($input, $output, $1, $pos);

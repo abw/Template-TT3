@@ -1,0 +1,13 @@
+[begin product layout]
+%%  into layout/site
+%%      block header
+This is the product header.  It cannot be changed.
+%%      end
+%%      slot content
+This is the default product content
+%%      end
+%%      block footer
+This is the product footer.  It cannot be changed.
+%%      end
+%%  end
+[end product layout]

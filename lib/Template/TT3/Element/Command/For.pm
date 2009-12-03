@@ -6,6 +6,8 @@ use Template::TT3::Class
     base       => 'Template::TT3::Element::Keyword',
     constants  => ':elements ARRAY',
     constant   => {
+        ITEM         => 'item',
+        IN           => 'in',
         SEXPR_FORMAT => "<for:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
         FOLLOW       => {
             map { $_ => 1 }
@@ -16,23 +18,6 @@ use Template::TT3::Class
         value  => \&text,
     };
 
-sub sexpr {
-    my $self   = shift;
-    my $format = shift || $self->SEXPR_FORMAT;
-    my $expr   = $self->[LHS]->sexpr;
-    my $body   = $self->[RHS]->sexpr;
-    for ($expr, $body) {
-        s/\n/\n    /gsm;
-    }
-    sprintf(
-        $format,
-        $expr,
-        $body
-    );
-}
-    
-
-
 sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
     my $lprec = $self->[META]->[LPREC];
@@ -42,32 +27,49 @@ sub parse_expr {
 
     $self->advance($token);
     
-    $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
+    my $expr = $$token->parse_expr($token, $scope, $lprec)
         || return $self->fail_missing( expression => $token );
 
-    $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
+    # if the next token is 'in' then the LHS is the target data
+    if ($$token->skip_ws($token)->is(IN, $token)) {
+        $self->[ARGS] = $expr;
+        $self->[EXPR] = $$token->parse_expr($token, $scope, $lprec)
+            || return $self->fail_missing( expression => $token );
+    }
+    else {
+        $self->[EXPR] = $expr;
+    }
+
+    $self->[BLOCK] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
         || return $self->fail_missing( block => $token );
 
-#    $self->debug("RHS: $self->[RHS]");
-#    $self->debug("token: $$token->[TOKEN]");
-    # TODO: look for elsif/else
-        
     return $self;
 }
 
 
 sub parse_infix {
     my ($self, $lhs, $token, $scope, $prec) = @_;
+    my $lprec = $self->[META]->[LPREC];
 
     return $lhs
-        if $prec && $self->[META]->[LPREC] <= $prec;
+        if $prec && $lprec <= $prec;
 
     $self->advance($token);
 
-    $self->[RHS] = $lhs;
+    $self->[BLOCK] = $lhs;
 
-    $self->[LHS] = $$token->parse_expr($token, $scope, $self->[META]->[LPREC])
+    my $expr = $$token->parse_expr($token, $scope, $lprec)
         || return $self->fail_missing( expression => $token );
+    
+    # if the next token is 'in' then the LHS is the target data
+    if ($$token->skip_ws($token)->is(IN, $token)) {
+        $self->[ARGS] = $expr;
+        $self->[EXPR] = $$token->parse_expr($token, $scope, $lprec)
+            || return $self->fail_missing( expression => $token );
+    }
+    else {
+        $self->[EXPR] = $expr;
+    }
     
     return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
@@ -82,10 +84,12 @@ sub else_block {
 
 sub values {
     my ($self, $context) = @_;
-    my $value = $self->[LHS]->value($context);
-    my @values;
+    my ($target, @values);
 
-    return $self->[LHS]->fail_undef_data
+    # evaluate the expression that gives us a list
+    my $value = $self->[EXPR]->value($context);
+    
+    return $self->[EXPR]->fail_undef_data
         unless defined $value;
     
     $value = [ $value ] 
@@ -93,15 +97,26 @@ sub values {
     
     return $self->else_values($context)
         unless @$value;
-    
-#    $self->debug("iterating over $value");
 
-    my $rhs  = $self->[RHS];
+    # this is the block we're going to repeatedly process
+    my $block = $self->[BLOCK];
+
+    # localise context for our 'item' (or other) iteration variable
+    $context = $context->with;
+
+    # if the user didn't specify an 'x' like 'for x in y' then we use 'item'
+    if ($target = $self->[ARGS]) {
+        $target = $target->variable($context);
+    }
+    else {
+        $target = $context->use_var(ITEM);
+    }
     
+    # repeat for each item
+    # TODO: use an iterator
     foreach my $item (@$value) {
-#        $self->debug("setting item to $item");
-        $context->set_var( item => $item );
-        push(@values, $rhs->values($context));
+         $target->set($item);
+         push(@values, $block->values($context));
     }
 
     return @values;
@@ -127,6 +142,24 @@ sub else_text {
          ? $_[SELF]->[ELSE]->text($_[CONTEXT])
          : ()
 }
+
+
+sub sexpr {
+    my $self   = shift;
+    my $format = shift || $self->SEXPR_FORMAT;
+    my $expr   = $self->[LHS]->sexpr;
+    my $body   = $self->[RHS]->sexpr;
+    for ($expr, $body) {
+        s/\n/\n    /gsm;
+    }
+    sprintf(
+        $format,
+        $expr,
+        $body
+    );
+}
+    
+
 
 
 

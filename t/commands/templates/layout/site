@@ -1,0 +1,11 @@
+[begin site layout]
+%% slot header
+This is the default header
+%% end
+%% slot content
+This is the default content
+%% end
+%% slot footer
+This is the default footer
+%% end 
+[end site layout]
