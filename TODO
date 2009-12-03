@@ -59,6 +59,8 @@ Here the '%b' isn't expanded as a hash because it's a PARAMS not a HASH.
 Avoid adding the default path to template_path so we can avoid creating
 default file provider if we're only using text-based templates.
 
+COMMANDS only installs commands into the grammar for the inline tag.  The
+grammar should be shared between inline/outline.
 
 
 Template::TT3::Templates/Hub/Config
