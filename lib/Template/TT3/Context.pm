@@ -6,11 +6,12 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Base',
     import      => 'class',
-    accessors   => 'variables scanner parent',
+    accessors   => 'variables scanner parent visiting',
     utils       => 'self_params',
     constants   => 'HASH CODE',
     constant    => {
-        VARIABLES   => 'Template::TT3::Variables',
+        VARIABLES => 'Template::TT3::Variables',
+        VISIT     => 'Template::TT3::Context::Visit',
     },
     messages    => {
         bad_type    => 'Invalid variable type for %s: %s',
@@ -40,6 +41,7 @@ sub init {
     $self->{ templates } = $config->{ templates };
     $self->{ scanner   } = $config->{ scanner };
     $self->{ scope     } = $config->{ scope };
+    $self->{ visiting  } = [ ];
     
     return $self;
 }
@@ -236,11 +238,13 @@ sub template {
     shift->templates->template(@_);
 }
 
+
 sub templates {
     my $self = shift;
     return $self->{ templates } 
         ||= $self->lookup('templates');
 }
+
 
 sub lookup {
     my $self   = shift;
@@ -261,8 +265,6 @@ sub lookup {
     return $self->hub->$item;
 }
     
-        
-
 
 sub scope {
     my $self = shift;
@@ -282,6 +284,75 @@ sub dump_up {
     return "$n $self {\n    vars => $vars\n    data => $data\n}\n"
         . ($self->{ parent } ? $self->{ parent }->dump_up($n+1) : '');
 }
+
+
+#-----------------------------------------------------------------------
+# visit($visitor, @args)
+#
+# The visit() method creates a Template::TT3::Context::Visit object 
+# as a blessed ARRAY containing the $context, $visitor and any optional
+# @args.  Any methods called against the visit object are delegated onto
+# the $visitor object.  The $context and any additional @args are passed
+# to the method along with any other arguments specified when the method
+# was called against the visit object.  In the usual case, a $visitor is
+# a template object.
+#
+#  e.g.  $context->visit($object, 10)->some_method(20)
+# calls  $object->some_method($context, 10, 20) 
+#
+# In addition, the visit object calls $context->enter($visitor) before
+# calling the delegate method.  This adds the $visitor to the 'visiting' 
+# list in the context (effectively the template caller stack).  To avoid
+# stack corruption, the delegate method call is wrapped in an eval 
+# block.  When then method call is complete, the visitor object is 
+# removed from the visiting stack by a call to $context->leave.  If an 
+# error occurred it is then re-thrown.  Otherwise the return value (or 
+# values if called in list context) is returned.
+#-----------------------------------------------------------------------
+
+sub visit {
+    bless [@_], VISIT;
+}
+
+sub enter {
+    $_[0]->debug("entering ", $_[1]) if DEBUG;
+    push( @{ $_[0]->{ visiting } }, $_[1] );
+}
+
+sub leave {
+    $_[0]->debug("leaving ", $_[0]->{ visiting }->[-1]) if DEBUG;
+    pop( @{ $_[0]->{ visiting } } );
+}
+
+
+package Template::TT3::Context::Visit;
+our $AUTOLOAD;
+
+sub AUTOLOAD {
+    my $self = shift;
+    my ($method) = ($AUTOLOAD =~ /([^:]+)$/ );
+    return if $method eq 'DESTROY';
     
+    # unpack arguments passed to the visit() method: context, visitor, args
+    my ($context, $visitor, @args) = @$self;
+    $context->enter($visitor);
+
+    # call method on visitor object in eval block, and downgrade
+    if (wantarray) {
+        my @result = eval { $visitor->$method($context, @args, @_) };
+        # TODO: should we call error() against visitor or context?
+        $context->leave;
+        $visitor->error($@) if $@;
+        return @result;
+    }
+    else {
+        my $result = eval { $visitor->$method($context, @args, @_) };
+        $context->leave;
+        $visitor->error($@) if $@;
+        return $result;
+    }
+}
+
+
 
 1;

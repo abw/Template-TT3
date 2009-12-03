@@ -105,9 +105,21 @@ sub _fill_in {
     $self->debug("filling in context: $context")
         if DEBUG;
 
-    return $self->code->($context);
+    return $context->visit($self)->_run;
+
+#    return $self->_run($context);
+
+#    return $self->code->($context);
+# context visit() should return a Visit object which wraps 
+#   return $context->visit($self)->run;
+
 }
 
+
+sub _run {
+    my $self = shift;
+    $self->_code->(@_);
+}
 
 
 #-----------------------------------------------------------------------
