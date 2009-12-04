@@ -4,6 +4,7 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
+    view       => 'for',
     constants  => ':elements ARRAY',
     constant   => {
         ITEM         => 'item',
@@ -43,7 +44,8 @@ sub parse_expr {
     $self->[BLOCK] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
         || return $self->fail_missing( block => $token );
 
-    return $self;
+#    return $self;
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 

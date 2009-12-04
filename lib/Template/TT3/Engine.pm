@@ -45,7 +45,7 @@ sub fill {
         $self->dump_data($params)
     ) if DEBUG;
     
-    return $template->fill( $params->{ data } );
+    return $template->fill( $params->{ data } || { } );
 }
 
 
@@ -77,12 +77,15 @@ sub template_params {
         @args = (shift, shift);
     }
     
-    $self->debug("args are: (", $self->dump_list(\@args), ')')
+    $self->debug("template args are: (", $self->dump_list(\@args), ')')
+        if DEBUG;
+
+    $self->debug(scalar(@_), " remaining args are: (", $self->dump_list(\@_), ')')
         if DEBUG;
 
     return (
         $self->template(@args),         # fetch a template object
-        params(@_),                     # fold remaining args into hash
+        @_ ? params(@_) : { },          # fold remaining args into hash
     );
 }
 

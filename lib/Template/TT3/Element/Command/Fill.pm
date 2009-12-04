@@ -5,6 +5,7 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
     as         => 'name_expr',
+    view       => 'fill',
     constants  => ':elements ARRAY',
     constant   => {
         SEXPR_FORMAT => "<fill:%s>",

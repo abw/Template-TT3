@@ -330,7 +330,7 @@ sub commands {
     $self->debug(
         "$self installed keywords: ", 
         join(', ', keys %{ $self->{ keywords } })
-    );
+    ) if DEBUG;
 }
 
 

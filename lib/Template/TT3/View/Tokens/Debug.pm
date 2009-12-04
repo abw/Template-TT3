@@ -127,7 +127,7 @@ class->methods(
         text comment whitespace padding tag_start tag_end html
         literal word keyword number filename unary binary prefix
         postfix squote dquote separator terminator if is parens
-        delimiter
+        delimiter fill dot
     )
 );
 

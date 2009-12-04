@@ -58,11 +58,10 @@ sub dot {
         || return $self->error_msg( bad_method => $self->[NAME], $method )
             unless ref $method eq CODE;
 
-    $self->[CONTEXT]->use_var( 
-        $name,
-        $self->[VALUE]->$method($args ? @$args : ()),
-        $self, 
-    );
+    # TODO: How do we tell this to work in list context?
+    my $result = $self->[VALUE]->$method($args ? @$args : ());
+
+    $self->[CONTEXT]->use_var($name, $result, $self);
 }
 
 

@@ -5,6 +5,9 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Base',
     constants => 'ARRAY BLANK',
+    config    => [
+        'trim_text|class:TRIM_TEXT',
+    ],
     messages  => {
         bad_method => qq{Can't locate object method "%s" via package "%s" at %s line %s},
         no_view    => 'No view method defined for %s',
@@ -15,8 +18,7 @@ our $TRIM_TEXT = 64;
 
 sub init {
     my ($self, $config) = @_;
-#    $self->{ file   } = $config->{ file   };
-#    $self->{ line   } = $config->{ line   } || 1;
+    $self->configure($config);
     $self->{ indent } = $config->{ indent } || 0;
     $self->{ pad    } = ' ' x $self->{ indent };
     return $self;
@@ -40,12 +42,13 @@ sub emit {
 
 sub tidy_text {
     my ($self, $text) = @_;
-	my $len = shift || $TRIM_TEXT;
+	my $len = shift || $self->{ trim_text };
     $text =~ s/\n/\\n/g;
     $text =~ s/\t/\\t/g;
     $text = substr($text, 0, $len) . '...' 
         if $len && length($text) > $len - 3;
     return $text;
 }
+
 
 1;

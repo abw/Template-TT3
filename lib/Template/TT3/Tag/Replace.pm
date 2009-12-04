@@ -1,4 +1,4 @@
-package Template::TT3::Tag::Comment;
+package Template::TT3::Tag::Replace;
 
 use Template::TT3::Class
     version   => 2.71,
@@ -9,20 +9,28 @@ use Template::TT3::Class
 
 sub tokenise {
     my ($self, $input, $output) = @_;
+    my $pos = pos $$input;
     
     # gobble everything up to the end token
     $$input =~ /$self->{ match_to_end }/cg
         || return $self->error_msg( no_end => $self->{ end } );
-        
-    # change the previous token (the comment start tag token) to be a 
-    # comment token and append the comment body and end token to it
-    $output->last->become('comment')->extend($1, $2);
-
-    $self->debug("matched to end of comment tag: [$1] [$2]") if DEBUG;
+    
+    $output->text_token( $self->replace($1, $input, $output), $pos );
+    $output->tag_end_token( $2, pos($$input) - length($2) );
 
     return $2;
 }
-    
+
+
+sub replace {
+    my $self   = shift;
+    my $action = $self->{ config }->{ replace }
+        || return $self->error_msg( missing => 'replace action' );
+
+    return $action->($self, @_);
+}
+        
+        
 
 1;
 
@@ -31,21 +39,23 @@ __END__
 
 =head1 NAME
 
-Template::TT3::Tag::Comment - comment tags
+Template::TT3::Tag::Replace - simple replacement tags
 
 =head1 SYNOPSIS
 
     use Template::TT3::Scanner;
-    use Template::TT3::Tag::Comment;
+    use Template::TT3::Tag::Replace;
     
-    my $tag = Template::TT3::Tag::Comment->new(
-        start => '[#',
-        end   => '#]',
+    my $tag = Template::TT3::Tag::Replace->new(
+        start   => '[b]',
+        end     => '[/b]',
+        replace => sub {
+            my ($self, $text) 
     );
     
     my $scanner = Template::TT3::Scanner->new(
         tagset => {
-            comment => $tag
+            bold => $bold
         }
     );
     

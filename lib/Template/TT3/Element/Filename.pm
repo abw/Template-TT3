@@ -29,6 +29,10 @@ sub sexpr {
     )
 }
 
+sub source {
+    shift->filename;
+}
+
 
 1;
 

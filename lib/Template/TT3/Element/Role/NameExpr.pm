@@ -19,7 +19,7 @@ sub parse_expr {
         ->parse_filename($token, $scope, $self->[META]->[LPREC])
         || return $self->fail_missing( $self->ARG_NAME => $token );
 
-    # save the scope in case we need to lookup blocks later
+    # save the scope so we can lookup lexically scoped blocks later
     $self->[ARGS] = $scope;
 
     # parse infix operators

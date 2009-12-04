@@ -23,7 +23,9 @@ sub init {
 
     $self->debug("Created virtual filesystem for $path : $self->{ VFS }")
         if DEBUG;
-    
+
+    $self->{ config } = $config;
+
     return $self;
 }
 
@@ -35,10 +37,19 @@ sub fetch {
         if DEBUG;
 
     my $file = $self->{ VFS }->file($path);
-    
-    return $file->exists
-        ? { file => $file, uri => $file->definitive }
-        : $self->decline( not_found => File => $path );
+
+    return $self->decline( not_found => File => $path )
+        unless $file->exists;
+
+    my $config = $self->{ config };
+
+    return {
+        file    => $file, 
+        uri     => $file->definitive,      # TODO this should be absolute
+        dialect => $config->{ dialect },
+        # TODO: add other options.
+        # TODO: add url as definitive path
+    };
 }
 
 

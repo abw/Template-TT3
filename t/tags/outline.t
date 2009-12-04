@@ -62,8 +62,7 @@ bravo
 charlie
 
 -- test if outline with trailing spaces and comments --
-#-- dump_tokens --
--- skip work to do on outline tags --
+#-- skip work to do on outline tags --
 # outline tags currently consume the newline end-of-tag token when they
 # much whitespace and comments.
 alpha

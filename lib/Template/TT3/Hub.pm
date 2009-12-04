@@ -46,6 +46,7 @@ our $COMPONENTS = {
     dialects   => DIALECTS_MODULE,
     cache      => CACHE_MODULE,
     store      => STORE_MODULE,
+    views      => VIEWS_MODULE,
 };
 
 

@@ -9,10 +9,10 @@ use Template::TT3::Class
     import    => 'class',
     vars      => 'AUTOLOAD',
     accessors => 'tokens',
+    modules   => 'VIEWS_MODULE',
     constants => ':elements HASH ARRAY',
     constant  => {
         ELEMENTS => 'Template::TT3::Elements',
-        VIEWS    => 'Template::TT3::Views',
         TEXT     => 'text',
     },
     messages => {
@@ -239,6 +239,11 @@ sub text {
 }
 
 
+sub tree {
+    shift->first->parse(@_);
+}
+
+
 sub can {
     my ($self, $name, @args) = @_;
     my $target;
@@ -313,24 +318,23 @@ sub view_method {
 
     $self->debug("view_method($name)") if DEBUG;
 
-    if ($type =~ s/^view_/tokens./) {       # tokens.HTML => Tokens::HTML
-        $self->debug("token view: $type") if DEBUG;
-        $view = VIEWS->view($type, @args)
-            || return $self->error_msg( invalid => view => $name );
-    }
-    elsif ($view = VIEWS->view('tokens.' . $name, @args)) {
-        # TODO: I think this is a bit dangerous..... better to require
-        # explicit view_ prefix for magic to kick in
-        $self->debug("got tokens view: tokens.$name") if DEBUG;
-        # OK, we've got a view
-    }
-    else {
-        return;
-    }
+    # map a view_XXX() method to a tokens.XXX string which the factory
+    # which map to Template::View::Tokens::XXX
+    return 
+        unless $type =~ s/^view_/tokens./;
 
     # create closure and register it as a method
     my $method = sub {
-        shift->view( $view );
+        my $this = shift;
+        my $view = VIEWS_MODULE->view($type, @_)
+            || return $self->error_msg( invalid => view => $name );
+
+        $self->debug(
+            "token view: $type with args: ", 
+            $self->dump_data(\@_)
+        ) if DEBUG;
+
+        $this->view( $view );
     };
     $self->class->method( $name => $method );
 

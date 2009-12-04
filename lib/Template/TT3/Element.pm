@@ -34,6 +34,9 @@ use Template::TT3::Class
         # default skip method don't skip but block on $self
         skip_separator     => \&accept,     # only separators skip here
         skip_delimiter     => \&accept,     # ditto for delimiters
+        
+        left_edge          => \&self,
+        right_edge         => \&self,
     };
 
 
@@ -59,9 +62,10 @@ our $MESSAGES = {
     args_posit      => "Unexpected positional arguments in call to %s: %s",
     args_named      => "Unexpected named parameters in call to %s: %s",
     args_missing    => "Missing value for '<2>' named parameter in call to %s",
+
+    remains         => "Unparsed text: %s",
     
     resource_missing => 'Requested %s resource not found: %s',
-
 
     # stuff to cleanup/rationalise
     bad_assign      => "Invalid assignment to expression: %s",
@@ -164,14 +168,19 @@ sub branch {
 }
 
 
+sub extend {
+    my $self = shift;
+    $self->[TOKEN] .= join(BLANK, @_);
+}
+
 
 #-----------------------------------------------------------------------
 # metadata methods
 #-----------------------------------------------------------------------
 
-sub lprec { $_[0]->[META]->[LPREC]  }
-sub rprec { $_[0]->[META]->[RPREC]  }
-
+sub lprec  { $_[0]->[META]->[LPREC] }
+sub rprec  { $_[0]->[META]->[RPREC] }
+sub length { CORE::length $_[0]->[TOKEN]  }
 
 
 #-----------------------------------------------------------------------
@@ -289,6 +298,15 @@ sub skip_ws {
 # parser rule matching methods
 #-----------------------------------------------------------------------
 
+sub parse {
+    my $self    = shift;
+    my $token   = \$self;
+    my $block   = $self->parse_block($token, @_);
+    $$token->finish;
+    return $block;
+}
+    
+
 sub parse_postfix {
     # Most things aren't postfix operators.  The only things that are 
     # are () [] and { }.  So in most cases parse_postfix() skips any whitespace
@@ -326,7 +344,10 @@ sub parse_body {
         return $$token->parse_follow($expr, $token, $scope, $parent);
     }
 
-    return $expr;
+#   No, I think we need to parse on....
+#    return $expr;
+
+   return $$token->skip_ws->parse_infix($expr, $token, $scope, $self->[META]->[LPREC]);
 }
 
 
@@ -567,6 +588,26 @@ sub branch_text {
         : BLANK;
 }
 
+
+
+# TODO: tweak T::TT3::Class to make this declarable
+
+sub type {
+    my $self = shift;
+    my $id   = $self->class->id;
+#    $class =~ s/([^:]*)$/$1/;
+    return lc $id;
+}
+
+
+sub finish {
+    my $self = shift;
+    my $rest = $self->remaining_text;
+    
+    return $self->error_msg(
+        remains => $rest
+    ) if defined $rest && CORE::length $rest;
+}
 
 
 #-----------------------------------------------------------------------
@@ -1329,6 +1370,15 @@ This is similar to the L<append()> method but attaches the new token to
 its C<BRANCH> slot instead of the usual C<NEXT> slot. 
 
     $element->branch( text => 'Hello', 42 );      # type, token, position
+
+=head2 extend($token)
+
+Used to append additional content to the scanned token.
+
+    my $element = $tokens->append( text => 'Hello ' );
+    $element->extend('World');
+    
+    print $element->token;      # Hello World
 
 =head1 ACCESSOR METHODS
 

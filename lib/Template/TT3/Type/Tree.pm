@@ -6,6 +6,7 @@ use Template::TT3::Class
     base        => 'Template::TT3::Type',
     utils       => 'blessed',
     auto_can    => 'view_method',
+    accessors   => 'root',
     config      => 'root!',
     init_method => 'configure',
     constant    => {
@@ -35,7 +36,8 @@ sub Tree {
 
 sub view {
     my ($self, $view) = @_;
-    $self->{ root }->view($view);
+    return $view->view_tree($self->{ root });
+#    $self->{ root }->view($view);
 }
 
 

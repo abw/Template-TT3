@@ -53,7 +53,8 @@ sub parse_expr {
     $self->[RHS] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
         || return $self->fail_missing( block => $token );
 
-    # TODO: look for elsif/else
+    # TODO: look for any following operators
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
         
     return $self;
 }

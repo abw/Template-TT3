@@ -1,14 +1,14 @@
 package Template::TT3::Views;
 
-use Badger::Factory::Class
+use Template::TT3::Factory::Class
     version => 3.00,
     debug   => 0,
     item    => 'view',
-    base    => 'Template::TT3::Base',
-    path    => 'Template::TT3::View 
-                Template::View 
-                TemplateX::TT3::View
-                TemplateX::View';
+    path    => 'Template(X)::(TT3::|)View';
+
+# This is a quick hack to prevent Badger::Factory from caching the objects
+# that are created.  Badger::Factory needs refactoring properly.
+our $NO_CACHE = 1;
 
 
 # This method overrides the default Badger::Factory behaviour of throwing
@@ -22,6 +22,8 @@ use Badger::Factory::Class
 sub not_found {
     return undef;
 }
+
+    
 
 1;
 

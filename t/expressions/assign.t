@@ -43,6 +43,13 @@ foo is 10
 a is alpha
 a is 10
 
+-- test assign foo bar --
+%% foo = 10
+%% bar = foo
+%% bar
+-- expect --
+10
+
 -- test assign chain --
 [%  foo = bar = baz = 10;  
     'foo: ' foo '  '

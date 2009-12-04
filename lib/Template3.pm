@@ -67,13 +67,13 @@ sub _engine_hook {
 
 sub _TT2_hook {
     my ($class, $target, $symbol, $symbols) = @_;
-    unshift(@$symbols, engine => 'TT2', as => 'TT2' );
+    unshift(@$symbols, engine => 'TT2', as => 'TT2');
 }
 
 
 sub _TT3_hook {
     my ($class, $target, $symbol, $symbols) = @_;
-    unshift(@$symbols, engine => 'TT3', as => 'TT3' );
+    unshift(@$symbols, engine => 'TT3', as => 'TT3');
 }
 
 
@@ -174,6 +174,7 @@ sub new {
     my $class = shift;
     $class->engine->new(@_);
 }
+
 
 #-----------------------------------------------------------------------
 # Any other class methods are delegated to the protoype engine via the 

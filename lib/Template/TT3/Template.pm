@@ -122,6 +122,33 @@ sub _run {
 }
 
 
+
+#-----------------------------------------------------------------------
+# temporary hack to get HTML output working
+#-----------------------------------------------------------------------
+
+sub _fill_html {
+    my ($self, $params) = self_params(@_);
+    return $self->_fill_html_in(
+        $self->context( data => $params )
+    );
+}
+
+
+sub _fill_html_in {
+    my ($self, $context) = @_;
+    return $context->visit($self)->_html;
+}
+
+
+sub _html {
+    my $self = shift;
+    $self->_block->html(@_);
+}
+
+
+
+
 #-----------------------------------------------------------------------
 # methods to fetch/create delegates
 #-----------------------------------------------------------------------
@@ -209,7 +236,7 @@ class->methods(
             shift->catch( decorate_error => $priv  => @_ ) 
         }
     }
-    qw( fill fill_in code compile tree block parse tokens scan )
+    qw( fill fill_in fill_html fill_html_in code compile tree block parse tokens scan )
 );
 
 
@@ -244,26 +271,10 @@ sub _block {
 
 
 sub _parse {
-    my $self    = shift;
-    my $tokens  = $self->_tokens;
-    my $token   = $tokens->first;
-    my $scope   = $self->scope;
-
-    $self->debug("Parsing tokens in $self->{ name }") 
-        if DEBUG;
-
-    my $block   = $token->parse_block(\$token, $scope);
-    my $remains = $token->remaining_text;
-    
-    # TODO: change this to a call on the element ->finish()
-    if (defined $remains && length $remains) {
-        $self->error("unparsed tokens: $remains");
-    }
-    
-#    $self->debug("template blocks: ", $self->dump_data($scope->{ blocks }))
-#        if DEBUG && $scope->{ blocks };
-
-    return $block;
+    my $self = shift;
+    $self->_tokens->first->parse(
+        $self->scope
+    );
 }
 
 
@@ -288,6 +299,25 @@ sub _scan {
     );
 }
 
+
+
+# TODO: figure out where these should go
+
+sub vars {
+    my $self = shift;
+    return $self->tree->view_vars(
+        template => $self,
+        source   => $self->source,
+    );
+}
+
+sub vars_HTML {
+    my $self = shift;
+    return $self->tree->view_vars_HTML(
+        template => $self,
+        source   => $self->source,
+    );
+}
 
 
 #-----------------------------------------------------------------------

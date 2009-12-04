@@ -182,7 +182,7 @@ sub init_providers {
         # ['foo', 'bar'] gets handled by a single provider 
         # (hmmm... maybe that's not such a good idea..)
 
-        $self->debug("init_providers() for ", $self->dump_data($item))
+        $self->debug("initialising provider: ", $self->dump_data($item))
             if DEBUG;
 
         # Create a provider for the specified (or default) type
@@ -205,6 +205,10 @@ sub init_providers {
         $self->debug("$type provider => $provider")
             if DEBUG;
     }
+
+    $self->debug(
+        "PROVIDERS: ", $self->dump_data($self->{ providers })
+    ) if DEBUG;
     
     return $self;
 }
@@ -236,21 +240,25 @@ sub template {
         };
     }
     else {
+        # TODO: map other types to provider chains.
+        
         # Ask each provider in turn
-        PROVIDER: foreach my $provider (@{ $self->{ providers } }) {
-            $self->debug("asking provider $provider for template $name")
-                if DEBUG;
+        PROVIDER: {
+            foreach my $provider (@{ $self->{ providers } }) {
+                $self->debug("asking provider $provider for template $name")
+                    if DEBUG;
             
-            # Yo!  Provider!  Wazzup?
-            if ($params = $provider->fetch($name, @_)) {
-                $params->{ uri      } ||= $type.COLON.$name;
-                $params->{ provider } ||= $provider;
-                last PROVIDER;
+                # Yo!  Provider!  Wazzup?
+                if ($params = $provider->fetch($name, @_)) {
+                    $params->{ uri      } ||= $type.COLON.$name;
+                    $params->{ provider } ||= $provider;
+                    last PROVIDER;
+                }
             }
-            
             # Nobody loves me. Everybody hates me. Think I'll go eat worms...
             return $self->decline_msg( not_found => $name );
         }
+    
     }
     
     $self->debug("template params: ", $self->dump_data($params))

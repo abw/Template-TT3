@@ -29,7 +29,7 @@ use Template::TT3::Class
 # This over-rides the default TAGSET constant above.  We use TAGSET as the
 # definition of the base class that any valid tagset object should be an
 # instances of (or subclass of).  But our default tagset is the TT3 one.
-our $TAGSET = 'Template::TT3::Tagset::TT3';
+our $TAGSET = 'Template::TT3::Tagset';
 
 *init = \&init_scanner;
 
@@ -63,8 +63,8 @@ sub init_tagset {
         my @classes = grep { ! ref } $class->all_vars('TAGSET'), $self->TAGSET;
         $self->debug("candidates for tagset class: ", join(', ', @classes)) if DEBUG;
         my $tclass = $classes[0];
+        $self->debug("creating new $tclass tagset object: ", $self->dump_data($tagset)) if DEBUG;
         $tagset = $tclass->new( tags => $config->{ tagset } );
-        $self->debug("created new tagset object: $tagset") if DEBUG;
     }
     else {
         $self->debug("creating new $tagset tagset object: ", $self->dump_data($config->{ tagset })) if DEBUG;

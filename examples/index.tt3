@@ -1,0 +1,8 @@
+[? HTML_CMDS ul li a ?]
+<h1>TT3 Examples</h1>
+
+[%  for dir.files
+        ul.menu
+            li
+                a[href=item.name] item.name
+%]

@@ -5,6 +5,7 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
     as         => 'name_block_expr',
+    view       => 'into',
     constants  => ':elements',
     alias      => {
         values => \&text,

@@ -1,42 +1,82 @@
 package Template::TT3::View::Tokens::HTML;
 
-#use utf8;
 use Template::TT3::Class
     version   => 2.7,
     debug     => 0,
-    base      => 'Template::TT3::View::Tokens',
+    base      => 'Template::TT3::View::Tokens Template::TT3::View::HTML',
     import    => 'class',
     codec     => 'html',
+    config    => [
+        'view=source',
+    ],
     constants => ':elements',
     constant  => {
         ATTR    => '%s="%s"',
         ELEMENT => "<%s%s>%s</%s>",
     };
+    
 
 
-our $TRIM_TEXT = 64;
+our $TRIM_TEXT = 128;
 our $AUTOLOAD;
 
 
-sub HTML {
-    my ($name, $attrs, @content) = @_;
-    my $attr = $attrs
-        ? join(
-            ' ',
-            '',     # dummy first entry to get leading space
-            map { sprintf( ATTR, $_ , encode( $attrs->{ $_ } ) ) }
-            sort keys %$attrs
-          )
-        : '';
+sub view_tokens {
+    my ($self, $tokens) = @_;
+    my $view = $self->{ view };
+
+    $self->debug("viewing as $view")
+        if DEBUG;
     
-    return sprintf( ELEMENT, $name, $attr, join('', grep { defined } @content), $name );
+    if ($view eq 'source') {
+        return $self->emit(
+            map { $_->view($self) }
+            @$tokens
+        );
+    }
+    elsif ($view eq 'tokens') {
+        return $self->emit(
+            map { $self->dump_token($_) }
+            @$tokens
+        );
+    }
+    else {
+        return $self->error_msg( invalid => view => $view );
+    }
 }
 
-sub span {
-    my $self      = shift;
-    my $css_class = shift;
-    HTML( span => { class => $css_class }, @_ );
+
+
+our $CUSTOM_TYPES = {
+    'boolean.or'  => 'binary operator',
+    'boolean.and' => 'binary operator',
+    'squote'      => 'squote string',
+};
+
+sub dump_token {
+    my ($self, $token) = @_;
+    my $type = $token->type;
+    $type = $CUSTOM_TYPES->{ $type } || $type;
+    for ($type) {
+        s/\./ /g;
+        s/tag(\w+)/tag_$1/;
+    }
+    $self->div(
+        "$type element",
+        $self->div(
+            head => 
+            $self->span( "info type" => $type ),
+            $self->span( "info posn" => '@' . $token->[POS] ),
+            $self->span( source => $self->tidy_text( encode($token->[TOKEN]) ) ),
+        ),
+    );
 }
+
+
+#-----------------------------------------------------------------------
+# most of the mundane methods can be auto-generated
+# TODO: make this an auto_can handler
+#-----------------------------------------------------------------------
 
 class->methods(
     map {
@@ -48,7 +88,8 @@ class->methods(
     qw(
         text comment padding html element terminator string
         literal word keyword number filename unary binary prefix
-        postfix squote dquote parens list pair variable
+        postfix squote dquote parens list hash pair variable dot filename
+        apply 
     )
 );
 
@@ -60,9 +101,14 @@ class->methods(
         }
     }
     qw(
-      is as if for raw
+      is as if for raw with just fill into blockdef slot sub
     )
 );
+
+
+#-----------------------------------------------------------------------
+# custom methods
+#-----------------------------------------------------------------------
 
 sub view_html_element {
     my ($self, $elem) = @_;
@@ -94,6 +140,7 @@ sub view_eof {
 }
 
 1;
+
 
 __END__
 

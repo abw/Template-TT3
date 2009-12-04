@@ -6,8 +6,9 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Base',
     import    => 'class',
-    utils     => 'params',
+    utils     => 'params is_object',
     dumps     => 'tags',
+    modules   => 'TAG_MODULE',
     constants => 'HASH ARRAY REGEX DEFAULT ALL',
     constant  => {
         TAGS  => 'Template::TT3::Tags',
@@ -57,17 +58,24 @@ sub init_tagset {
         $spec = shift @pending;
         $self->debug("spec: ", $self->dump_data($spec)) if DEBUG;
 
-        $spec = { style => $spec } 
-            unless ref $spec eq HASH;
+        if (is_object(TAG_MODULE, $spec)) {
+            $tag = $spec;
+        }
+        else {
+            $spec = { style => $spec } 
+                unless ref $spec eq HASH;
             
-        $type = $spec->{ type } ||= $name;
+            $type = $spec->{ type } ||= $name;
+
+            $tag = $factory->tag( $type => $spec )
+                || return $self->error_msg( invalid => tag => $type );
+        }
         
         # add the tag name to the order list if we haven't already seen it
         push(@$tagnames, $name)
             unless $tagset->{ $name };
         
-        $tagset->{ $name } = $factory->tag( $type => $spec )
-            || return $self->error_msg( invalid => tag => $type );
+        $tagset->{ $name } = $tag;
     }
     
     $self->debug("tag order is: ", $self->dump_data($tagnames)) if DEBUG;

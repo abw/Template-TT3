@@ -5,6 +5,7 @@ use Template::TT3::Class
     debug      => 0,
     base       => 'Template::TT3::Element::Command::Block',
     utils      => 'tt_params',
+    view       => 'sub',
     constants  => ':elements BLANK',
     alias      => {
         values => \&value,

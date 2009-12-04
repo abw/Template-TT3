@@ -23,11 +23,6 @@ use Template::TT3::Class
 our $HUB_MODULE = HUB_MODULE;
 
 
-#sub templates {
-#    shift->hub->templates(@_);
-#}
-
-
 sub hub {
     my $self = shift->prototype;
 

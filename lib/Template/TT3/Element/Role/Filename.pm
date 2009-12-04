@@ -19,6 +19,8 @@ sub parse_filename {
     # add any subsequent filename tokens onto the filename
     $self->[EXPR] .= $next->[EXPR]
         if $next = $$token->parse_filename($token);
+
+#    $self->debug("filename expr: $self->[EXPR]");
     
     # rebless self into a filename token
     $self->become('filename');

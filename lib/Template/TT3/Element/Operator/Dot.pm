@@ -7,6 +7,7 @@ use Template::TT3::Class
     base      => 'Template::TT3::Element::Operator::Binary
                   Template::TT3::Element',
     as        => 'filename',        # dots allowed in filenames, e.g. foo.tt3
+    view      => 'dot',
     constants => ':elements',
     constant  => {
         SEXPR_FORMAT  => '<dot:%s%s%s>',
@@ -93,6 +94,15 @@ sub sexpr {
         "\n" . $rhs,
         "\n" . $args . "\n"
     );
+}
+
+
+sub left_edge {
+    $_[SELF]->[LHS]->left_edge;
+}
+
+sub right_edge {
+    $_[SELF]->[RHS]->right_edge;
 }
 
 

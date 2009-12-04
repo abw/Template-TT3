@@ -16,6 +16,10 @@ by  num_by          # ditto - needs iterator
 <spec>              # template uri path query
 
 
+Change the scanner to push the preceding text onto the output tokens before
+calling the tag.  The tag can inspect $output->last if it want to do any 
+pre-chomping (see the way the comment tag now works for an example).
+
 Delete position() and other source methods from T::Type::Text
 
 Move the temporary html() method in the 'Is' command to the T::TT3::HTML

@@ -3,7 +3,7 @@ package Template::TT3::View::Tree::HTML;
 use Template::TT3::Class
     version   => 2.7,
     debug     => 0,
-    base      => 'Template::TT3::View::Tree',
+    base      => 'Template::TT3::View::Tree Template::TT3::View::HTML',
     import    => 'class',
     codec     => 'html',
     constants => ':elements',
@@ -13,23 +13,10 @@ use Template::TT3::Class
     },
     alias => {
         view_html => \&view_text,
+        view_dot  => \&view_binary,
     };
 
 our $TRIM_TEXT = 128;
-
-sub HTML {
-    my ($name, $attrs, @content) = @_;
-    my $attr = $attrs
-        ? join(
-            ' ',
-            '',     # dummy first entry to get leading space
-            map { sprintf( ATTR, $_ , encode( $attrs->{ $_ } ) ) }
-            sort keys %$attrs
-          )
-        : '';
-    
-    return sprintf( ELEMENT, $name, $attr, join('', grep { defined } @content), $name );
-}
 
 sub html_text {
     my ($self, $text) = @_;
@@ -38,17 +25,6 @@ sub html_text {
     return $text;
 }
 
-sub span {
-    my $self      = shift;
-    my $css_class = shift;
-    HTML( span => { class => $css_class }, @_ );
-}
-
-sub div {
-    my $self      = shift;
-    my $css_class = shift;
-    HTML( div => { class => $css_class }, @_ );
-}
 
 sub element {
     my ($self, $type, $elem, @content) = @_;
@@ -59,8 +35,7 @@ sub element {
             head => 
             $self->span( "info type" => $type ),
             $self->span( "info posn" => '@' . $elem->[POS] ),
-#            $self->span( source => $self->tidy_text( $elem->source ) ),
-            $self->span( source => $self->tidy_text( encode($elem->source), $TRIM_TEXT ) ),
+            $self->span( source => $self->tidy_text( encode($elem->source) ) ),
         ),
         @content
             ? $self->div( body => @content )
@@ -88,7 +63,7 @@ sub view_text {
             head => 
             $self->span( "info type" => 'text' ),
             $self->span( "info posn" => '@' . $elem->[POS] ),
-            $self->span( source => $self->tidy_text( $elem->[TOKEN], $TRIM_TEXT ) ),
+            $self->span( source => $self->tidy_text( encode($elem->[TOKEN]) ) ),
 #            $self->span( source => '&laquo;' . $self->tidy_text( $elem->[TOKEN] ) . '&raquo;'),
         ),
     );
@@ -116,12 +91,20 @@ sub view_dquote {
     my ($type, $text);
     
     if ($block) {
-        $type = 'variable string';
+        $type = 'dquote string';
         $text = $block->view($self);
     }
     else {
         $type = 'string';
-        $text = $self->div( 'text element' => $elem->[EXPR] );
+        $text = $self->div( 
+            'text element' => 
+            $self->div(
+                head => 
+                $self->span( "info type" => 'text' ),
+                $self->span( "info posn" => '@' . $elem->[POS] ),
+                $self->span( source => $self->tidy_text( encode($elem->[EXPR]) ) ),
+            ),
+        );
     }
     
     $self->element( 
@@ -138,6 +121,24 @@ sub view_binary {
         $self->div( 'lhs '      => $elem->[LHS]->view($self) ),
         $self->div( 'operator element' => $elem->[TOKEN] ),
         $self->div( 'rhs '      => $elem->[RHS]->view($self) ),
+    );
+}
+
+sub view_prefix {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'prefix unary expr' => $elem,
+        $self->div( 'operator element' => $elem->[TOKEN] ),
+        $self->div( 'rhs '      => $elem->[RHS]->view($self) ),
+    );
+}
+
+sub view_postfix {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'postfix unary expr' => $elem,
+        $self->div( 'lhs '      => $elem->[LHS]->view($self) ),
+        $self->div( 'operator element' => $elem->[TOKEN] ),
     );
 }
 
@@ -176,13 +177,125 @@ sub view_list {
     );
 }
 
+sub view_hash {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'hash expr' => $elem,
+        $self->div( 'operator element' => '{' ),
+        $self->div( 'lhs'              => $elem->[EXPR]->view($self) ),
+        $self->div( 'operator element' => '}' ),
+    );
+}
+
+sub view_filename {
+    my ($self, $elem) = @_;
+    $self->element( 
+        "filename element" => $elem
+    );
+}
+
 sub view_if {
     my ($self, $elem) = @_;
     $self->element( 
         'if keyword' => $elem,
-        $self->div( 'test'  => $self->span( branch => 'Test' ), $elem->[EXPR]->view($self) ),
-        $self->div( 'true'  => $self->span( branch => 'Then' ), $elem->[BLOCK]->view($self) ),
-#        $self->div( 'false element'     => $elem->[FOLLOW]->view($self) ),
+        $self->branch( Test => $elem->[EXPR]->view($self) ),
+        $self->branch( True => $elem->[BLOCK]->view($self) ),
+        $elem->[ELSE]
+            ? $self->branch( Else => $elem->[ELSE]->view($self) )
+            : ()
+    );
+}
+
+sub view_for {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'for keyword' => $elem,
+        $elem->[ARGS]
+            ? $self->branch( Item => $elem->[ARGS]->view($self) )
+            : (),
+        $self->branch( List => $elem->[EXPR]->view($self) ),
+        $self->branch( Then => $elem->[BLOCK]->view($self) ),
+        $elem->[ELSE]
+            ? $self->branch( Else => $elem->[ELSE]->view($self) )
+            : ()
+    );
+}
+
+sub view_with {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'with keyword' => $elem,
+        $self->branch( Data  => $elem->[ARGS]->view($self) ),
+        $self->branch( Block => $elem->[BLOCK]->view($self) ),
+    );
+}
+
+sub view_just {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'just keyword' => $elem,
+        $self->branch( Data  => $elem->[ARGS]->view($self) ),
+        $self->branch( Block => $elem->[BLOCK]->view($self) ),
+    );
+}
+
+sub view_fill {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'fill keyword' => $elem,
+        $self->branch( Template => $elem->[EXPR]->view($self) ),
+    );
+}
+
+sub view_blockdef {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'block keyword' => $elem,
+        # TODO: args
+        $self->branch( Name  => $elem->[EXPR]->view($self) ),
+        $self->branch( Block => $elem->[BLOCK]->view($self) ),
+    );
+}
+
+sub view_sub {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'sub keyword' => $elem,
+        # TODO: args
+        $elem->[EXPR]
+            ? $self->branch( Name  => $elem->[EXPR]->view($self) )
+            : (),
+        $self->branch( Block => $elem->[BLOCK]->view($self) ),
+    );
+}
+
+sub view_apply {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'sub keyword' => $elem,
+        $self->branch( Call => $elem->[EXPR]->view($self) ),
+        $elem->[ARGS]
+            ? $self->branch( Args  => $elem->[ARGS]->view($self) )
+            : (),
+    );
+}
+
+sub view_slot {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'slot keyword' => $elem,
+        $self->branch( Name  => $elem->[EXPR]->view($self) ),
+        $self->branch( Block => $elem->[BLOCK]->view($self) ),
+    );
+}
+
+
+sub view_into {
+    my ($self, $elem) = @_;
+    $self->element( 
+        'into keyword' => $elem,
+        $self->branch( Template => $elem->[EXPR]->view($self) ),
+        $self->branch( Block    => $elem->[BLOCK]->view($self) ),
     );
 }
 
@@ -219,6 +332,7 @@ sub view_element {
         element => $elem
     );
 }
+
 
 class->methods(
     map {

@@ -23,28 +23,7 @@ Here's a slightly more useful template:
     Hello [% name %]
 
 This template has a chunk of plain text ('C<Hello >') followed by a tag
-which outputs the value of the C<name> variable ('C<[% name %]>').  You can 
-create and run this template using the following Perl script:
-
-    use strict;
-    use warnings;
-    use Template::TT3::Template;
-    
-    my $template = Template::TT3::Template->new(
-        text => 'Hello [% name %]',
-    );
-    
-    print $template->fill( 
-        name => 'Badger',
-    );
-
-This will print the following output:
-
-    Hello Badger
-
-Note that there's still some work todo on cleaning up the TT3 front-end.
-For now, at least, you have to manually create each template as show above,
-but it will get nicer.
+which outputs the value of the C<name> variable ('C<[% name %]>').  
 
 =head1 TEMPLATE TAGS
 

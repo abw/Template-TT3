@@ -11,6 +11,7 @@ use Template::TT3::Class
         CACHE_MODULE      => 'Template::TT3::Cache',
         DIALECT_MODULE    => 'Template::TT3::Dialect',
         DIALECTS_MODULE   => 'Template::TT3::Dialects',
+        ELEMENT_MODULE    => 'Template::TT3::Element',
         ENGINES_MODULE    => 'Template::TT3::Engines',
         EXCEPTIONS_MODULE => 'Template::TT3::Exceptions',
         HUB_MODULE        => 'Template::TT3::Hub',
@@ -18,17 +19,21 @@ use Template::TT3::Class
         PROVIDERS_MODULE  => 'Template::TT3::Providers',
         SCANNER_MODULE    => 'Template::TT3::Scanner',
         STORE_MODULE      => 'Template::TT3::Store',
+        TAG_MODULE        => 'Template::TT3::Tag',
         TAGSET_MODULE     => 'Template::TT3::Tagset',
         TEMPLATE_MODULE   => 'Template::TT3::Template',
         TEMPLATES_MODULE  => 'Template::TT3::Templates',
+        VIEWS_MODULE      => 'Template::TT3::Views',
     },
     exports => {
         any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
                  DIALECT_MODULE SCANNER_MODULE DIALECT_CLASS
-                 TAGSET_MODULE ENGINES_MODULE',
+                 TAG_MODULE TAGSET_MODULE ENGINES_MODULE VIEWS_MODULE 
+                 ELEMENT_MODULE',
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
-                    CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE',
+                    CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE
+                    VIEWS_MODULE',
         },
     };
 

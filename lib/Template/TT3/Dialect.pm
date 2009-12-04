@@ -31,7 +31,7 @@ sub init {
     $self->{ config } = $config;
 
     $self->configure($config);
-    
+
     # if we've been supplied with a tagset object rather than a configuration
     # then we install it straight into tagset_object
     $self->{ tagset_object } = $self->{ tagset }
@@ -66,7 +66,7 @@ sub create_tagset {
     my $module = $self->{ tagset_module };
     my $tagset = $self->{ tagset };
     my $params;
-    
+
     # The tagset can be undefined (in which case we used the default 
     # configuration for the tagset_module), an array ref (in which case it's
     # a list of tags for the tagset) or a hash ref (in which case it's a 

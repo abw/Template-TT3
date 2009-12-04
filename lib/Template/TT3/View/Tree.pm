@@ -11,4 +11,14 @@ sub view_tree {
 }
 
 
+sub view_block {
+    my ($self, $block) = @_;
+    return join(
+        "\n", 
+        grep { defined $_ }
+        map { $_->view($self) }
+        $block->expressions
+    );
+}
+
 1;

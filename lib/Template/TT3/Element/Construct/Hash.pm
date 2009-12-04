@@ -3,7 +3,7 @@ package Template::TT3::Element::Construct::Hash;
 use Template::TT3::Class 
     debug     => 0,
     base      => 'Template::TT3::Element::Construct',
-    view      => 'list',
+    view      => 'hash',
     constants => ':elements',
     constant  => {
         FINISH        => '}',

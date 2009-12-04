@@ -10,24 +10,57 @@
 use Badger 
     lib => '../lib';
 
-use Template::TT3::Template;
+use Template3;
 use Template::TT3::HTML;
+use Template::TT3::Template;
 use constant TEMPLATE => 'Template::TT3::Template';
 
 my $file     = shift || die usage();
-my $template = TEMPLATE->new( file => $file );
+my $template = Template3->template( file => $file );
 my $tree     = $template->tree; 
-my $tokens   = $template->tokens->view_HTML;
+my $source   = $template->tokens->view_HTML;
+my $vars     = $template->vars_HTML;
+my $tokens   = $template->tokens->view_HTML( view => 'tokens' );
 $tree = $tree ? $tree->view_HTML : "ERROR: $@";
-my $output   = $template->try->html || qq{<div class="error">$@</div>};
+my $output   = $template->try->fill_html || munge_error($@);
+
+# Template3 and Template::TT3::Templates don't handle file handles yet,
+# but the low-level template objects do, so we'll use that for now.
 my $wrapper  = TEMPLATE->new( file => \*DATA );
 
 print $wrapper->fill( 
+    source => $source,
     tokens => $tokens,
     tree   => $tree,
+    vars   => $vars,
     name   => $file,
     output => $output,
 );
+
+
+sub munge_error {
+    my $error = '' . shift;   # stringify exceptions
+    for ($error) {
+        s{
+            ^(\s*)(Error:)(.*)
+        }{
+            qq{<div class="msg info">$1<span class="key">$2</span><span class="value">$3</span></div>}
+        }mex;
+        s{
+            ^(\s*)(Source:)(.*)
+        }{
+            qq{<div class="src info">$1<span class="key">$2</span><span class="value">$3</span></div>}
+        }mex;
+        s{
+            ^(\s*\^\s+here.*)
+        }{
+            qq{<div class="here info">$1</div>}
+        }mex;
+        
+    }
+    return qq{<div class="error">$error</div>};
+}
+
 
 sub usage {
     return <<EOF;
@@ -50,25 +83,39 @@ __DATA__
    
     <div class="tabset" id="tabset">
       <ul class="tabs">
-        <li class="warm"><a href="#tokens">Tokens</a></li>
+        <li class="warm"><a href="#source">Source</a></li>
+        <li><a href="#tokens">Tokens</a></li>
         <li><a href="#tree">Tree</a></li>
+        <li><a href="#vars">Variables</a></li>
         <li><a href="#output">Output</a></li>
       </ul>
       <div class="panels">
-        <div class="panel warm" id="tokens">
-          <h2>Source Tokens</h1>
+        <div class="panel warm" id="source">
+          <h2>Template Source</h2>
+          <div class="content">
+[% source %]
+          </div>
+        </div>       
+        <div class="panel" id="tokens">
+          <h2>Source Tokens</h2>
           <div class="content">
 [% tokens %]
           </div>
         </div>       
         <div class="panel" id="tree">
-          <h2>Parse Tree</h1>
+          <h2>Parse Tree</h2>
           <div class="content">
 [% tree %]
           </div>
         </div>       
+        <div class="panel" id="vars">
+          <h2>Variables Used</h2>
+          <div class="content">
+[% vars %]
+          </div>
+        </div>       
         <div class="panel" id="output">
-          <h2>Generated Output</h1>
+          <h2>Generated Output</h2>
           <div class="content">
 [% output %]
           </div>
@@ -81,6 +128,7 @@ __DATA__
         function() {
             $('#tabset').tt3_tabset();
             $('#tree').tt3_tree();
+            $('#vars').tt3_tree();
         }
     );
   </script>
