@@ -44,6 +44,9 @@ sub parse_expr {
 
     # advance token
     $self->advance($token);
+
+    # look for an optional fragment
+    $self->[FRAGMENT] = $$token->parse_fragment($token, $scope);
     
     # parse expression following
     $self->[LHS] = $$token->parse_expr($token, $scope, $lprec)
