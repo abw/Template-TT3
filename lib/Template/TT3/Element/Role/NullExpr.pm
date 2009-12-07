@@ -16,7 +16,9 @@ sub parse_expr {
     # accept the current token and advance to the next one
     $$token = $self->[NEXT];
 
-    return $self;
+    # parse infix operators
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
+    #return $self;
 }
 
 1;

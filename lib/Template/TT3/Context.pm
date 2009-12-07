@@ -189,6 +189,7 @@ sub no_var {
 sub auto_var {
     my ($self, $handler) = @_;
     $self->{ auto_var } = $handler;
+    return $self;
 }
 
 
@@ -228,6 +229,28 @@ sub just {
         lookup => undef,
     }, $class;
 }
+
+
+#-----------------------------------------------------------------------
+# For commands/controls like TAGS, COMMANDS, etc., we want to be able
+# to evaluate a set of arguments like this: [? COMMANDS include ?] or 
+# this: [? COMMANDS { wrap = wrapper, inc = include }.  We want the 
+# values ('wrapper' and 'include') to evaluate right back to their 
+# literal names so that we end up with a hash that we can pass to the
+# relevant internal method, e.g. { wrap => 'wrapper', inc => 'include' }.
+# To achieve this we create a new detached (just) context with an 
+# auto_var handler that simply returns the variable name
+#-----------------------------------------------------------------------
+
+sub loopback {
+    $_[0]->debug("installing loopback") if DEBUG;
+    shift->just->auto_var( \&loopback_var );
+}
+
+sub loopback_var {
+    $_[0]->debug("loopback: $_[1]") if DEBUG;
+    return $_[1];
+}    
 
 
 #-----------------------------------------------------------------------

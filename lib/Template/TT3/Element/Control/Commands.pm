@@ -4,8 +4,9 @@ use Template::TT3::Class
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
-    constants  => ':elements',
-    as         => 'name_expr',
+    constants  => ':elements HASH',
+#    as         => 'name_expr',
+    as         => 'args_expr',
     alias      => {
         text   => \&value,
         values => \&value,
@@ -19,12 +20,27 @@ use Template::TT3::Class
 
 sub value {
     my ($self, $context) = @_;
-    my $expr = $self->[EXPR];
-    my $cmds = $expr->value($context);
+    my $args = $self->[ARGS];
+    my @cmds = $args->params( $context->loopback );
+    my $cmds;
+
+    return $self->error_msg( cmds_undef => $self->[TOKEN], $args->source )
+        unless @cmds;
     
-    return $self->error_msg( cmds_undef => $self->[TOKEN], $expr->source )
+    if (@cmds == 1) {
+        $cmds = shift @cmds;
+    }
+    else {
+        $cmds = { map { $_ => $_ } @cmds };
+    }
+
+    return $self->error_msg( cmds_undef => $self->[TOKEN], $args->source )
         unless defined $cmds;
 
+    $cmds = {
+        $cmds => $cmds
+    } unless ref $cmds eq HASH;
+    
     $self->debug("Setting CMDS: $cmds") if DEBUG;
     
     my $scanner = $context->scope->scanner

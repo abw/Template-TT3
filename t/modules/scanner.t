@@ -19,7 +19,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template::TT3::Scanner Template::TT3::Tagset',
     args  => \@ARGV,
-    tests => 14;
+    tests => 16;
 
 use utf8;
 use Template::TT3::Scanner;
@@ -121,8 +121,18 @@ This is [b]some bold text[/b]
 This is [i]some italic text[/i]
 EOF
 
+my $expect =<<'EOF';
+This is <b>some bold text</b>
+This is <i>some italic text</i>
+EOF
+
 $tokens = $scanner->scan($text);
 ok( $tokens, 'scanned bold/italic text' );
+is( $tokens->tree->text, $expect, 'output matches expected' );
+
+# try the all-in-one transform() method
+my $output = $scanner->transform($text);
+is( $output, $expect, 'transform output matches expected' );
 
 #print $tokens->tree->text;
 

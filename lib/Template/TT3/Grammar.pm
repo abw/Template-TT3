@@ -153,11 +153,25 @@ sub commands {
     $self->debug("PRE SYMBOLS: ", $self->dump_data($symbols)) if DEBUG;
 
     @commands = map { 
-        ref $_ eq ARRAY ? $_ : split(DELIMITER, $_) 
+        ref $_ eq ARRAY ? $_ : 
+        ref $_ eq HASH  ? $_ :
+        split(DELIMITER, $_) 
     } @$args;
 
-    foreach $command (@commands) {
-        if (ref $command eq ARRAY) {
+    while (@commands) {
+        $command = shift @commands;
+        
+        if (ref $command eq HASH) {
+            unshift(
+                @commands, 
+                map {
+                    [$_, sprintf(CMD_ELEMENT, lc $command->{$_}), (CMD_PRECEDENCE) x 2]
+                }
+                keys %$command
+            );
+            next;
+        }
+        elsif (ref $command eq ARRAY) {
             ($name, $element, $lprec, $rprec) = @$command;
         }
         else {

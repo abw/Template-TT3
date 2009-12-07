@@ -12,12 +12,13 @@
 #========================================================================
 
 use Badger 
-    lib => '../../lib';
+    lib => '../../lib',
+    Filesystem => 'Bin';
 
 use Template::TT3::Test 
     debug => 'Template3',
     args  => \@ARGV,
-    tests => 3;
+    tests => 5;
 
 use Template3;
 
@@ -39,16 +40,26 @@ is( $fill, 'Hello Badger', 'filled template' );
 # class methods
 #-----------------------------------------------------------------------
 
+Template3->config(
+    template_path => Bin->dir('templates')
+);
+
 $fill = Template3->fill(
     text => 'Goodbye [% name %]',
     data => { name => 'Cruel World' }
 );
-is( $fill, 'Goodbye Cruel World', 'filled template via class method');
+is( $fill, 'Goodbye Cruel World', 'filled template text via class method');
+
+$fill = Template3->fill(
+    file => 'hello.tt3',
+    data => { name => 'Badger' }
+);
+is( $fill, 'Hello Badger!', 'filled template file via class method');
 
 
 #-----------------------------------------------------------------------
 # input string
 #-----------------------------------------------------------------------
 
-my $input = 'Diver [% dir %]';
-print "OUT: ", Template3->process(\$input, { dir => 'Down' });
+#my $input = 'Diver [% dir %]';
+#print "OUT: ", Template3->process(\$input, { dir => 'Down' });

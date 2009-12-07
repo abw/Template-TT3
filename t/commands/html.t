@@ -1,6 +1,6 @@
 #============================================================= -*-perl-*-
 #
-# t/expressions/html.t
+# t/commands/html.t
 #
 # Test script for HTML expressions.
 #
@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    skip    => 'This is broken until keywords changes are localised',
+#    skip    => 'This is broken until keywords changes are localised',
     tests   => 16,
     debug   => 'Template::TT3::Element::HTML Template::TT3::Element::Control::HtmlElement',
     args    => \@ARGV,
@@ -167,6 +167,13 @@ __DATA__
 [% italic bold a %]
 -- expect --
 <i><b>alpha</b></i>
+
+-- start --
+-- test id shortcut --
+[? HTML_CMDS i as italic, b as bold -?]
+[% italic#foo 'hello' %]
+-- expect --
+<i id="foo">hello</i>
 
 
 

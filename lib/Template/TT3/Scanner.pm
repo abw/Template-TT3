@@ -212,6 +212,7 @@ sub tags {
     $self->init_tags;
 }
 
+
 sub reset {
     my $self = shift;
     $self->{ tagset }->reset;
@@ -219,6 +220,13 @@ sub reset {
     $self->init_tags;
     $self->debug("Reset tagset: ", $self->dump_data($self->{ tagset }))
         if DEBUG;
+}
+
+
+sub transform {
+    my $self = shift;
+    my $text = shift;
+    $self->scan($text)->tree->text(@_);
 }
 
 1;

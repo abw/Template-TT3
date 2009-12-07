@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 16,
+    tests   => 20,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -185,6 +185,43 @@ no alpha
 %]
 -- expect --
 < * bravo * charlie>
+
+-- test for ... end#for --
+%% for x in 1 to 3
+x: [% x %]
+%% end#for
+-- expect --
+x: 1
+x: 2
+x: 3
+
+-- test for#bar ... end#bar --
+%% for#bar x in 1 to 3
+x: [% x %]
+%% end#bar
+-- expect --
+x: 1
+x: 2
+x: 3
+
+-- test for#bar ... end#for --
+%% for#bar x in 1 to 3
+x: [% x %]
+%% end#for
+-- expect --
+x: 1
+x: 2
+x: 3
+
+-- test mismatched fragment error --
+%% for x in 1 to 3
+x: [% x %]
+%% end#if
+-- error --
+TT3 syntax error at line 3 of "mismatched fragment error" test:
+    Error: Mismatched fragment at end of 'for' block: end#if
+   Source: %% end#if
+                  ^ here
 
 -- test illegal follow declaration --
 # TODO: create a custom command in t/lib which is deliberately broken

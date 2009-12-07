@@ -91,11 +91,15 @@ sub parse_expr {
     }
 
     # look for #ident, e.g. 'a#home' is sugar for 'a[id="home"]'
-    if ($$token->is(ID_HASH, $token)) {
-        $id = $$token->parse_word($token, $scope)
-            || return $self->fail_missing( word => $token );
+    if ($id = $$token->parse_fragment($token, $scope)) {
         $id = $id->text;                        # FIXME - no context
     }
+
+#    if ($$token->is(ID_HASH, $token)) {
+#        $id = $$token->parse_word($token, $scope)
+#            || return $self->fail_missing( word => $token );
+#        $id = $id->text;                        # FIXME - no context
+#    }
 
     # stuff extra class/id info into EXPR.
     if (defined $class || defined $id) {

@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 3,
+    tests   => 7,
     debug   => 'Template::TT3::Tag',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -25,6 +25,7 @@ use Template::TT3::HTML;
 our $vars = callsign;
 
 test_expect(
+#    verbose   => 1,
     debug     => $DEBUG,
     variables => $vars,
 );
@@ -45,9 +46,33 @@ __DATA__
 Hi
 Hello World!
 
+-- test using COMMANDS with an alias --
+[? COMMANDS hey = hello -?]
+[% hey %]
+-- expect --
+Hello World!
+
+-- test using COMMANDS with an 'as' alias --
+[? COMMANDS hello as wazzup -?]
+[% wazzup %]
+-- expect --
+Hello World!
+
 -- test hello html mode --
 -- method html --
 [? COMMANDS hello -?]
 [% hello %]
+-- expect --
+<b>Hello World!</b>
+
+-- test multiple commands --
+[? COMMANDS wrapper hello -?]
+[% wrapper bold hello; block bold "<b>$content</b>" %]
+-- expect --
+<b>Hello World!</b>
+
+-- test multiple commands with aliases --
+[? COMMANDS wrapper as wrap, hello as hi -?]
+[% hi wrap bold ; block bold "<b>$content</b>" %]
 -- expect --
 <b>Hello World!</b>

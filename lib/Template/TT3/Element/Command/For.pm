@@ -19,6 +19,7 @@ use Template::TT3::Class
         value  => \&text,
     };
 
+
 sub parse_expr {
     my ($self, $token, $scope, $prec, $force) = @_;
     my $lprec = $self->[META]->[LPREC];
@@ -27,6 +28,8 @@ sub parse_expr {
         if $prec && ! $force && $lprec <= $prec;
 
     $self->advance($token);
+
+    $self->[FRAGMENT] = $$token->parse_fragment($token, $scope);
     
     my $expr = $$token->parse_expr($token, $scope, $lprec)
         || return $self->fail_missing( expression => $token );
@@ -41,7 +44,8 @@ sub parse_expr {
         $self->[EXPR] = $expr;
     }
 
-    $self->[BLOCK] = $$token->parse_body($token, $scope, $self, $self->FOLLOW)
+    $self->[BLOCK] = $$token
+        ->parse_body($token, $scope, $self, $self->FOLLOW)
         || return $self->fail_missing( block => $token );
 
 #    return $self;

@@ -252,7 +252,9 @@ sub view_blockdef {
     $self->element( 
         'block keyword' => $elem,
         # TODO: args
-        $self->branch( Name  => $elem->[EXPR]->view($self) ),
+        $elem->[EXPR]
+            ? $self->branch( Name  => $elem->[EXPR]->view($self) )
+            : (),
         $self->branch( Block => $elem->[BLOCK]->view($self) ),
     );
 }

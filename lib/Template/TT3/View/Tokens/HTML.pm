@@ -89,7 +89,7 @@ class->methods(
         text comment padding html element terminator string
         literal word keyword number filename unary binary prefix
         postfix squote dquote parens list hash pair variable dot filename
-        apply 
+        apply fragment
     )
 );
 

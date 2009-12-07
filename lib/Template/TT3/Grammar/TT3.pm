@@ -112,7 +112,7 @@ our $SYMBOLS  = [
     [ ';'       => delimiter        =>   0,   0 ],
     [ ':'       => terminator       =>   0,   0 ],
     [ 'in'      => terminator       =>   0,   0 ],
-    [ '#'       => terminator       =>   0,   0 ],
+    [ '#'       => fragment         =>   0,   0 ],
     
     # One token to end them all and in the darkness bind them
     [ 'end'     => end              =>   0,   0 ],

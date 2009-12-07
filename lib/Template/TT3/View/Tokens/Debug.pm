@@ -8,6 +8,7 @@ use Template::TT3::Class
     utils       => 'params refaddr',
     import      => 'class',
     config      => 'show_pos=1 show_refs=0',
+    auto_can    => 'can_view',
     init_method => 'configure';
 
 
@@ -111,25 +112,23 @@ sub view_eof {
 }
 
 
-class->methods(
-    map {
-        my $type = $_;              # lexical copy for closure
-        "view_$type" => sub {
-            $_[0]->emit_head(
-                $type, 
-                $_[1]->[POS],
-                $_[0]->emit_text( $_[1]->[TOKEN] ),
-                $_[0]->show_refs($_[1]),
-            );
-        }
-    }
-    qw(
-        text comment whitespace padding tag_start tag_end html
-        literal word keyword number filename unary binary prefix
-        postfix squote dquote separator terminator if is parens
-        delimiter fill dot
-    )
-);
+sub can_view {
+    my ($self, $name) = @_;
+    
+    $self->debug("can_view($name)") if DEBUG;
+
+    return 
+        unless $name =~ s/^view_//;
+        
+    return sub {
+        $_[0]->emit_head(
+            $name, 
+            $_[1]->[POS],
+            $_[0]->emit_text( $_[1]->[TOKEN] ),
+            $_[0]->show_refs($_[1]),
+        );
+    };
+}
 
 
 

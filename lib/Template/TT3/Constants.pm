@@ -62,29 +62,30 @@ use Badger::Class
             },
             elements  => {
                 # element slots - the first 4 are common to all elements
-                META    => '=0',
-                NEXT    => '=1',
-                TOKEN   => '=2',
-                POS     => '=3',
+                META     => '=0',
+                NEXT     => '=1',
+                TOKEN    => '=2',
+                POS      => '=3',
 
                 # remaining slots have different meanings depending on 
                 # the element type
-                EXPR    => '=4',    # unary expression and expr/block...
-                BLOCK   => '=5',    # ... expressions use EXPR and/or BLOCK
-                LHS     => '=4',    # binary expressions use LHS and RHS
-                RHS     => '=5',
-                ARGS    => '=6',    # arguments
+                EXPR     => '=4',    # unary expression and expr/block...
+                BLOCK    => '=5',    # ... expressions use EXPR and/or BLOCK
+                LHS      => '=4',    # binary expressions use LHS and RHS
+                RHS      => '=5',
+                ARGS     => '=6',    # arguments
                 # TODO: rename ELSE as BRANCH
-                ELSE    => '=7',    # reference to follow-on block, e.g. else
-                BRANCH  => '=7',    # used to skip over compile time control tags
+                ELSE     => '=7',    # reference to follow-on block, e.g. else
+                BRANCH   => '=7',    # used to skip over compile time control tags
+                FRAGMENT => '=8',    # e.g. for#outer ... end#outer
 
                 # element metadata slots
-                CONFIG  => '=0',    # configuration parameters
-                ELEMS   => '=1',    # reference to elements factory
-                LPREC   => '=2',    # leftward precedence
-                RPREC   => '=3',    # rightward precedence
-                LEFT    => '=-1',   # binds left    # NOT USED?
-                RIGHT   => '=1',    # binds right   # NOT USED?
+                CONFIG   => '=0',    # configuration parameters
+                ELEMS    => '=1',    # reference to elements factory
+                LPREC    => '=2',    # leftward precedence
+                RPREC    => '=3',    # rightward precedence
+                LEFT     => '=-1',   # binds left    # NOT USED?
+                RIGHT    => '=1',    # binds right   # NOT USED?
 
                 # evaluation parameters - move these back to being separate
                 # constant set and merge them in

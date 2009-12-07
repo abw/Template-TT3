@@ -28,6 +28,7 @@ use Template::TT3::Class
         parse_pair         => \&null,
         parse_dotop        => \&null,
         parse_filename     => \&null,
+        parse_fragment     => \&null,
         parse_signature    => \&null,
         parse_infix        => \&reject,     # Special case returns LHS
         
@@ -37,6 +38,7 @@ use Template::TT3::Class
         
         left_edge          => \&self,
         right_edge         => \&self,
+        source             => 'token',
     };
 
 
@@ -62,6 +64,8 @@ our $MESSAGES = {
     args_posit      => "Unexpected positional arguments in call to %s: %s",
     args_named      => "Unexpected named parameters in call to %s: %s",
     args_missing    => "Missing value for '<2>' named parameter in call to %s",
+
+    bad_fragment    => "Mismatched fragment at end of '%s' block: %s",
 
     remains         => "Unparsed text: %s",
     
@@ -249,6 +253,13 @@ sub in {
         # as per in(), we advance the $token reference
         my ($self, $match, $token) = @_;
         my $result;
+
+        $match = { 
+            map  { $_ => 1 } 
+            grep { defined }
+            @$match 
+        } if ref $match eq ARRAY;
+            
         if ($self->[TOKEN] && ($result = $match->{ $self->[TOKEN] })) {
             $$token = $self->[NEXT];
             return $result;
@@ -344,10 +355,8 @@ sub parse_body {
         return $$token->parse_follow($expr, $token, $scope, $parent);
     }
 
-#   No, I think we need to parse on....
-#    return $expr;
-
-   return $$token->skip_ws->parse_infix($expr, $token, $scope, $self->[META]->[LPREC]);
+    # ...and we pass on down through the valley
+    return $$token->skip_ws->parse_infix($expr, $token, $scope, $self->[META]->[LPREC]);
 }
 
 
@@ -697,6 +706,11 @@ sub fail_undef_expr {
 
 sub fail_undef_dot { 
     shift->fail_undef( dot => @_ );
+}
+
+sub fail_syntax { 
+    my $self = shift;
+    return $self->syntax_error_msg($self, @_);
 }
 
 
