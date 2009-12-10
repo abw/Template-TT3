@@ -14,12 +14,13 @@
 #========================================================================
 
 use Badger 
-    lib => '../../lib';
+    lib => '../../lib',
+    Filesystem => 'Bin';
     
 use Template::TT3::Test 
     debug => 'Template::TT3::Hub',
     args  => \@ARGV,
-    tests => 3;
+    tests => 5;
 
 use Template::TT3::Hub;
 use constant HUB => 'Template::TT3::Hub';
@@ -33,4 +34,13 @@ ok( $providers, 'fetched providers' );
 my $file = HUB->provider( file => { path => '/tmp' } );
 ok( $file, 'fetched file provider' );
 
+my $data = HUB->input_glob(\*DATA);
+chomp $data;
+is( $data, 'Hello World!', 'input_glob() read from __DATA__' );
 
+$data = HUB->input_fh( Bin->dir('templates')->file('hello.tt3')->open );
+chomp $data;
+is( $data, q{Hello [% name or 'World' %]!}, 'input_fh() read from hello.tt3' );
+
+__DATA__
+Hello World!
