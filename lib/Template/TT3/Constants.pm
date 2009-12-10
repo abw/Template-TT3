@@ -29,6 +29,15 @@ use Badger::Class
         CMD_PRECEDENCE      => 100,
         CMD_ELEMENT         => 'cmd_%s',
         
+        FROM_TEXT           => 'template text',
+        FROM_CODE           => 'template code',
+        FROM_FH             => 'template read from filehandle',
+        
+        TEXT_SCHEME         => 'text',
+        FILE_SCHEME         => 'file',
+        CODE_SCHEME         => 'code',
+        NAME_SCHEME         => 'name',
+        COLON               => ':',
     },
     exports => {
         any  => 'FORCE',
@@ -36,6 +45,8 @@ use Badger::Class
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
             cache       => 'CACHE_ALL CACHE_NONE',
+            from        => 'FROM_TEXT FROM_CODE FROM_FH',
+            scheme      => 'TEXT_SCHEME FILE_SCHEME CODE_SCHEME NAME_SCHEME COLON',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
             precedence  => 'ARG_PRECEDENCE CMD_PRECEDENCE CMD_ELEMENT',
             type_slots  => {
@@ -94,6 +105,10 @@ use Badger::Class
                 VISITOR   => '=1',
                 VIEW      => '=1',
                 GENERATOR => '=1',
+            },
+            lookup => {
+                LOOKUP_ID      => '=0',
+                LOOKUP_EXPIRES => '=1',
             },
         },
     };
