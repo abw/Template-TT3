@@ -67,7 +67,7 @@ ok( $hub, "got hub from engine: $hub" );
 my $template = $tt3->template( text => 'Hello [% name or "World" %]!' )
     || die $tt3->reason;
 ok( $template, 'fetched template from text' );
-ok( $template->uri, 'template uri is ' . $template->uri );
+ok( $template->id, 'template id is ' . $template->id );
 ok( $template->hub, 'template hub is ' . $template->hub );
 ok( $template->dialect, 'template dialect is ' . $template->dialect );
 ok( $template->templates, 'template templates is ' . $template->templates );

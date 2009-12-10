@@ -81,7 +81,7 @@ sub template_params {
     # or a pair of ($type, $name), e.g. $self->template( text => '...' ).  We
     # have to know about that kind of shit and clean it up so that we can 
     # get to any parameters coming after it.
-    if (@_ && ref $_[0] eq HASH) {
+    if (@_ && ref $_[0]) {      # eq HASH) {
         @args = (shift);
     }
     else {

@@ -4,6 +4,7 @@ use Template::TT3::Class
     version    => 2.71,
     debug      => 0,
     base       => 'Template::TT3::Provider',
+    constants  => ':scheme',
     filesystem => 'VFS',
     messages   => {
         no_path => 'No path (or root) specified for file provider',
@@ -44,9 +45,12 @@ sub fetch {
     my $config = $self->{ config };
 
     return {
-        file    => $file, 
-        uri     => $file->definitive,      # TODO this should be absolute
-        dialect => $config->{ dialect },
+        file     => $file, 
+        id       => FILE_SCHEME.COLON.$file->definitive,
+        path     => $file->absolute,
+        dialect  => $config->{ dialect },
+#        loaded   => time,
+#        modified => $file->modified,
         # TODO: add other options.
         # TODO: add url as definitive path
     };

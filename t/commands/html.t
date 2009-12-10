@@ -16,7 +16,7 @@ use Badger
 
 use Template::TT3::Test 
 #    skip    => 'This is broken until keywords changes are localised',
-    tests   => 16,
+    tests   => 13,
     debug   => 'Template::TT3::Element::HTML Template::TT3::Element::Control::HtmlElement',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -144,6 +144,13 @@ __DATA__
   <li><a href="contact.html">Contact Us</a></li>
 </ul>
 
+-- test Remaining tests depend on grammar not being trampled --
+-- skip --
+-- expect --
+
+-- stop --
+
+
 -- test loading single HTML command --
 [? HTML_CMDS a -?]
 [% a b %]
@@ -168,7 +175,6 @@ __DATA__
 -- expect --
 <i><b>alpha</b></i>
 
--- start --
 -- test id shortcut --
 [? HTML_CMDS i as italic, b as bold -?]
 [% italic#foo 'hello' %]

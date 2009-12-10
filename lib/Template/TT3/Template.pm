@@ -8,18 +8,15 @@ use Template::TT3::Class
     base        => 'Template::TT3::Base',
     utils       => 'params self_params is_object refaddr',
     filesystem  => 'File',
-    accessors   => 'file uri name',
-    config      => 'templates dialect uri source',
-    constants   => 'GLOB',
+    accessors   => 'file uri name id',
+    config      => 'templates dialect id uri source',
+    constants   => 'GLOB :from',
     constant    => {
         # TODO: rework all this to use Template::TT3::Modules
         SOURCE      => 'Template::TT3::Type::Source',
         SCOPE       => 'Template::TT3::Scope',
         CONTEXT     => 'Template::TT3::Context',
         TREE        => 'Template::TT3::Type::Tree',
-        FROM_TEXT   => 'template text',
-        FROM_CODE   => 'template code',
-        FROM_FH     => 'template read from filehandle',
     },
     messages => {
         no_text    => 'The text is not available for %s',
@@ -47,7 +44,7 @@ sub init {
     # to "lowest": file, text, code, block
     
     if ($file = $config->{ file }) {
-        if (ref $file eq GLOB) {
+        if (ref $file eq GLOB) {            # TODO: I/O handles
             local $/ = undef;
             $self->{ text }   = <$file>;
             $self->{ name } ||= FROM_FH;

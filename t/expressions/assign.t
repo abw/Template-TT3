@@ -14,11 +14,8 @@
 use Badger 
     lib     => '../../lib';
 
-#use Badger::Debug modules => 'Template::TT3::Utils';
-
-
 use Template::TT3::Test 
-    tests   => 8,
+    tests   => 9,
     debug   => 'Template::TT3::Context',
     args    => \@ARGV,
     import  => 'test_expect callsign';

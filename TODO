@@ -66,6 +66,9 @@ default file provider if we're only using text-based templates.
 COMMANDS only installs commands into the grammar for the inline tag.  The
 grammar should be shared between inline/outline.
 
+Add support to function signatures for optional items (e.g. foo(bar?) )
+and default values (e.g. foo(bar=10) ).
+
 
 Template::TT3::Templates/Hub/Config
 -----------------------------------

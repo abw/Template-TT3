@@ -4,6 +4,7 @@ use Template::TT3::Class
     version    => 2.71,
     debug      => 0,
     base       => 'Template::TT3::Provider',
+    constants  => ':scheme',
     filesystem => 'Cwd';
 
 
@@ -26,10 +27,19 @@ sub fetch {
         if DEBUG;
 
     my $file = $self->{ cwd }->file($path);
+
+    return $self->decline( not_found => File => $path )
+        unless $file->exists;
     
-    return $file->exists
-        ? { file => $file, uri => $file->path }
-        : $self->decline( not_found => File => $path );
+    return {
+        file     => $file, 
+        id       => FILE_SCHEME.COLON.$file->definitive,
+        path     => $file->absolute,
+        dialect  => $self->{ config }->{ dialect },
+#        loaded   => time,
+#        modified => $file->modified,
+    };
+
         
 }
 

@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 12,
+    tests   => 13,
     debug   => 'Template::TT3::Element::Command::Block',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -128,6 +128,15 @@ bar: [% html_element('foo', 'bar', 'baz') %]
 foo: <foo/>
 bar: <foo>barbaz</foo>
 
+-- test block subs --
+%% hello = block(name)
+Hello [% name %]!
+%% end
+%% hello('World')
+%% hello('Badger')
+-- expect --
+Hello World!
+Hello Badger!
 
 
          

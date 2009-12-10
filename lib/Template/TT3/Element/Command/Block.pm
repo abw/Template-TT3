@@ -97,26 +97,17 @@ sub text {
             ")"
         ) if DEBUG;
 
+        # TODO: pre-compute this at compile time
+        my $sign = $self->[ARGS]->signature;
+
         return sub {
-            $self->debug("Running block with args: ", $self->dump_data($self->[ARGS]))
-                if DEBUG;
-            my $params = tt_params($self, $self->[ARGS]->signature, undef, @_);
-            $self->debug("got params: ", $self->dump_data($params)) if DEBUG;
-            $context->set_vars($params);
-            return $self->[BLOCK]->text( $context );
+            return $self->[BLOCK]->text(
+                $context->with(
+                    tt_params($self, $sign, undef, @_)
+                )
+            );
         };
     }
-        
-        # this is a named block;
- #       if ($self->[ARGS]) {
-            
-    
-    # If the block has a name then it is purely declarative and generates
-    # no output at runtime, otherwise it's a runtime block.
-#    $_[SELF]->debug("BLOCK HAS NAME: ", $_[SELF]->[EXPR]->value($_[CONTEXT]))
-#        if $_[SELF]->[EXPR];
-#    $_[SELF]->debug("BLOCK HAS ARGS: ", $_[SELF]->dump_data($_[SELF]->[ARGS]))
-#        if $_[SELF]->[ARGS];
         
     return $self->[BLOCK]->text( $context );
 }

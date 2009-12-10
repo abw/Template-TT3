@@ -5,24 +5,25 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Base',
     import      => 'class',
-    utils       => 'textlike md5_hex',
-    constants   => 'ARRAY HASH DELIMITER',
- #   modules     => 'TEMPLATE_MODULE',
+    utils       => 'textlike md5_hex is_object refaddr params self_params',
+    constants   => ':types :from :scheme :lookup DELIMITER BLANK',
+    modules     => 'TEMPLATE_MODULE',
     hub_methods => 'dialects dialect filesystem',
     mutators    => 'cache store',
     constant    => {
-        TEXT    => 'text',
-        FILE    => 'file',
-        COLON   => ':',
-        DIALECT => 'TT3',
+        TEXT      => 'text',
+        DIALECT   => 'TT3',
+        IO_HANDLE => 'IO::Handle',
     },
     config      => [
         'path|template_path|class:PATH',
         'providers|template_providers',
-        'scheme|template_scheme|class:SCHEME|method:FILE',
+        'scheme|template_scheme|class:SCHEME|method:FILE_SCHEME',
         'dialect|class:DIALECT|method:DIALECT',
         'cache|class:CACHE',
         'store|class:STORE',
+        'dynamic_path=0',
+        'path_expires=1',
 #       'hub|class:HUB',
 #       'template_module|class:TEMPLATE_MODULE|method:TEMPLATE_MODULE',
 
@@ -30,9 +31,11 @@ use Template::TT3::Class
     messages    => {
         bad_path    => 'Invalid template path specified: %s',
         bad_dialect => 'Invalid template dialect specified: %s',
-        not_found   => 'Template not found: %s',
+        not_found   => 'Template not found: %s:%s',
+        no          => 'No %s specified for template',
     };
 
+use Badger::Timestamp 'TIMESTAMP';
 
 
 sub init {
@@ -54,7 +57,7 @@ sub init {
     # not if they're zero - that means "No caching/storing")
     my $hub = $self->hub;
     # disabled for now...
-#   $self->{ cache } = $hub->cache unless defined $self->{ cache };
+    $self->{ cache } = $hub->cache unless defined $self->{ cache };
 #   $self->{ store } = $hub->store unless defined $self->{ store };
     
     if (DEBUG) {
@@ -165,7 +168,7 @@ sub init_providers {
     # OK, you're good to go
     my $default   = $self->{ scheme        };         # 'file'
     my $providers = $self->{ providers     } = [ ];
-    my $ptype     = $self->{ provider_type } = { };
+    my $ptype     = $self->{ provider_type } = { name => $providers };
     my $pname     = $self->{ provider_name } = { };
     my $pfactory  = $self->hub->providers;
     my (@providers, $provider, $chain, $item, $type, $name);
@@ -214,52 +217,301 @@ sub init_providers {
 }
 
 
+#-----------------------------------------------------------------------
+# Template methods.  template() dispatches to template_xxx() depending
+# on the argument(s) specified.  This may trickle down through other
+# template_xxx() methods culminating in a call to lookup(\%params)
+#-----------------------------------------------------------------------
+
 sub template {
     my $self = shift;
-    my $type = shift;
-    my $name = shift;
-    my ($params, $dialect);
-    
-    $self->debug(
-        "template(", 
-            $self->dump_list([$type, $name]), 
-        ")"
-    ) if DEBUG;
-    
-    if (ref $type eq HASH) {
-        $params = $type;
-        $type   = $params->{ type };
-        $name ||= $params->{ name };
+    my $src  = shift || return $self->error_msg( no => 'source' );
+    my ($ref, $name, $params);
+
+    if (is_object(TEMPLATE_MODULE, $src)) {
+        # first argument is already a template object
+        return $src;
     }
-    elsif ($type eq TEXT) {
-        # No worries mate, we can do text.
-        $params = {
-            @_,
-            text => $name, 
-            uri  => $self->text_uri($name),
-        };
+    elsif (ref $src) {
+        return $self->template_ref($src, @_);
+    }
+    elsif (@_ && defined $_[0]) {
+        return $self->template_type($src, @_);
     }
     else {
-        # TODO: map other types to provider chains.
-        
-        # Ask each provider in turn
-        PROVIDER: {
-            foreach my $provider (@{ $self->{ providers } }) {
-                $self->debug("asking provider $provider for template $name")
-                    if DEBUG;
-            
-                # Yo!  Provider!  Wazzup?
-                if ($params = $provider->fetch($name, @_)) {
-                    $params->{ uri      } ||= $type.COLON.$name;
-                    $params->{ provider } ||= $provider;
-                    last PROVIDER;
-                }
-            }
-            # Nobody loves me. Everybody hates me. Think I'll go eat worms...
-            return $self->decline_msg( not_found => $name );
-        }
-    
+        return $self->template_name($src, @_);
     }
+}
+
+
+sub template_ref {
+    my $self = shift;
+    my $item = shift     || return $self->error_msg( no => 'reference' );
+    my $ref  = ref $item || return $self->template( $item, @_ );
+    my ($type, $name, $params);
+    
+    # some other kind of reference
+    if ($ref eq SCALAR) {
+        # a reference to some text
+        return $self->template_text($item, @_);
+    }
+    elsif ($ref eq ARRAY) {
+        # a reference to an array of arguments
+        return $self->template(@$item, @_);
+    }
+    elsif ($ref eq HASH) {
+        if (keys %$item == 1) {
+            # a hash with exactly one entry, e.g. { file => 'blah.html' }
+            return $self->template( (keys %$item)[0], (values %$item)[0], @_ );
+        }
+        else {
+            # a hash with more (or possibly less) than one entry should
+            # have 'type' and either a 'name' or a $type entry, 
+            # e.g.{ type => 'file', name => 'foo.html' } 
+            #  or { type => 'file', file => 'foo.html' }
+            
+            # TODO: we might have a block definition passed to use from a 
+            # filename element that has resolved it locally
+            $params = $item;
+            $type   = $params->{ type } || $self->lookup($params); #return $self->error_msg( no => 'type' );
+            $name   = $params->{ name } || $params->{ $type };
+            return $self->template($type, $name, $params);
+        }
+    }
+    elsif ($ref eq CODE) {
+        # a code reference
+        return $self->template_code($item, @_);
+    }
+    elsif ($ref eq GLOB) {
+        return $self->template_glob($item, @_);
+    }
+    elsif (is_object(IO_HANDLE, $item)) {
+        return $self->template_fh($item, @_);
+    }
+    else {
+        # 
+        return $self->error_msg( invalid => type => $type );
+    }
+}
+
+
+sub template_text {
+    my $self   = shift;
+    my $text   = shift;
+    my $params = params(@_);
+    $params->{ name } ||= FROM_TEXT;
+    $params->{ text }   = $text;
+    $params->{ id   }   = $self->text_id($text);
+    return $self->lookup($params);
+}
+
+
+sub template_code {
+    my $self   = shift;
+    my $code   = shift;
+    my $params = params(@_);
+    $params->{ name } ||= FROM_CODE;
+    $params->{ code }   = $code;
+    $params->{ id   }   = $self->code_id($code);
+    return $self->lookup($params);
+}
+
+
+sub template_glob {
+    my $self   = shift;
+    my $glob   = shift;
+    my $params = params(@_);
+    $params->{ name } ||= FROM_FH;
+    $params->{ text }   = $self->hub->input_glob($glob);
+    $params->{ id   }   = $self->text_id( $params->{ text } );
+    return $self->lookup($params);
+}
+
+
+sub template_fh {
+    my $self   = shift;
+    my $fh     = shift;
+    my $params = params(@_);
+    $params->{ name } ||= FROM_FH;
+    $params->{ text }   = $self->hub->input_fh($fh);
+    $params->{ id   }   = $self->text_id( $params->{ text } );
+    return $self->lookup($params);
+}
+
+
+sub template_name {
+    shift->template_type( NAME_SCHEME, @_ );
+}
+
+
+sub template_type {
+    my $self   = shift;
+    my $type   = shift;
+    return $self->template_text(@_) if $type eq TEXT_SCHEME;
+    my $name   = shift;
+    my $params = params(@_);
+    my $uri    = $type.COLON.$name;
+    my ($lookup, $id, $template);
+
+    $params->{ name } ||= $name;
+    $params->{ type }   = $type;
+    $params->{ uri  }   = $uri;
+
+    # See if we've previously mapped this type:name uri to a template.  If 
+    # we have then $self->{ lookup } will contain an entry telling us the 
+    # definitive id for the template.  We can then use that to look in the 
+    # cache(s) to see if we've got it in memory or on disk.  Otherwise we 
+    # have to go through the usual route of asking all the providers for it.
+
+    ID_LOOKUP: {
+        # a dynamic template_path defeats any path lookup caching
+        last ID_LOOKUP
+            if $self->{ dynamic_path };
+
+        # see if we've looked up an item with this name before
+        last ID_LOOKUP
+            unless $lookup = $self->{ lookup }->{ $uri };
+    
+        # delete and ignore lookup entry if it's gone stale
+        if (time > $lookup->[LOOKUP_EXPIRES]) {
+            $self->debug("$uri lookup data has expired\n") if DEBUG;
+            $self->debug("expired at $lookup->[LOOKUP_EXPIRES], time is now ", time);
+            delete $self->{ lookup }->{ $uri };
+            last ID_LOOKUP;                                 # STALE PATH
+        }
+            
+        # if the lookup failed then it'll fail again so we can bail early
+        unless ($id = $lookup->[LOOKUP_ID]) {
+            $self->debug("$uri was previously not found\n") if DEBUG;
+            return $self->not_found($type, $name, $params); # NOT FOUND 
+        }
+            
+        # we've got a candidate for caching
+        if ($template = $self->cached($id)) {               # TODO: modified?
+            $self->debug("found cached version of $name\n") if DEBUG;
+            return $template;                               # FOUND
+        }
+        else {
+            $self->debug("$uri ($id) has expired from the cache\n") if DEBUG;
+            delete $self->{ lookup }->{ $uri };
+        }
+    }
+    
+    return $self->locate($params);
+}
+
+
+
+#-----------------------------------------------------------------------
+# Lookup methods
+#-----------------------------------------------------------------------
+
+sub lookup {
+    my ($self, $params) = self_params(@_);
+    my $id = $params->{ id };
+
+    # lookup in the cache or go straight to template preparation
+    return $id
+        && $self->cached($id)
+        || $self->prepare($params);
+}
+
+
+sub locate {
+    my ($self, $params) = self_params(@_);
+    my $found;
+
+    my $type = $params->{ type } 
+        || return $self->error_msg( missing => 'type' );
+        
+    my $name = $params->{ name } 
+        || return $self->error_msg( missing => 'name' );
+        
+    my $provs = $self->{ provider_type }->{ $type } 
+        || return $self->error_msg( invalid => type => $type );
+
+    $self->debug("asking ", scalar(@$provs), " provider(s) for $type:$name")
+        if DEBUG;
+
+    # Ask each provider in turn
+    PROVIDER: {
+        foreach my $provider (@$provs) {
+            $self->debug("asking provider $provider for template $type:$name")
+                if DEBUG;
+            
+            # Yo!  Provider!  Wazzup?
+            if ($found = $provider->fetch($name, @_)) {
+                $self->debug("provider found it: ", $self->dump_data($found))
+                    if DEBUG;
+                $params = {
+                    provider => $provider,
+                    %$params,
+                    %$found,
+                };
+                last PROVIDER;
+            }
+        }
+        # Nobody loves me. Everybody hates me. Think I'll go eat worms...
+        return $self->not_found( $type, $name, $params );
+    }
+    
+    my $id = $params->{ id };
+
+    return $id
+        && $self->cached($id)
+        || $self->prepare($params);
+}
+
+
+#-----------------------------------------------------------------------
+# preparation and caching methods
+#-----------------------------------------------------------------------
+
+*cached = \&cache_fetch;
+
+sub cache_fetch {
+    my ($self, $id, $modified) = @_;
+    my $data;
+
+    # see if the named template is in the cache
+    if ($self->{ cache } && ($data = $self->{ cache }->get($id))) {
+        $self->debug("$id found in the cache => $data\n") if DEBUG;
+        return $data;
+            # create/update LOOKUP entry for faster path matching
+#            $self->add_lookup_path($data);
+    }
+
+    if ($self->{ store } && ($data = $self->{ store }->get($id))) {
+        $self->debug("$id found in the store\n") if DEBUG;
+        return $data;
+    }
+    
+    return undef;
+}
+
+
+sub cache_store {
+    my ($self, $id, $data) = @_;
+    my $cached;
+
+    if ($self->{ cache }) {
+        $self->debug("storing $id in memory cache as $data\n") if DEBUG;
+        $self->{ cache }->set($id, $data);
+        $cached = $id;
+    }
+    
+    # add to store - this needs refactoring along with Template::TT2::Document
+    if ($self->{ store }) {
+        shift->todo('persistent template storage');
+    }
+    
+    return $cached;
+}
+
+
+sub prepare {
+    my ($self, $params) = self_params(@_);
+    my $dialect;
     
     $self->debug("template params: ", $self->dump_data($params))
         if DEBUG;
@@ -282,7 +534,63 @@ sub template {
     $params->{ hub       } = $self->{ hub };
 
     # finally have the dialect create us a template
-    return $dialect->template($params);
+    return $self->prepared(
+        $params,
+        $dialect->template($params)
+    );
+}
+
+
+sub prepared {
+    my ($self, $params, $template) = @_;
+    my $id  = $params->{ id  };
+    my $uri = $params->{ uri };
+    
+    # If we've got an id then we can store it in the cache.  If it is
+    # successfully cached and we have a uri (e.g. file:foo.tt3) then 
+    # we can create a lookup entry so that we can quickly map file:foo.tt3
+    # to the cache entry indexed by $id
+    
+    if ($id && $self->cache_store($id, $template, $params)) {
+        # a dynamic path defaults any path lookup caching
+        if ($uri && ! $self->{ dynamic_path }) {
+            $self->debug("adding lookup entry for [$uri => $id] expiring in $self->{ path_expires } seconds")
+                if DEBUG;
+            $self->{ lookup }->{ $uri } = [
+                $id, time + $self->{ path_expires }
+            ];
+        }
+    }
+    
+    return $template;
+}
+
+
+
+#-----------------------------------------------------------------------
+# Methods for generating ids for template that don't already have a uri
+# (e.g. file path).  Templates read from text get a unique (for practical 
+# purposes) uri based on an MD5 hex string, e.g. text:1a2b3c4da5e6f7e8d.
+# Templates that are wrappers around code refs get code:1234567 using 
+# their refaddr.
+#-----------------------------------------------------------------------
+
+sub text_id {
+    my ($self, $text) = @_;
+    return TEXT_SCHEME.COLON.md5_hex(ref $text ? $$text : $text);
+}
+
+
+sub code_id {
+    my ($self, $code) = @_;
+    # generate a unique (for practical purposes) uri for text-based templates
+    # based on an MD5 hex string, e.g. text:1a2b3c4da5e6f7e8d
+    return CODE_SCHEME.COLON.refaddr($code);
+}
+
+
+sub not_found {
+    shift->decline_msg( not_found => @_ );
 }
 
 
@@ -291,14 +599,6 @@ sub default_path {
     return [
         { type => 'cwd' }
     ];
-}
-
-
-sub text_uri {
-    my ($self, $text) = @_;
-    # generate a unique (for practical purposes) uri for text-based templates
-    # based on an MD5 hex string, e.g. text:1a2b3c4da5e6f7e8d
-    return TEXT.COLON.md5_hex(ref $text ? $$text : $text);
 }
 
 

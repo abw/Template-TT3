@@ -526,10 +526,7 @@ sub fetch_template {
     my ($self, $name, $context, $scope) = @_;
     my ($blocks, $block);
     
-    # FIXME: not sure about making this 'file'.  Feels too hard-coded.
-    # Should be something generic like 'template' which all providers
-    # respond to regardless of type.  Or perhaps 'any' and/or 'all'???
-    my @args = ( file => $name );
+    my @args = ( name => $name );
 
     # Before asking for the template, we do a local lookup for a block
     # in this scope.  If we find an entry then we use that single item
