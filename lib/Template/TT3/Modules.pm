@@ -9,6 +9,8 @@ use Template::TT3::Class
 
         # TT3 modules
         CACHE_MODULE      => 'Template::TT3::Cache',
+        CONTEXT_MODULE    => 'Template::TT3::Context',
+        SERVICES_MODULE   => 'Template::TT3::Services',
         DIALECT_MODULE    => 'Template::TT3::Dialect',
         DIALECTS_MODULE   => 'Template::TT3::Dialects',
         ELEMENT_MODULE    => 'Template::TT3::Element',
@@ -27,14 +29,14 @@ use Template::TT3::Class
         IO_HANDLE         => 'IO::Handle',
     },
     exports => {
-        any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
+        any  => 'CONTEXT_MODULE HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
                  DIALECT_MODULE SCANNER_MODULE DIALECT_CLASS
                  TAG_MODULE TAGSET_MODULE ENGINES_MODULE VIEWS_MODULE 
                  ELEMENT_MODULE IO_HANDLE',
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE
-                    VIEWS_MODULE',
+                    VIEWS_MODULE CONTEXT_MODULE SERVICES_MODULE',
         },
     };
 

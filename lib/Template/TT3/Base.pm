@@ -118,23 +118,6 @@ sub resource_error_msg {
 }
 
 
-sub debug_callers {
-    my $self = shift;
-    my $i = 1;
-    while (1) {
-        my @info = caller($i);
-        last unless @info;
-        my ($pkg, $file, $line, $sub) = @info;
-        warn(
-            sprintf(
-                "%4s: Called from %s in %s at line %s\n",
-                '#' . $i++, $sub, $file, $line
-            )
-        );
-    }
-}
-
-
 sub dump_data_depth {
     my ($self, $data, $depth) = @_;
     local $Badger::Debug::MAX_DEPTH = $depth || 1;
@@ -252,11 +235,6 @@ or invalid resources (templates, files, plugins, etc).
 =head2 resource_error_msg($token, $format, @args)
 
 A wrapper around L<token_error_msg()> use to raise resource errors.
-
-=head2 debug_callers()
-
-This is a temporary method used for debugging.  It prints a trace
-showing the current call stack.
 
 =head2 dump_data_depth($data, $depth)
 

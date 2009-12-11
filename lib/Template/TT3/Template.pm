@@ -16,7 +16,6 @@ use Template::TT3::Class
         # TODO: rework all this to use Template::TT3::Modules
         SOURCE      => 'Template::TT3::Type::Source',
         SCOPE       => 'Template::TT3::Scope',
-        CONTEXT     => 'Template::TT3::Context',
         TREE        => 'Template::TT3::Type::Tree',
     },
     messages => {
@@ -25,7 +24,6 @@ use Template::TT3::Class
 
 use Template::TT3::Type::Source 'Source';
 use Template::TT3::Type::Tree 'Tree';
-use Template::TT3::Context;
 
 
 sub init {
@@ -93,6 +91,17 @@ sub init {
 #-----------------------------------------------------------------------
 # the important methods that do shit
 #-----------------------------------------------------------------------
+
+sub service {
+    my $self = shift;   
+
+    return sub {
+        my $env = params(@_);
+        $env->{ context }
+            ->visit($self)
+            ->run
+    };
+}
 
 sub _fill {
     my ($self, $params) = self_params(@_);
@@ -212,11 +221,13 @@ sub scope {
 
 sub context {
     my $self = shift;
-    return $self->CONTEXT->new(
-        templates => $self->{ templates },
-        hub       => $self->{ hub },
-        @_
-    );
+    my $params = params(@_);
+    # TODO: should this get hub context and then clone it?
+    return $self->hub->context->child(@_);
+#        templates => $self->{ templates },
+#        hub       => $self->{ hub },
+#        @_
+#    );
 }
 
 sub templates {

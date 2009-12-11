@@ -41,13 +41,15 @@ use Template::TT3::Class
 #-----------------------------------------------------------------------
 
 our $COMPONENTS = { 
-    filesystem => FILESYSTEM_MODULE,
-    templates  => TEMPLATES_MODULE,
-    providers  => PROVIDERS_MODULE,
-    plugins    => PLUGINS_MODULE,
-    dialects   => DIALECTS_MODULE,
     cache      => CACHE_MODULE,
+    context    => CONTEXT_MODULE,
+    dialects   => DIALECTS_MODULE,
+    filesystem => FILESYSTEM_MODULE,
+    plugins    => PLUGINS_MODULE,
+    providers  => PROVIDERS_MODULE,
+    services   => SERVICES_MODULE,
     store      => STORE_MODULE,
+    templates  => TEMPLATES_MODULE,
     views      => VIEWS_MODULE,
 };
 
@@ -61,10 +63,11 @@ our $COMPONENTS = {
 #-----------------------------------------------------------------------
 
 our $DELEGATES  = {
-    template   => 'templates',
-    provider   => 'providers',
-    plugin     => 'plugins',
     dialect    => 'dialects',
+    plugin     => 'plugins',
+    provider   => 'providers',
+    service    => 'services',
+    template   => 'templates',
 };
 
 

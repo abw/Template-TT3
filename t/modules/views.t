@@ -11,8 +11,9 @@
 #
 #========================================================================
 
-#$Badger::Class::DEBUG=1;
-use Badger lib => '../../lib';
+use Badger 
+    lib => '../../lib';
+    
 use Template::TT3::Test 
     debug => 'Badger::Factory Template::TT3::Views',
     args  => \@ARGV,

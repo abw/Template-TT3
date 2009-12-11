@@ -47,6 +47,16 @@ sub init {
 }
 
 
+sub child {
+    my ($self, $params) = self_params(@_);
+    my $class = ref $self || $self;
+    bless {
+        %$self,
+        %$params,
+    }, $class;
+}
+
+
 #-----------------------------------------------------------------------
 # variables
 #-----------------------------------------------------------------------
@@ -257,8 +267,23 @@ sub loopback_var {
 # templates
 #-----------------------------------------------------------------------
 
+sub fill {
+    my $self     = shift;
+    my $template = $self->any_template(shift);
+    return $template->fill(@_);
+}
+
+
 sub template {
     shift->templates->template(@_);
+}
+
+
+sub any_template {
+    my $self      = shift;
+    my $templates = $self->templates;
+    return $templates->template(@_)
+        || $self->error( $templates->reason );
 }
 
 
@@ -278,11 +303,16 @@ sub lookup {
  
     # otherwise lookup the named item
     my $item = shift;
+
+    $self->debug("looking up $item") if DEBUG;
  
     # walkup through the parent chain looking for the item
     while ($lookup) {
         $lookup->{ $item } && return;
+        $lookup = $lookup->{ lookup };      # FIXME: or parent?
     }
+    
+    $self->debug("asking hub for $item") if DEBUG;
     
     # failing that ask the hub to provide it
     return $self->hub->$item;

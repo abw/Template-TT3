@@ -6,6 +6,9 @@ use Template::TT3::Class
     base        => 'Template::TT3::Engine',
     import      => 'class',
     modules     => 'HUB_MODULE',
+    words       => 'SERVICE',
+    utils       => 'params',
+    constants   => ':service ARRAY HASH DELIMITER DEFAULT',
     constant    => {
         TT3     => __PACKAGE__,
     },
@@ -17,11 +20,50 @@ use Template::TT3::Class
     ],
     hub_methods => 'templates',
     auto_can    => 'hub_can',          # ...because the auto_can gets it
-    init_method => 'configure',
+#   init_method => 'configure',
     mutators    => 'hub_module';
 
 our $HUB_MODULE = HUB_MODULE;
+our $SERVICE    = [ qw( layout header footer wrapper ) ];
 
+
+#-----------------------------------------------------------------------
+# initialisation methods
+#-----------------------------------------------------------------------
+
+sub init {
+    my ($self, $config) = @_;
+
+    $self->configure($config);
+    
+    my $service = $config->{ service }
+        || $self->class->any_var(SERVICE);
+
+    my $services = $self->class->hash_vars( 
+        SERVICES => $config->{ services } 
+    );
+    
+    # tricky this... either of the SERVICE or SERVICES could have come
+    # from a package variable far, far, away, and we can't reliably tell
+    # which should take precedence: an existing $services->{ default } 
+    # entry or a new $service.... Hmmm... for now we'll assume that an 
+    # existing $services->{ default } wins because we don't define one of
+    # those by default.
+    $services->{ default } ||= $service;
+    
+    $self->{ services } = $services;
+    $self->{ config   } = $config;
+
+    $self->debug("services: ", $self->dump_data($services))
+        if DEBUG;
+    
+    return $self;
+}
+
+
+#-----------------------------------------------------------------------
+# Hub methods
+#-----------------------------------------------------------------------
 
 sub hub {
     my $self = shift->prototype;
@@ -98,6 +140,90 @@ sub detach_hub {
 
     # explicitly destroy the hub if we created it
     $self->destroy_hub if $self->{ my_hub };
+}
+
+
+#-----------------------------------------------------------------------
+# Template processing methods
+#-----------------------------------------------------------------------
+
+sub process {
+    my $self    = shift;
+    my $input   = shift;
+    my $data    = @_ ? (ref $_[0] eq HASH ? shift : params(splice(@_))) : { };
+    my $output  = shift || $self->{ output };
+    my $options = @_ ? params(@_) : undef;
+    return $self->render(
+        input   => $input,
+        data    => $data,
+        output  => $output,
+        options => $options,
+    );
+#    return $self->hub->output(
+#        $template->fill($data),
+#        @_
+#    );
+}
+
+sub render {
+    my $self = shift;
+    my $env  = params(@_);
+    $env->{ context } ||= $self->context->with( $env->{ data } );
+    $self->service( $env->{ service } )->($env);
+}
+    
+
+sub context {
+    shift->hub->context;
+}
+
+
+sub service {
+    my $self = shift;
+    my $name = shift || DEFAULT;
+
+    return $self->{ service }->{ $name }
+        || $self->build_service($name);
+}
+
+
+sub build_service {
+    my $self     = shift;
+    my $name     = shift || DEFAULT;
+    my $config   = $self->{ config };
+    my $factory  = $self->hub->services;
+    my $services = $self->{ services };
+    my $service  = $services->{ $name }
+        || return $self->error_msg( invalid => service => $name );
+
+    # we allow a service ist to be specified as a whitespace delimited string 
+    # because we're nice like that and can easily expand it
+    $service = $services->{ $name } = [ split(DELIMITER, $service) ]
+        unless ref $service eq ARRAY;
+    
+    $self->debug("constructing service pipeline: ", join(', ', @$service))
+        if DEBUG;
+
+    # TODO: I think the input/output should be part of the service definition
+
+    # start the pipeline with an input service
+    my $pipeline = $factory->service(INPUT_SERVICE)->service;
+    my ($key, $value);
+    
+    # then add each component in the service pipeline that has a 
+    # configuration value defined
+    foreach my $key (@$service) {
+        next unless defined ($value = $config->{ $key });
+        $self->debug("service: $key => $value") if DEBUG;
+        $pipeline = $factory
+            ->service( $key => $value )     # create service object
+            ->service( $pipeline );         # bind it to the pipline
+    }
+    
+    # TODO: add the final output service
+    # $pipeline = $factory->service( OUTPUT_SERVICE )->service($pipeline)
+    
+    return $pipeline;
 }
 
 

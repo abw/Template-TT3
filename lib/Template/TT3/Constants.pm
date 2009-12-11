@@ -32,6 +32,10 @@ use Badger::Class
         CODE_SCHEME         => 'code',
         NAME_SCHEME         => 'name',
         COLON               => ':',
+        
+        # service names
+        INPUT_SERVICE       => 'input',
+        OUTPUT_SERVICE      => 'output',
 
         # parsing constants
         ARG_PRECEDENCE      => 200,
@@ -53,6 +57,7 @@ use Badger::Class
             cache        => 'CACHE_ALL CACHE_NONE',
             from         => 'FROM_TEXT FROM_CODE FROM_HANDLE',
             scheme       => 'TEXT_SCHEME FILE_SCHEME CODE_SCHEME NAME_SCHEME COLON',
+            service      => 'INPUT_SERVICE OUTPUT_SERVICE',
             precedence   => 'ARG_PRECEDENCE CMD_PRECEDENCE',
             lookup_slots => {
                 ID       => '=0',
@@ -187,6 +192,15 @@ Constants used as the C<scheme:> prefix when constructing URIs for templates
     CODE_SCHEME         # code
     NAME_SCHEME         # name
     COLON               # :
+
+=head2 :service
+
+Constants defining the names of the core services that
+L<Template::TT3::Engine::TT3> fetches from L<Template::TT3::Services> to 
+construct a template service pipeline.
+
+    INPUT_SERVICE       # input
+    OUTPUT_SERVICE      # output
 
 =head2 :precedence
 

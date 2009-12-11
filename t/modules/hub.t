@@ -38,7 +38,7 @@ my $data = HUB->input_glob(\*DATA);
 chomp $data;
 is( $data, 'Hello World!', 'input_glob() read from __DATA__' );
 
-$data = HUB->input_fh( Bin->dir('templates')->file('hello.tt3')->open );
+$data = HUB->input_handle( Bin->dir('templates')->file('hello.tt3')->open );
 chomp $data;
 is( $data, q{Hello [% name or 'World' %]!}, 'input_fh() read from hello.tt3' );
 
