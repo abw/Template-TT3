@@ -7,13 +7,11 @@ use Template::TT3::Class
     import      => 'class',
     utils       => 'textlike md5_hex is_object refaddr params self_params',
     constants   => ':types :from :scheme :lookup DELIMITER BLANK',
-    modules     => 'TEMPLATE_MODULE',
+    modules     => 'TEMPLATE_MODULE IO_HANDLE',
     hub_methods => 'dialects dialect filesystem',
     mutators    => 'cache store',
     constant    => {
-        TEXT      => 'text',
-        DIALECT   => 'TT3',
-        IO_HANDLE => 'IO::Handle',
+        DIALECT => 'TT3',
     },
     config      => [
         'path|template_path|class:PATH',
@@ -24,19 +22,28 @@ use Template::TT3::Class
         'store|class:STORE',
         'dynamic_path=0',
         'path_expires=1',
-#       'hub|class:HUB',
-#       'template_module|class:TEMPLATE_MODULE|method:TEMPLATE_MODULE',
-
     ],
     messages    => {
         bad_path    => 'Invalid template path specified: %s',
         bad_dialect => 'Invalid template dialect specified: %s',
-        not_found   => 'Template not found: %s:%s',
+        not_found   => 'Template not found: <2>',
         no          => 'No %s specified for template',
     };
 
-use Badger::Timestamp 'TIMESTAMP';
 
+our $TYPES = {
+    text   => \&template_text,
+    code   => \&template_code,
+    glob   => \&template_glob,
+    handle => \&template_handle,
+    fh     => \&template_handle,
+};    
+
+
+
+#-----------------------------------------------------------------------
+# initialisation methods
+#-----------------------------------------------------------------------
 
 sub init {
     my ($self, $config) = @_;
@@ -69,17 +76,11 @@ sub init {
     # saves us from having to re-compile templates unless they've changed)
     # we also maintain a lookup table which maps a template name to the 
     # specific file that provided it and the time that we should check it
-    # again to see if it has changed (time now  + STAT_TTL seconds).  This 
+    # again to see if it has changed (time now  + path_expires seconds).  This 
     # saves us from making repeated stat() calls on a file (or reads from a 
     # database) in rapid succession when the chances of a file changing are
     # very slim.
     $self->{ lookup } = { };
-
-    # Load up the template module (quick hack to get things working)
-#    $self->debug("loading template module: $self->{ template_module }")
-#        if DEBUG;
-#        
-#    class( $self->{ template_module } )->load;
 
     return $self;
 }
@@ -217,10 +218,9 @@ sub init_providers {
 }
 
 
+
 #-----------------------------------------------------------------------
-# Template methods.  template() dispatches to template_xxx() depending
-# on the argument(s) specified.  This may trickle down through other
-# template_xxx() methods culminating in a call to lookup(\%params)
+# Template methods
 #-----------------------------------------------------------------------
 
 sub template {
@@ -228,11 +228,7 @@ sub template {
     my $src  = shift || return $self->error_msg( no => 'source' );
     my ($ref, $name, $params);
 
-    if (is_object(TEMPLATE_MODULE, $src)) {
-        # first argument is already a template object
-        return $src;
-    }
-    elsif (ref $src) {
+    if (ref $src) {
         return $self->template_ref($src, @_);
     }
     elsif (@_ && defined $_[0]) {
@@ -250,8 +246,11 @@ sub template_ref {
     my $ref  = ref $item || return $self->template( $item, @_ );
     my ($type, $name, $params);
     
-    # some other kind of reference
-    if ($ref eq SCALAR) {
+    if (is_object(TEMPLATE_MODULE, $item)) {
+        # first argument is already a template object
+        return $item;
+    }
+    elsif ($ref eq SCALAR) {
         # a reference to some text
         return $self->template_text($item, @_);
     }
@@ -286,23 +285,12 @@ sub template_ref {
         return $self->template_glob($item, @_);
     }
     elsif (is_object(IO_HANDLE, $item)) {
-        return $self->template_fh($item, @_);
+        return $self->template_handle($item, @_);
     }
     else {
         # 
         return $self->error_msg( invalid => type => $type );
     }
-}
-
-
-sub template_text {
-    my $self   = shift;
-    my $text   = shift;
-    my $params = params(@_);
-    $params->{ name } ||= FROM_TEXT;
-    $params->{ text }   = $text;
-    $params->{ id   }   = $self->text_id($text);
-    return $self->lookup($params);
 }
 
 
@@ -321,20 +309,31 @@ sub template_glob {
     my $self   = shift;
     my $glob   = shift;
     my $params = params(@_);
-    $params->{ name } ||= FROM_FH;
+    $params->{ name } ||= FROM_HANDLE;
     $params->{ text }   = $self->hub->input_glob($glob);
     $params->{ id   }   = $self->text_id( $params->{ text } );
     return $self->lookup($params);
 }
 
 
-sub template_fh {
+sub template_handle {
     my $self   = shift;
     my $fh     = shift;
     my $params = params(@_);
-    $params->{ name } ||= FROM_FH;
-    $params->{ text }   = $self->hub->input_fh($fh);
+    $params->{ name } ||= FROM_HANDLE;
+    $params->{ text }   = $self->hub->input_handle($fh);
     $params->{ id   }   = $self->text_id( $params->{ text } );
+    return $self->lookup($params);
+}
+
+
+sub template_text {
+    my $self   = shift;
+    my $text   = shift;
+    my $params = params(@_);
+    $params->{ name } ||= FROM_TEXT;
+    $params->{ text }   = $text;
+    $params->{ id   }   = $self->text_id($text);
     return $self->lookup($params);
 }
 
@@ -347,7 +346,7 @@ sub template_name {
 sub template_type {
     my $self   = shift;
     my $type   = shift;
-    return $self->template_text(@_) if $type eq TEXT_SCHEME;
+    my $deleg  = $TYPES->{ $type }; return $self->$deleg(@_) if $deleg;
     my $name   = shift;
     my $params = params(@_);
     my $uri    = $type.COLON.$name;
@@ -387,7 +386,7 @@ sub template_type {
         }
             
         # we've got a candidate for caching
-        if ($template = $self->cached($id)) {               # TODO: modified?
+        if ($template = $self->cache_fetch($id)) {          # TODO: modified?
             $self->debug("found cached version of $name\n") if DEBUG;
             return $template;                               # FOUND
         }
@@ -412,7 +411,7 @@ sub lookup {
 
     # lookup in the cache or go straight to template preparation
     return $id
-        && $self->cached($id)
+        && $self->cache_fetch($id)
         || $self->prepare($params);
 }
 
@@ -458,7 +457,7 @@ sub locate {
     my $id = $params->{ id };
 
     return $id
-        && $self->cached($id)
+        && $self->cache_fetch($id)
         || $self->prepare($params);
 }
 
@@ -467,20 +466,23 @@ sub locate {
 # preparation and caching methods
 #-----------------------------------------------------------------------
 
-*cached = \&cache_fetch;
-
 sub cache_fetch {
     my ($self, $id, $modified) = @_;
     my $data;
 
-    # see if the named template is in the cache
+    # TODO: go back over Template::TT2::Templates to see what the purpose
+    # of $modified is and if we still need it
+
+    # see if the named template is in the cache...
     if ($self->{ cache } && ($data = $self->{ cache }->get($id))) {
         $self->debug("$id found in the cache => $data\n") if DEBUG;
         return $data;
-            # create/update LOOKUP entry for faster path matching
-#            $self->add_lookup_path($data);
+
+        # create/update LOOKUP entry for faster path matching
+        # $self->add_lookup_path($data);
     }
 
+    # ...or in the secondary store
     if ($self->{ store } && ($data = $self->{ store }->get($id))) {
         $self->debug("$id found in the store\n") if DEBUG;
         return $data;
@@ -500,7 +502,7 @@ sub cache_store {
         $cached = $id;
     }
     
-    # add to store - this needs refactoring along with Template::TT2::Document
+    # add to store - not working yet - need to figure out how
     if ($self->{ store }) {
         shift->todo('persistent template storage');
     }
@@ -625,220 +627,463 @@ sub destroy {
 
 1;
 
-
 __END__
 
-sub init_dialects {
-    my $self     = shift; 
-    my $config   = shift || $self->{ config };
-    my $dialects = $self->{ dialects };
-    my $dialect  = $self->{ dialect };
-    my $tclass   = $dialects->dialect($dialect)
-        || return $self->error_msg( bad_dialect => $dialect );
+=head1 NAME
 
-    # store the default type name and start a hash to quickly map
-    # template types to class names.
-    $self->{ dialect_class } = {
-        $dialect => $tclass,
-    };
+Template::TT3::Templates - template manager
+
+=head1 SYNOPSIS
+
+    use Template::TT3::Templates;
     
-    return $self->{ dialects };
-}
+    my $templates = Template::TT3::Templates->new(
+        template_path => '/path/to/templates',
+    );
+    my $template = $templates->template('example.tt3')
+        || die $templates->reason;
 
-sub init_path {
-    my $self   = shift; 
-    my $config = shift || $self->{ config };
-    my $inpath = $config->{ template_path }     # other modules use 'path' but
-             ||= delete($config->{ path })      # 'template_path' is canonical
-             ||  $self->pkgvar('TEMPLATE_PATH');
-    my (@paths, $path, $args);
-    
-    $inpath = [ $inpath ] unless ref $inpath eq 'ARRAY';
+=head1 DESCRIPTION
 
-    # The $inpath list can contain single paths (e.g. '/path/to/file') which 
-    # can be followed by an optional hash of options, e.g.
-    #    ['/path/to/files']  ['/path/to/files' => { ...options .. }]
-    # or it can contain hashes of options with the path inside, e.g.
-    #    [ { path => '/path/to/file', ...options... } ]
-    # or some combination of the two.
+This module implements a template manager responsible for loading, preparing
+and caching templates.  It is an internal component of the Template Toolkit
+which is loaded and used automatically by the L<Template::TT3::Hub> module.
 
-    $self->debug("init_path() => ", $self->dump_list($inpath), "\n") if $DEBUG;
-    
-    while (@$inpath) {
-        $path = shift @$inpath;
+=head1 CONFIGURATION OPTIONS
 
-        if (ref $path eq 'HASH') {
-            # got a hash
-            $args = $path;
-        }
-        elsif (ref $path) {
-            # got a non-hash ref: throw error for now, but consider things like sub refs / path generators
-            return $self->error_msg( bad_path => $path );
-        }
-        elsif (@$inpath && ref $inpath->[0] eq 'HASH') {
-            # got a non-ref item, and the next item is a hash
-            $args = shift @$inpath;
-            $args->{ path } = $path;
-        }
-        else {
-            # got a non-ref item, and the next item isn't a hash (or there isn't a next item)
-            $args = { 
-                path => $path,
-            };
-        }
+=head2 template_path / path
 
-        push(@paths, $args->{ path });   # quick hack for now
-        
-        # TODO:
-        #  * merge with the master config 
-        #  * add default type
-        #  * add file: prefix to paths (if no prefix defined)
-        #  * map prefix to provider
+This can be used to specify the location or locations of templates.  In the
+simple case it can be specified as a single string denoting a file system
+location.
 
-        #  $self->not_implemented('config merging and path store');
-    }
-    $self->{ template_path } = \@paths;
-    
-    return $self;
-}
+    my $templates = Template::TT3::Templates->new(
+        template_path => '/path/to/templates',
+    );
 
-sub dialect_class {
-    my $self    = shift;
-    my $dialect = shift || $self->{ dialect };
-    return  $self->{ dialect_class }->{ $dialect }
-        ||= $self->{ dialects }->dialect($dialect)
-        ||  $self->error_msg( bad_dialect => $dialect );
-}
+Multiple locations can be specified using an array reference.
 
-# quick hack to get things working
-
-sub template {
-    my $self = shift;
-    my $name = shift;
-    my $args = @_ && ref $_[0] eq 'HASH' ? shift : { @_ };
-    my $file = $self->locate($name)
-        || return $self->decline_msg( not_found => $name );
-    my $type = $self->dialect_class;
-    my $text = UTILS->read_file($file);
-
-    $self->debug("template $name located in $file\n") if $DEBUG;
-
-    # TODO: make ref
-    $args->{ text } = $text;
-
-    # add back-reference from template to the templates collective
-    $args->{ templates } ||= $self;
-    
-    $self->debug("creating new template: $type / $args\n") if $DEBUG;
-    $type->new($args);
-}
-
-sub locate {
-    my $self = shift;
-    my $name = shift;
-    my $path = $self->{ template_path };
-#    local $Template::Utils::DEBUG = 1;
-
-    # TODO: if no path is defined then we could try the name by itself.
-    # This would make $t->template('/foo/bar') and $t->template('./foo/bar')
-    # both work without having to define a default template path
-    
-    if ($path && @$path) {
-        return UTILS->find_file($name, $path);
-    }
-    else {
-        return -f $name ? $name : undef;
-    }
-}
-
-# fetch
-#   * perform any name mapping
-#     - obj, ref, array, etc
-#   * look for prefix type?
-#   * look in cache
-#   * search path
-#   * get config   
-#   * instantiate
-#   * save in cache  
-
-1;
-
-__END__
-
-=pod
-
-# TODO / ISSUES
-
-In the templates path we need to be able to differentiate between 
-configuration items destined for the provider and those for the templates.
-
-     path => [ 
-        # template config params
-        { path => '/here', type => 'TT3', ignore => '<# #>' }
-        # providers config params
-        { type => 'dbi', database => 'mysite', table => 'templates' }
-     ] 
-
-I think we probably need to enforce a 'template' prefix on those 
-params destined for the template.
-
-    { path => '/here', template_type => 'TT3', template_ignore => '<# #>' }
-
-or put them in a 'template' item, like this:
-
-    { path => '/here', template => { type => 'TT3', ignore => '<# #>' } }
-
-Or we invert the problem and put the provider parameters in a particular
-place:
-
-    { path => '/here', type => 'TT3', ignore => '<# #>', provider => { ... } }
-
-Different ways of specifying the provider.
-
-    provider => 'file'
-    provider => { type => 'file', path => '/here', option1 => 'blah', etc }
-    provider_type => 'file'
-    
-Or we put both in:
-
-    Template->new({
+    my $templates = Template::TT3::Templates->new(
         template_path => [
-            '/here' => {
-                template => { type => 'TT3', ignore => '[# #]' },
-                provider => { type => 'file', ignore => '.svn' },
-                cache    => 1,
-                store    => 1,
-            },
-            '/there' => {
-                template => { type => 'TT2', PRE_CHOMP => 1, POST_CHOMP => 1 },
-                provider => { type => 'file', ignore => '.CVS' },
-                cache    => 1,
-                store    => 0,
-            },
+            '/path/to/my/templates',
+            '/path/to/your/templates',
         ],
-    });
+    );
 
-Yes, I think that's the cleanest solution.  In most cases the provider will not
-be required.  'file' will be the default and other schemes like 'http' can be 
-auto-detected.
+The C<template_path> option can also be specified using the shorter alias 
+C<path>.
 
-    template_path => [ '/path/to/blah' ]         # file: is implicit
-    template_path => [ 'file:/path/to/blah' ]    # file: is explicit
-    template_path => [ 'http://templates.mydomain.com/public/templates' ]
-    template_path => [ 'dbi:mysql:mysite' => { table => 'templates', key => 'path' } ]
-    template_path => [ 'dbi:mysql:mysite?table=templates;key=path' ]    # er... not sure
+=head2 dialect
 
-However, it does mean that some of the simple cases get less simple:
+This can be used to define the default dialect for templates. The default
+dialect is C<TT3> if not otherwise specified. You can set it to any module or
+short name that is recognised by the L<Template::TT3::Dialects> factory
+module.  For example, if you want to use the L<TT2|Template::TT3::Dialect::TT2>
+dialect you would write:
 
-    template_path => [
-       '/here'  => { type => 'TT2' },
-       '/there' => { type => 'TT3', ignore => '<# #>' },
+    my $templates = Template::TT3::Templates->new(
+        dialect => 'TT2',
+    );
+
+Note that this only specifies the I<default> dialect.  This may be over-ridden
+by a different C<dialect> setting in the L<template_path>
+
+    my $templates = Template::TT3::Templates->new(
+        dialect       => 'TT2',
+        template_path => [
+            { path    => '/path/to/my/templates' },     # uses TT2 dialect
+            { path    => '/path/to/your/templates',     # uses TT3 dialect
+              dialect => 'TT3' 
+            }
+        ],
+    );
+
+=head2 cache
+
+This can be used to provide an object suitable for caching compiled templates.
+The default caching module is L<Template::TT3::Cache> but you can substitute
+any L<Cache::Cache> module to work in its place.
+
+=head2 store
+
+This can be used to provide an object suitable for storing compiled templates
+to disk or some other secondary storage medium.  The default store module is
+L<Template::TT3::Store> but you can substitute any L<Cache::Cache> module to 
+work in its place.
+
+NOTE: The store isn't working as we don't yet have a view to generate Perl
+code from compiled templates.  This needs some work.
+
+=head2 dynamic_path
+
+The C<Template::TT3::Templates> module performs some additional internal
+caching to quickly map template paths to cached templates without going
+through the rigamarole of check each location every time.  However, if your
+C<template_path> can change from one request to the next then there is no
+guarantee that the C<hello.tt3> template we fetched last time you asked for 
+it is going to be the same C<hello.tt3> template that you get this time.
+
+The C<dynamic_path> option can be set to any true value to indicate that the
+L<template_path> can change at any time. This will bypass the fast path lookup
+and ensure that the L<template_path> providers are queried each time.
+
+=head2 path_expires
+
+This option is used in conjunction with the lookup path cache described above
+in L<dynamic_path>. Even with a static L<template_path> there is still the
+possibility that the templates on disk can change. We want to avoid doing the
+full filesystem check for every request so we cache template paths for a short
+while (typically a few seconds) before checking again.  The C<path_expires>
+option can be set to indicate how much time should elapse (in seconds) before
+a full filesystem check is performed.
+
+If your templates never change or change infrequently then you can set this
+to an arbitrarily large number (e.g. 3600 to check one every hour).  If you're 
+a developer using a persistent template processing environment (e.g. a mod_perl 
+handler) and you're changing your templates often then you should set this to 
+a small number (e.g. 1 second) so that you can reload your browser and see any 
+changes straight away.
+
+=head2 template_providers
+
+In the usual case the L<template_path> is used internally to generate a list
+of provider object responsible for locating and loading templates.  The 
+C<template_providers> option can be specified to override this.  This is an
+advanced option and you are expected to know what you are doing if you use 
+it.
+
+=head1 METHODS
+
+This module implements the following methods in addition to those inherited
+from the L<Template::TT3::Base> and L<Badger::Base> base classes. 
+
+=head2 template($type, $name)
+
+This method locates loads and returns a template object.
+
+If the first argument is a reference of any kind then the method delegates
+to the L<template_ref()> method.
+
+    $templates->template($ref);         # calling this...
+    $templates->template_ref($ref);     # ...ends up calling this
+
+If a single non-reference argument is specified then the method delegates
+to the L<template_name()> method.
+
+    $templates->template('foo');        # calling this...
+    $templates->template_name('foo');   # ...ends up calling this
+
+If more than one argument is specified then the method delegates to the
+L<template_type()> method.
+
+    $templates->template(               # calling this...
+        text => 'Hello [% name %]' 
+    );
+    $templates->template_type(          # ...end up calling this
+        text => 'Hello [% name %]'
+    )
+
+All arguments passed to the C<template()> method are forwarded to the 
+appropriate delegate method.  The C<template()> method returns whatever
+value its delegate method returns.
+
+If the template cannot be found then the method returns C<undef>. A message
+indicating why it declined can be retrieved via the
+L<reason()|Badger::Base/reason()> method (inherited from L<Badger::Base>).
+
+    my $template = $templates->fetch('missing.tt3')
+        || die $templates->reason;          # Template not found: missing.tt3
+
+All errors are thrown as exceptions.  For example, if the module find a file
+but cannot open it, or if a template is found but it contains a syntax error,
+then an exception will be raised.
+
+Failing to find a template that was requested is I<not> considered to be an
+error condition. Rather, it is part and parcel of correct operation for the
+module. You ask if a template is available and the module replies "Yes, here
+it is" (a template object is returned) or "No, it isn't" (C<undef> is returned).
+
+=head2 template_ref($ref, $params)
+
+This method returns a template object for the reference passed as the first
+argument, C<$ref>.  It can be any of the following types:
+
+=head3 Template::TT3::Template
+
+If the item is already a reference to a L<Template::TT3::Template> object
+(or subclass) then it is returned without further ado.
+
+=head3 SCALAR
+
+A template can be specified by reference to a scalar variable containing
+the template text.  This is delegated to the L<template_text()> method.
+
+=head2 ARRAY
+
+A template can be specified by reference to an array containing further
+arguments that specify the type and/or name of a template.
+
+    $templates->template_ref([ file => 'example.tt3' ]);
+    $templates->template_ref([ text => 'Hello [% name %]' ]);
+
+In this case the method delegates back to the L<template()> method, expanding
+the contents of the array onto the start of the parameter list.
+
+=head2 HASH
+
+A template can be specified by reference to a hash array.  If this contains
+exactly one key/value pair then it is treated as a template type and 
+identifier (e.g. file name, template text, etc).
+
+    $templates->template_ref({ file => 'example.tt3' });
+    $templates->template_ref({ text => 'Hello [% name %]' });
+
+In this case the method delegates back to the L<template()> method, adding
+the type (key) and identifier (value) to the start of the parameter list.
+
+If the hash array contains more than one key/value pair then it is treated
+as a complete parameter specification for a template and is forwarded to 
+the L<lookup()> method.
+
+=head2 CODE
+
+A template can be specified by reference to a subroutine that generates
+the template output.  This is delegated to the L<template_code()> method.
+
+=head2 GLOB
+
+A template can be specified by reference to a Perl GLOB (e.g. C<\*STDIN>,
+C<\*DATA>) from which the template source can be read. This is delegated to 
+the L<template_glob()> method.
+
+=head2 IO::Handle
+
+A template can be specified by reference to an L<IO::Handle> object (or
+subclass) defining a file handle from which the template source can be read. 
+This is delegated to the L<template_handle()> method.
+
+=head2 template_code($code, $params)
+
+This method prepares a template object from a code reference which implements
+the output generating logic for a template.
+
+    my $code = sub {
+        my $context = shift;
+        return "Hello " . $context->var('name')->value;
     }
+    
+    my $template = $templates->template_code($code);
+    
+    print $template->fill( name => 'World' );       # Hello World
 
-    template_path => [
-       '/here'  => { template_type => 'TT2' },
-       '/there' => { template => { type => 'TT3', ignore => '<# #>' } },
-    }
+=head2 template_glob($glob, $params)
+
+This method prepares a template object from a Perl GLOB reference (e.g.
+C<\*STDIN>, C<\*DATA>) from which the template source can be read.
+
+    my $template = $templates->template_glob(\*DATA);
+    
+    print $template->fill( name => 'World' );       # Hello World
+    
+    __DATA__
+    Hello [% name %]
+
+=head2 template_handle($fh, $params)
+
+This method prepares a template object from an I<IO::Handle> object (or
+subclass) from which the template source can be read.
+
+    use Badger::Filesystem 'File';
+    
+    my $filehandle = File('hello.tt3')->open;
+    my $template   = $templates->template_handle($filehandle);
+    
+    print $template->fill( name => 'World' );       # Hello World
+
+=head2 template_text($text, $params)
+
+This method prepares a template object from a text string or reference to a 
+text string.
+
+    my $source   = 'Hello [% name %]';
+    my $template = $templates->template_text($source);   # either
+    my $template = $templates->template_text(\$source);  # or
+    
+    print $template->fill( name => 'World' );       # Hello World
+
+=head2 template_name($name, $params)
+
+This method prepares a template object from the name passed as an argument.
+It looks through all locations in the L<template_path> until it finds a 
+template matching the C<$name> specified.  It returns a template object or
+C<undef> if the template cannot be found.
+
+    my $template = $templates->template_name('hello.tt3')
+        || die $templates->reason;      # e.g. Template not found: hello.tt3
+    
+    print $template->fill( name => 'World' );       # Hello World
+
+=head2 template_type($type, $name, $params)
+
+This method prepares a template object using the C<$type> and C<$name> 
+passed as arguments.  If C<$type> is C<text>, C<code>, C<glob>, C<handle>
+or C<fh> (an alias for C<handle>) then it delegates to L<template_text()>,
+L<template_code()>, L<template_glob()> or L<template_handle()>, respectively.
+
+    $template = $templates->template_type( text   => 'Hello [% name %]' );
+    $template = $templates->template_type( code   => sub { ... } );
+    $template = $templates->template_type( glob   => \*STDIN );
+    $template = $templates->template_type( handle => $fh );
+    $template = $templates->template_type( fh     => $fh );
+
+Otherwise it queries each of the providers for the L<template_path> that
+correspond to the specified C<$type>. In the usual case the type will be
+C<file> and all filesystem-based providers will respond.
+
+    my $template = $templates->template_type( file => 'hello.tt3' )
+        || die $templates->reason;      # e.g. Template not found: hello.tt3
+    
+    print $template->fill( name => 'World' );       # Hello World
+
+=head1 INTERNAL METHODS
+
+=head2 init($config)
+
+Initialisation method. In turn this calls L<init_path()> and
+L<init_providers()>.
+
+=head2 init_path($config)
+
+Initialisation method used to prepare the L<template_path>.
+
+=head2 init_providers($config)
+
+Initialisation method used to create a template provider for each location
+in the L<template_path>.  Template providers are implemented as subclasses
+of L<Template::TT3::Provider>.  In the usual case these will be 
+L<Template::TT3::Provider::File> objects for fetching templates from the 
+file system.
+
+Provider objects are loaded and instantiated by the
+L<Template::TT3::Providers> factory module.
+
+=head2 lookup($params)
+
+This method is used internally by the L<template()> method and friends.
+It accepts a list or reference to a hash array of named parameters that
+define initialisation parameters for a template.  If an C<id> parameter
+is specified then the method will call L<cache_fetch()> to see if a 
+cached version of the compiled template is available.  Otherwise it will
+call the L<prepare()> method to prepare it.
+
+=head2 locate($params)
+
+This method is used internally by the L<template_type()> method.  It 
+queries the provider for each location in the L<template_path> to see if
+it can provide the requested template.  If the C<type> parameter is 
+defined then it will only queries those providers corresponding to that 
+type.
+
+=head2 cache_fetch($id)
+
+This method checks to see if a cached version of a template is available.
+The cache is implemented using a L<Template::TT3::Cache> object.  The 
+L<Template::TT3::Store> module may also be used to provide persistent 
+secondary storage for compiled templates.  However this is not operational
+at the time of writing because we don't yet have the appropriate view to
+convert compiled templates to Perl code.
+
+The method returns a template object from the cache or C<undef> if none is
+available.
+
+=head2 cache_store($id,$template)
+
+This method is used to store a compiled template in the in-memory cache and/or
+secondary store.
+
+=head2 prepare($params)
+
+This method is used to prepare a new template object from a set of
+configuration parameters.
+
+=head2 prepared($params, $template)
+
+This method is called after a new template object is prepared by the 
+L<prepare()> method.  It takes care of updating the cache (via a call
+to L<cache_store()>) and updating the internal path lookup table for 
+optimising subsequent requests for the same template.
+
+=head2 text_id($text)
+
+This method creates a unique (for practical purposes) identifier from a 
+text string.  It is comprised of the C<text:> prefix followed by an MD5 hash
+of the text. 
+
+=head2 code_id($code)
+
+This method creates a unique (for practical purposes) identifier from a code
+references. It is comprised of the C<code:> prefix
+followed by the memory address of the code reference.
+
+=head2 not_found($type, $name)
+
+This method is used to report templates that cannot be found.  It creates a 
+decline message and returns C<undef>.  The message can be retrieved via a 
+call to the L<reason()|Badger::Base/reason()> method inherited from 
+L<Badger::Base>.
+
+    my $template = $templates->template('missing.tt3')
+        || die $templates->reason;
+
+=head2 default_path()
+
+This method constructs a default L<template_path> for those times when
+is hasn't been explicitly defined.  The default path contains a single 
+L<Template::TT3::Provider::Cwd> provider object which serves templates from
+the current working directory of the filesystem.
+
+=head2 destroy_providers()
+
+This method is used to explicitly cleanup the providers it is using at 
+garbage collection time.
+
+=head2 destroy()
+
+This method is used to explicitly cleanup the object at garbage collection
+time.
+
+=head1 PACKAGE VARIABLES
+
+This module defines the following package variables.
+
+=head2 $TYPES
+
+This is a lookup table mapping C<text>, C<code>, C<glob>, C<handle> and
+C<fh> (an alias for C<handle>) to the L<template_text()>, L<template_code()>,
+L<template_glob()> and L<template_handle()> methods respectively. 
+
+=head1 AUTHOR
+
+Andy Wardley  L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO.
+
+This module inherits methods from the L<Template::TT3::Base> and
+L<Badger::Base> base classes.
+
+It uses the L<Template::TT3::Providers> module to create template 
+provider objects.
+
+Templates are returned as L<Template::TT3::Template> objects.
+
+=cut
 
 # Local Variables:
 # mode: perl
@@ -847,22 +1092,3 @@ However, it does mean that some of the simple cases get less simple:
 # End:
 #
 # vim: expandtab shiftwidth=4:
-
-
-#========================================================================
-# Template::Templates
-#
-# DESCRIPTION
-#   Templates manager responsible for fetching, loading, caching and 
-#   storing templates.
-# 
-# AUTHOR
-#   Andy Wardley <abw@wardley.org>
-#
-# TODO
-#   * look at a better way of integrating the module factory behaviour
-#     of Template::Types without having to define it as a separate 
-#     module.
-#========================================================================
-
-

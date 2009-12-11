@@ -43,7 +43,14 @@ sub config {
 #-----------------------------------------------------------------------
 
 sub process {
-    shift->todo;
+    my $self     = shift;
+    my $template = $self->template(shift);
+    my $data     = @_ ? (ref $_[0] eq HASH ? shift : params(@_)) : { };
+
+    return $self->hub->output(
+        $template->fill($data),
+        @_
+    );
 }
 
 

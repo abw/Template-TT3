@@ -24,12 +24,13 @@ use Template::TT3::Class
         TEMPLATE_MODULE   => 'Template::TT3::Template',
         TEMPLATES_MODULE  => 'Template::TT3::Templates',
         VIEWS_MODULE      => 'Template::TT3::Views',
+        IO_HANDLE         => 'IO::Handle',
     },
     exports => {
         any  => 'HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
                  DIALECT_MODULE SCANNER_MODULE DIALECT_CLASS
                  TAG_MODULE TAGSET_MODULE ENGINES_MODULE VIEWS_MODULE 
-                 ELEMENT_MODULE',
+                 ELEMENT_MODULE IO_HANDLE',
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE

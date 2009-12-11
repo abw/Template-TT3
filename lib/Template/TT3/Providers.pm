@@ -10,6 +10,8 @@ use Template::TT3::Factory::Class
 
 1;
 
+__END__
+
 =head1 NAME
 
 Template::TT3::Providers - factory module for loading template providers
@@ -63,10 +65,6 @@ location.
     my $provider = $providers->provider('default');     # same thing
 
 =head1 METHODS
-
-This module implements the following methods in addition to those inherited
-from the L<Template::TT3::Base>, L<Badger::Factory> and L<Badger::Base> base
-classes. 
 
 This module inherits all methods from the L<Template::TT3::Factory>,
 L<Template::TT3::Base>, L<Badger::Factory> and L<Badger::Base> base classes.

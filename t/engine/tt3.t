@@ -13,7 +13,6 @@
 #
 #========================================================================
 
-use lib '/home/abw/projects/badger/lib';
 use Badger 
     lib        => '../../lib',
     Filesystem => 'Bin';

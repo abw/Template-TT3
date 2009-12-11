@@ -22,7 +22,7 @@ use Badger
 use Template::TT3::Test 
     args  => \@ARGV,
     debug => 'Template::TT3::Templates',
-    tests => 23;
+    tests => 25;
 
 use Template::TT3::Templates;
 use constant TEMPLATES => 'Template::TT3::Templates';
@@ -108,6 +108,14 @@ chomp $output;
 is( $output, 'Hello Weasel!', $output );
 
 
+
+#-----------------------------------------------------------------------
+# missing templates
+#-----------------------------------------------------------------------
+
+$template = $templates->template('missing.tt3');
+ok( ! $template, 'no template called missing.tt3' );
+is( $templates->reason, 'Template not found: missing.tt3', 'not found message' );
 
 __DATA__
 Good-day [% name %]

@@ -18,7 +18,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template3',
     args  => \@ARGV,
-    tests => 5;
+    tests => 6;
 
 use Template3;
 
@@ -58,8 +58,19 @@ is( $fill, 'Hello Badger!', 'filled template file via class method');
 
 
 #-----------------------------------------------------------------------
-# input string
+# process() with different input types
 #-----------------------------------------------------------------------
 
-#my $input = 'Diver [% dir %]';
-#print "OUT: ", Template3->process(\$input, { dir => 'Down' });
+my $input = 'Van [% dir %]';
+test_process_input(\$input, { dir => 'Halen' }, 'Van Halen');
+
+sub test_process_input {
+    my ($input, $vars, $expect, $message) = @_;
+    is( 
+        Template3->process($input, $vars),
+        $expect,
+        $message || $expect
+    );
+}
+
+# there are more process() tests in t/engine/template3.t

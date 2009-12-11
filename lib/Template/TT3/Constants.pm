@@ -31,7 +31,7 @@ use Badger::Class
         
         FROM_TEXT           => 'template text',
         FROM_CODE           => 'template code',
-        FROM_FH             => 'template read from filehandle',
+        FROM_HANDLE         => 'template read from file handle',
         
         TEXT_SCHEME         => 'text',
         FILE_SCHEME         => 'file',
@@ -45,7 +45,7 @@ use Badger::Class
             chomp       => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                             CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
             cache       => 'CACHE_ALL CACHE_NONE',
-            from        => 'FROM_TEXT FROM_CODE FROM_FH',
+            from        => 'FROM_TEXT FROM_CODE FROM_HANDLE',
             scheme      => 'TEXT_SCHEME FILE_SCHEME CODE_SCHEME NAME_SCHEME COLON',
             whitespace  => 'NO_WHITESPACE SKIP_WHITESPACE',
             precedence  => 'ARG_PRECEDENCE CMD_PRECEDENCE CMD_ELEMENT',

@@ -101,7 +101,7 @@ sub input_glob {
 }
 
 
-sub input_fh {
+sub input_handle {
     my $self = shift->prototype;
     my $fh   = shift;
     my $text = join(BLANK, $fh->getlines);

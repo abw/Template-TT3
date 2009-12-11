@@ -10,6 +10,7 @@ use Template::TT3::Class
     filesystem  => 'File',
     accessors   => 'file uri name id',
     config      => 'templates dialect id uri source',
+    modules     => 'IO_HANDLE',
     constants   => 'GLOB :from',
     constant    => {
         # TODO: rework all this to use Template::TT3::Modules
@@ -44,10 +45,19 @@ sub init {
     # to "lowest": file, text, code, block
     
     if ($file = $config->{ file }) {
-        if (ref $file eq GLOB) {            # TODO: I/O handles
-            local $/ = undef;
-            $self->{ text }   = <$file>;
-            $self->{ name } ||= FROM_FH;
+        # There's some duplication here with what's going on in the various
+        # template fetching methods of Template::TT3::Templates.  But I think
+        # it's probably a good thing for templates to be reasonably self-
+        # sufficient so that a programmer can just create a template object
+        # that loads itself from text, file or filehandle without requiring
+        # all the template providing machinery of T::TT3::Templates.
+        if (ref $file eq GLOB) {
+            $self->{ text }   = $self->hub->input_glob($file);
+            $self->{ name } ||= FROM_HANDLE;
+        }
+        elsif (ref $file eq IO_HANDLE) {
+            $self->{ text }   = $self->hub->input_handle($file);
+            $self->{ name } ||= FROM_HANDLE;
         }
         else {
             $self->{ file }   = File($file)->must_exist;
