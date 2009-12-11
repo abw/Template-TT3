@@ -6,7 +6,7 @@ use Template::TT3::Class
     base        => 'Template::TT3::Base',
     import      => 'class',
     utils       => 'textlike md5_hex is_object refaddr params self_params',
-    constants   => ':types :from :scheme :lookup DELIMITER BLANK',
+    constants   => ':types :from :scheme :lookup_slots DELIMITER BLANK',
     modules     => 'TEMPLATE_MODULE IO_HANDLE',
     hub_methods => 'dialects dialect filesystem',
     mutators    => 'cache store',
@@ -372,15 +372,15 @@ sub template_type {
             unless $lookup = $self->{ lookup }->{ $uri };
     
         # delete and ignore lookup entry if it's gone stale
-        if (time > $lookup->[LOOKUP_EXPIRES]) {
+        if (time > $lookup->[EXPIRES]) {
             $self->debug("$uri lookup data has expired\n") if DEBUG;
-            $self->debug("expired at $lookup->[LOOKUP_EXPIRES], time is now ", time);
+            $self->debug("expired at $lookup->[EXPIRES], time is now ", time);
             delete $self->{ lookup }->{ $uri };
             last ID_LOOKUP;                                 # STALE PATH
         }
             
         # if the lookup failed then it'll fail again so we can bail early
-        unless ($id = $lookup->[LOOKUP_ID]) {
+        unless ($id = $lookup->[ID]) {
             $self->debug("$uri was previously not found\n") if DEBUG;
             return $self->not_found($type, $name, $params); # NOT FOUND 
         }

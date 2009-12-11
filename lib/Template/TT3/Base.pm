@@ -1,8 +1,8 @@
 package Template::TT3::Base;
 
-use Badger::Debug ':debug :dump';
+use Badger::Debug 
+    ':debug :dump';
 
-use Badger::Utils;
 use Template::TT3::Class
     version   => 0.01,
     debug     => 0,
@@ -21,13 +21,6 @@ use Template::TT3::Class
     };
 
 
-sub hub {
-    my $self = shift;
-
-    return $self->{ hub } 
-        ||= return $self->error_msg( no_hub => ref $self || $self );
-}
-
 
 sub init_hub {
     my ($self, $config) = @_;
@@ -41,6 +34,14 @@ sub init_hub {
         || class( $self->HUB_MODULE )->load->name;
         
     return $self;
+}
+
+
+sub hub {
+    my $self = shift;
+
+    return $self->{ hub } 
+        ||= return $self->error_msg( no_hub => ref $self || $self );
 }
 
 
@@ -157,5 +158,152 @@ sub _exception {
 }
 
 
-
 1;
+
+__END__
+
+=head1 NAME
+
+Template::TT3::Base - base class for other TT modules
+
+=head1 SYNOPSIS
+
+    package Template::TT3::ExampleModule;
+    
+    use Template::TT3::Class
+        version => 3.00,
+        base    => 'Template::TT3::Base';
+
+=head1 DESCRIPTION
+
+This module implements a common base class for all other TT3 modules.  It is
+itself a subclass of L<Badger::Base> which provides the bulk of the 
+functionality.  C<Template::TT3::Base> adds a number of methods that are 
+specific to the Template Toolkit.
+
+=head1 METHODS
+
+This module implements the following methods in addition to those inherited
+from the L<Badger::Base> base class module.  Most, if not all of these 
+methods are intended for internal use within subclass modules.
+
+=head2 init_hub($config)
+
+A custom initialisation object method which looks for a
+L<hub|Template::TT3::Hub> reference in the C<$config> configuration parameters
+and stores it in the C<$self> object. If a hub is not defined as a
+configuration parameter then it automatically loads L<Template::TT3::Hub>
+and uses its prototype (singleton) object.
+
+=head2 hub()
+
+An accessor method which returns the current hub reference (a
+L<Template::TT3::Hub> object). It throws an error if no hub is available.
+See L<init_hub()>.
+
+=head2 self()
+
+A trivial method that simply returns the C<$self> object reference.  This is
+typically used by L<Template::TT3::Element> objects as a no-op shortcut.
+
+=head2 raise_error($type,$params)
+
+Used to raise exceptions of a particular type.  The C<$type> is forwarded
+to L<Template::TT3::Exception> to locate the appropriate exception module.
+
+=head2 token_error($type,$token,$message)
+
+Used to raise exceptions of a particular type from the perspective of a 
+particular token element.  This is typically used to report syntax errors,
+undefined data errors, missing resource errors, and any other kind of error
+that relates to a particular source code fragment.
+
+NOTE: This and the other related methods listed below should probably be moved into
+the L<Template::TT3::Element> base class.
+
+=head2 token_error_msg($token, $format, @args)
+
+This method is a wrapper around L<token_error()> use that uses the
+L<message()|Badger::Base/message()> method inherited from L<Badger::Base>
+to present the error using a pre-defined (in C<$MESSAGES>) message format.
+
+=head2 syntax_error($token, $message)
+
+A wrapper around L<token_error()> use to raise syntax errors.
+
+=head2 syntax_error_msg($token, $message)
+
+A wrapper around L<token_error_msg()> use to raise syntax errors.
+
+=head2 undef_error($token, $message)
+
+A wrapper around L<token_error()> use to raise errors relating to undefined
+data values.
+
+=head2 undef_error_msg($token, $format, @args)
+
+A wrapper around L<token_error_msg()> use to raise undefined data errors.
+
+=head2 resource_error($token, $message)
+
+A wrapper around L<token_error()> use to raise errors relating to missing
+or invalid resources (templates, files, plugins, etc).
+
+=head2 resource_error_msg($token, $format, @args)
+
+A wrapper around L<token_error_msg()> use to raise resource errors.
+
+=head2 debug_callers()
+
+This is a temporary method used for debugging.  It prints a trace
+showing the current call stack.
+
+=head2 dump_data_depth($data, $depth)
+
+This is a temporary method used for debugging.  It is a wrapper around the
+L<dump_data()|Badger::Debug/dump_data()> method which is mixed in from 
+L<Badger::Debug>.  The C<$depth> argument can be set to limit to depth to
+which the data dumper will traverse.  
+
+TODO: This method should probably be moved into L<Badger::Debug>.
+
+=head1 INTERNAL METHODS
+
+The following methods are defined for internal use.
+
+=head2 _exceptions()
+
+This method loads the L<Template::TT3::Exceptions> module and returns its
+class name.
+
+=head2 _exception()
+
+This method instantiates an exception object using the L<Template::TT3::Exceptions> 
+factory module loaded via the L<_exceptions()> method.
+
+=head1 AUTHOR
+
+Andy Wardley  L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO.
+
+This module inherits methods from the L<Badger::Base> base classes.
+It also mixes in the methods exported from the L<Badger::Debug> module's
+L<:debug|Badger::Debug/:debug> and L<:dump|Badger::Debug/:dump> tag sets.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

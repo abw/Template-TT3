@@ -83,8 +83,8 @@ sub parse_infix {
 
 sub else_block {
     return @_ == 1
-        ? $_[SELF]->[ELSE]
-        : $_[SELF]->[ELSE] = $_[1];
+        ? $_[SELF]->[BRANCH]
+        : $_[SELF]->[BRANCH] = $_[1];
 }        
 
 
@@ -137,15 +137,15 @@ sub text {
 
 
 sub else_values {
-    return $_[SELF]->[ELSE]
-         ? $_[SELF]->[ELSE]->values($_[CONTEXT])
+    return $_[SELF]->[BRANCH]
+         ? $_[SELF]->[BRANCH]->values($_[CONTEXT])
          : ()
 }
 
 
 sub else_text {
-    return $_[SELF]->[ELSE]
-         ? $_[SELF]->[ELSE]->text($_[CONTEXT])
+    return $_[SELF]->[BRANCH]
+         ? $_[SELF]->[BRANCH]->text($_[CONTEXT])
          : ()
 }
 

@@ -535,7 +535,7 @@ specify the operators to be created.
 
 Each operator starts with a short identified (e.g. C<inc>). This is CamelCased
 (e.g. to C<Inc>) and appended to the base class name to give a new package
-name (e.g. C<Template::TT3::Element::Number::Inc). Any subsequent
+name (e.g. C<Template::TT3::Element::Number::Inc>). Any subsequent
 non-reference arguments provide the names of operator base classes for the new
 operator. These are CamelCased and appended to the
 C<Template::TT3::Element::Operator> base class package (e.g. C<prefix> is

@@ -116,109 +116,6 @@ sub constructors {
 }
 
 
-
-#-----------------------------------------------------------------------
-# old stuff
-#-----------------------------------------------------------------------
-
-
-
-
-
-
-# TODO: rename these get() set() and use()
-sub OLD_value {
-    my ($self, $name, $element) = @_;
-    my $var = $self->{ vars }->{ $name };
-
-    # TODO: check for undef/missing values
-    return ($var && $var->value)
-        || $self->{ data }->{ $name };
-}
-
-
-
-sub OLD_var {
-    my ($self, $name) = @_;
-
-    $self->debug("var($name)") if DEBUG;
-    
-    return  $self->{ vars }->{ $name } 
-#        ||= $self->use_var( $name => $self->{ data }->{ $name } );
-        ||= $self->get_var( $name );
-}
-
-sub OLD_get_var {
-    my ($self, $name) = @_;
-
-    if (exists $self->{ data }->{ $name }) {
-        $self->use_var( $name => $self->{ data }->{ $name } );
-    }
-    elsif ($self->{ auto }) {
-        $self->use_var( $name => $self->{ auto }->($self, $name) );
-    }
-    else {
-        # TODO: make this call undef_var() in case we want to re-define it
-        $self->use_var( $name => undef );
-    }
-}
-        
-    
-sub OLD_set_var {
-    my ($self, $name, $value) = @_;
-
-    $self->debug("var($name)") if DEBUG;
-    
-    # TODO: we currently don't update the target data, just the local
-    # variable wrapper stored in $self->{ vars }
-    return $self->{ vars }->{ $name } 
-         = $self->use_var( $name => $value );
-
-}
-
-sub OLD_set_vars {
-    my ($self, $params) = self_params(@_);
-    my $vars = $self->{ vars };
-    
-    while (my ($name, $value) = each %$params) {
-        $vars->{ $name } = $self->use_var( $name => $value );
-    }
-}
-
-
-
-sub OLD_reset {
-    my $self = shift;
-    delete $self->{ vars };
-}
-
-
-sub OLD_with {
-    my ($self, $params) = self_params(@_);
-    my $data  = $self->{ data };
-    my $class = ref $self || $self;
-    bless {
-        %$self,
-        data   => { %$data, %$params },
-        vars   => { },
-        parent => $self,
-    }, $class;
-}
-
-
-sub OLD_just {
-    my ($self, $params) = self_params(@_);
-    my $data  = $self->{ data };
-    my $class = ref $self || $self;
-    bless {
-        %$self,
-        data   => $params,
-        vars   => { },
-        parent => $self,
-    }, $class;
-}
-
-
 # tmp hack to try out automatically resolved data
 
 sub auto {
@@ -234,6 +131,15 @@ sub auto {
 
 Template::TT3::Variables - factory for template variable objects
 
+=head1 NOTE
+
+The functionality for this module has been (mostly) moved into 
+L<Template::TT3::Context>.  Once the final few bits have been merged
+this module will be deprecated.
+
+I<OR> this will become the variable managing base class for 
+L<Template::TT3::Context>.  I haven't quite decided yet.
+
 =head1 DESCRIPTION
 
 The C<Template::TT3::Variables> module defines a factory for creating 
@@ -248,38 +154,7 @@ For example, the following template fragment:
 
 Can be implemented in Perl like so:
 
-    $root->dot('user')->dot('name')->dot('length')->get;
+    $vars->dot('user')->dot('name')->dot('length')->get;
 
-Here C<$root> is a C<Template::TT3::Varaib
+Here C<$root> is a C<Template::TT3::Variables> object.
 
-    my $vars = Template::TT3::Variables->new;
-    my $root = $vars->var( 
-        '' => {
-            user => {
-                name => 'Ford Prefect',
-            }
-        }
-    );
-
-
-Here C<$root>
-
-Rather surprisingly, this gives slightly better performance than the current
-TT2 implementation for accessing variables, despite the fact that there's
-rather a lot of wrapping and delegating going on.
-
-One obvious benefit of this approach is that it makes it easier to create a
-literal Perl translation of template code. This is important when compiling
-templates to Perl code.
-
-Another benefit
-
-=head1 METHODS
-
-=head2 new()
-
-Constructor method used to create a new C<Template::TT3::Variables> object.
-
-=head2 var($name, $value)
-
-This method is used to create a new variable object.  

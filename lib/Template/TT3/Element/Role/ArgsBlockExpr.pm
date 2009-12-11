@@ -4,7 +4,7 @@ use Template::TT3::Class
     version   => 2.718,
     debug     => 0,
     mixins    => 'parse_expr',
-    constants => ':elements :precedence';
+    constants => ':elements';
 
 
 sub parse_expr {

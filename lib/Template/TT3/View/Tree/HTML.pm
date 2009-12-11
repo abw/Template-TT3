@@ -200,8 +200,8 @@ sub view_if {
         'if keyword' => $elem,
         $self->branch( Test => $elem->[EXPR]->view($self) ),
         $self->branch( True => $elem->[BLOCK]->view($self) ),
-        $elem->[ELSE]
-            ? $self->branch( Else => $elem->[ELSE]->view($self) )
+        $elem->[BRANCH]
+            ? $self->branch( Else => $elem->[BRANCH]->view($self) )
             : ()
     );
 }
@@ -215,8 +215,8 @@ sub view_for {
             : (),
         $self->branch( List => $elem->[EXPR]->view($self) ),
         $self->branch( Then => $elem->[BLOCK]->view($self) ),
-        $elem->[ELSE]
-            ? $self->branch( Else => $elem->[ELSE]->view($self) )
+        $elem->[BRANCH]
+            ? $self->branch( Else => $elem->[BRANCH]->view($self) )
             : ()
     );
 }

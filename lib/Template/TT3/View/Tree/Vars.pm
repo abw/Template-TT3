@@ -99,7 +99,7 @@ sub can_view {
     my ($self, $name) = @_;
     return sub {
         my ($self, $elem) = @_;
-        for my $e (EXPR, BLOCK, ARGS, ELSE) {
+        for my $e (EXPR, BLOCK, ARGS, BRANCH) {
             $elem->[$e]->view($self) 
                 if $elem->[$e]
                 && is_object(ELEMENT_MODULE, $elem->[$e]);
