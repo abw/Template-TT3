@@ -18,17 +18,24 @@ use Badger
     Filesystem => 'Bin';
 
 use Template::TT3::Test 
-    tests => 5,
+    tests => 8,
     debug => 'Template::TT3::Service Template::TT3::Service::Header',
     args  => \@ARGV;
 
 my $tdir = Bin->dir('templates');
+my $data = {
+    name => 'Badger',
+};
 
 use Template3;
 use Template::TT3::Services;
 use constant SERVICES => 'Template::TT3::Services';
 
 pass( 'Loaded ' . SERVICES );
+
+#-----------------------------------------------------------------------
+# header and footer
+#-----------------------------------------------------------------------
 
 my $tt3 = Template3->new(
     template_path => $tdir,
@@ -38,17 +45,23 @@ my $tt3 = Template3->new(
 );
 ok( $tt3, 'created template engine' );
 
-my $output = $tt3->process('hello.tt3', name => 'Badger');
+my $output = $tt3->process('hello.tt3', $data);
 
-is( $output, "This is the header.\nHello Badger!\n", 'got header + content' );
+is( $output, 
+    "This is the header.\nHello Badger!\n", 
+    'got header + content' 
+);
 
 $output = $tt3->render(
     input  => 'hello.tt3', 
-    data   => { name  => 'Badger' },
+    data   => $data,
     footer => 'footer.tt3'
 );
 
-is( $output, "This is the header.\nHello Badger!\nThis is the footer.\n", 'got header + content + footer' );
+is( $output, 
+    "This is the header.\nHello Badger!\nThis is the footer.\n", 
+    'got header + content + footer' 
+);
 
 $output = $tt3->render(
     input  => 'hello.tt3', 
@@ -63,3 +76,30 @@ is( $output,
 );
 
 
+#-----------------------------------------------------------------------
+# wrapper
+#-----------------------------------------------------------------------
+
+use Badger::Constants 'BLANK';
+
+$tt3 = Template3->new(
+    template_path => $tdir,
+    wrapper       => BLANK,
+);
+
+ok( $tt3, 'created template engine with BLANK wrapper' );
+is( $tt3->process('hello.tt3', name => 'Badger' ), 
+    "Hello Badger!\n", 
+    'no wrapper' 
+);
+
+$output = $tt3->render( 
+    input => 'hello.tt3', 
+    data  => $data,
+    wrapper => 'wrapper.tt3',
+);
+
+is( $output,
+    "[WRAPPER]\nHello Badger!\n[/WRAPPER]\n", 
+    'with wrapper' 
+);

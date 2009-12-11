@@ -14,7 +14,9 @@ sub type_args {
     my $args = @_ == 1
              ? (ref $_[0] eq HASH ? shift : { template => shift })
              : { @_ };
+    
     $args->{ services } = $self;
+    
     return ($type, $args);
 }
     

@@ -81,6 +81,28 @@ attaching to a prototype hub.  I'm concerned that creating a "leaf node"
 template for temporary use in a subroutine might pull the whole framework
 into persistence. 
 
+Template Services
+-----------------
+
+I'm a little wary about merging the higher level concepts of services
+(stuff to do around a template) with the lower level decorating behaviours.
+My first attempt had the low level items named Template::TT3::Decorator::*
+and a Template::TT3::Service::Decorator service loaded the decorators.  But
+that's not generic enough as there are plenty of useful service components
+that we might want to write that, strictly speaking, aren't decorators 
+(although at a pinch we could claim that they decorate the template processing
+service).
+
+On the other hand, I don't want to split them too far as it's important that
+service pipelines and individual components are interchangeable.  Also, I think
+there's a nice PSGI/Plack-like simplicity around the service components as
+they stand.  That's a good thing.
+
+One problem that needs to be resolved is that service components currently 
+hard-code the environment parameter (e.g. Template::TT3::Service::Header 
+always looks for the 'header' environment parameter).  Also, the fact that
+we have a default parameter of 'template' is too decorator-specific.
+
 
 Final Cleanup List
 ------------------
