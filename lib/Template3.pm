@@ -200,28 +200,24 @@ Template3 - Perl interface to the Template Toolkit v3
 =head1 SYNOPSIS
 
     use Template3;
-    
-    # process() is the all-in-one template processing method with all the
-    # bells and whistles.  You can call it as a class method...
+
+    # simple all-in-one method to process a template
     Template3->process($input, $data, $output);
     
-    # ...or as an object method
-    my $tt3 = Template3->new(%options);
-    $tt3->process($input, $data, $output);
-    
-    # fill() is a lower-level method for processing a template and 
-    # returning the generated output
-    print $tt3->fill( 
-        file => 'example.tt3', 
-        data => { name => 'Badger' } 
+    # or for fine control
+    Template3->render(
+        input  => $input,
+        data   => $data,
+        output => $output,
+        # plus any other environment options
     );
     
-    # template() fetches a template for you to process yourself
-    my $template = $tt3->template( 
-        text => 'Hello [% name %]' 
+    # creating a Template3 object
+    my $tt3 = Template3->new(
+        template_path => '/path/to/templates',
+        header        => 'site/header.tt3',
+        footer        => 'site/footer.tt3',
     );
-    
-    print $template->fill( name => 'Badger' );
 
 =head1 PLEASE NOTE
 
@@ -233,9 +229,9 @@ incorrect.
 =head1 INTRODUCTION
 
 The B<Template3> module provides a simple interface to the Template Toolkit
-for Perl programmers. It is implemented as a thin wrapper or I<facade> around
-a L<Template::TT3::Engine> object which is responsible for doing the real work
-of processing templates.  The default engine is L<Template::TT3::Engine::TT3>
+for Perl programmers. It is implemented as a thin wrapper around a
+L<Template::TT3::Engine> object which is responsible for doing the real work
+of processing templates. The default engine is L<Template::TT3::Engine::TT3>
 which implements version 3 of the Template Toolkit language.
 
 The B<Template3> module will eventually replace the current B<Template> module
@@ -251,52 +247,10 @@ lunch), we will be able to drop the '3' and just use the C<Template> module:
 At this point, anyone who is relying on the C<Template> module to work as it
 currently does with TT2 will be sorely disappointed.  TT3 has been completely
 re-designed and re-built from the ground up and nothing is guaranteed to work
-the same (although most things are quite similar).  
+the same (although most things are quite similar).
 
-However, all is not lost.  The L<Template2> module is a drop-in replacement
-for the current TT2 C<Template> module. 
-
-    use Template2;
-    
-    # instantiate a Template2 object (note the extra '2')
-    my $tt2 = Template2->new( INCLUDE_PATH => '/path/to/templates' );
-
-You can also use the C<as> import option to create C<Template> as an alias.
-Then you don't need to change any further C<Template> references in your code.
-
-    use Template2 as => 'Template';
-    
-    # instantiate a Template object (no extra '2')
-    my $tt2 = Template->new( INCLUDE_PATH => '/path/to/templates' );
-
-The L<Template2> module is, like L<Template3>, a thin veneer around an 
-L<engine|Template::TT3::Engine> object.  They differ only in which engine
-they engage: L<Template::TT3::Engine::TT2> or L<Template::TT3::Engine::TT3>,
-respectively.
-
-You will be able to continue using C<Template3> after release.  It will 
-remain as an alias and/or thin wrapper that will always use the TT3 engine.
-In summary, the C<Template> module will default to the latest version of TT
-(TT2, TT3, TT4, etc) while L<Template2>, C<Template3> and so on will always
-relate to a specific versions.  Furthermore, the C<Template> module (as it
-will be known, C<Template3> as it is currently known) provides options that
-allow you to unambiguously specify a particular engine (any engine, in fact).  
-For example, the following incantation will engage the TT2 engine and create
-C<Template> as an alias to it:
-
-    use Template3
-        engine => 'TT2',
-        as     => 'Template';
-
-While we're talking about module names, it should also be pointed out that the
-TT3 implementation is currently located under the C<Template::TT3::*>
-namespace. This is a temporary location to avoid any clashes with existing TT2
-C<Template::*> modules. When TT3 is released, the majority of the modules will
-be moved "up" a namespace to replace and/or augment the current C<Template::*>
-modules. For example, L<Template::TT3::Engine::TT3> will eventually become
-L<Template::Engine::TT3>. Anything specific to a particular engine or template
-dialect will remain in a dedicated sub-namespace, e.g. C<Template::TT2>,
-C<Template::TT3>, etc.
+For further information about backward compatibility with version 2 of the 
+Template Toolkit, please see L<Template::TT3::Manual::Compatibility>.
 
 =head1 DESCRIPTION
 

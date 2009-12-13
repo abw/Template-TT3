@@ -220,7 +220,7 @@ sub scope {
 
 
 sub context {
-    my $self = shift;
+    my $self   = shift;
     my $params = params(@_);
     # TODO: should this get hub context and then clone it?
     return $self->hub->context->child(@_);

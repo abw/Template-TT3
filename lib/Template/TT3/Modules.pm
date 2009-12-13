@@ -19,6 +19,7 @@ use Template::TT3::Class
         HUB_MODULE        => 'Template::TT3::Hub',
         PLUGINS_MODULE    => 'Template::TT3::Plugins',
         PROVIDERS_MODULE  => 'Template::TT3::Providers',
+        SERVICE_MODULE    => 'Template::TT3::Service',
         SCANNER_MODULE    => 'Template::TT3::Scanner',
         STORE_MODULE      => 'Template::TT3::Store',
         TAG_MODULE        => 'Template::TT3::Tag',
@@ -32,7 +33,7 @@ use Template::TT3::Class
         any  => 'CONTEXT_MODULE HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
                  DIALECT_MODULE SCANNER_MODULE DIALECT_CLASS
                  TAG_MODULE TAGSET_MODULE ENGINES_MODULE VIEWS_MODULE 
-                 ELEMENT_MODULE IO_HANDLE',
+                 ELEMENT_MODULE IO_HANDLE SERVICE_MODULE',
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE

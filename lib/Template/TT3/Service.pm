@@ -4,12 +4,15 @@ use Template::TT3::Class
     version     => 2.70,
     debug       => 0,
     base        => 'Template::TT3::Base',
-    config      => 'template services',
-    mutators    => 'template',
+    config      => 'template services name!',
+    mutators    => 'name',
     init_method => 'configure',
     utils       => 'params',
     constant    => {
         SERVE => 'serve',
+    },
+    messages    => {
+        no_source => 'No source pipeline specified to connect %s service to.',
     };
 
 
@@ -18,14 +21,40 @@ sub serve {
 }
 
 
-# TODO: change this to pipeline()
+sub template_name {
+    $_[0]->{ template };
+}
 
-sub service {
-    my ($self, $source) = @_;
-    my $serve = $self->can(SERVE);
+
+sub template {
+    my $self = shift;
+    my $env  = shift || return $self->debug_caller, $self->error_msg( missing => 'environment' );
+    
+    my $template = $env->{ $self->{ name } } 
+                || $self->{ template }
+                || return;
+
+    return $env->{ context }->any_template( $template );
+}
+
+
+sub connect {
+    my $self   = shift;
+    my $source = shift || $self->no_source;
+    my $serve  = $self->can(SERVE);
+
     return sub {
         $serve->($self, params(@_), $source);
     };
+}
+
+
+sub no_source {
+    my $self = shift;
+    # Default behaviour is to raise an error message if no source pipeline
+    # is specified to connect to.  Services that are sources (e.g. T~S~Input)
+    # can re-define this to silently do nothing.
+    return $self->error_msg( no_source => $self->{ name } );
 }
 
 
@@ -37,11 +66,39 @@ __END__
 
 Template::TT3::Service - base class template service module
 
+=head1 SYNOPSIS
+
+    # an example of a service class
+    package Template::TT3::Service::Header;
+    
+    use Template::TT3::Class
+        version => 2.70,
+        debug   => 0,
+        base    => 'Template::TT3::Service',
+        config  => 'name=header';
+    
+    sub serve {
+        my ($self, $env, $pipeline) = @_;
+        
+        # fetch the header template if there is one
+        my $header = $self->template( $env )
+            || return $pipeline->( $env );
+            
+        # process the header and then the rest of the pipeline
+        return $header->fill_in( $env->{ context } )
+             . $pipeline->( $env );
+    }
+    
+    1;
+
 =head1 DESCRIPTION
 
-This module implements a base class for template service modules.
-A service is responsible for modifying the generated output from a 
-template in some way.  For example, adding a header, footer, etc.
+This module implements a base class for template service modules. A service is
+responsible for modifying the generated output from a template in some way.
+For example, adding a header, footer, etc.
+
+You should start by reading the documentation for L<Template::TT3::Services>
+which provides an overview of services and service pipeline.
 
 =head1 CONFIGURATION OPTIONS
 
@@ -49,77 +106,50 @@ The base class service module defines one optional configuration item.
 
 =head2 template
 
-Most services are involved in processing an additional template, e.g. 
+Many services are involved in processing an additional template, e.g. 
 a header, footer, wrapper, etc.  This default option is provided for that
-purpose.
+purpose.  Subclasses may ignore this option if it is of no relevance and/or
+define their own.
 
 =head1 METHODS
 
 This module implements the following methods in addition to those inherited
 from the L<Template::TT3::Base> and L<Badger::Base> base class modules. 
 
-=head2 decorate($env, $source)
+=head2 serve(\%env, $pipeline)
 
 This is a stub method in the base class that should be re-defined by 
 service subclasses.  
 
-=head2 service($source)
+=head2 connect($pipeline)
 
-This method creates a service wrapper subroutine around the service. 
+This method creates a service pipeline subroutine around the service. 
 
-    my $service = $service->service;
+    my $pipeline = $service->connect;
 
-A service subroutine expects two arguments.  The first is a reference to 
-a hash array containing a service environment.  At a minimum this must define
-a C<context> item which references a L<Template::TT3::Context> object.
+See L<Template::TT3::Services> for further details.
 
-    my $env = {
-        context => $context         # Template::TT3::Context object
-    };
+=head2 template_name()
 
-The second item is a reference to another service. We can turn a template into
-a service subroutine by calling its
-L<service()|Template::TT3::Template/service()> method.
+Returns the name of the default template specified via the L<template> option.
 
-    my $source = $template->service;
+=head2 template(\%env)
 
-Now we can run our service service, passing it the environment hash and
-the source service that it should modify.
-
-    my $output = $service->($env, $source);
-
-Individual service services can be chained together into servicing 
-pipelines.
-
-
-
-
-
-=head2 etc...
+Returns a template object for the default template specified via the
+L<template> option.  It is fetched from the L<context|Template::TT3::Context>
+that must be provided in the environment passed to the method.
 
 =head1 INTERNAL METHODS
 
-The following methods are defined for internal use.
+=head2 no_source()
 
-TODO: This documentation is an auto-generated stub.
-
-=head2 internal_method1()
-
-=head2 internal_method2()
-
-=head2 etc...
-
-=head1 PACKAGE VARIABLES
-
-This module defines the following package variables.
-
-TODO: This documentation is an auto-generated stub.
-
-=head2 $VAR1
-
-=head2 $VAR2
-
-=head2 etc...
+This method is called by the L<connect()> method when called without a 
+source C<$pipeline> to connect to.  In most cases this is an indication
+of incorrect usage and the method throws an error accordingly.  However,
+some services (most notably L<Template::TT3::Service::Input>) do not 
+require a source pipeline as they usually sit at the start of a pipeline.
+In this case the module will re-define the C<no_source()> method to silently
+return without complaint.
 
 =head1 AUTHOR
 

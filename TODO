@@ -103,6 +103,13 @@ hard-code the environment parameter (e.g. Template::TT3::Service::Header
 always looks for the 'header' environment parameter).  Also, the fact that
 we have a default parameter of 'template' is too decorator-specific.
 
+[ ]  Write layout service
+[ ]  Write output service
+[ ]  Play around with other services: adding data, timers, output cache, etc.
+[ ]  Fix service names, parameters, etc.
+[ ]  Change service() method to pipeline() or something suitable evocative
+     of what it's doing.
+
 
 Final Cleanup List
 ------------------

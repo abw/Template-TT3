@@ -8,7 +8,7 @@ use Template::TT3::Class
     modules     => 'HUB_MODULE',
     words       => 'SERVICE',
     utils       => 'params',
-    constants   => ':service ARRAY HASH DELIMITER DEFAULT',
+    constants   => ':service ARRAY HASH DELIMITER DEFAULT BLANK',
     constant    => {
         TT3     => __PACKAGE__,
     },
@@ -24,7 +24,7 @@ use Template::TT3::Class
     mutators    => 'hub_module';
 
 our $HUB_MODULE = HUB_MODULE;
-our $SERVICE    = [ qw( layout header footer wrapper ) ];
+our $SERVICE    = 'layout header footer wrapper';
 
 
 #-----------------------------------------------------------------------
@@ -183,7 +183,7 @@ sub service {
     my $name = shift || DEFAULT;
 
     return $self->{ service }->{ $name }
-        || $self->build_service($name);
+       ||= $self->build_service($name);
 }
 
 
@@ -191,10 +191,10 @@ sub build_service {
     my $self     = shift;
     my $name     = shift || DEFAULT;
     my $config   = $self->{ config };
-    my $factory  = $self->hub->services;
     my $services = $self->{ services };
     my $service  = $services->{ $name }
         || return $self->error_msg( invalid => service => $name );
+    my ($key, $value, @services);
 
     # we allow a service ist to be specified as a whitespace delimited string 
     # because we're nice like that and can easily expand it
@@ -202,28 +202,42 @@ sub build_service {
         unless ref $service eq ARRAY;
     
     $self->debug("constructing service pipeline: ", join(', ', @$service))
-        if DEBUG;
+        if DEBUG or 1;
 
-    # TODO: I think the input/output should be part of the service definition
+    # we always have an input service
+    push(@services, INPUT_SERVICE, BLANK);
 
-    # start the pipeline with an input service
-    my $pipeline = $factory->service(INPUT_SERVICE)->service;
-    my ($key, $value);
-    
-    # then add each component in the service pipeline that has a 
-    # configuration value defined
-    foreach my $key (@$service) {
-        next unless defined ($value = $config->{ $key });
-        $self->debug("service: $key => $value") if DEBUG;
-        $pipeline = $factory
-            ->service( $key => $value )     # create service object
-            ->service( $pipeline );         # bind it to the pipline
+    foreach (@$service) {
+        $key = $_;   # perl alias
+        if (ref $key) {
+            # A reference is a self-contained service object or specification.
+            $self->debug("service reference: $key") if DEBUG;
+            push(@services, $key);
+        }
+        elsif ($key =~ s/^(\w+)://) {
+            my $type = $1;
+            $value = $config->{ $key } || { };
+            $value = { template => $value } unless ref $value eq HASH;
+            $value->{ type } = $type;
+            $value->{ name } = $key;
+            $self->debug("service shortcut: $type => ", $self->dump_data($value)) if DEBUG or 1;
+            push(@services, $type => $value);
+        }
+        elsif (defined ($value = $config->{ $key })) {
+            # Otherwise it's a name (e.g. 'header') and we look for the 
+            # corresponding value in the master configuration.  If there is
+            # no value define then we skip the service.
+            $self->debug("service data: $key => $value") if DEBUG;
+            push(@services, $key => $value);
+        }
     }
+
+    # we always have an output service (or will do once I've written it)
+    #push(@services, OUTPUT_SERVICE, BLANK);
     
-    # TODO: add the final output service
-    # $pipeline = $factory->service( OUTPUT_SERVICE )->service($pipeline)
-    
-    return $pipeline;
+    $self->debug("connecting services: ", $self->dump_data(\@services)) if DEBUG;
+
+    return $self->hub->services->connect(@services);
 }
 
 
