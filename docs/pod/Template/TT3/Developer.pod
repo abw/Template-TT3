@@ -1,0 +1,52 @@
+=head1 NAME
+
+Template::TT3::Developer - TT3 Developer Guide
+
+=head1 INTRODUCTION
+
+This will be the developer guide for TT3. Both the software and the manual are
+works in progress so don't expect too much at this time.
+
+=head1 TABLE OF CONTENTS
+
+L<Template::TT3::Developer::Introduction> will give a general introduction to 
+the TT3 code base.
+
+L<Template::TT3::Developer::Compatibility> will talk about backwards
+compatibility with version 2 of the Template Toolkit. This will include things
+like: which modules have moved where, what's being done differently, and
+making TT2 plugins work under TT3 (hopefully most will just work without any
+changes, but that depends on how deep they probe into TT).
+
+L<Template::TT3::Developer::Modules> will give an overview of what modules
+comprise the TT3 code base.
+
+L<Template::TT3::Developer::Factory> will talk about factory modules like
+L<Template::TT3::Engines>, L<Template::TT3::Dialects>, and so on. It will
+explain how they're all derived from L<Badger::Factory> (via the thin
+L<Template::TT3::Factory> subclass) and constructed using the
+L<Template::TT3::Factory::Class> metaprogramming module which is itself a
+subclass of L<Badger::Factory::Class> and L<Badger::Class>. It will explain
+the benefits of using factory modules. Things like being able to centralise
+and standardise the behaviour, change the search path, automatically load XS
+modules as and when they become available, and so on.
+
+L<Template::TT3::Developer::Compiling> will be an introduction and overview
+of how templates are scanned, parsed and viewed.  It'll talk about tokens,
+elements, trees, expressions and other gory details.  Maybe this should be
+called "T~T~D~Dialects"
+
+L<Template::TT3::Developer::Scanning> will talk about the scanning process
+and look in detail at tags, tag sets, and how to implement your own custom
+tags.  Not sure about the name of this, but it'll do for now.
+
+L<Template::TT3::Developer::Parsing> will talk about the parsing process.
+Not sure about the name of this either.
+
+L<Template::TT3::Developer::Viewing> will talk about creating views of
+template trees and token lists.  Not sure about the name of this either.
+
+L<Template::TT3::Developer::Running> will explain how templates are executed.
+Another sucky name here.
+
+L<Template::TT3::Developer::Services> will talk about writing services.

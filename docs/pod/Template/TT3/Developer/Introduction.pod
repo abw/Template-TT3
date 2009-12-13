@@ -1,0 +1,69 @@
+=head1 NAME
+
+Template::TT3::Developer::Introduction - An introduction to TT3 for developers
+
+=head1 INTRODUCTION
+
+This is a rough draft of the documentation that will introduce TT3 for 
+developers.
+
+=head1 TODO
+
+TT3 uses Badger.  Badger does all the generic stuff so that TT3 can 
+concentrate on doing template stuff.  Separating it out also means that 
+L<Template::TT2> and L<Template::TT3> can share a lot of common code.
+You can also use L<Badger> bits for your own code.
+
+Things of interest include:
+
+=head2 Base Class - Badger::Base (and Template::TT3::Base)
+
+Does object construction, error handling, message generation.
+
+=head2 Debugging - Badger::Debug
+
+Adds the debug() and related debugging methods to objects.  Makes the 
+DEBUG flag available.
+
+=head2 Utils - Badger::Utils and Template::TT3::Utils
+
+Aggregates all the useful utilities in Scalar::Util, List::Util, etc., 
+and adds a few of its own.
+
+=head2 Class Construction - Badger::Class and Template::TT3::Class
+
+Allows us to replace all that messy boilerplate code with some nice clean
+declarative code.
+
+=head2 File Handling - Badger::Filesystem
+
+Handles all interaction with the filesystem through a clean OO interface.
+Also has some nifty features like virtual filesystems, filesystem visitors,
+automatic encoding and decoding of file (e.g. to handle Unicode) and so on.
+
+=head2 Module Locating and Loading- Badger::Factory and Template::TT3::Factory
+
+Factories are responsible for loading other modules.  We do lots of this so
+that it's easy to load modules on demand, provide different implementations
+of certain modules, and so on.  See L<Template::TT3::Developer::Factory>.
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

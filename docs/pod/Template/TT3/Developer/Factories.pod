@@ -1,0 +1,85 @@
+=head1 NAME
+
+Template::TT3::Developer::Factories - modules that load modules in TT3
+
+=head1 INTRODUCTION
+
+This is a rough draft of the developer documentation that will describe the 
+way that factories are used in TT3 to load other modules.
+
+=head1 The Players
+
+There are a number of modules in TT3 whose sole responsibility is to locate
+and load modules and instantiate objects of the corresponding classes.
+They are all called I<factory modules>.
+
+=head2 Template::TT2::Engines
+
+Responsible for loading C<Template::TT2::Engine::*> engine modules.
+
+=head2 Template::TT2::Dialects
+
+Responsible for loading C<Template::TT2::Dialect::*> dialect modules.
+
+=head2 Template::TT2::Services
+
+Responsible for loading C<Template::TT2::Service::*> services modules.
+
+=head2 TODO: ...and a whole bunch more
+
+=head1 Supporting Roles
+
+The factories listed above are in most cases very thin wrappers around
+a common factory base classes.
+
+=head2 Badger::Factory
+
+This is where it all begins. You should go and read the documentation for
+that. Be aware that B::F has grown organically over the last 2 years and it's
+ready for a good cleanup. In an earlier implementation of TT3 I had 3 factory
+base classes of progressive complexity: one that just loaded modules, one that
+loaded modules and created objects, and another that also cached the object.
+I thought I was being clever by merging them all into one in the form of 
+Badger::Factory, but now I think it may have been a mistake.  I've hit a few
+complexity barriers and "WTF?!?!" moments where I've got lost in what B::F
+is doing.  That's a sure sign that it needs re-thinking.  So expect some 
+change here, but it'll be as backward-compatible as possible.
+
+=head2 Template::TT3::Factory
+
+This is our thin subclass of L<Badger::Factory> where we customise a few
+details that are specific to TT3.
+
+=head2 Badger::Factory::Class
+
+This is a subclass of L<Badger::Class> specialised for creating factory 
+classes.  You should go and skim the documentation for L<Badger::Class>
+and then take a look over L<Badger::Factory::Class> at this point.
+
+=head2 Template::TT3::Factory::Class
+
+This is a thin subclass of L<Badger::Factory::Class> that uses our 
+L<Template::TT3::Factory> as the base class for our factories instead
+of the default L<Badger::Factory>.  This allows us to inject our custom
+TT3 behaviours into our factory classes.
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

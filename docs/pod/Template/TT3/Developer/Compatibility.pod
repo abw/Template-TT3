@@ -1,0 +1,93 @@
+=head1 NAME
+
+Template::TT3::Developer::Compatibility - Backward compatibility for TT developers
+
+=head1 INTRODUCTION
+
+This is a rough draft of the developer documentation that will discuss backwards
+compatibility between TT3 and TT2.
+
+=head1 TODO
+
+As Bob Dylan said: "Eveything's broken".  Sorry, but everything inside TT3
+is different to how it was in TT2.  
+
+=head2 Template::Service
+
+The monolithic service module from TT2 has been replaced by a number of 
+small, simple service modules that each perform one task and one task only
+(e.g. add a header, add a footer, etc).  These can be combined in all sorts
+of interesting ways to create your own custom template processing service
+pipelines.  Or you can just use the default service pipeline which allows you
+to add headers, footers, wrappers, and all the other things that TT2 allowed
+you to add.
+
+See L<Template::TT3::Services> for an introduction to services.  Please be 
+aware that the service pipeline code is quite new and subject to change.
+
+=head2 Template::Context
+
+Performs a similar role in TT3 as its counterpart in TT2, but it has an 
+all-new API and implementation.  
+
+=head2 Template::Stash
+
+No longer exists.  The high-level "get/set this variable" functionality
+is now in L<Template::TT3::Context>.  The dotop mechanism is implemented
+in L<Template::TT3::Variable> and subclasses.  The virtual methods are
+implemented in L<Template::TT3::Type> and subclasses.
+
+Please note that the L<Template::TT3::Variables> module was used during
+development (and is still being used at the time of writing) but it's due
+for deprecation (although I may change my mind).  Don't get too attached
+to it
+
+=head2 Template::Provider
+
+This has been split into a whole bunch of modules.  L<Template::TT3::Templates>
+is the master template manager.  L<Template::TT3::Cache> handles the in-memory
+cache and L<Template::TT3::Store> handles to on-disk storage of compiled 
+templates.  Both are API compatible with C<Cache::Cache> modules making it 
+easy for you to drop in your own replacements for these.
+
+The L<Template::TT3::Provider> module is a base class for a new set of 
+low-level template providers that I<only> have to worry about loading a 
+template from a file, database, or some other source and returning a 
+hash array containing some information about the template.  This makes
+them much simpler that the old TT2 provider module.  
+
+L<Template::TT3::Provider::File> is the main provider that loads files
+from the filesystem.  L<Template::TT3::Provider::Cwd> is a special case
+filesystem provider that is engaged when no C<template_path> is specified.
+This looks in the current working directory for templates that are specified
+with a relative path.
+
+=head2 Template::Document
+
+Replaced with L<Template::TT3::Template>, but it's much changed.
+
+=head2 TODO
+
+The above list is incomplete. It's just the first few things I could think of
+off the top of my head.  More work todo here.
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

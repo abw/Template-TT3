@@ -1,0 +1,151 @@
+=head1 NAME
+
+Template::TT3::Developer::Modules - the modules comprising TT3
+
+=head1 INTRODUCTION
+
+This is a rough draft of the developer documentation that will give an
+overview of the modules that comprise TT3.
+
+=head1 Higher Level Modules
+
+=head2 Front End: Template3
+
+For end users.  Thin facade.  Can switch between implementation engines.
+
+=head2 Engines: Template::TT3::Engine(s)
+
+Runtime engine.  Different engines (e.g. TT2 and TT3) may implement different
+APIs, functionality, etc.
+
+=head2 Services: Template::TT3::Service(s)
+
+For creating template processing pipelines.
+
+=head2 Dialects: Template::TT3::Dialect(s)
+
+Implement template languages, e.g. TT3, TT2, etc.
+
+=head1 Template Management Modules
+
+=head2 Template::TT3::Templates
+
+This module is responsible for finding, loading and caching template.
+It uses the L<Template::TT3::Provider> modules to find and load templates
+then caches them in memory and/or on disk using L<Template::TT3::Cache>
+and L<Template::TT3::Store>
+
+=head2 Template::TT3::Provider
+
+This is a base class for providers that find and load templates.  The 
+L<Template::TT3::Provider::File> module is a subclass for loading templates
+from the filesystem.  Others may follow.
+
+=head2 Template::TT3::Template
+
+This is an object used to represent templates.
+
+=head1 Data Management Modules
+
+=head2 Template::TT3::Context
+
+A context is a place to store variable data and provide access to resources
+like templates, plugins, etc. In TT3 the context object also includes most of
+the high-level functionality of the TT2 Template::Stash.
+
+=head2 Template::TT3::Variable
+
+Base class object for representing template variables.  This is subclassed
+into specialised objects for different data types: hash arrays, lists, 
+objects, etc.
+
+=head2 Template::TT3::Type
+
+Base class object for data types.  These modules implement the virtual methods
+for different data types: hashes, lists, text.
+
+=head1 Scanning, Parsing and Compilation Modules
+
+=head2 Template::TT3::Scanner
+
+Scans templates for text and tags.  Uses a tagset to define what tags to
+find.
+
+=head2 Template::TT3::Tagset
+
+Defines a set of tags, e.g. the L<Template::TT3::Tagset::TT3> tagset
+defines the inline, outline, comment and control tags.
+
+=head2 Template::TT3::Tag
+
+Implements the scanning and tokenising logic for a particular kind of tag.
+E.g. inline tags are specialised to look out for the end-of-tag token, 
+control tags have effect at compile time, comment tags do nothing.
+
+=head2 Template::TT3::Tokens
+
+Collects tokens emitted by the scanner and tags during tokenisation.  
+Each token is represented by an element object.  This is a bit of a mess
+and I'll probably jiggle things around a bit here.
+
+=head2 Template::TT3::Scope
+
+Used to represent a lexical scope in a template.
+
+=head2 Template::TT3::Elements
+
+Factory class for loading and instantiating element objects.  
+
+=head2 Template::TT3::Element
+
+Base class for elements.  There's a fair bit of documentation in this 
+module which describes the tokenising and parsing process.  It's incomplete
+(and possibly inaccurate in places), but it's a good start.
+
+This module is then subclasses into umpty different element modules that
+represent different parts of the TT3 language: text chunks, numbers, words,
+operators, end so on.
+
+=head2 Template::TT3::Grammar
+
+Defines a collection of operators and keywords that comprise a template
+language.
+
+=head1 Views
+
+=head2 Template::TT3::View
+
+This is a base class visitor module for creating views of a parsed template
+tree.  It is subclasses into two main categories for views working on either
+a token-based view of the template (e.g. for reconstituting the template 
+source including all whitespace and other ignorable tokens) or an expression
+based view that operates on the parsed tree.
+
+=head1 Support Modules
+
+Base, class, constants, utils, moduels, hub, exception, test.
+
+=head2 TODO
+
+The above list is incomplete.  
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
