@@ -1,0 +1,30 @@
+=head1 NAME
+
+Template::TT3::Manual::Controls - compile time controls
+
+=head1 INTRODUCTION
+
+This is a rough draft of the documentation that will describe the various
+compile-time controls that are available in TT3, e.g. TAGS, COMMANDS, etc. It
+is incomplete and incorrect in places. Please don't trust anything you read.
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

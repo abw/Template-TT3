@@ -1,0 +1,85 @@
+=head1 NAME
+
+Template::TT3::Manual::Templates - an overview of templates
+
+=head1 INTRODUCTION
+
+This documentation provides an overview of what template processing is,
+what TT3 templates look like, and how you can get started processing them.
+
+This documentation is not even a rough draft yet.  It's not even a rough
+draft of what the rough draft might look like.
+
+=head1 TEMPLATES
+
+TODO: more general intro to templates, aka form letters, etc., like we 
+have in the Badger book.  Make no technical assumptions until we've had
+a chance to explain the basics.
+
+Templates are text documents with embedded tags that instruct the template
+processor to perform some action.  Here's the archetypal "Hello World" 
+template:
+
+    Hello World
+
+Ok, it's not much of a template but it illustrates the point - templates 
+generate text by default.  You don't need to type C<print>, for example,
+to make it output anything.
+
+Here's a slightly more useful template:
+
+    Hello [% name %]
+
+This template has a chunk of plain text ('C<Hello >') followed by a tag
+which outputs the value of the C<name> variable ('C<[% name %]>').  
+
+=head1 TEMPLATE TAGS
+
+TT3 can embed any number of different tags in a template document. Each tag
+can implement it's own syntax, semantics, grammar, etc., effectively allowing
+you to embed several different languages into the same template.
+
+As scary as that sounds, the practical reality is more pragmatic. The default
+set of tags in TT3 templates implement more-or-less the same core language.
+The difference lies in the keywords that different tags support, when the tags
+are evaluated (at compile time or run time), or their tokenising behaviour.
+
+That all sounds rather complicated, but a few examples should illustrate the
+different template tags.
+
+[TODO: no scratch that, go and look at this separate manual page instead]
+
+See L<Template::TT3::Manual::Tags>
+
+=head1 TODO
+
+More blurb on how a template is considered to be a list of "chunks", which
+are really all just expressions.  Also might want to talk about tokens,
+e.g. that denote tag start/end.
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+You may now like to read L<Template::TT3::Manual::Tags> to learn more about
+the different kind of tags that can be embedded into templates and what they
+do.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

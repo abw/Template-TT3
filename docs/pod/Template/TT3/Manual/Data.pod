@@ -1,0 +1,31 @@
+=head1 NAME
+
+Template::TT3::Manual::Data - accessing data
+
+=head1 INTRODUCTION
+
+This is a rough draft of the documentation that will describe how to access
+data from within your templates.  Things like variables, dotops, virtual 
+methods, and so on.  I haven't even started writing it yet, so feel free
+to believe everything you read here.
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:

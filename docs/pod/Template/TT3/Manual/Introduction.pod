@@ -5,21 +5,16 @@ Template::TT3::Manual::Introduction - an introduction to TT3
 =head1 INTRODUCTION
 
 This documentation provides an introduction to version 3 of the Template 
-Toolkit (TT3).  
+Toolkit (TT3).  It is a work in progress.  The code is changing and the 
+docs may not be up to date.  Tread carefully.
 
 =head1 TT3 STATUS
 
 TT3 is still in development. At present it should be considered alpha quality
-code at best. It's good enough to process simple templates but lacks many of
-the higher-level features that are present in TT2. For example, there are
-currently no equivalents of the C<PRE_PROCESS> and C<WRAPPER> options, but
-you can achieve a similar effect as long as you don't mind adding a few extra
-lines of Perl code.
-
-For the sake of your own sanity, I would think very carefully before even
-considering using TT3 in a production system. Apart from the missing features,
-there are absolutely no guarantees that the things that work today will still
-be working tomorrow.  Consider this fair warning.
+code at best. For the sake of your own sanity, I would think very carefully
+before even considering using TT3 in a production system. There are absolutely
+no guarantees that the things that work today will still be working tomorrow.
+Consider this fair warning.
 
 =head1 FINDING, FETCHING AND INSTALLING TT3
 
@@ -53,10 +48,10 @@ encouraged at this point in time because they serve as reminders about
 what things are todo, or have been recently broken.  Remember, this is 
 pre-alpha quality code so we're not expecting all tests to pass.
 
-TT3's modules all live in the C<Template::TT3::*> namespace for now.  At
-some point in the future they will be moved "up" a level to occupy the
-C<Template> namespace, replacing the current TT2 modules.  At that time
-the current TT2 C<Template::*> modules will be moved (or rather, replaced) 
+TT3's modules all live in the C<Template::TT3::*> namespace for now. At some
+point in the future they will be moved "up" a level to occupy the C<Template>
+namespace, replacing the current Template Toolkit v2 modules. At that time the
+current TT2 C<Template::*> modules will be moved (or rather, replaced)
 permanently with their equivalents in C<Template::TT2::*>.
 
 The L<Template3> module is a new TT3 version of the current TT2 L<Template>
@@ -74,39 +69,16 @@ you, e.g. C<use Badger>, C<use Moose>, C<use Modern::Perl>, etc.)
     use warnings;
     use Template3;
 
-The C<process()> method will continue to be the general purpose all-on-one
-template processing method.  However, this method is still TODO at the time 
-of writing, so let's skip over that for now.  Use C<fill()> instead until
-such time as L<process()> has been implemented properly.
+The C<process()> method continues to be the general purpose all-on-one
+template processing method.  It takes an input, some data, and an output.
+You can call it as a class method:
 
-You can call C<fill()> as a class method, like so:
+    Template3->process('hello.tt3', { name => 'World' });
 
-    print Template3->fill( text => 'Hello World' );
-
-The first argument is the template type, the second (in this case) is the
-template text.  Here's an example that loads the template from a file.
-
-    print Template3->fill( file => 'hello.tt3' );
-
-Here's an example with some data.
-
-    print Template3->fill( 
-        text => 'Hello [% name %]',
-        data => {
-            name => 'World'
-        },
-    );
-
-Here's an example using a C<Template3> object.
+Or you can create an object and call it as an object method:
 
     my $tt3 = Template3->new;
-
-    print $tt3->fill( 
-        file => 'hello.tt3',
-        data => {
-            name => 'World'
-        },
-    );
+    $tt3->process('hello.tt3', { name => 'World' });
 
 Creating an object allows you to specify configuration parameters.  For
 example, the C<template_path> option allows you to specify a location for
@@ -127,12 +99,6 @@ filesystem.  You can specify multiple locations using as array reference.
         ],
     );
 
-Don't expect too many other options to work at the moment.  There are other
-options (plenty of them, in fact), but there's no guarantee that specifying
-them as options to the L<Template3> module will result in them being forwarded
-to the correct internal module. The whole configuration mechanism needs some 
-work to facilitate this.
-
 =head1 AUTHOR
 
 Andy Wardley L<http://wardley.org/>
@@ -146,7 +112,7 @@ modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Template::TT3::Manual::Language>
+L<Template::TT3::Manual>
 
 =cut
 

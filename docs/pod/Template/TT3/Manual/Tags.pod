@@ -1,29 +1,13 @@
 =head1 NAME
 
-Template::TT3::Manual::Language - the TT3 template language
+Template::TT3::Manual::Tags - embeddable tags
 
 =head1 INTRODUCTION
 
-This documentation describes the TT3 template language.
+This documentation describes the different kinds of tags that can be 
+embedded in TT3 templates.
 
-=head1 TEMPLATES
-
-Templates are text documents with embedded tags that instruct the template
-processor to perform some action.  Here's the archetypal "Hello World" 
-template:
-
-    Hello World
-
-Ok, it's not much of a template but it illustrates the point - templates 
-generate text by default.  You don't need to type C<print>, for example,
-to make it output anything.
-
-Here's a slightly more useful template:
-
-    Hello [% name %]
-
-This template has a chunk of plain text ('C<Hello >') followed by a tag
-which outputs the value of the C<name> variable ('C<[% name %]>').  
+This document is a rough draft.
 
 =head1 TEMPLATE TAGS
 

@@ -12,8 +12,33 @@ works in progress so don't expect too much at this time.
 L<Template::TT3::Manual::Introduction> gives a general introduction to TT3.
 It tells you how to download, install and start using it.
 
-L<Template::TT3::Manual::Language> gives an overview of the TT3 template
-language.
+L<Template::TT3::Manual::Compatibility> talks about backwards compatibility
+with version 2 of the Template Toolkit.  If you've got any applications,
+web sites or other code using TT2 then you should read this.
 
+L<Template::TT3::Manual::Templates> will (when it's finished) provide a 
+general introduction to what template processing it, what templates look 
+like, explain some of the terminology and so on.
+
+L<Template::TT3::Manual::Tags> will (when it's finished) explain about the
+different tags that can be embedded in TT3 templates, the chomping options,
+and how you can go about customising, adding or replacing tags, or
+building your own tag sets from scratch.
+
+L<Template::TT3::Manual::Expressions> will (when it's written) talk about
+the expression language at the heart of TT3.
+
+L<Template::TT3::Manual::Data> will (when it's written and once I've thought
+of a better name for it) show all the different ways you can access and 
+manipulate data.  Variables, dotops, vmethods and so on.
+
+L<Template::TT3::Manual::Operators> will (when it's written) list all the 
+operators implemented by TT3.
+
+L<Template::TT3::Manual::Commands> will (when it's written) list all the 
+command keywords implemented by TT3.  e.g. if, for, fill, etc
+
+L<Template::TT3::Manual::Controls> will (when it's written) list all the 
+compile-time control keywords implemented by TT3.  e.g. TAGS, COMMANDS, etc.
 
 

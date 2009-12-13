@@ -1,0 +1,105 @@
+=head1 NAME
+
+Template::TT3::Manual::Compatibility - backwards compatibility
+
+=head1 INTRODUCTION
+
+Version 3 of the Template Toolkit (or TT3 for short) is a complete re-think,
+re-design and re-implementation of the Template Toolkit in terms of both the
+template language and the modules that implement it.
+
+TT3 is effectively a new template language and implementation that happens to
+bear more than a striking resemblance to its predecessor, TT2. However, it is
+safest to assume that everything has changed. That way you'll be pleasantly
+surprised when you discover how reassuringly familiar most things are.
+
+We are of course mindful of the fact that a great number of people are 
+dependent on the existing TT2 language and implementation.  This documentation
+is aimed at those people in particular.  It describes the plans that are
+afoot and in some cases, actions that are already underway, to provide a 
+simple and reliable upgrade path from TT2 to TT3.
+
+In brief, the development version of TT3 is currently occupying the
+C<Template::TT3> namespace. A temporary L<Template3> module is being used to
+preview what the new, version 3 L<Template> module will look like. 
+
+When TT3 is ready for release, these C<Template::TT3::*> modules will be moved
+up a level to occupy the C<Template::*> namespace, replacing the existing 
+TT2 modules.  The L<Template3> module will become the new L<Template> 
+module.  
+
+The existing TT2 modules will be moved to the C<Template::TT2> namespace
+where they will rest in peace for ever more.
+
+The new version 3 L<Template> module will have an options to 
+automatically engage the v2 C<Template::TT2> modules for backwards
+
+=head1 Template::TT2
+
+The existing version 2 L<Template> module and its supporting modules in the
+C<Template::*> namespace will be moved en masse to the L<Template::TT2>
+namespace.  For most users of TT2, it should be sufficient to replace any
+reference to C<Template> with C<Template::TT2>
+
+Current code:
+
+    use Template;
+    
+    my $tt = Template->new(
+        INCLUDE_PATH => '/path/to/templates',
+    );
+
+New code:
+
+    use Template::TT2;
+    
+    my $tt = Template::TT2->new(
+        INCLUDE_PATH => '/path/to/templates',
+    );
+
+Work on this started in October 2008 and was complete (to the point of 
+implementing all of TT2's features) by the end of 2008.  It has fallen a 
+little being the main TT2 code base since then.  There are perhaps a 
+dozen minor patches that need to be back-ported to Template::TT2 and 
+a few failing tests that need to be looked into.  If anyone would like to
+help bring it up to date then please get in touch.
+
+The source code repository for C<Template::TT2> is at
+L<http://github.com/abw/Template-TT2>.  
+
+=head1 Template::TT3
+
+The new v3 code for the Template Toolkit is currently living in the
+C<Template::TT3::*> namespace. The L<Template3> module is a new implementation
+of what will eventually replace the current v2 L<Template> module.  They
+have been developed in separate namespaces so that there is no effect on 
+existing TT2 users until we're 100% ready the throw the switch and release
+TT3.
+
+The source code repository for C<Template::TT3> is at
+L<http://github.com/abw/Template-TT3>.  
+
+=head1 AUTHOR
+
+Andy Wardley L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Template::TT3::Manual>
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
