@@ -9,6 +9,7 @@ use Template::TT3::Class
     constants   => ':types :from :scheme :lookup_slots DELIMITER BLANK',
     modules     => 'TEMPLATE_MODULE IO_HANDLE',
     hub_methods => 'dialects dialect filesystem',
+    filesystem  => 'File FILE',
     mutators    => 'cache store',
     constant    => {
         DIALECT => 'TT3',
@@ -245,7 +246,7 @@ sub template_ref {
     my $item = shift     || return $self->error_msg( no => 'reference' );
     my $ref  = ref $item || return $self->template( $item, @_ );
     my ($type, $name, $params);
-    
+
     if (is_object(TEMPLATE_MODULE, $item)) {
         # first argument is already a template object
         return $item;
@@ -287,9 +288,12 @@ sub template_ref {
     elsif (is_object(IO_HANDLE, $item)) {
         return $self->template_handle($item, @_);
     }
+    elsif (is_object(FILE, $item)) {
+        return $self->template_file($item, @_);
+    }
     else {
         # 
-        return $self->error_msg( invalid => type => $type );
+        return $self->error_msg( invalid => input => $item );
     }
 }
 
@@ -334,6 +338,17 @@ sub template_text {
     $params->{ name } ||= FROM_TEXT;
     $params->{ text }   = $text;
     $params->{ id   }   = $self->text_id($text);
+    return $self->lookup($params);
+}
+
+
+sub template_file {
+    my $self   = shift;
+    my $file   = File(shift);
+    my $params = params(@_);
+    $params->{ name } ||= $file->name,
+    $params->{ text }   = $file->text;
+    $params->{ id   }   = FILE_SCHEME.COLON.$file->definitive;
     return $self->lookup($params);
 }
 

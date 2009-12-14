@@ -12,7 +12,7 @@ sub serve {
 
     my $input = $self->template( $env )
         || return $self->error_msg( missing => $self->{ name } );
-
+    
     return $input->fill_in( $env->{ context } );
 }
 

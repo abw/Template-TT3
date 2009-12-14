@@ -20,7 +20,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template::TT3::Hub',
     args  => \@ARGV,
-    tests => 5;
+    tests => 6;
 
 use Template::TT3::Hub;
 use constant HUB => 'Template::TT3::Hub';
@@ -41,6 +41,9 @@ is( $data, 'Hello World!', 'input_glob() read from __DATA__' );
 $data = HUB->input_handle( Bin->dir('templates')->file('hello.tt3')->open );
 chomp $data;
 is( $data, q{Hello [% name or 'World' %]!}, 'input_fh() read from hello.tt3' );
+
+my $config = HUB->config;
+ok( $config, "got config: $config" );
 
 __DATA__
 Hello World!

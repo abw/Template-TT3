@@ -159,16 +159,13 @@ sub process {
         output  => $output,
         options => $options,
     );
-#    return $self->hub->output(
-#        $template->fill($data),
-#        @_
-#    );
 }
 
 sub render {
     my $self = shift;
     my $env  = params(@_);
     $env->{ context } ||= $self->context->with( $env->{ data } );
+    $self->debug("rendering environment: ", $self->dump_data($env)) if DEBUG;
     $self->service( $env->{ service } )->($env);
 }
     
@@ -233,7 +230,7 @@ sub build_service {
     }
 
     # we always have an output service (or will do once I've written it)
-    #push(@services, OUTPUT_SERVICE, BLANK);
+    push(@services, OUTPUT_SERVICE, BLANK);
     
     $self->debug("connecting services: ", $self->dump_data(\@services)) if DEBUG;
 

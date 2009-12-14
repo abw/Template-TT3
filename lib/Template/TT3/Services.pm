@@ -15,6 +15,13 @@ use Template::TT3::Class
     modules     => 'SERVICE_MODULE';
 
 
+sub init {
+    my ($self, $config) = @_;
+    $self->init_hub($config)
+         ->init_factory($config);
+}
+
+
 sub type_args {
     my $self = shift;
     my $type = shift;

@@ -16,7 +16,8 @@ use Badger
     Filesystem => 'Bin';
 
 use Template::TT3::Test 
-    debug => 'Template3',
+#    debug => 'Template3 Template::TT3::Templates',
+    debug => 'Template::TT3::Engine::TT3 Template::TT3::Services',
     args  => \@ARGV,
     tests => 6;
 

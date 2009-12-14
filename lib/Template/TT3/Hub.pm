@@ -5,9 +5,10 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Base Badger::Hub',
     modules     => ':hub',                # import XXX_MODULE from T::Modules
-    utils       => 'params',
+    utils       => 'params blessed',
     filesystem  => 'VFS FS',
     codec       => 'unicode',
+    init_method => 'configure',
     constants   => 'HASH ARRAY CODE GLOB SCALAR BLANK',
     constant    => {
         PRINT_METHOD => 'print',
@@ -92,6 +93,11 @@ sub self {
 }
 
 
+sub config {
+    shift->prototype(@_)->{ config };
+}
+
+
 sub input_glob {
     my $self = shift->prototype;
     my $glob = shift;
@@ -131,25 +137,30 @@ sub output {
     $self->debug("output [$type] => $dest\n") if DEBUG;
 
     if (! $type) {
+        $self->debug("output file: $dest\n") if DEBUG;
         $self->output_file($dest, $args)->write($text);    # output to file
-#        $self->output_file($dest, $text, $args);    # output to file
     }
     elsif (blessed $dest) {
+        $self->debug("output object print(): $dest\n") if DEBUG;
         my $code = $dest->can(PRINT_METHOD)
             || return $self->error_msg( bad_output => $dest );
         return $code->($dest, $text);               # call object's print() method
     }
     elsif ($type eq CODE) {
+        $self->debug("output CODE: $dest\n") if DEBUG;
         return $dest->($text);                      # call subroutine
     }
     elsif ($type eq GLOB) {
+        $self->debug("output GLOB: $dest\n") if DEBUG;
         return print $dest $text;                   # print to GLOB (e.g. STDOUT)
     }
     elsif ($type eq SCALAR) {
+        $self->debug("output SCALAR: $dest\n") if DEBUG;
         $$dest .= $text;                            # append to text ref
         return $dest;
     }
     elsif ($type eq ARRAY) {
+        $self->debug("output ARRAY: $dest\n") if DEBUG;
         push @$dest, $text;                         # push onto list
         return $dest;
     }
@@ -165,6 +176,8 @@ sub output_filesystem {
     return $self->{ output_fs } ||= do {
         my $encoding = $self->{ output_encoding } || $self->{ encoding };
         my @args     = $encoding ? (encoding => $encoding) : ();
+
+        $self->debug("creating output fs: ", $self->dump) if DEBUG;
         
         if ($self->{ output_path }) {
             # create a Badger::Filesystem::Directory object for file output,

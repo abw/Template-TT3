@@ -5,6 +5,7 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Base',
     config      => 'template services name!',
+    accessors   => 'services',
     mutators    => 'name',
     init_method => 'configure',
     utils       => 'params',
@@ -28,7 +29,7 @@ sub template_name {
 
 sub template {
     my $self = shift;
-    my $env  = shift || return $self->debug_caller, $self->error_msg( missing => 'environment' );
+    my $env  = shift || return $self->error_msg( missing => 'environment' );
     
     my $template = $env->{ $self->{ name } } 
                 || $self->{ template }
@@ -44,6 +45,7 @@ sub connect {
     my $serve  = $self->can(SERVE);
 
     return sub {
+        $self->debug("pipeline segment invoked: $self->{ name }") if DEBUG;
         $serve->($self, params(@_), $source);
     };
 }
@@ -55,6 +57,11 @@ sub no_source {
     # is specified to connect to.  Services that are sources (e.g. T~S~Input)
     # can re-define this to silently do nothing.
     return $self->error_msg( no_source => $self->{ name } );
+}
+
+
+sub hub {
+    shift->services->hub;
 }
 
 
