@@ -122,6 +122,8 @@ sub init_tag {
         $self->init_patterns($start, $end);
     };
 
+    $self->debug("initialised patterns: ", $self->dump_data($patterns)) if DEBUG;
+
     # import patterns into $self with a match_prefix, e.g. match_whitespace
     @$self{ 
         map { "match_$_" } 
@@ -157,28 +159,21 @@ sub init_patterns {
 
     # define a regex to match to the end of the tag if tag_end is 
     # defined or to the end of line (\n) or end of file if not
-    
-    # TODO: we need a special case for outline tags that have the newline
-    # as the end of tag
-    
     if (defined $end) {
         $end = ref $end eq REGEX ? $end : quotemeta($end);
         $eol = qr/
-            [^\n]*?        # capture everything on this line non-greedily
-                           # TODO: fix this so that outline tags work - they
-                           # have a "\n" end tag that should be matched before
-                           # the newline
-            (?: \n         # either match and consumer a newline character
-              | (?=        # or look ahead for the end of the text or the        
-                 $end      # end-of-tag marker
-              )
+            [^\n]*?         # capture everything on this line non-greedily
+            (?: \n          # either match and consumer a newline character
+              | (?=         # or look ahead for the end of the text or the        
+                  $end      # end-of-tag marker
+                 )
             ) 
         /sx;
     }
     else {
         $eol = qr/
-             [^\n]*        # anything up to end of line
-            (?:\n|$)       # end of line or end of file
+             [^\n]*         # anything up to end of line
+            (?:\n|$)        # end of line or end of file
         /x;
     };
     
@@ -186,8 +181,6 @@ sub init_patterns {
     my $comment = qr/ (?: ^\s*|\s+ ) \# $eol /msx;
 
     # whitespace can contain ignorable comments
-    # TODO: fix this so that we don't gobble a newline that an outline 
-    # token may be expecting
     my $wspace = qr/ (?:$comment|\s+)+ /sx;
 
     # now construct table of regexen for matching various operators and 
@@ -410,7 +403,7 @@ sub tokenise {
 #            $output->dquote_token($1, $pos, $2);
         }
         elsif ($$input =~ /$self->{ match_at_end }/cg) {
-            $self->debug("matched end of tag: $1") if DEBUG;
+            $self->debug("matched end of tag: [$1] by $self->{ match_at_end }") if DEBUG;
 
             # add the tag end token and return it to scan() so it can 
             # identify any post-chomping flags
@@ -432,6 +425,7 @@ sub tokenise {
             $output->whitespace_token($1, $pos);
         }
         else {
+#            $self->debug("match at end faile
             return $self->unexpected($input);
         }
         

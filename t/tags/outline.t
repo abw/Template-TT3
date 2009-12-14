@@ -14,16 +14,48 @@
 use Badger 
     lib     => '../../lib';
 
-#use Badger::Debug 
-#    modules => 'Template::TT3::Scanner';
-
 use Template::TT3::Test 
-    tests   => 4,
+    tests   => 9,
     debug   => 'Template::TT3::Tag::Outline Template::TT3::Scanner',
     args    => \@ARGV,
-    import  => 'test_expect callsign';
+    import  => 'test_expect callsign :all';
+
+$Badger::Debug::MAX_TEXT = 1024;
 
 our $vars = callsign;
+
+#-----------------------------------------------------------------------
+# There's some tricky regex magic required to allow outline tags to 
+# match comments and whitespace to the end of line without consuming
+# the end-of-tag newline character
+#-----------------------------------------------------------------------
+
+use Template::TT3::Tag::Outline;
+use constant OUTLINE => 'Template::TT3::Tag::Outline';
+
+my $outline = OUTLINE->new;
+my $comment = $outline->{ match_comment    };
+my $wspace  = $outline->{ match_whitespace };
+my $at_end  = $outline->{ match_at_end     };
+
+my $input = "# hello\n";
+ok( $input =~ /$comment/cg, 'comment matches' );
+ok( $input =~ /\G\n/, 'matched newline after comment' );
+
+$input = "   \n";
+ok( $input =~ /$wspace/cg, 'whitespace matches' );
+ok( $input =~ /\G\n/, 'matched newline after whitespace' );
+
+$input = "\n";
+ok( $input =~ /$at_end/cg, 'matched newline at end' );
+
+$input = "";
+ok( $input =~ /$at_end/cg, 'matched end at end' );
+
+
+#-----------------------------------------------------------------------
+# run the tests in the __DATA__ section
+#-----------------------------------------------------------------------
 
 test_expect(
     debug     => $DEBUG,
@@ -50,7 +82,6 @@ before
 alphabravocharlieafter
 
 -- test if outline --
-#-- dump_tokens --
 alpha
 %% if 1
 bravo
@@ -65,13 +96,12 @@ charlie
 #-- skip work to do on outline tags --
 # outline tags currently consume the newline end-of-tag token when they
 # much whitespace and comments.
-alpha
+%% a
 %% if 1        # this is a comment
 bravo
 # there are trailing spaces on the end of the next line
 %% end   
 charlie
 -- expect --
-alpha
-bravo
+alphabravo
 charlie

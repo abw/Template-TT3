@@ -10,9 +10,8 @@ our $TAGS = [
         end   => '%]',
     },
     outline => {                
-        type    => 'default',       # doesn't have a subclass of it's own so 
-        start   => qr/^%%/m,        # it uses Template::TT3::Tag
-        end     => qr/\s*(\n|$)/m , # this causes problems...
+        type    => 'outline',
+        start   => qr/^%%/m,
     },
     comment => {
         start   => '[#',
