@@ -1,0 +1,269 @@
+=head1 NAME
+
+Template::TT3::TODO - TT3 To-Do List
+
+=head1 INTRODUCTION
+
+This is the To-Do list for TT3.  It is incomplete and in no particular order.
+
+=head1 Language Elements
+
+=head2 Loop Iterator
+
+There's no equivalent of TT2's 'loop' iterator.  I want to have a little
+rethink of the iterator API before I plug it in.
+
+=head2 Ranges
+
+    %%  for x in 1 to 101 by 10
+
+This needs a proper loop iterator.
+
+=head2 Tertiary ? :
+
+    %% foo ? bar : baz
+
+I can't believe I still haven't got around to this.  Should be trivial.
+
+=head2 Thin Lambda Arrow
+
+    %% a -> a + 1
+
+Need to finish/cleanup the LHS signature recognition (almost there).
+
+=head2 Parallel Assignment
+
+    %% @a = @b
+
+The assignment mechanism needs a little re-think.  The current as_lvalue()
+hack is clunky.  They way it used to work (in the pre-badger prototype) was
+probably better.
+
+=head2 Template Spec
+
+    %% template = <example.tt3>     # fetch single template
+    %% template = <foo.tt3 bar.tt>  # aggregate several templates
+
+I'd like to implement a jQuery-like selection mechanism that will aggregate
+over one or more templates.  As a minimum it would be useful to be able to 
+find and reference a single template (although a C<find> keyword might do the
+job just as well, if not better).
+
+=head2 Non-Chaining Infix Operators
+
+Figure out what non-chaining infix operators should do.
+
+=head2 Elements Not Being Loaded
+
+Figure out why element classes aren't being loaded.  e.g. declaring 
+[ TAGS => ctr_tags => 0, 0 ] should load T::TT3::Element::Control::Tags
+and fail if it doesn't exists.  The find() method appears to be returning
+the class name without checking to see if it can be loaded.  (may be fixed?)
+
+=head2 name(), pair() and pairs() methods
+
+Add name(), pair() and pairs() methods to all elements that require them.
+
+=head2 list_values() / items() methods
+
+Change element 'list_values()' to 'items()', or figure out how to map it
+properly onto value/values.
+
+=head2 Signatures
+
+Add T::TT3::Element::Signature which defines the signature construct. We need
+this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
+
+=head2 Optional Items in Function Signatures.
+
+Add support to function signatures for optional items (e.g. foo(bar?) )
+and default values (e.g. foo(bar=10) ).
+
+=head1 Commands
+
+=head2 html
+
+Move the temporary html() method in the 'Is' command to the T::TT3::HTML
+module.  But it has to be installed into a base class for block commands
+so that we don't need to poke it into is(), as(), for(), if(), etc., and
+every other command that has block output.  That said, I'm not sure if it's
+possible.  We may have to explicitly add html() methods to all the block
+commands.  That feels like a little bit of a dirty specialisation, but we
+have to embrace the fact that TT is (guessing) 99% used for generating 
+HTML.  It would be better if we could do it generically (as original planned
+for the HTML extensions - they would just adorn existing classes with 
+html() methods).  But we can't expect the HTML extension to know about every
+class.  Nor can we expect every block-based element to know about every 
+possible output format (although asking them to know HTML wouldn't be so
+bad).  Smells a bit dirty.
+
+=head1 Controls
+
+=head2 Merge COMMANDS and HTML_CMDS
+
+Cleanup and merge C<COMMANDS> and C<HTML_CMDS> so that a single C<COMMANDS>
+(or C<CMDS> for short) control can load commands from libraries, or complete
+libraries.
+
+=head2 Grammar Changes via C<COMMANDS> Should be Localised.
+
+Changes to the grammar, e.g. via C<COMMANDS> are not localised.  They 
+permanently modify the grammar.  Instead we should probably store the 
+current keywords list in the lexical scope.  That also allows certain 
+block directives (e.g. 'switch') install keywords within its scope (e.g.
+'case').
+
+=head2 Grammar Changes via C<COMMANDS> Should Affect All Tags.
+
+C<COMMANDS> only installs commands into the grammar for the inline tag.  The
+grammar should be shared between inline/outline and any other tags that share
+the same grammar.  
+
+=head2 TAGS with Outline Tags
+
+Need to write some tests and if necessary, fix up TAGS control and Outline
+tag so that the TAGS control can change the start tag
+
+=head1 Scanner / Tags / Tagsets / Tokens
+
+=head2 Refactor Tokens/Elements
+
+The way that tokens and grammar are subclasses of elements is ugly.  And
+I think the constructor creation makes things more confusing than they should
+be.  Well, it works for now.
+
+=head2 Preceding Text
+
+Change the scanner to push the preceding text onto the output tokens before
+calling the tag.  The tag can inspect $output->last if it want to do any 
+pre-chomping (see the way the comment tag now works for an example).
+
+=head1 Grammar
+
+=head2 Split Grammar into Operators and Keywords
+
+It might be worthwhile splitting the grammar into separate collections of
+operators and keywords.  Other than the element construction (which should
+probably also be moved out anyway), the only real thing the grammar does 
+is to generate the regexen to match operators.  If keywords end up in the 
+lexical scope then we might as downsize the grammar to an operator regex
+compiler.
+
+=head1 Template Evaluation
+
+=head2 PARAMS
+
+Figure out what to do with PARAMS.  They don't get recognised as HASH vars
+so they don't get the same behaviours that it has.  e.g. "a(%b) = c(%b)".
+Here the '%b' isn't expanded as a hash because it's a PARAMS not a HASH.
+
+=head2 template_path
+
+Avoid adding the default path to template_path so we can avoid creating
+default file provider if we're only using text-based templates.
+
+
+=head1 Factories
+
+Add support to Badger::Factory for generic XXX_head and XXX_tail methods 
+that add elements to the start or end of the path respectively.
+
+Badger::Factory needs a cleanup and refactor to simplify what it does.
+Probably best to cleave it back into 3 parts like it (well, its predecessor)
+used to be.
+
+
+=head1 Configuration
+
+=head2 Amalgamating Arguments
+
+Config needs to amalgamate arguments.  Decide if things like storage should
+be enabled or not.  Hub needs to heed its call.
+
+=head1 Hub
+
+=head2 Cleanup
+
+Need to implement a proper cleanup policy.
+
+=head2 Memory Leakage
+
+Also need to think *VERY* carefully about what different components may be
+attaching to a prototype hub.  I'm concerned that creating a "leaf node"
+template for temporary use in a subroutine might pull the whole framework
+into persistence. 
+
+=head1 Template Services
+
+=head2 Services and/or Decorators?
+
+I'm a little wary about merging the higher level concepts of services
+(stuff to do around a template) with the lower level decorating behaviours.
+My first attempt had the low level items named Template::TT3::Decorator::*
+and a Template::TT3::Service::Decorator service loaded the decorators.  But
+that's not generic enough as there are plenty of useful service components
+that we might want to write that, strictly speaking, aren't decorators 
+(although at a pinch we could claim that they decorate the template processing
+service).
+
+On the other hand, I don't want to split them too far as it's important that
+service pipelines and individual components are interchangeable.  Also, I think
+there's a nice PSGI/Plack-like simplicity around the service components as
+they stand.  That's a good thing.
+
+=head2 Code Service
+
+A generic service for running user-supplied subroutine refs.
+
+=head2 Layout Service
+
+Write the Template::TT3::Service::Layout module.  It should tweak the config
+to add the main page template to the visit stack so that slots can resolve
+from the main template.
+
+=head2 Presentation Service
+
+A generic (if possible) service that modifies the environment to select
+headers, footers, etc., based on certain conditions (which would be the 
+hard bit to make generic).  A good start would be to demonstrate a simple
+CODE ref that does this.
+
+=head2 Other Services
+
+Other services that may be worth investigating are timers, debug controls, 
+sitemap, etc.
+
+
+=head1 Final Cleanup
+
+The following modules are believed to be complete, clean, tested and
+documented.
+
+   Template::TT3::Factory
+   Template::TT3::Factory::Class
+   Template::TT3::Engines
+   Template::TT3::Dialects
+   Template::TT3::Providers
+
+=head1 AUTHOR
+
+Andy Wardley  L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
+
+
