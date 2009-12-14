@@ -16,7 +16,7 @@ use Badger
     Filesystem => 'Bin';
 
 use Template::TT3::Test 
-    tests => 11,
+    tests => 19,
     debug => 'Template::TT3::Service Template::TT3::Services',
     args  => \@ARGV;
 
@@ -193,5 +193,62 @@ $output = $tt3->render(
 is( $output,
     "This is the header.\nHello Badger!\nThat's a very nice coat you're wearing.\n", 
     'custom service with a very nice coat for very lazy people' 
+);
+
+
+#-----------------------------------------------------------------------
+# define several different services
+#-----------------------------------------------------------------------
+
+$tt3 = Template3->new(
+    template_path => $tdir,
+    services => {
+        default => 'wrapper',
+        clothed => 'header footer wrapper',
+        naked   => [ ],
+    },
+    wrapper => 'wrapper.tt3',
+    header  => 'header.tt3',
+    footer  => BLANK,
+);
+
+$output = $tt3->render(
+    input   => 'hello.tt3',
+    data    => $data,
+);
+is( $output, 
+    "[WRAPPER]\nHello Badger!\n[/WRAPPER]\n", 
+    'got default service' 
+);
+
+$output = $tt3->render(
+    input   => 'hello.tt3',
+    data    => $data,
+    service => 'naked',
+);
+is( $output, 
+    "Hello Badger!\n", 
+    'got naked service' 
+);
+
+$output = $tt3->render(
+    input   => 'hello.tt3',
+    data    => $data,
+    service => 'clothed',
+);
+is( $output, 
+    "[WRAPPER]\nThis is the header.\nHello Badger!\n[/WRAPPER]\n", 
+    'got clothed service' 
+);
+
+$output = $tt3->render(
+    input   => 'hello.tt3',
+    data    => $data,
+    service => 'clothed',
+    footer  => 'footer.tt3',
+);
+is( $output, 
+    "[WRAPPER]\nThis is the header.\nHello Badger!\nThis is the footer.\n[/WRAPPER]\n", 
+    'got clothed service with extra footer' 
 );
 

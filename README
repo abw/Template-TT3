@@ -1,27 +1,44 @@
 This is a working prototype of the TT3 (Template Toolkit V3) template
-language.  It's very much under construction at the moment but will 
-eventually become the release version of TT3.
+language.  It will eventually become the release version of TT3.
+
+Everything is still very much under construction so don't expect anything
+production-ready just yet.  However, most of the important functionality
+is now in place.
 
 At present all modules are contained under the Template::TT3 namespace.
 They will eventually become the new Template::* modules and the current 
 TT2 modules will be moved permanently into Template::TT2::*.  But that's
 a while off yet.
 
-Everything is still very much under construction so don't expect anything
-production-ready just yet.
+You'll need to install the latest development version of Badger from 
+github.
 
-You'll need the latest development version of Badger from the subversion
-repository (which I'll get around to moving to github RSN).  See 
-http://badgerpower.com/.  Releasing version 0.07 is also RSN.
-
-With the Badger in place:
-
+  $ git clone git://github.com/abw/Badger.git
+  $ cd Badger
   $ perl Makefile.PL
   $ make
   $ make test
+  $ sudo make install
+  $ cd ..
 
-That's about all you can do right now.  You'll have to look at the tests
-for more inspiration.
+The clone the Template-TT3 repository, make and install it.
 
--- abw
-   Nov 10 2009
+  $ git clone git://github.com/abw/Template-TT3.git
+  $ cd Template-TT3
+  $ perl Makefile.PL
+  $ make
+  $ make test       # expect some failures
+
+The documentation for TT3 is sparse right now.  The Template3 module has
+some basic documentation to get you started.  You might like to browse
+through the annotated slides for the presentation I gave at the 2009
+London Perl Workshop.  This should give you an idea about some of the 
+new things you can do.
+
+  http://tt3.template-toolkit.org/talks/tt3-lpw2009/slides/start.html
+
+You might also want to take a glance at some of the test scripts to see
+some examples of what can be done.
+
+-- Andy Wardley
+   December 14th 2009

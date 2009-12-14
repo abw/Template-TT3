@@ -67,13 +67,21 @@ sub _engine_hook {
 
 sub _TT2_hook {
     my ($class, $target, $symbol, $symbols) = @_;
-    unshift(@$symbols, engine => 'TT2', as => 'TT2');
+    unshift(
+        @$symbols, 
+        engine => 'TT2', 
+        as     => 'TT2', 
+    );
 }
 
 
 sub _TT3_hook {
     my ($class, $target, $symbol, $symbols) = @_;
-    unshift(@$symbols, engine => 'TT3', as => 'TT3');
+    unshift(
+        @$symbols, 
+        engine => 'TT3', 
+        as     => 'TT3'
+    );
 }
 
 
@@ -218,6 +226,16 @@ Template3 - Perl interface to the Template Toolkit v3
         header        => 'site/header.tt3',
         footer        => 'site/footer.tt3',
     );
+    
+    # then use it
+    $tt3->process('hello.tt3', { name => 'World' });
+    
+    # or
+    $tt3->render(
+        input  => 'hello.tt3', 
+        data   => { name => 'World' },
+        output => 'hello.html',
+    );
 
 =head1 PLEASE NOTE
 
@@ -261,18 +279,293 @@ To use the module you must first load it into your Perl program:
 There are a number of options you can specify when loading the module.
 See L<LOAD OPTIONS> below for further details.
 
-You can use the module by calling L<Template> class methods directly:
+You can use the module by calling L<Template3> class methods directly:
 
-    Template->process($input, $data, $output);
+    Template3->process($input, $data, $output);
 
-Or by creating a C<Template> object and calling methods against it:
+Or by creating a C<Template3> object and calling methods against it:
 
-    my $tt3 = Template3->new();
+    my $tt3 = Template3->new;
     $tt3->process($input, $data, $output);
 
 The L<METHODS> section below contains details of all the methods available.
 See L<CLASS METHODS> following that for further details on how class methods
 are delegated to a I<prototype> object.
+
+=head1 LOAD OPTIONS
+
+The following options can be specified when you C<use> the C<Template3>
+module.
+
+=head2 engine
+
+The C<Template3> module is implemented as a thin wrapper around a
+L<Template::TT3::Engine> object which is responsible for doing the real work
+of processing templates.
+
+The default engine is L<Template::TT3::Engine::TT3>, implementing the B<TT3>
+API for the Template Toolkit. This is slightly different to the B<TT2> API
+(UPDATE: in fact it might not be that different after all).
+
+The C<engine> option allows you to specify the engine module that you want to 
+use.
+
+    use Template3
+        engine => 'Template::TT3::Engine::TT2';
+
+You can drop the C<Template::TT3::Engine> prefix and leave it up to the 
+L<Template::TT3::Engines> factory module to find and load the relevant 
+module for you.
+
+    use Template3
+        engine => 'TT2';
+
+=head2 as
+
+This creates an alias to the C<Template3> module.  For example, if your
+existing code expecting to use the L<Template> module then you can create
+an alias from L<Template> to L<Template3>.
+
+    use Template3
+        as => 'Template';
+    
+    my $tt3 = Template->new;
+
+=head2 TT2
+
+Shorthand for engaging the C<TT2> engine and creating a C<TT2> alias.
+
+    use Template3 'TT2';
+    
+    my $tt2 = TT2->new;
+
+It is equivalent to:
+
+    use Template3
+        engine => 'TT2',
+        as     => 'TT2';
+
+=head2 TT3
+
+Shorthand for engaging the C<TT3> engine and creating a C<TT3> alias. 
+
+    use Template 'TT3';
+    
+    my $tt3 = TT3->new;
+
+It is equivalent to:
+
+    use Template3
+        engine => 'TT3',
+        as     => 'TT3';
+
+=head2 TODO
+
+We should have other options for configuring the prototype engine.  e.g.
+
+    use Template3
+        template_path => '/path/to/templates',
+        dialect       => 'TT3';
+
+Hmmm... that's going to be tricky.  It requires us to know about all the
+options that any engine/dialect/service/etc could implement (not feasible)
+or to blindly accept any options which is sub-optimal (no way to automatically
+detect typos, invalid options, etc).  Probably better to have an explicit
+config option.
+
+    use Template3
+        config => {
+            template_path => '/path/to/templates',
+            dialect       => 'TT3',
+        };
+
+We could perhaps also allow a config file:
+
+    use Template3
+        config => '/path/to/config/file.yaml';  # detect codec from extension
+
+=head1 CONFIGURATION OPTIONS
+
+Please note that the following list is incomplete. This is partly because I
+haven't got around to documenting them yet, and partly because there are so
+many of them that I haven't decided which ones should go here and which should
+be relegated to the longer L<Template::TT3::Manual::Config> documentation.
+Furthermore, there are a number of configuration options which should work,
+and do work (as far as I'm aware), but don't yet have tests explicitly proving
+that they work.  At that point in time I'd rather document the stuff that I
+know works and add other items as and when I write the tests for them.
+
+TODO: Explain how TT3 is built from a large number of small, (mostly) simple
+components. They all have their own configuration options. The L<Template3>
+module is a thin wrapper around L<Template::TT3::Engine::TT3> (or whatever
+other engine you explicitly select). The engine creates a
+L<Template::TT3::Hub> which acts as the central repository for all the things
+we might need.  We pass the entire configuration hash over to the hub and
+then leave it up to the hub to create whatever we need (templates providers, 
+dialects, context objects, and so on).  The hub ensures that the constructor
+for each component gets a copy of the config (or the relevant sub-section 
+within it).  So in summary, you can specify any option supported by any
+sub-component of TT3 and it should (fingers crossed) get forwarded to the
+components's constructor.
+
+TODO: L<Template::TT3::Manual::Config> will eventually contain the full
+description of all the options.  This section should contain a summary of 
+the most important options.
+
+=head2 dialect
+
+This option allows you to specify the template dialect that you want to use.
+At present there is only one dialect: TT3. A TT2 dialect will be provided in
+the near future, offering something very similar to the current TT2 language,
+but implemented using the new TT3 parser. You can also create your own
+dialects, either to customise TT3 or to plug in an entirely different template
+language. Until I've had the chance to write more about this, you might like
+to consult the slides from my London Perl Workshop talk which shows a trivial
+example of creating a custom dialect.
+L<http://tt3.template-toolkit.org/talks/tt3-lpw2009/slides/slide17.html>.
+
+    my $tt3 = Template3->new( 
+         dialect => 'TT2'           # no TT2 dialect yet - coming RSN
+    );
+
+=head2 template_path
+
+This option allows you to specify the location of templates as a single value
+or a reference to a list of values.
+
+    # single location
+    my $tt3 = Template3->new( 
+        template_path => '/path/to/templates' 
+    );
+    
+    # multiple locations
+    my $tt3 = Template3->new( 
+        template_path => [ '/path/one', '/path/two' ] 
+    );
+
+Each item in the path can be a reference to a hash array containing the
+path and any other configuration items relating to the templates loaded
+from that location.  The following example shows how you can define a 
+template path that loads TT2 templates from one location and TT3 templates
+from another (note that the TT2 dialect isn't implemented yet, so this is
+theoretical - however, the dialect switching does work)
+
+    my $tt3 = Template3->new( 
+        template_path => [ 
+            {   path    => '/path/to/templates/tt3', 
+                dialect => 'TT3',
+            },
+            {
+                path    => '/path/to/templates/tt2',
+                dialect => 'TT2',
+            }
+        ]
+    );
+
+If you don't specify a C<template_path> then TT3 will allow you to access
+any file on the filesystem.  Templates specified with relative path names
+will be resolved relative to the current working directory.
+
+    use Template3;
+    
+    Template3->process('hello.tt3');        # in current directory
+    Template3->process('../hello.tt3');     # in parent directory
+    Template3->process('/tmp/hello.tt3');   # absolute path
+
+=head2 header
+
+This option allows you to specify a header template that should be processed
+before each main page template. The output from the footer is added to the
+start of the main page output. This affects templates processed using the
+L<process()> or L<render()> methods().
+
+    my $tt3 = Template3->new( 
+        header => 'site/header.tt3',
+    );
+
+=head2 footer
+
+This option allows you to specify a footer template that should be processed
+after each main page template.  The output from the footer is added to the 
+end of the main page output.  This affects templates processed using the
+L<process()> or L<render()> methods().
+
+    my $tt3 = Template3->new( 
+        header => 'site/header.tt3',
+    );
+
+=head2 wrapper
+
+This option allows you to specify a wrapper template that should be used to
+enclose the output from the main page template. The wrapper template is
+processed, passing the output generated from the main page template as the
+C<content> variable. This affects templates processed using the L<process()>
+or L<render()> methods().
+
+    my $tt3 = Template3->new( 
+        wrapper => 'site/wrapper.tt3',
+    );
+
+=head2 service
+
+TT3 uses a new service pipeline architecture for processing templates.
+The pipeline is defined as a number of service components, each of which
+does one small and simple thing.
+
+The default pipeline is defined as:
+
+    input => header => footer => wrapper => output
+
+The C<input> service deals with fetching and processing the main page 
+template.  The L<header>, L<footer> and L<wrapper> components decorate
+the output by adding headers, footers and wrappers respectively.  The
+C<output> component emits the generated content to a file, file handle, 
+object, or simply returns it if no output target has been specified.
+
+Each of these service components has a corresponding option that can be
+specified as a configuration option (see L<header>, L<footer> and L<wrapper>)
+and/or as an option to the L<render()> method.
+
+    $tt3->render(
+        input  => 'example.tt3',
+        header => 'site/header.tt3',
+        footer => 'site/footer.tt3',
+    );
+
+If you want to do something more complicated then you can defined your own
+service pipeline.  For example, if you want two different headers, one which
+we'll call the C<site_header> and the other, the C<section_header>, then you
+can write something like this:
+
+    my $tt3 = Template3->new(
+        service        => [
+            'header:site_header',               # type:name is sugar for:
+            'header:section_header',            # { type=>$type, name=>$name }
+            'footer',
+        ],
+        site_header    => 'site/header.tt3',    # default site header
+        footer         => 'site/footer.tt3',    # default site footer
+        section_header => '',                   # no default section header
+    );
+
+Note that you must specify a defined but false value for any components
+that don't have a default template (e.g. C<section_header> in the above
+example).  Otherwise the service component will be optimised out of the 
+pipeline and you'll be denied from using it later (this optimisation means
+that you don't pay any penalty for things like L<header>, L<footer> and 
+L<wrapper> if you don't use them).
+
+Note that the C<input> and C<output> service components are added
+automatically.  I'm not 100% sure that this is a good idea so it may 
+change in the near future.
+
+Now you can call the L<render()> method and configure the environment to 
+affect any of the service components.
+
+    $tt3->render(
+        input          => 'hello.tt3',
+        section_header => 'welcome/header.tt3',
+    );
 
 =head1 METHODS
 
@@ -331,10 +624,48 @@ The above example is equivalent to:
 Errors are returned as L<exception|Badger::Exception> objects, but you 
 can safely C<print> them to see a summary of the error type and message.
 
-=head2 engine()
+=head2 render(\%env)
 
-Method to get and/or set the runtime engine for the C<Template> module.
-See L<TEMPLATE ENGINES> for further details.
+This method does the same thing as L<process()> but using named parameters.
+
+    $tt3->render(
+        input  => 'example.tt3',
+        data   => { name => 'World' },
+        output => 'example.html',
+    );
+
+The named parameters define an I<environment> that is passed to the L<service>
+pipeline. In addition to the C<input>, C<data> and C<output> options
+corresponding to the positional arguments of the L<process()> method, the 
+environment can also contain parameters that affect other components in
+the service pipeline.
+
+    $tt3->render(
+        input  => 'example.tt3',
+        data   => { name => 'World' },
+        output => 'example.html',
+        header => 'site/header.tt3',
+        footer => 'site/footer.tt3',
+    );
+
+=head2 fill($type,$name,%env)
+
+This is a low-level method for processing a single template and returning 
+the output generated.  The service pipeline is bypassed, so you don't get
+any extra headers, footers, output redirection or anything else like that.
+
+    my $output = $tt3->fill( 
+        file => 'example.tt3',
+        data => { name => 'Badger' },
+    );
+    
+    my $output = $tt3->fill( 
+        text => 'Hello [% name %]',
+        data => { name => 'Badger' },
+    );
+
+The arguments are a little clumsy at present.  They may get changed
+in the near future as part of a general cleaned and consistency drive.
 
 =head2 prototype()
 
@@ -349,12 +680,12 @@ object for that class.  The prototype object will be automagically created
 
 So calling a class method like this:
 
-    Template3->print( file => $file );
+    Template3->process($file);
 
 is directly equivalent to calling an object method against the class
 prototype, like this:
     
-    Template3->prototype->print( file => $file );
+    Template3->prototype->process($file);
 
 The L<prototype()> method creates a new object by calling the L<new()>
 class method.  It then stores the returned object in the class C<$PROTOTYPE>
@@ -374,142 +705,6 @@ Or explicitly:
 The object returned by the L<prototype()> method will be an instance of the
 I<engine> class in use (as created by the L<new()> method). The following 
 sections describes engines in further detail.
-
-=head1 TEMPLATE ENGINES
-
-The C<Template3> module is implemented as a thin wrapper or I<facade> around a
-L<Template::TT3::Engine> object which is responsible for doing the real work of
-processing templates. 
-
-The default engine is L<Template::Engine::TT3>, implementing the B<TT3> API
-for the Template Toolkit. This is slightly different to the B<TT2> API
-(UPDATE: in fact it might not be that different after all).
-
-You can enable a different engine by calling the C<engine> class method. For
-example, the use the B<TT2> engine:
-
-    use Template3;
-    Template3->engine('Template::TT3::Engine::TT2');
-
-C<TT2> and C<TT3> are provided as aliases for their respective engines.
-
-    use Template3;
-    Template3->engine('TT2');
-
-The C<Template3> module will then interface to the
-L<Template::TT3::Engine::TT2> engine which provides an API which is backwardly
-compatible with B<TT2>.
-
-    # TT2 API
-    my $tt = Template3->new( INCLUDE_PATH => '/path/to/templates' );
-    $tt->process('example.tt2', { name => 'Badger' });
-
-You can also engage an engine using the C<engine> load option:
-
-    use Template3 engine => 'TT2';
-
-Or for the specific case of B<TT2>, you can write:
-
-    use Template 'TT2';
-
-This is the easiest way to ensure that your existing programs using the
-B<TT2> v2 API continue to work with version 3 of the C<Template3> module.
-
-You can also use an engine module directly and bypass the C<Template3>
-module altogether.
-
-    use Template::TT3::Engine::TT3;
-    
-    my $tt3 = Template::TT3::Engine::TT3->new(
-        template_path => '/path/to/templates',
-    );
-    
-    $tt3->process('example.tt3', { name => 'Badger' });
-
-You can do the same thing with C<TT2>:
-
-    use Template::TT3::Engine::TT2;
-    
-    my $tt2 = Template::TT3::Engine::TT2->new( 
-        INCLUDE_PATH => '/path/to/templates' 
-    );
-    
-    $tt2->process('example.tt2', { name => 'Badger' });
-
-Although in this particular case, the C<TT2> engine module is little more
-than a thin wrapper around L<Template::TT2>, so you might as well use it 
-directly.
-
-    use Template::TT2;
-    
-    my $tt2 = Template::TT2->new( 
-        INCLUDE_PATH => '/path/to/templates' 
-    );
-    
-    $tt2->process('example.tt2', { name => 'Badger' });
-
-=head1 LOAD OPTIONS
-
-The following options can be specified when you C<use> the C<Template3> module.
-
-=head2 engine
-
-This allows you to specify the engine module you want to use. The default is 
-L<Template::TT3::Engine::TT3>.
-
-    use Template engine => 'Template::TT3::Engine::TT2';
-
-You can drop the C<Template::TT3::Engine> prefix and leave it up to the 
-L<Template::TT3::Engines> factory module to find and load the relevant 
-module for you.
-
-    use Template engine => 'TT2';
-
-=head2 TT2
-
-Shorthand for engaging the C<TT2> engine and creating a C<TT2> alias.
-
-    use Template 'TT2';
-    
-    my $tt2 = TT2->new();
-
-=head2 TT3
-
-Shorthand for engaging the C<TT3> engine and creating a C<TT3> alias. 
-
-    use Template 'TT3';
-    
-    my $tt3 = TT3->new();
-
-=head1 CONFIGURATION OPTIONS
-
-=head2 path / template_path
-
-Specify the location of templates as a single value or a reference to a
-list of values.
-
-    my $tt = Template->new( path => '/path/to/templates' );
-    my $tt = Template->new( path => [ '/path/one', '/path/two' ] );
-
-NOTE: this isn't implemented yet
-
-=head2 data
-
-Define a default set of data for template variables.
-
-    my $tt = Template->new( vars => {
-        name  => 'Badger',
-        email => 'badger@template-toolkit.org',
-    });
-
-NOTE: this isn't implemented yet
-
-=head2 ...MORE TODO...
-
-=head1 BUGS
-
-The C<Template3> module is mostly functional and correct, but the engines
-behind it don't necessarily do what they're supposed to (yet).
 
 =head1 AUTHOR
 

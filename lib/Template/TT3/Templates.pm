@@ -14,7 +14,7 @@ use Template::TT3::Class
         DIALECT => 'TT3',
     },
     config      => [
-        'path|template_path|class:PATH',
+        'path|template_path|tpath|class:PATH',
         'providers|template_providers',
         'scheme|template_scheme|class:SCHEME|method:FILE_SCHEME',
         'dialect|class:DIALECT|method:DIALECT',

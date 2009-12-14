@@ -202,7 +202,7 @@ sub build_service {
         unless ref $service eq ARRAY;
     
     $self->debug("constructing service pipeline: ", join(', ', @$service))
-        if DEBUG or 1;
+        if DEBUG;
 
     # we always have an input service
     push(@services, INPUT_SERVICE, BLANK);
@@ -220,7 +220,7 @@ sub build_service {
             $value = { template => $value } unless ref $value eq HASH;
             $value->{ type } = $type;
             $value->{ name } = $key;
-            $self->debug("service shortcut: $type => ", $self->dump_data($value)) if DEBUG or 1;
+            $self->debug("service shortcut: $type => ", $self->dump_data($value)) if DEBUG;
             push(@services, $type => $value);
         }
         elsif (defined ($value = $config->{ $key })) {
