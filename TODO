@@ -45,11 +45,6 @@ the class name without checking to see if it can be loaded.
 
 Add name(), pair() and pairs() methods to all elements that require them.
 
-Fix the regexes that are constructed for the outline tag so they don't 
-consume newlines in comments, whitespace, etc.  Also make the end tag
-optional and accept a simple string as a start token which gets compiled
-to qr/^$start/.
-
 Change element 'list_values()' to 'items()', or figure out how to map it
 properly onto value/values.
 
@@ -68,6 +63,9 @@ grammar should be shared between inline/outline.
 
 Add support to function signatures for optional items (e.g. foo(bar?) )
 and default values (e.g. foo(bar=10) ).
+
+Add support to Badger::Factory for generic XXX_head and XXX_tail methods 
+that add elements to the start or end of the path respectively.
 
 
 Template::TT3::Templates/Hub/Config
@@ -104,7 +102,7 @@ always looks for the 'header' environment parameter).  Also, the fact that
 we have a default parameter of 'template' is too decorator-specific.
 
 [ ]  Write layout service
-[ ]  Write output service
+[X]  Write output service
 [ ]  Play around with other services: adding data, timers, output cache, etc.
 [X]  Fix service names, parameters, etc.
 [X]  Change service() method to pipeline() or something suitable evocative
@@ -122,5 +120,4 @@ documented.
    Template::TT3::Engines
    Template::TT3::Dialects
    Template::TT3::Providers
-
 
