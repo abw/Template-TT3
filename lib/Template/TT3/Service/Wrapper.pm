@@ -27,7 +27,7 @@ __END__
 
 =head1 NAME
 
-Template::TT3::Service::Footer - service module for adding a page wrapper
+Template::TT3::Service::Wrapper - service module for adding a page wrapper
 
 =head1 SYNOPSIS
 

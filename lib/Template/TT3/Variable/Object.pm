@@ -9,6 +9,7 @@ use Template::TT3::Class
         type        => 'object',
         PRIVATE     => '_',
         PUBLIC      => '*',
+        TT_DOT      => 'tt_dot',
         TT_PAIRS    => 'tt_pairs',
     },
     messages => {
@@ -45,6 +46,7 @@ sub configuration {
 
 sub dot {
     my ($self, $name, $args) = @_;
+    my ($result, $code);
 
     my $method 
         = $self->[META]->[METHODS]->{ $name }
@@ -54,12 +56,27 @@ sub dot {
        || return $self->error_msg( denied => $self->[NAME], $name );
               
     $method = $name if $method eq '1';
-    $method = $self->[VALUE]->can($method)
-        || return $self->error_msg( bad_method => $self->[NAME], $method )
-            unless ref $method eq CODE;
 
-    # TODO: How do we tell this to work in list context?
-    my $result = $self->[VALUE]->$method($args ? @$args : ());
+    # TODO: must be able to indicate that method should be called in list 
+    # context, e.g. to implement foo.@bar
+
+    if (ref $method eq CODE) {
+        # we've got a code reference
+        $result = $self->[VALUE]->$method($args ? @$args : ());
+    }
+    elsif ($code = $self->[VALUE]->can($method)) {
+        # we've got the name of a method that the object implements
+        $result = $self->[VALUE]->$code($args ? @$args : ());
+    }
+    elsif ($code = $self->[VALUE]->can(TT_DOT)) {
+        # the object has a tt_dot() method
+        $self->debug("object has a ", TT_DOT, "() method") if DEBUG;
+        $result = $self->[VALUE]->$code($name, $args ? @$args : ());
+    }
+    else {
+        return $self->error_msg( bad_method => $self->[NAME], $method );
+    }
+
 
     $self->[CONTEXT]->use_var($name, $result, $self);
 }

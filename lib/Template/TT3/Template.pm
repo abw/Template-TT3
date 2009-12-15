@@ -82,7 +82,7 @@ sub init {
         return $self->error_msg( missing => 'text, file or code' );
     }
 
-    $self->{ config } = $config;
+    $self->{ config   } = $config;
 
     return $self;
 }
@@ -235,6 +235,42 @@ sub templates {
     return $self->{ templates }
        ||= $self->{ config }->{ templates }
        ||= $self->hub->templates;
+}
+
+
+sub metadata {
+    my $self = shift;
+    my $meta = $self->{ metadata } ||= { };
+
+    # return the metadata hash when called without args
+    return $meta unless @_;
+
+    if (@_ == 1 && ! ref $_[0]) {
+        # single non-reference name is a lookup request: $t->metadata('title')
+        return $meta->{ $_[0] };
+    }
+    else {
+        # single hash ref or list of named params provide new metadata
+        my $params = params(@_);
+        $self->debug("adding metadata to template: ", $self->dump_data($params))
+            if DEBUG;
+        @$meta{ keys %$params } = values %$params;
+    }
+
+    return $meta;
+}
+
+sub tt_dot {
+    my ($self, $name, @args) = @_;
+
+    if (exists $self->{ metadata }->{ $name }) {
+        $self->debug("found metadata item for $name: $self->{ metadata }->{ $name }")
+            if DEBUG;
+        return $self->{ metadata }->{ $name };
+    }
+
+    # TODO: throw error?
+    return undef;
 }
 
 

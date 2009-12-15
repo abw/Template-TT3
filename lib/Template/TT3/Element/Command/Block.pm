@@ -62,11 +62,26 @@ sub parse_expr {
             #};
         }
         else {
+            # current way pushes block into scope... but this will break when
+            # we start using nested lexical scopes in a template.
             $scope->{ blocks }->{ $name } = {
                 source => $scope->{ source },
                 name   => $name, 
                 block  => $self->[BLOCK],
             };
+
+            # the new way should call a method on the scope which will walk
+            # up the scope chain until it find a template object to register
+            # the block with.
+            
+            #$scope->block( 
+            #    $name => {
+            #        source => $scope->{ source },
+            #        name   => $name, 
+            #        block  => $self->[BLOCK],
+            #    }
+            #);
+
         }
             
         $self->debug("added blocks: ", $self->dump_data($scope->{ blocks }))

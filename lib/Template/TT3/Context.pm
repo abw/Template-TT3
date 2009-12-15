@@ -13,6 +13,10 @@ use Template::TT3::Class
         VARIABLES => 'Template::TT3::Variables',
         VISIT     => 'Template::TT3::Context::Visit',
     },
+    alias       => {
+        get     => \&get_var,
+        set     => \&set_var,
+    },
     messages    => {
         bad_type    => 'Invalid variable type for %s: %s',
         missing     => '%s not found in context',

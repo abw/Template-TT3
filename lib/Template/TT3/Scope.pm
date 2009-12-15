@@ -34,7 +34,46 @@ sub clone {
         parent => $self,
     );
 }
+
+
+sub block {
+    shift->template->block(@_);
+}
+
+
+sub metadata {
+    shift->template->metadata(@_);
+}
+
+
+sub template {
+    my $self = shift;
+    return $self->{ template } 
+        ||= $self->parent('template')
+        ||  $self->error_msg( missing => 'template' );
+}
+
+
+sub parent {
+    my $self   = shift;
+    my $parent = $self->{ parent };
     
+    # act as a simple accessor when called without arguments
+    return $parent unless @_;
+ 
+    # otherwise lookup the named item
+    my $item = shift;
+
+    $self->debug("looking up $item in parent") if DEBUG;
+ 
+    # walkup through the parent chain looking for the item
+    while ($parent) {
+        $parent->{ $item } && return;
+        $parent = $parent->{ parent };
+    }
+}
+
+
 sub context {
     my $self = shift;
 

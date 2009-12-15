@@ -31,6 +31,7 @@ use Badger::Class
         FILE_SCHEME         => 'file',
         CODE_SCHEME         => 'code',
         NAME_SCHEME         => 'name',
+        DATA_SCHEME         => 'data',
         COLON               => ':',
         
         # service names
@@ -56,7 +57,8 @@ use Badger::Class
                              CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
             cache        => 'CACHE_ALL CACHE_NONE',
             from         => 'FROM_TEXT FROM_CODE FROM_HANDLE',
-            scheme       => 'TEXT_SCHEME FILE_SCHEME CODE_SCHEME NAME_SCHEME COLON',
+            scheme       => 'TEXT_SCHEME FILE_SCHEME CODE_SCHEME NAME_SCHEME 
+                             DATA_SCHEME COLON',
             service      => 'INPUT_SERVICE OUTPUT_SERVICE',
             precedence   => 'ARG_PRECEDENCE CMD_PRECEDENCE',
             lookup_slots => {

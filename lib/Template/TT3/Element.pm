@@ -231,7 +231,7 @@ sub advance_expr {
 
 
 sub is {
-    # Check to see if the token matches that specifed: 
+    # Check to see if the token matches that specified: 
     # e.g. if ($token->is('foo'))
     if (@_ == 3) {
         # if a $token reference is passed as the third argument then we 

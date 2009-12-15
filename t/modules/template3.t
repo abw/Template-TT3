@@ -4,6 +4,8 @@
 #
 # Test the Template3 module.
 #
+# Run with the -h option for help.
+#
 # Written by Andy Wardley <abw@wardley.org>
 #
 # This is free software; you can redistribute it and/or modify it
@@ -16,7 +18,6 @@ use Badger
     Filesystem => 'Bin';
 
 use Template::TT3::Test 
-#    debug => 'Template3 Template::TT3::Templates',
     debug => 'Template::TT3::Engine::TT3 Template::TT3::Services',
     args  => \@ARGV,
     tests => 6;

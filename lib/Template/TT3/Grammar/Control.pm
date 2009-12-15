@@ -23,6 +23,7 @@ our $SYMBOLS  = [
     [ ','           => separator        =>   0,   0 ],
     [ ';'           => delimiter        =>   0,   0 ],
     [ ':'           => terminator       =>   0,   0 ],
+    [ 'META'        => ctr_meta         =>   0,   0 ],
     [ 'TAGS'        => ctr_tags         =>   0,   0 ],
     [ 'HTML'        => ctr_html         =>   0,   0 ],
     [ 'COMMANDS'    => ctr_commands     =>   0,   0 ],

@@ -1,0 +1,4 @@
+[HEADER][% slot header 'Default header' %][/HEADER]
+[CONTENT][% content %][/CONTENT]
+[FOOTER][% slot footer 'Default footer' %][/FOOTER]
+[CONTENT_SLOT][% slot content '' %][/CONTENT_SLOT]
