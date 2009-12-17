@@ -70,8 +70,7 @@ our $SYMBOLS  = [
     [ 'to'      => num_to           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     [ 'by'      => num_by           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     
-    [ '?'       => question         => 230,   0 ],      # foo ? bar : baz
-#    [ ':'       => terminator       =>   0,   0 ],      # foo ? bar : baz       # TODO: terminator
+    [ '?'       => op_ternary       => 230,   0 ],      # foo ? bar 
 
     # this used to be above ? : but I think it's better here so that 
     # something like a -> a > 10 ? "big" : "small" is parsed as 
