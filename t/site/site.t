@@ -22,7 +22,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template::TT3::Site Template::TT3::Site::Map::File Badger::Filesystem::Visitor',
     args  => \@ARGV,
-    tests => 6;
+    tests => 2;
 
 use Template::TT3::Site;
 use constant SITE => 'Template::TT3::Site';
@@ -33,9 +33,9 @@ my $file = Bin->dir('metadata')->file('site.yaml');
 my $site = SITE->new( map => $file );
 ok( $site, 'created new site' );
 
-$site->build(
-    verbose => 1,
-    all     => 1,
+#$site->build(
+#    verbose => 1,
+#    all     => 1,
 #    colour  => 0,
-);
+#);
 
