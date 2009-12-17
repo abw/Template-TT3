@@ -76,6 +76,10 @@ sub hush {
     return '';
 }
 
+sub def {
+    CORE::defined $_[0] ? $_[0] : '';
+}
+
 sub defined {
     CORE::defined $_[0] ? TRUE : FALSE;
 }

@@ -45,6 +45,7 @@ sub value {
     # If we were passed an element reference then we raise the error 
     # against that so that it can decorate the exception with line 
     # number, source code, etc.  Otherwise we just throw a plain error.
+    $self->debug("undef value() for $self->[NAME], element is $element, context is $self->[CONTEXT]") if DEBUG;
     return $element
         ? $element->fail_undef_data #( $self->fullname )
         : $self->error_msg( undefined => $self->fullname );

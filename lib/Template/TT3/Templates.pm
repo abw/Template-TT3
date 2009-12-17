@@ -123,7 +123,7 @@ sub init_path {
             # got a hash - that's a complete definition
             $args = $path;
         }
-        elsif (ref $path) {
+        elsif (ref $path && ! textlike $path) {
             # got a non-hash ref: throw error for now, but consider things 
             # like sub refs / path generators for the future
             return $self->error_msg( bad_path => $path );

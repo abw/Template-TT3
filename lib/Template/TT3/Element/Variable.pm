@@ -110,7 +110,6 @@ sub name {
 
 
 sub variable {
-    $_[SELF]->debug("variable variable(): ", $_[SELF]->source) if DEBUG;
     $_[CONTEXT]->var( $_[SELF]->[TOKEN] );
 }
 

@@ -84,7 +84,7 @@ sub get {
 
 sub set {
     my ($self, $value) = @_;
-#    $self->debug("setting variable $self->[NAME] to $value");
+    $self->debug("$self setting variable $self->[NAME] in my context $self->[CONTEXT] to $value") if DEBUG;
     return $self->[CONTEXT]->set_var( 
         $self->[NAME],
         $value,
@@ -107,8 +107,6 @@ sub text {
     else {
 # TODO: Look for element.  Does this branch ever get called or does 
 # Undef take care of it?
-#        my $element = shift;
-        
         return $self->error_msg( undefined => "var:" . $self->fullname );
     }
 }
@@ -191,11 +189,10 @@ sub method_names {
 
 
 sub no_method {
-    my ($self, $name) = @_;
-    return $self->error_msg( 
-        no_vmethod => $self->type => $name => $self->fullname,
-#        join(', ', sort $self->method_names)
-     );
+    my ($self, $name, $element) = @_;
+    return $element
+        ? $element->fail_undef_method( $self->type, $name, $self->fullname )
+        : $self->error_msg( no_vmethod => $self->type => $name => $self->fullname );
 }
 
 

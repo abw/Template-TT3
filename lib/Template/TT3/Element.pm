@@ -56,6 +56,7 @@ our $MESSAGES = {
     undef_data      => "Undefined value returned by expression: <1>",
     undef_expr      => "Undefined value in '<2>': <1>",
     undef_dot       => "Undefined value in '<1>.<2>': <1>",
+    undef_method    => '"<2>" is not a valid <1> method in "<3>.<2>"', 
     nan             => "Non-numerical value '<2>' returned by expression: <1>",
 
     pairs_odd       => 'Cannot make pairs from an odd number (<2>) of items: <1>',
@@ -703,6 +704,10 @@ sub fail_undef_expr {
 
 sub fail_undef_dot { 
     shift->fail_undef( dot => @_ );
+}
+
+sub fail_undef_method { 
+    shift->fail_undef( method => @_ );
 }
 
 sub fail_syntax { 

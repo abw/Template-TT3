@@ -70,8 +70,7 @@ sub var {
     
     return @_ > 1
         ? $self->set_var(@_)
-        : $self->{ vars }->{ $_[0] } 
-      ||= $self->get_var(@_);
+        : $self->get_var(@_);
 }
 
 
@@ -84,7 +83,7 @@ sub get_var {
     # bound to the child context, not the parent.  Otherwise we use $self.
     $context ||= $self;
 
-    $self->debug("$self get_var($name)") if DEBUG;
+    $self->debug("$self get_var($name) in $context") if DEBUG ;
 
     if ($var = $self->{ vars }->{ $name }) {
         # FIXME: had to add this to fix the gnarly old goat bug that prevented
@@ -119,7 +118,7 @@ sub get_var {
     }
     elsif ($self->{ lookup }) {
         $self->debug("asking lookup ($self->{ lookup }) for $name") if DEBUG;
-        return $self->{ lookup }->get_var($name, $self);
+        return $self->{ lookup }->get_var($name, $context);
     }
     else {
         $self->debug("$self $name is missing") if DEBUG;
@@ -131,7 +130,7 @@ sub get_var {
 sub set_var {
     my ($self, $name, $value) = @_;
 
-    $self->debug("set_var($name, $value)") if DEBUG;
+    $self->debug("$self set_var($name, $value)") if DEBUG;
     
     # we don't update the target data, just the local variable wrapper
     return $self->{ vars }->{ $name } 

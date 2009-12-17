@@ -13,6 +13,7 @@ sub serve {
     my $header = $self->template( $env )
         || return $pipeline->( $env );
 
+    # TODO: should we run the pipeline first?
     return $header->fill_in( $env->{ context } )
          . $pipeline->( $env );
 }

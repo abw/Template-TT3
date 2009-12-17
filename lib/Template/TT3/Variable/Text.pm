@@ -12,7 +12,7 @@ use Template::TT3::Class
 
 
 sub dot {
-    my ($self, $name, $args) = @_;
+    my ($self, $name, $args, $element) = @_;
 
     $self->debug(
         "text lookup $name with args [$args] => ", 
@@ -28,7 +28,7 @@ sub dot {
         );
     }
     else {
-        return $self->no_method($name);
+        return $self->no_method($name, $element);
     }
 }
 
