@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 9,
+    tests   => 11,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -100,3 +100,18 @@ TT3 undefined data error at line 1 of "undefined middle of a dotop" test:
     Error: Undefined value in 'hash.missing.have': hash.missing
    Source: %% hash.missing.have.you.seen.my.cat
                           ^ here
+-- test hash dotop with dollar sigil --
+%% var = 'phi'
+PHI: [% hash.phi %]
+PHI: [% hash.$var %]
+-- expect --
+PHI: 1.618
+PHI: 1.618
+
+-- test list dotop with dollar sigil --
+%% n = 1
+twenty: [% list.1 %]
+twenty: [% list.$n %]
+-- expect --
+twenty: 20
+twenty: 20

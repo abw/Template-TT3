@@ -4,7 +4,7 @@ use Template::TT3::Class
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Sigil',
-    constants => ':elements ARRAY',
+    constants => ':elements ARRAY FORCE',
     alias     => {
         # we always force scalar value() on our target, even when we're
         # being called as list values()
@@ -12,6 +12,28 @@ use Template::TT3::Class
 
         # TODO: do we need one for list_values and/or hash_values()?
     };
+
+
+sub parse_dotop {
+    my ($self, $token, $scope, $prec) = @_;
+
+    # advance past sigil token
+    $$token = $self->[NEXT];
+    
+    # fetch next expression using our ultra-high RHS precedence, along with
+    # the FORCE argument to ensure that we get at least one token if we can
+    $self->[EXPR] = $$token->parse_expr(
+        $token, $scope, $self->[META]->[RPREC], FORCE
+    )   || return $self->fail_missing( expression => $token );
+
+    $self->debug("using $self->[EXPR] as dotop: $self\n") if DEBUG;
+    
+    # TODO: allow other () [] {} to follow
+    #return $$token->parse_postfix($self, $token, $scope, $prec);
+    
+    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
+}
+
 
 # NOTE: I considered change the parse_expr() / parse_variable() methods to return 
 # the next variable expression directly so we can avoid these indirections.
