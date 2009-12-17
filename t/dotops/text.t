@@ -16,7 +16,7 @@ use Badger
 
 #use Badger::Debug modules => 'Template::TT3::Variables';
 use Template::TT3::Test 
-    tests   => 6,
+    tests   => 7,
     debug   => 'Template::TT3::Template Template::TT3::Variables',
     args    => \@ARGV,
     import  => 'test_expressions';
@@ -63,4 +63,7 @@ foo.mushroom
 -- expect --
 <ERROR:"mushroom" is not a valid text method in "'snake'.mushroom">
 
-
+-- test text.trim --
+'  hello  '.trim
+-- expect --
+hello

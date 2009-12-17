@@ -8,9 +8,8 @@ use Template::TT3::Class
     base     => 'Template::TT3::Grammar';
 
 # These are the command keywords that we recognise
-our $COMMANDS = 'as is do dot sub block with just
-                 for if else elsif fill into slot
-                 encode decode raw';
+our $COMMANDS = 'as is do dot sub block with just slot into for 
+                 if else elsif unless fill encode decode raw';
 
 our $SYMBOLS  = [
 #   [ token => element_name => left_precedence, right_precedence ]

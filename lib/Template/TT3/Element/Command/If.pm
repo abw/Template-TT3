@@ -92,9 +92,14 @@ sub else_block {
 }        
 
 
+sub true {
+    return $_[SELF]->[LHS]->value($_[CONTEXT]);
+}
+
+
 sub text {
     # TODO: should we have a true()/truth() method in elements?
-    return $_[SELF]->[LHS]->value($_[CONTEXT])
+    return $_[SELF]->true($_[CONTEXT])
          ? $_[SELF]->[RHS]->text($_[CONTEXT])
          : $_[SELF]->[BRANCH]
             ? $_[SELF]->[BRANCH]->text($_[CONTEXT])
@@ -102,7 +107,7 @@ sub text {
 }
 
 sub values {
-    return $_[SELF]->[LHS]->value($_[CONTEXT])
+    return $_[SELF]->true($_[CONTEXT])
          ? $_[SELF]->[RHS]->values($_[CONTEXT])
          : $_[SELF]->[BRANCH]
             ? $_[SELF]->[BRANCH]->values($_[CONTEXT])
@@ -111,7 +116,7 @@ sub values {
 
 
 sub pairs {
-    return $_[SELF]->[LHS]->value($_[CONTEXT])
+    return $_[SELF]->true($_[CONTEXT])
          ? $_[SELF]->[RHS]->pairs($_[CONTEXT])
          : $_[SELF]->[BRANCH]
             ? $_[SELF]->[BRANCH]->pairs($_[CONTEXT])
