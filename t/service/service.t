@@ -16,7 +16,7 @@ use Badger
     Filesystem => 'Bin';
 
 use Template::TT3::Test 
-    tests => 19,
+    tests => 23,
     debug => 'Template::TT3::Service Template::TT3::Services',
     args  => \@ARGV;
 
@@ -30,6 +30,7 @@ use Template::TT3::Services;
 use constant SERVICES => 'Template::TT3::Services';
 
 pass( 'Loaded ' . SERVICES );
+
 
 #-----------------------------------------------------------------------
 # header and footer
@@ -131,14 +132,35 @@ $tt3 = Template3->new(
     layout         => 'layout.tt3',
 );
 
+my $expect =<<EOF;
+[HEADER]Default header[/HEADER]
+[CONTENT]Hello Badger![/CONTENT]
+[FOOTER]This is the custom footer block[/FOOTER]
+[CONTENT_SLOT]This is the custom content block[/CONTENT_SLOT]
+EOF
+
 ok( $tt3, 'created template engine with layout' );
 is( $tt3->process('laidout.tt3', name => 'Badger' ), 
-    "Hello Badger!cccccc\n", 
+    $expect,
     'custom layout' 
 );
 
 
-exit();
+#-----------------------------------------------------------------------
+# before
+#-----------------------------------------------------------------------
+
+$tt3 = Template3->new(
+    template_path  => $tdir,
+    before         => 'config.tt3',
+);
+
+ok( $tt3, 'created template engine with before' );
+is( $tt3->process('hello.tt3'), 
+    "Hello Badger!\n", 
+    'before', 
+);
+
 
 
 #-----------------------------------------------------------------------

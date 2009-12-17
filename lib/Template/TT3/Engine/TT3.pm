@@ -24,7 +24,7 @@ use Template::TT3::Class
     mutators    => 'hub_module';
 
 our $HUB_MODULE = HUB_MODULE;
-our $SERVICE    = 'layout header footer wrapper';
+our $SERVICE    = 'before layout header footer wrapper';
 
 
 #-----------------------------------------------------------------------
