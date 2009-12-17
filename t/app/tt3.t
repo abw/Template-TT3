@@ -22,7 +22,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template::TT3::App',
     args  => \@ARGV,
-    tests => 6;
+    tests => 2;
 
 use Template::TT3::App;
 use constant APP => 'Template::TT3::App';
