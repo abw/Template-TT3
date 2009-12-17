@@ -39,6 +39,14 @@ The assignment mechanism needs a little re-think.  The current as_lvalue()
 hack is clunky.  They way it used to work (in the pre-badger prototype) was
 probably better.
 
+=head2 List Context Methods
+
+    %% foo.@bar
+
+The C<@> indicates that the method should be called in list context instead
+of the default scalar context.  This required some tweakery in the object
+variable modules and then updates to the element parsers.
+
 =head2 Template Spec
 
     %% template = <example.tt3>     # fetch single template
@@ -80,6 +88,8 @@ Add support to function signatures for optional items (e.g. foo(bar?) )
 and default values (e.g. foo(bar=10) ).
 
 =head1 Commands
+
+=head2 fix the HTML commands like 'br' that don't expect any content
 
 =head2 html
 
@@ -194,6 +204,32 @@ template for temporary use in a subroutine might pull the whole framework
 into persistence. 
 
 =head1 Template Services
+
+I'm not sure about the service pipeline architecture as it stands.  On one
+hand, it's nice and simple.  On the other hand, it is perhaps too simple.
+Things like branching and/or conditional execution of the pipeline are
+not possible (or limited, at best).  It's also hard to intuit the execution
+order of the pipeline because it depends on individual components.  
+
+For example, the header component can elect to process the preceding pipeline
+first and then add the header (in which case the main template can make
+changes that affect the header, e.g. set a variable, update the environment,
+etc) or it can process the header first and then do the main page template (in
+which case the header can affect the template). In the case of the 'before'
+component the distinction is much more clear cut - the 'before' template
+should be processed before the main template. But with something like header,
+you can't be so sure, and the only way to figure out the execution order for a
+pipeline containing a header component is to know what the code in the header
+component does. I don't like that.
+
+One possible change is to have the components write to and from the 
+environment 'content' parameter instead of executing the preceding pipeline
+to get content.  But that would prevent components like error from wrapping
+the execution in an error handler.
+
+Perhaps we should revert to having simple decorator services that work on 
+the content, but leaving other services to work on the pipeline if they 
+prefer?  That might be the best approach.
 
 =head2 Services and/or Decorators?
 
