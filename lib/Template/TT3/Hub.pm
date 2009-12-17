@@ -43,12 +43,14 @@ use Template::TT3::Class
 
 our $COMPONENTS = { 
     cache      => CACHE_MODULE,
+    codecs     => CODECS_MODULE,
     context    => CONTEXT_MODULE,
     dialects   => DIALECTS_MODULE,
     filesystem => FILESYSTEM_MODULE,
     plugins    => PLUGINS_MODULE,
     providers  => PROVIDERS_MODULE,
     services   => SERVICES_MODULE,
+    sitemaps   => SITEMAPS_MODULE,
     store      => STORE_MODULE,
     templates  => TEMPLATES_MODULE,
     views      => VIEWS_MODULE,
@@ -64,10 +66,12 @@ our $COMPONENTS = {
 #-----------------------------------------------------------------------
 
 our $DELEGATES  = {
+    codec      => 'codecs',
     dialect    => 'dialects',
     plugin     => 'plugins',
     provider   => 'providers',
     service    => 'services',
+    sitemap    => 'sitemaps',
     template   => 'templates',
 };
 

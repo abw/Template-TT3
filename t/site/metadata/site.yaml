@@ -1,0 +1,44 @@
+# General metadata for the site
+site:
+  name: my_test_site
+  title: My Test Site
+  author: Andy Wardley
+  copyright: 2009 Andy Wardley
+
+# Build options
+build:
+#  summary: 1
+  verbose: 1
+#  mkdir: 1
+#  quiet: 0
+ # colour: 1
+
+# Directory layout - these are the defaults
+#dirs:
+#  pages: templates/pages
+#  library: templates/library
+#  output: html
+
+# The static page templates we want to build
+find:
+  files: 
+    - '*.tt3'
+    - '*.html'
+  no_files: 'ignore_*'
+  in_dirs: '*'
+  not_in_dirs:
+    - .git
+    - .svn
+    - 'ignore_*'
+  # mappings from input file extension to output file extension
+  suffix:
+    tt3: html
+
+# Options for the template engine, including service parameters like
+# header, footer, etc.  The template_path is generated automatically
+engine:
+#  before:  site/config.tt3
+  header:  header.tt3
+  footer:  footer.tt3
+#  wrapper: site/wrapper.tt3
+

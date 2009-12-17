@@ -21,13 +21,18 @@ use Template::TT3::Class
         PROVIDERS_MODULE  => 'Template::TT3::Providers',
         SERVICE_MODULE    => 'Template::TT3::Service',
         SCANNER_MODULE    => 'Template::TT3::Scanner',
+        SITEMAP_MODULE    => 'Template::TT3::Site::Map',
+        SITEMAPS_MODULE   => 'Template::TT3::Site::Maps',
         STORE_MODULE      => 'Template::TT3::Store',
         TAG_MODULE        => 'Template::TT3::Tag',
         TAGSET_MODULE     => 'Template::TT3::Tagset',
         TEMPLATE_MODULE   => 'Template::TT3::Template',
         TEMPLATES_MODULE  => 'Template::TT3::Templates',
         VIEWS_MODULE      => 'Template::TT3::Views',
+
+        # other modules
         IO_HANDLE         => 'IO::Handle',
+        CODECS_MODULE     => 'Badger::Codecs',
     },
     exports => {
         any  => 'CONTEXT_MODULE HUB_MODULE EXCEPTIONS_MODULE TEMPLATE_MODULE
@@ -37,7 +42,8 @@ use Template::TT3::Class
         tags => {
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE
-                    VIEWS_MODULE CONTEXT_MODULE SERVICES_MODULE',
+                    VIEWS_MODULE CONTEXT_MODULE SERVICES_MODULE 
+                    SITEMAPS_MODULE CODECS_MODULE',
         },
     };
 

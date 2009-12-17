@@ -1,0 +1,7 @@
+[? META greeting = 'Hello World!' ?]
+
+<h1>[% Page.title %]</h1>
+<p>
+  This is the home page.
+</p>
+
