@@ -15,9 +15,11 @@ use Template::TT3::Class
     },
     alias     => {
         _params => \&Badger::Utils::params,
+        fail    => 'error_msg',         # some modules may re-define
     },
     messages  => {
-        no_hub => '%s object is not attached to a hub',
+        no_hub         => '%s object is not attached to a hub',
+        syntax_dot_set => "You cannot set '%s.%s' to '%s'",
     };
 
 
@@ -62,10 +64,15 @@ sub raise_error {
 }
 
 
+#-----------------------------------------------------------------------
+# TODO: move this into element
+#-----------------------------------------------------------------------
+
+
 sub token_error {
     my $self   = shift;
     my $type   = shift;
-    my $token  = shift;
+    my $token  = shift;                     # TODO: put token first
     my $text   = join(BLANK, @_);
     my $posn   = $token && $token->pos;
     
@@ -82,7 +89,7 @@ sub token_error {
 sub token_error_msg {
     my $self   = shift;
     my $type   = shift;
-    my $token  = shift;
+    my $token  = shift;                     # TODO: put token first
     my $text   = $self->message(@_);
     return $self->token_error($type, $token, $text);
 }

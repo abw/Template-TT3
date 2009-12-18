@@ -83,12 +83,23 @@ sub get {
 
 
 sub set {
-    my ($self, $value) = @_;
-    $self->debug("$self setting variable $self->[NAME] in my context $self->[CONTEXT] to $value") if DEBUG;
-    return $self->[CONTEXT]->set_var( 
-        $self->[NAME],
-        $value,
-    );
+    my $self = shift;
+    
+    $self->debug(
+        "setting variable ",
+        $self->fullname,
+        " to $_[0] in ",
+        $self->[PARENT] 
+            ? "parent $self->[PARENT]"
+            : "context $self->[CONTEXT]"
+    ) if DEBUG;
+
+    # TODO: try and unify the top level context with any other hash so that
+    # we always call on the parent here, and the parent for all top level
+    # items is the root hash
+    return $self->[PARENT]
+        ? $self->[PARENT]->dot_set($self->[NAME], @_)
+        : $self->[CONTEXT]->set_var($self->[NAME], @_);
 }
 
 
@@ -121,14 +132,28 @@ sub pairs {
 }
 
 
+sub dot {
+    shift->not_implemented;
+}
+
+sub dot_set {
+    my ($self, $name, $value, $element) = @_;
+
+    $self->debug(
+        $self->fullname, "->dot_set($name => $value) ", 
+        $element ? " by element $element" : " (no element)"
+    ) if DEBUG;
+
+    return ($element || $self)
+        ->fail( syntax_dot_set => $self->fullname, $name, $value );
+}
+
 sub ref {
     CORE::ref $_[0]->[VALUE];
 }
 
 
-sub dot {
-    shift->not_implemented;
-}
+
 
 
 sub apply {

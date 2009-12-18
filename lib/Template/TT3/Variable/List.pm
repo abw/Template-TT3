@@ -39,6 +39,24 @@ sub dot {
     }
 }
 
+sub dot_set {
+    my ($self, $name, $value, $element) = @_;
+
+    $self->debug(
+        $self->fullname, "->dot_set($name => $value) ", 
+        $element ? " by element $element" : " (no element)"
+    ) if DEBUG;
+    
+    $self->[VALUE]->[$name] = $value;
+
+    return $self->[CONTEXT]->use_var( 
+        $name,
+        $value, 
+        $self, 
+    );
+}
+
+
 sub values {
     $_[SELF]->debug("values()") if DEBUG;
     return @{ $_[SELF]->[VALUE] };

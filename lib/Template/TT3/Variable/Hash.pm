@@ -62,6 +62,24 @@ sub dot {
 }
 
 
+sub dot_set {
+    my ($self, $name, $value, $element) = @_;
+
+    $self->debug(
+        $self->fullname, "->dot_set($name => $value) ", 
+        $element ? " by element $element" : " (no element)"
+    ) if DEBUG;
+    
+    $self->[VALUE]->{ $name } = $value;
+
+    return $self->[CONTEXT]->use_var( 
+        $name,
+        $value, 
+        $self, 
+    );
+}
+
+
 # NOTE - this is evaluating the hash in list (values) context, so it's 
 # really equivalent to C<%hash>.  It is not the same thing as C<values %hash>
 

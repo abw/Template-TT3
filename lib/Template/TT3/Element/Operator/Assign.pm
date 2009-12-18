@@ -41,6 +41,9 @@ sub parse_infix {
     # the RHS if it has a function signature, e.g.  [% b(t) = "<b>$t</b>" %]
     # or if it requires parallel assignment, e.g. [% @foo = @bar %]
     my $assign = $lhs->as_lvalue($self, $scope);
+    
+    $self->debug("parsed assignment\nLHS: $self->[LHS]\nRHS: $self->[RHS]")
+        if DEBUG;
 
     # at this point the next token might be a lower or equal precedence 
     # operator, so we give it a chance to continue with the current operator
@@ -58,7 +61,8 @@ sub value {
         ->set(                           # set it to RHS value
             $_[SELF]
                 ->[RHS]
-                ->value( $_[CONTEXT] )
+                ->value( $_[CONTEXT] ),
+            $_[SELF]
         )
         ->value( $_[SELF] );
 

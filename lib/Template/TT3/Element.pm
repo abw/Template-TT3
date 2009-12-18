@@ -73,7 +73,7 @@ our $MESSAGES = {
     resource_missing => 'Requested %s resource not found: %s',
 
     # stuff to cleanup/rationalise
-    bad_assign      => "Invalid assignment to expression: %s",
+#    bad_assign      => "Invalid assignment to expression: %s",
     bad_method      => "The %s() method is not implemented by %s.",
     not_follow      => "'%s' cannot follow '%s'",
     bad_assign      => "You cannot assign to %s",
@@ -618,26 +618,18 @@ sub finish {
 
 
 #-----------------------------------------------------------------------
-# error handling - see also methods in Template::TT3::Base
+# Error handling - see also methods in Template::TT3::Base
+# TODO: clean all this up.  There are too many confusing methods.
 #-----------------------------------------------------------------------
 
-sub token_error {
-    my $self   = shift;
-    my $type   = shift;
-    my $token  = shift || $self;
-    my $text  = join(BLANK, @_);
-    my $posn  = $token->pos;
-
-    $self->raise_error(
-        $type => {
-            info     => $text,
-            element  => $self,
-            token    => $token,
-            position => $posn,
-        },
-    );
+sub fail {
+    my $self = shift;
+    my $name = shift;
+    my $type = $name =~ /^([[:alnum:]]+)_/ ? $1 : $name;
+    my $text = $self->message($name, @_);
+    my $posn = $self->pos;
+    return $self->token_error( $type, $self, $text);
 }
-
 
 sub fail_missing {
     my ($self, $what, $token) = @_;
@@ -650,6 +642,7 @@ sub fail_missing {
             : (missing_for     => $what => $self->[TOKEN] => $$token->[TOKEN])
     );
 }
+
 
 
 sub fail_undef { 

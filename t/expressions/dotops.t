@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 11,
+    tests   => 15,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -115,3 +115,32 @@ twenty: [% list.$n %]
 -- expect --
 twenty: 20
 twenty: 20
+
+
+#-----------------------------------------------------------------------
+# dotop to assign to hashes, lists, etc
+#-----------------------------------------------------------------------
+
+-- test hash update --
+%% hash.pi = 3.1415926
+PI: [% hash.pi %]
+-- expect --
+PI: 3.1415926
+
+-- test hash add --
+%% hash.answer = 42
+Answer: [% hash.answer %]
+-- expect --
+Answer: 42
+
+-- test list update --
+%% list.1 = 'twenty'
+twenty [% list.1 %]
+-- expect --
+twenty twenty
+
+-- test list add --
+%% list.5 = 'fifty'
+fifty [% list.5 %]
+-- expect --
+fifty fifty

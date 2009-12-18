@@ -60,6 +60,11 @@ sub as_pair {
     );
 }
 
+sub as_lvalue {
+    my ($self, $op, $rhs, $scope) = @_;
+    return $op;
+}
+
 
 sub value {
     $_[SELF]->debug("fetching value()") if DEBUG;

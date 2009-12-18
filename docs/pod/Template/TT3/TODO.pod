@@ -19,12 +19,6 @@ rethink of the iterator API before I plug it in.
 
 This needs a proper loop iterator.
 
-=head2 Tertiary ? :
-
-    %% foo ? bar : baz
-
-I can't believe I still haven't got around to this.  Should be trivial.
-
 =head2 Thin Lambda Arrow
 
     %% a -> a + 1
@@ -86,6 +80,25 @@ this to reconstitute args for error reporting, e.g. in T::E::Command::Sub.
 
 Add support to function signatures for optional items (e.g. foo(bar?) )
 and default values (e.g. foo(bar=10) ).
+
+=head2 Error Handling
+
+The element base class has evolved a large and complicated set of error 
+method (well, quick hacks to get things working) that need to be cleaned
+up.  The new way is to call $element->fail(), e.g.
+
+    $element->fail( syntax_on_fire => $a, $b, $c );
+
+This raises a syntax exception (L<Template::TT3::Exception::Syntax>) using
+the C<syntax_on_fire> message format (which doesn't really exist, BTW, I
+just made it up) which should be defined in L<Template::TT3::Base>.  The
+arguments ($a, $b, $c) are used to fill in the message format.
+
+Eventually we should move all the messages out into a separate 
+C<Template::TT3::Messages> module.  This should try and load an alternate
+set based on some configuration variable, environment variable, etc., 
+so that the message can be localised to different languages and/or marked
+up as HTML.
 
 =head1 Commands
 
