@@ -37,8 +37,11 @@ sub init {
     $self->{ page } = $page;
     $self->{ uri  } = $config->{ uri } || $self->{ page }->{ uri } || '';
     
+    $self->debug("page $self->{ uri } has data ", $self->dump_data($page))
+        if DEBUG;
+
     my @path = split(SLASH, $self->{ uri });
-    $self->{ name } = $path[-1];
+    $self->{ name } = $page->{ name } || $path[-1];
     
     return $self;
 }
@@ -91,6 +94,17 @@ sub pages {
     ];
 }
 
+sub url {
+    $_[0]->{ uri };
+}
+
+sub title {
+    'TODO';
+}
+
+sub about {
+    'about';
+}
 
 sub input_file {
     my $self = shift;
@@ -132,10 +146,93 @@ sub modified {
     shift->input_file->modified;
 }
 
+
 #-----------------------------------------------------------------------
 # Everything after this point is a cut-n-paste from another code base.
 # It needs sorting out, making generic, cleaning up, etc.
 #-----------------------------------------------------------------------
+
+
+sub trail {
+    my $self  = shift;
+    delete $self->{ trail } if @_;
+    return $self->{ trail } ||= do {
+        my $uri   = $self->{ uri }; 
+        $uri =~ s[^/][];
+        $uri =~ s[\/index.html][];
+        my @path  = split(/\/+/, $uri);
+        my @trail = map { '/' . join('/', @path[0..$_]) } 0..$#path;
+#        $self->debug("TRAIL: ", join(', ', @trail), "\n");
+        # we don't throw errors by default because there could be pages missing
+        # in the trail (e.g. /foo/bar/baz but no /foo/bar).  However, we forward
+        # any arguments passed, so the caller can add { throw => 1 } if they like.
+        $self->site->pages(@trail, @_); 
+    };
+}
+
+sub menu_items {
+    my $self = shift;
+    my $name = shift || 'menu';
+    $self->debug("menu items (base: $self->{ uri })\n") if DEBUG;
+
+    my $menu = shift
+        || $self->{ $name } 
+        || $self->{ page }->{ $name } 
+        || return $self->decline_msg( no_menu => $self->{ uri } );
+        
+    $menu = $self->{ $name } = [ split(/\s+/, $menu) ]
+        unless ref $menu eq ARRAY;
+
+    return $menu;
+}
+
+sub menu_item {
+    my $self  = shift;
+    my $name  = shift;
+    my $items = $self->menu_items(@_);
+    return (grep { $_ eq $name } @$items)
+        ? $name
+        : $self->decline_msg( not_found => 'menu item' => $name );
+}
+
+sub menu {
+    my $self = shift;
+    return $self->pages( $self->menu_items(@_) );
+}
+
+
+sub menu_page {
+    my $self = shift;
+    my $item = $self->menu_item(@_) || return;
+    return $self->page($item);
+}
+
+
+sub under {
+    my ($self, $uri) = @_;
+    $uri = $uri->uri if is_object(ref $self, $uri);
+    
+    if ($uri eq $self->{ uri }) {
+        # exact match
+        return 1;
+    }
+    else {
+        # Otherwise make sure we add a '/' to the end of the uri so that we only 
+        # match at directory boundaries.  So a page at /food/berries, for example, 
+        # should match under /food (/food/) but not /foo (/foo/)
+        $uri .= '/' unless $uri =~ m{/$};
+        return $self->{ uri } =~ /^$uri/;
+    }
+}
+
+sub AUTOLOAD {
+    my $self = shift;
+    my ($name) = ($AUTOLOAD =~ /([^:]+)$/ );
+    return if $name eq 'DESTROY';
+    $self->debug("asked page for $name");
+    return "TODO: Page.AUTOLOAD($name)";
+}
+
 
 
 1;

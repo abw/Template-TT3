@@ -10,12 +10,13 @@ use Template::TT3::Class
     modules    => 'SITEMAPS_MODULE',
     filesystem => 'File Dir VFS',
     accessors  => 'sitemap',
-    constants  => 'HASH :scheme',
+    constants  => 'HASH ARRAY :scheme',
     constant   => {
         PAGE     => 'Template::TT3::Site::Page',
         ENGINE   => 'Template::TT3::Engine::TT3',
         BUILDER  => 'Template::TT3::Site::Builder',
         REPORTER => 'Template::TT3::Site::Reporter',
+        ROOT     => '/',
     };
 
 
@@ -85,6 +86,9 @@ sub init_map {
     $self->{ site } = $self->{ config }->{ site };
     $self->debug("loaded site: ", $self->dump_data($self->{ site })) if DEBUG;
     $self->debug("merged config: ", $self->dump_data($self->{ config })) if DEBUG;
+    
+    # TODO: proper page initialisation
+    $self->{ pages } = $self->{ config }->{ pages };
     
     return $self;
 }
@@ -303,12 +307,40 @@ sub page {
         || return $self->error_msg( missing => 'uri' );
 
     my $data = $self->{ sitemap }->page($uri);
+
+    $self->debug("page data for $uri: ", $self->dump_data($data))
+        if DEBUG;
     
     return $self->PAGE->new(
         site => $self,
         page => $data,
         uri  => $uri,
     );
+}
+
+sub pages {
+    my $self = shift;
+    my $pages = @_ == 1 && ref $_[0] eq ARRAY ? shift : [ @_ ];
+
+    return [ 
+        map { 
+            $self->debug("requesting page: $_") if DEBUG;
+            $self->page($_) 
+                || return $self->error($self->reason) 
+        } 
+        @$pages
+    ];
+}
+
+sub root {
+    my $self = shift;
+    return $self->page(ROOT)
+        || return $self->error( $self->reason );
+}
+
+sub menu {
+    my $self = shift;
+    return $self->root->menu;
 }
 
 

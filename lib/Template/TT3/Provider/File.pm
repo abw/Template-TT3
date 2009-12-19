@@ -44,6 +44,9 @@ sub fetch {
 
     my $config = $self->{ config };
 
+    $self->debug("file provider returning file $file")
+        if DEBUG;
+
     return {
         file     => $file, 
         id       => FILE_SCHEME.COLON.$file->definitive,

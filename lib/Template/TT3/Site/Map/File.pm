@@ -38,6 +38,7 @@ sub init {
 
     $self->{ data } = $data;
     $self->{ file } = $file;
+    $self->{ page } = $data->{ pages };
     $self->{ dir  } = $file->directory;
 
     $self->debug("loaded sitemap data: ", $self->dump_data($data)) if DEBUG;
@@ -51,7 +52,7 @@ sub init {
             metadata => $file->directory,
             root     => $file->parent(1),
         };
-
+    
     $self->debug("set dir from sitemap file to $config->{ dir }\n") if DEBUG;
     
     return $self;

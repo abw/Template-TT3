@@ -31,9 +31,11 @@ sub template {
     my $self = shift;
     my $env  = shift || return $self->error_msg( missing => 'environment' );
     
-    my $template = $env->{ $self->{ name } } 
-                || $self->{ template }
-                || return;
+    my $template = $env->{ $self->{ name } };
+    $template = $self->{ template }
+        unless defined $template;
+    
+    return unless $template;
 
     return $env->{ context }->any_template( $template );
 }

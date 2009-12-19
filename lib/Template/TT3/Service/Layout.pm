@@ -11,40 +11,27 @@ use Template::TT3::Class
 sub serve {
     my ($self, $env, $pipeline) = @_;
 
-    my $layout = $self->template( $env )
-        || return $pipeline->( $env );
-    
-#    my $context = $env->{ context }->with(
-#        content => sub {
-#            $self->debug("called layout content");
-#            my $env2 = $env;
-#            if (@_) {
-#                my $params = params(@_);
-#                $env2 = { %$env2, %$params };
-#            }
-#            $pipeline->( $env2 );
-#        }
-#    );
-    
-    # TODO: push input onto context
-    # Oh bollocks.  Of course.  We haven't run the preceding pipeline
-    # yet, and we don't get to until the 'content' callback is called.
-    # Hmmm... perhaps we need to pre-process it, set content variable 
-    # to output, but also allow slots to work
+    # Render the pipeline content 
+    my $content  = $pipeline->( $env );
 
-    my $context = $env->{ context }->with(
-        content => $pipeline->( $env )
-    );
-        
+    # See if a layout template is defined, if not then we're done
+    my $layout   = $self->template( $env )
+        || return $content;
+    
+    # Create a context with the content defined as a variable
+    my $context  = $env->{ context }->with( content => $content );
+
+    # Fetch the main page template
     my $template = $env->{ template }
         || return $self->error_msg( missing => 'input template' );
 
+    # Have the context visit the main page template and then process 
+    # the layout template.  This ensures that any slots in the layout
+    # will be filled by blocks defined in the main page template
     $context->enter($template);
-
-    my $result = $layout->try->fill_in(
-        $context
-    );
     
+    my $result = $layout->try->fill_in( $context );
+
     $context->leave;
     
     return $@

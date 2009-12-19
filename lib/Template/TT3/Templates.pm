@@ -346,9 +346,8 @@ sub template_file {
     my $self   = shift;
     my $file   = File(shift);
     my $params = params(@_);
-    $params->{ name } ||= $file->name,
-    $params->{ text }   = $file->text;
-    $params->{ id   }   = FILE_SCHEME.COLON.$file->definitive;
+    $params->{ file } = $file,
+    $params->{ id   } = FILE_SCHEME.COLON.$file->definitive;
     return $self->lookup($params);
 }
 
@@ -549,6 +548,8 @@ sub prepare {
     # back to us and/or reach other parts of the framework
     $params->{ templates } = $self;
     $params->{ hub       } = $self->{ hub };
+
+    $self->debug("preparing ", $self->dump_data($params)) if DEBUG;
 
     # finally have the dialect create us a template
     return $self->prepared(
