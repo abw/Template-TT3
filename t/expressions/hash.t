@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 13,
+    tests   => 14,
     debug   => 'Template::TT3::Element::Construct::Hash 
                 Template::TT3::Element::Construct::List
                 Template::TT3::Element::Sigil::Hash',
@@ -173,6 +173,25 @@ hash.keys.sort.join ': ' hash.twenty
 <ERROR:Cannot make pairs from an odd number (1) of items: twenty>
 #twenty: 20
 
+-- test nested hash definitions --
+questions = [
+  { title   = 'Date of Birth' }
+  { title   = 'Date of Death' }
+  { title   = 'Partner' }
+  { title   = 'Children' 
+    answers = [
+      { text  = 'Alex, Clint &amp; Matthew'
+        added = 'Frances, Julian &amp; Miles'
+      }
+    ]
+  }
+  { title   = 'Grandchildren' }
+  { title   = 'Mother' }
+  { title   = 'Fother' }
+]
+questions.size
+-- expect --
+7
 
 
 __END__

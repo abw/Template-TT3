@@ -15,8 +15,10 @@ use Template::TT3::HTML;
 use Template::TT3::Template;
 use constant TEMPLATE => 'Template::TT3::Template';
 
+$| = 1;
+
 my $file     = shift || die usage();
-my $template = Template3->template( file => $file );
+my $template = Template3->template($file);
 my $tree     = $template->tree; 
 my $source   = $template->tokens->view_HTML;
 my $vars     = $template->vars_HTML;

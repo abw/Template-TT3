@@ -6,7 +6,38 @@ Template::TT3::TODO - TT3 To-Do List
 
 This is the To-Do list for TT3.  It is incomplete and in no particular order.
 
+Please also consult L<Template::TT3::Status> which summarises the current
+status of TT3 and lists the various modules that are done, doing and todo.
+
 =head1 Language Elements
+
+There are some fundamental issues relating to elements that need to be
+addressed.  Most importantly, the current approach for determining if an
+element should generate output is incomplete.  At present, an assignment 
+inside a block (e.g. if, for, etc) will not have its output suppressed.
+
+The C<value()> method returns the value of an expression (which for an 
+assignment will be the value of the RHS.  The C<text()> method does the
+same thing but (possibly) with optional processing.  In the case of an 
+assignment, the C<text()> method suppresses the output.  The C<text()>
+method will (or should) also complain if the value is undefined.
+
+However, elements that contain a block always evaluate the content by calling
+the C<value()> method on the child elements. In essence, these directives fail
+to propagate to their children the fact that they're being called in text
+context.  The obvious solution is to add the additional methods that allow 
+a block to be called in value or text context.  However, it's not as simple 
+as that.  We also want to support other modes like HTML.  Again, a call to 
+C<html()> on a parent element should call the corresponding C<html()> method
+on its children.  Adding a third method to every block directive is a 
+possibility, but it's starting to smell of code bloat.  A better solution 
+would be to find some way to implement this generically. 
+
+Another issue relating to the above is that too many C<value()> methods 
+are throwing errors on undefined values.  This is probably due to the fact
+that many elements simple alias C<values()> to C<text()> or rely on the 
+default implementation inherited from the L<Template::TT3::Element> base
+class.
 
 =head2 Loop Iterator
 
@@ -216,6 +247,7 @@ attaching to a prototype hub.  I'm concerned that creating a "leaf node"
 template for temporary use in a subroutine might pull the whole framework
 into persistence. 
 
+
 =head1 Template Services
 
 I'm not sure about the service pipeline architecture as it stands.  On one
@@ -277,22 +309,20 @@ headers, footers, etc., based on certain conditions (which would be the
 hard bit to make generic).  A good start would be to demonstrate a simple
 CODE ref that does this.
 
+=head2 Environment Service
+
+The environment service is a quick hack to explore the kind of things that 
+can be done when you can easily change the environment (e.g. changing or
+removing the layout template based on file extension so that .css and .js
+files get passed through without HTML headers, and so on).
+
+It would probably be better to pass the C<env> variable to the C<before>
+template and kill two birds with one stone.
+
 =head2 Other Services
 
 Other services that may be worth investigating are timers, debug controls, 
 sitemap, etc.
-
-
-=head1 Final Cleanup
-
-The following modules are believed to be complete, clean, tested and
-documented.
-
-   Template::TT3::Factory
-   Template::TT3::Factory::Class
-   Template::TT3::Engines
-   Template::TT3::Dialects
-   Template::TT3::Providers
 
 =head1 AUTHOR
 
@@ -304,6 +334,11 @@ Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Template::TT3::Status> which summarises the current status of TT3 and
+lists the component modules that are done, doing and todo.
 
 =cut
 

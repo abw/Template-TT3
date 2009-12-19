@@ -1,0 +1,236 @@
+=head1 NAME
+
+Template::TT3::Status - TT3 Development Status
+
+=head1 INTRODUCTION
+
+This document contains information relating to the current development status
+of the Template Toolkit. 
+
+TT3 is still at the pre-alpha stage. Nothing is guaranteed to work at present
+(although most things do). You should I<not> use it any any production code
+unless you're extremely brave or somewhat foolhardy.
+
+Although most of the code is working and tested (albeit incompletely), 
+the documentation is mostly incomplete or completely missing. 
+
+=head1 WHAT'S HAPPENING RIGHT NOW?
+
+I've started working through the element modules to clean them up, thoroughly
+test and documentation them, and generally get things ready for a first
+release.
+
+=head1 ELEMENT MODULES
+
+Elements are the basic nodes that comprise a parsed template tree.  They're
+rather like DOM elements except that they can generate dynamic content.  So
+they're more like opcodes, or perhaps somewhere in between.
+
+I've begun the process of working through the element modules doing a final
+cleanup and adding documentation.  Modules marked with an C<[X]> in the 
+lists below have been done and should be ready for release.  Those marked
+with C<[ ]> are eagerly awaiting their turn.
+
+=head2 Old Elements Libraries
+
+I started off writing a smaller number of C<Template::TT3::Elements::*>
+libraries that included many different element class definitions. However, it
+quickly became difficult to manage. Most elements have now been moved to
+individual module files. This makes it easier to subclass from existing
+element module (otherwise you have to know which library module the base class
+element is in and ensure that it has been pre-loaded).  It also gives us 
+somewhere to put the documentation for each element class instead of cramming
+it all into one monstrous file.
+
+These are the current element library modules. This list should eventually
+dwindle to nothing as they are split up and replaced by individual element
+modules.
+
+    [ ] Template::TT3::Element::Boolean
+    [ ] Template::TT3::Element::Core
+    [ ] Template::TT3::Element::Number
+    [ ] Template::TT3::Element::Operator
+    [ ] Template::TT3::Element::Punctuation
+    [ ] Template::TT3::Element::Structure
+    [ ] Template::TT3::Element::Text
+    [ ] Template::TT3::Element::Whitespace
+
+=head2 Core Elements
+
+    [ ] Template::TT3::Element::Block
+    [ ] Template::TT3::Element::Filename
+    [ ] Template::TT3::Element::Keyword
+    [ ] Template::TT3::Element::Literal
+    [ ] Template::TT3::Element::Sub
+    [ ] Template::TT3::Element::Text
+    [ ] Template::TT3::Element::Word
+
+=head2 Variable Elements
+
+These elements are used to represent variables and operations relating to 
+variables (e.g. application of a function bound to a variable).
+
+    [ ] Template::TT3::Element::Variable::Apply
+    [ ] Template::TT3::Element::Variable
+
+=head2 Construct
+
+These elements implement data constructs, including hash definitions, list
+definitions and parenthesised expressions.  e.g.
+
+    [%  list = [10, 20, 30]  %]
+    [%  hash = {a=10, b=20, c=30}  %]
+
+The modules implementing constructs are:
+
+    [ ] Template::TT3::Element::Construct::Args
+    [ ] Template::TT3::Element::Construct::Hash
+    [ ] Template::TT3::Element::Construct::List
+    [ ] Template::TT3::Element::Construct::Parens
+    [ ] Template::TT3::Element::Construct
+
+=head2 Operators
+
+These elements implement various operators of the language.
+
+    [ ] Template::TT3::Element::Operator::Assign
+    [ ] Template::TT3::Element::Operator::Dot
+    [ ] Template::TT3::Element::Operator::Pair
+    [ ] Template::TT3::Element::Operator::Ternary
+
+=head2 Sigils
+
+These elements implement the sigil prefix operators: C<$>, C<@> and C<%>.
+
+    [ ] Template::TT3::Element::Sigil
+    [ ] Template::TT3::Element::Sigil::Hash
+    [ ] Template::TT3::Element::Sigil::Item
+    [ ] Template::TT3::Element::Sigil::List
+
+=head2 Commands
+
+These elements implement the runtime command keywords.
+
+    [ ] Template::TT3::Element::Command::As
+    [ ] Template::TT3::Element::Command::Block
+    [ ] Template::TT3::Element::Command::Decode
+    [ ] Template::TT3::Element::Command::Do
+    [ ] Template::TT3::Element::Command::Dot
+    [ ] Template::TT3::Element::Command::Else
+    [ ] Template::TT3::Element::Command::Elsif
+    [ ] Template::TT3::Element::Command::Encode
+    [ ] Template::TT3::Element::Command::Fill
+    [ ] Template::TT3::Element::Command::For
+    [ ] Template::TT3::Element::Command::Hello
+    [ ] Template::TT3::Element::Command::If
+    [ ] Template::TT3::Element::Command::Include
+    [ ] Template::TT3::Element::Command::Into
+    [ ] Template::TT3::Element::Command::Is
+    [ ] Template::TT3::Element::Command::Just
+    [ ] Template::TT3::Element::Command::Raw
+    [ ] Template::TT3::Element::Command::Slot
+    [ ] Template::TT3::Element::Command::Sub
+    [ ] Template::TT3::Element::Command::Unless
+    [ ] Template::TT3::Element::Command::With
+    [ ] Template::TT3::Element::Command::Wrapper
+
+=head2 Controls
+
+There's some work needed here to tidy up the command loading code. We should
+support command libraries so that we can merge the current (temporary)
+L<HTML_CMDS|Template::TT3::Element::Template::TT3::Element::Control::HtmlCmds> into 
+L<COMMANDS|Template::TT3::Element::Template::TT3::Element::Control::Commands>.
+
+e.g.
+
+    [? COMMANDS HTML.ul HTML.li HTML.div ?]
+    [? COMMANDS HTML.['ul' 'li' 'div'] ?]
+    [? COMMANDS HTML.{ul li div} ?]
+
+These are the current modules implementing compile time controls:
+
+    [ ] Template::TT3::Element::Control::Commands
+    [ ] Template::TT3::Element::Control::Html
+    [ ] Template::TT3::Element::Control::HtmlCmds
+    [ ] Template::TT3::Element::Control::Meta
+    [ ] Template::TT3::Element::Control::Tags
+
+
+=head2 Mixin Roles
+
+These elements define roles that other elements can mix in to add 
+functionality.  They need organising into a proper hierarchy roughly 
+corresponding to the methods that they implement.  e.g.
+
+    Template::TT3::Element::Role::Expr::Args        # parse_expr() reads args
+    Template::TT3::Element::Role::Infix::Args       # parse_infix() reads args
+
+The badly named C<as> import hook defined by C<Template::TT3::Class> should 
+be renamed (it's a throwback to a time when the C<parse_XXX()> methods were
+called C<as_XXX()> so it made more sense then).  In fact, it's probably 
+worth adding a new L<Template:TT3::Element::Class> module specialised to 
+the task of creating element modules.
+
+    use Template::TT3::Element::Class
+        expr  => 'args',            # adds T~Role::Expr::Args
+        infix => 'args';            # adds T~Role::Infix::Args
+
+These are the modules as they currently stand:
+
+    [ ] Template::TT3::Element::Role::ArgsBlockExpr
+    [ ] Template::TT3::Element::Role::ArgsExpr
+    [ ] Template::TT3::Element::Role::Block
+    [ ] Template::TT3::Element::Role::BlockExpr
+    [ ] Template::TT3::Element::Role::ExprBlockExpr
+    [ ] Template::TT3::Element::Role::Filename
+    [ ] Template::TT3::Element::Role::NameBlockExpr
+    [ ] Template::TT3::Element::Role::NameExpr
+    [ ] Template::TT3::Element::Role::NullExpr
+    [ ] Template::TT3::Element::Role::Pair
+
+=head2 WTF Elements
+
+These are the elements that I'm not sure about. Some are junk that was thrown
+together for testing and are no longer required. Some have been deprecated or
+replaced but not yet deleted. Others I've just put here to remind me to look
+at them.
+
+    [ ] Template::TT3::Element::HTML::Table
+    [ ] Template::TT3::Element::HTML
+
+=head1 Other Modules
+
+Until I get a chance to properly organise a list of the other modules, I'll
+just dump everything else here.
+
+The following modules are believed to be complete, clean, tested and
+documented.
+
+    [X] Template::TT3::Factory
+    [X] Template::TT3::Factory::Class
+    [X] Template::TT3::Engines
+    [X] Template::TT3::Dialects
+    [X] Template::TT3::Providers
+
+=head1 AUTHOR
+
+Andy Wardley  L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
+
+

@@ -1,40 +1,68 @@
 <html>
   <head>
-    <title>TT3 Template Tokens: examples/hello.tt3</title>
-    <style>
-div.template {
-    font-family: Courier, monospace;
-    font-size: 14px;
-    color: #444;
-}
+    <title>TT3 Template Tree: examples/hello.tt3</title>
+    <link rel="stylesheet" type="text/css" href="tt3.css">
+    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="tt3.js"></script>
 
-span.text {
-    color: #aaf;
-}
-
-span.keyword {
-    color: #a44;
-}
-
-span.word {
-    color: #4a4;
-}
-
-span.whitespace,
-span.comment {
-    color: #888;
-}
-
-span.tag_start,
-span.tag_end {
-    color: #44a;
-}
-    </style>
   </head>
   <body>
-    <div class="template tt3">
-<span class="text">Hello </span><span class="tag_start">[%</span><span class="whitespace"> </span><span class="word">name</span><span class="whitespace"> </span><span class="binop">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span><span class="text">!
-</span>
+    <h1>TT3: examples/hello.tt3</h1>
+   
+    <div class="tabset" id="tabset">
+      <ul class="tabs">
+        <li class="warm"><a href="#source">Source</a></li>
+        <li><a href="#tokens">Tokens</a></li>
+        <li><a href="#tree">Tree</a></li>
+        <li><a href="#vars">Variables</a></li>
+        <li><a href="#output">Output</a></li>
+      </ul>
+      <div class="panels">
+        <div class="panel warm" id="source">
+          <h2>Template Source</h2>
+          <div class="content">
+<span class="text">Hello </span><span class="tag"><span class="tag_start">[%</span><span class="whitespace"> </span><span class="variable">name</span><span class="whitespace"> </span><span class="binary">or</span><span class="whitespace"> </span><span class="squote">'World'</span><span class="whitespace"> </span><span class="tag_end">%]</span></span><span class="text">!
+</span><span class="eof">--EOF--</span>
+          </div>
+        </div>       
+        <div class="panel" id="tokens">
+          <h2>Source Tokens</h2>
+          <div class="content">
+<div class="text element"><div class="head"><span class="info type">text</span><span class="info posn">@0</span><span class="source">Hello </span></div></div><div class="tag_start element"><div class="head"><span class="info type">tag_start</span><span class="info posn">@6</span><span class="source">[%</span></div></div><div class="whitespace element"><div class="head"><span class="info type">whitespace</span><span class="info posn">@8</span><span class="source"> </span></div></div><div class="variable element"><div class="head"><span class="info type">variable</span><span class="info posn">@9</span><span class="source">name</span></div></div><div class="whitespace element"><div class="head"><span class="info type">whitespace</span><span class="info posn">@13</span><span class="source"> </span></div></div><div class="binary operator element"><div class="head"><span class="info type">binary operator</span><span class="info posn">@14</span><span class="source">or</span></div></div><div class="whitespace element"><div class="head"><span class="info type">whitespace</span><span class="info posn">@16</span><span class="source"> </span></div></div><div class="squote string element"><div class="head"><span class="info type">squote string</span><span class="info posn">@17</span><span class="source">'World'</span></div></div><div class="whitespace element"><div class="head"><span class="info type">whitespace</span><span class="info posn">@24</span><span class="source"> </span></div></div><div class="tag_end element"><div class="head"><span class="info type">tag_end</span><span class="info posn">@25</span><span class="source">%]</span></div></div><div class="text element"><div class="head"><span class="info type">text</span><span class="info posn">@27</span><span class="source">!\n</span></div></div><div class="eof element"><div class="head"><span class="info type">eof</span><span class="info posn">@29</span><span class="source"></span></div></div>
+          </div>
+        </div>       
+        <div class="panel" id="tree">
+          <h2>Parse Tree</h2>
+          <div class="content">
+<div class="block"><div class="text element"><div class="head"><span class="info type">text</span><span class="info posn">@0</span><span class="source">Hello </span></div></div>
+<div class="binary expr element"><div class="head"><span class="info type">binary expr</span><span class="info posn">@14</span><span class="source">name or 'World'</span></div><div class="body"><div class="lhs "><div class="variable element element"><div class="head"><span class="info type">variable element</span><span class="info posn">@9</span><span class="source">name</span></div></div></div><div class="operator element">or</div><div class="rhs "><div class="squote string element element"><div class="head"><span class="info type">squote string element</span><span class="info posn">@17</span><span class="source">'World'</span></div></div></div></div></div>
+<div class="text element"><div class="head"><span class="info type">text</span><span class="info posn">@27</span><span class="source">!\n</span></div></div></div>
+          </div>
+        </div>       
+        <div class="panel" id="vars">
+          <h2>Variables Used</h2>
+          <div class="content">
+<div class="variable element"><div class="head">name</div><div class="body"><div class="uses"><span class="branch">Uses</span><div class="block"><div class="element"><div class="head"><span class="info line">@ line 1</span><span class="source">Hello [% <span class="used_here">name</span> or 'World' %]!</span></div></div></div></div></div></div>
+          </div>
+        </div>       
+        <div class="panel" id="output">
+          <h2>Generated Output</h2>
+          <div class="content">
+Hello World!
+
+          </div>
+        </div>       
+      </div>
     </div>
   </body>
+  <script type="text/javascript">
+    $(document).ready(
+        function() {
+            $('#tabset').tt3_tabset();
+            $('#tree').tt3_tree();
+            $('#vars').tt3_tree();
+        }
+    );
+  </script>
 </html>
+

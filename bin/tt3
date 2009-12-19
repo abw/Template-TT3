@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+#
+# Command line application driver for TT3.
+#
+# Written by Andy Wardley http://wardley.org/
+#
+# December 2009
+#
+
+use lib '/home/abw/projects/badger/lib';    # abw testing
+use Badger; # lib => '../lib';                 # just while testing
+use Template::TT3::App;
+
+Template::TT3::App
+    ->args(@ARGV)
+    ->run;
