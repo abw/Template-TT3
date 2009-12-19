@@ -1,41 +1,42 @@
 package Template::TT3::Element::Literal;
 
-use Template::TT3::Class 
-    version    => 3.00,
-    base       => 'Template::TT3::Element',
-    constants  => ':elements',
-    as         => 'filename',
-    view       => 'literal',
-    constant   => {
-        SEXPR_FORMAT => '<literal:%s>',
+use Template::TT3::Class::Element
+    version  => 2.69,
+    roles    => 'filename',
+    base     => 'Template::TT3::Element',
+    constant => {
+        SOURCE_FORMAT => '%s',
     },
-    alias      => {
+    alias    => {
+        parse_expr  => 'advance',
         parse_word  => 'advance',
-        name        => \&text,
-        value       => \&text,
-        values      => \&text,
-        source      => \&text,
+        text        => \&token,
+        value       => \&token,
+        values      => \&token,
     };
 
 
-sub text {
-    $_[0]->[TOKEN];
+sub token {
+    $_[SELF]->[TOKEN];
 }
 
 
-sub sexpr {
+sub variable {
+    # literal values can be converted to a text variable in order to perform 
+    # dotops or other stringy operations on it
+    $_[CONTEXT]->use_var( 
+        $_[SELF], $_[SELF]->text( $_[CONTEXT] ) 
+    );
+}
+
+
+sub source {
     sprintf(
-        $_[0]->SEXPR_FORMAT,
+        $_[0]->SOURCE_FORMAT, 
         $_[0]->[TOKEN]
     );
 }
 
-
-sub old_generate {
-    $_[1]->generate_literal(
-        $_[0]->[TOKEN]
-    );
-}
 
 1;
 
@@ -43,13 +44,14 @@ __END__
 
 =head1 NAME
 
-Template:TT3::Element::Construct - base class element for literal elements
+Template:TT3::Element::Literal - base class element for literal elements
 
 =head1 DESCRIPTION
 
 This module implements a subclass of L<Template::TT3::Element>. It acts as a
-common base class for the L<Template::TT3::Element::Word>, L<Template::TT3::Element::Keyword>
-and L<Template::TT3::Element::Keyword> modules.
+common base class for the L<Template::TT3::Element::Word>,
+L<Template::TT3::Element::Keyword> and L<Template::TT3::Element::Keyword>
+modules.
 
 =head1 METHODS
 
@@ -59,19 +61,29 @@ base classes.
 
 =head2 parse_word()
 
+This method is an alias to the L<advance()|Template::TT3::Element/advance()>
+method inherited from the L<Template::TT3::Element> base class.
+
 =head2 text()
+
+This method is an alias to the L<token()|Template::TT3::Element/token()>
+method inherited from the L<Template::TT3::Element> base class.  It simply
+returns the literal token text.
 
 =head2 value()
 
-An alias to L<text()>.
+An alias as per L<text()>.
 
 =head2 values()
 
-An alias to L<text()>.
+An alias as per L<text()>.
 
 =head2 name()
 
-An alias to L<text()>.
+An alias as per L<text()>.
+
+TODO: I've taken this out... I don't think we're using name() any more...
+let's see what breaks.
 
 =head1 AUTHOR
 

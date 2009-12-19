@@ -1,8 +1,12 @@
 #============================================================= -*-perl-*-
 #
-# t/modules/types.t
+# t/factory/types.t
 #
-# Test the Template::TT3::Types module.
+# Test the Template::TT3::Types factory module responsible for loading
+# and instantiate data type modules (text, list, hash, etc) that 
+# implement the virtual data methods.
+#
+# Run with the -h option for help.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -11,15 +15,17 @@
 #
 #========================================================================
 
-#use Badger::Debug modules => 'Badger::Factory';
-use Badger lib => '../../lib';
+use Badger 
+    lib => '../../lib';
+    
 use Template::TT3::Test 
     debug => 'Badger::Factory Template::TT3::Types',
     args  => \@ARGV,
-    tests => 43;
+    tests => 48;
 
 use Template::TT3::Types;
 use constant TYPES => 'Template::TT3::Types';
+use Badger::Debug ':all';
 
 ok( TYPES->preload, 'preload' );
 
@@ -75,8 +81,19 @@ is( $hash->item('foo'), 20, 'foo item is 20' );
 is( $hash->{ bar }, 30, 'bar item is 30' );
 
 
+#-----------------------------------------------------------------------
+# should be able to use aliases for all those
+#-----------------------------------------------------------------------
+
+ok( TYPES->type('UNDEF'), 'got UNDEF type' );
+ok( TYPES->type('TEXT'), 'got TEXT type' );
+ok( TYPES->type('CODE'), 'got CODE type' );
+ok( TYPES->type('HASH'), 'got HASH type' );
+ok( TYPES->type('ARRAY'), 'got ARRAY type' );
+
+
 #------------------------------------------------------------------------
-# try bad object name
+# try bad type name
 #------------------------------------------------------------------------
 
 ok( ! TYPES->try->create( frobulator => 99 ), 'no frobulator' );
@@ -96,7 +113,6 @@ is( $text->length, 11, 'got object text length' );
 $list = $types->create( list => [ 'Hello', 'World'] );
 is( $list->first, 'Hello', 'got object list first' );
 is( $list->[-1], 'World', 'got object list last' );
-
 
 $hash = $types->create( hash => { 'Hello' => 'World' } );
 is( $hash->item('Hello'), 'World', 'got object hash item' );
@@ -124,7 +140,7 @@ is( $types->error->info, "type not found: hash", 'no hash error' );
 
 
 #-----------------------------------------------------------------------
-# get the vtables info
+# get the vtables info - NOTE: this is going to be moved out
 #-----------------------------------------------------------------------
 
 my $vtables = TYPES->vtables;

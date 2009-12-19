@@ -1,7 +1,7 @@
 package Template::TT3::Element::Role::Filename;
 
 use Template::TT3::Class 
-    version    => 2.718,
+    version    => 2.69,
     constants  => ':elements',
     mixins     => 'parse_filename filename';
 
@@ -10,23 +10,22 @@ sub parse_filename {
     my ($self, $token) = @_;
     my $next;
     
-    # advance token
+    # Our token forms the start of the filename
+    $self->[EXPR] = $self->[TOKEN];
+
+    # Advance token pointer to the next token
     $$token = $self->[NEXT];
 
-    # our token forms the start of the filename
-    $self->[EXPR] = $self->[TOKEN];
-    
-    # add any subsequent filename tokens onto the filename
+    # Append any subsequent filename elements
     $self->[EXPR] .= $next->[EXPR]
         if $next = $$token->parse_filename($token);
 
-#    $self->debug("filename expr: $self->[EXPR]");
-    
-    # rebless self into a filename token
+    # Rebless self into a filename element
     $self->become('filename');
-
+    
     return $self;
 }
+
 
 sub filename {
     $_[SELF]->[EXPR];

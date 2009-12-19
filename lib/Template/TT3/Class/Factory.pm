@@ -1,7 +1,7 @@
-package Template::TT3::Factory::Class;
+package Template::TT3::Class::Factory;
 
 use Template::TT3::Class
-    version   => 0.01,
+    version   => 2.69,
     debug     => 0,
     uber      => 'Badger::Factory::Class',
     constant  => {
@@ -14,7 +14,7 @@ __END__
 
 =head1 NAME
 
-Template::TT3::Factory::Class - class constructor for factory modules 
+Template::TT3::Class::Factory - class constructor for factory modules 
 
 =head1 SYNOPSIS
 
@@ -23,7 +23,7 @@ Template::TT3::Factory::Class - class constructor for factory modules
     
     package Template::TT3::Engines;
     
-    use Template::TT3::Factory::Class
+    use Template::TT3::Class::Factory
         version   => 3.00,
         debug     => 0,
         item      => 'engine',

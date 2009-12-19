@@ -1,7 +1,4 @@
-package Template::TT3::Element::Role::NameExpr;
-
-use Carp;
-croak __PACKAGE__, ' is deprecated - use Template::TT3::Element::Role::Expr::Name instead';
+package Template::TT3::Element::Role::Expr::Name;
 
 use Template::TT3::Class 
     version   => 2.718,
@@ -16,18 +13,21 @@ sub parse_expr {
     return undef
         if $prec && ! $force && $self->[META]->[LPREC] <= $prec;
 
-    # advance past the keyword and whitespace then parse a filename
+    # Advance past the keyword and whitespace, then parse a filename
     $self->[EXPR] = $$token
         ->next_skip_ws($token)
         ->parse_filename($token, $scope, $self->[META]->[LPREC])
         || return $self->fail_missing( $self->ARG_NAME => $token );
 
-    # save the scope so we can lookup lexically scoped blocks later
+    # Save the scope so we can lookup lexically scoped blocks later
+    # NOTE: there is no guarantee this this method won't get mixed into 
+    # a module which does something else with the ARGS slot.
     $self->[ARGS] = $scope;
 
-    # parse infix operators
+    # Parse any infix operators following this expression
     return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
+
 
 1;
 

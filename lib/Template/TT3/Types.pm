@@ -1,63 +1,29 @@
-#========================================================================
-#
-# Template::TT3::Types
-#
-# DESCRIPTION
-#   Factory module for loading and instantiating Template::TT3::Type objects
-#   on demand.
-# 
-# AUTHOR
-#   Andy Wardley <abw@wardley.org>
-#
-#========================================================================
-
 package Template::TT3::Types;
 
-use Badger::Factory::Class
-    version => 3.00,
+use Template::TT3::Class::Factory
+    version => 2.69,
     debug   => 0,
     item    => 'type',
-    base    => 'Template::TT3::Base',
-    path    => 'Template::TT3::Type',
-    types   => {
-        # Perl's names, and our made-up names to map different data types
-        # to method providers
-        UNDEF  => 'Template::TT3::Type::Undef',
-        TEXT   => 'Template::TT3::Type::Text',
-        ARRAY  => 'Template::TT3::Type::List',
-        HASH   => 'Template::TT3::Type::Hash',
-        CODE   => 'Template::TT3::Type::Code',
-#       OBJECT => 'Template::TT3::Type::Object',
-        
-        # lower case TT names
-#        text   => 'Template::TT3::Type::Text',
-#        list   => 'Template::TT3::Type::List',
-#        hash   => 'Template::TT3::Type::Hash',
-#       params => 'Template::TT3::Type::Params',
+    path    => 'Template(X)::(TT3::|)Type',
+    names   => {
+        TEXT  => 'text',
+        CODE  => 'code',
+        ARRAY => 'list',
+        HASH  => 'hash',
+        UNDEF => 'undef',
     };
 
-our $STANDARD_TYPES = [qw( UNDEF VALUE ARRAY HASH CODE OBJECT )];
+our @STANDARD_TYPES = qw( TEXT CODE ARRAY HASH CODE UNDEF );
 our $VTABLES = { };
-
-sub OLD_init {
-    my ($self, $config) = @_;
-#    $self->{ types } = $self->class->hash_vars( TYPES => $config->{ types } );
-    $self->init_factory($config);
-    return $self;
-}
-
-sub TMP_init {
-    my ($self, $config) = @_;
-    $self->init_factory($config);
-#    $self->debug("types: ", $self->dump_data($self->{ types }));
-    return $self;
-}
 
 
 sub preload {
     my $self  = shift->prototype;
     my $types = $self->types;
     my $loads = { };
+
+    # all change
+    $types = $TYPE_NAMES;
     
     $self->debug("preload() types: ", $self->dump_data($types)) if DEBUG;
     

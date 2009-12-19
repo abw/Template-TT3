@@ -27,6 +27,10 @@ This is my immediate stack as of Saturday 19th December.
     * T~Element::Text       # subclass of literal (extract from T~Es~Text)
     * ...then other elements currently in the T~Elements::* modules
 
+Sidetracked onto cleaning up factories:
+
+    * Template::TT3::Types
+
 =head1 ELEMENT MODULES
 
 Elements are the basic nodes that comprise a parsed template tree.  They're
@@ -53,14 +57,14 @@ These are the current element library modules. This list should eventually
 dwindle to nothing as they are split up and replaced by individual element
 modules.
 
-    [ ] Template::TT3::Element::Boolean
-    [ ] Template::TT3::Element::Core
-    [ ] Template::TT3::Element::Number
-    [ ] Template::TT3::Element::Operator
-    [ ] Template::TT3::Element::Punctuation
-    [ ] Template::TT3::Element::Structure
-    [ ] Template::TT3::Element::Text
-    [ ] Template::TT3::Element::Whitespace
+    [ ] Template::TT3::Elements::Boolean
+    [ ] Template::TT3::Elements::Core
+    [ ] Template::TT3::Elements::Number             ** WORKING ON THIS **
+    [ ] Template::TT3::Elements::Operator
+    [ ] Template::TT3::Elements::Punctuation
+    [ ] Template::TT3::Elements::Structure
+    [ ] Template::TT3::Elements::Text               ** WORKING ON THIS **
+    [ ] Template::TT3::Elements::Whitespace
 
 =head2 Core Elements
 
@@ -71,6 +75,15 @@ modules.
     [ ] Template::TT3::Element::Sub
     [ ] Template::TT3::Element::Text
     [ ] Template::TT3::Element::Word
+
+Newly added (split out from Template::TT3::Elements::XXX libraries.
+    
+    [ ] Template::TT3::Element::String;
+    [ ] Template::TT3::Element::Squote;
+    [ ] Template::TT3::Element::Dquote;
+    [ ] Template::TT3::Element::Padding;
+    [ ] Template::TT3::Element::TagStart;
+    [ ] Template::TT3::Element::Whitespace;
 
 =head2 Variable Elements
 
@@ -102,8 +115,10 @@ These elements implement various operators of the language.
 
     [ ] Template::TT3::Element::Operator::Assign
     [ ] Template::TT3::Element::Operator::Dot
+    [ ] Template::TT3::Element::Operator::Number    ** WORKING ON THIS **
     [ ] Template::TT3::Element::Operator::Pair
     [ ] Template::TT3::Element::Operator::Ternary
+    [ ] Template::TT3::Element::Operator::Text      ** WORKING ON THIS **
 
 =head2 Sigils
 
@@ -205,6 +220,24 @@ at them.
     [ ] Template::TT3::Element::HTML::Table
     [ ] Template::TT3::Element::HTML
 
+=head1 Factory Modules
+
+Factory modules are responsible for loading modules and instantiating objects.
+I'm in the process of migrating Template::TT3::Factory::Class to T~Class::Factory.
+
+    [X] Template::TT3::Factory                  # base class
+    [X] Template::TT3::Class::Factory           # metaprogramming class
+
+    [X] Template::TT3::Engines
+    [X] Template::TT3::Exceptions
+    [X] Template::TT3::Dialects
+    [X] Template::TT3::Providers
+
+    [ ] Template::TT3::Types
+        - remove pre-defined types and have T~Variables manage the list
+          instead
+
+
 =head1 Other Modules
 
 Until I get a chance to properly organise a list of the other modules, I'll
@@ -213,11 +246,6 @@ just dump everything else here.
 The following modules are believed to be complete, clean, tested and
 documented.
 
-    [X] Template::TT3::Factory
-    [X] Template::TT3::Factory::Class
-    [X] Template::TT3::Engines
-    [X] Template::TT3::Dialects
-    [X] Template::TT3::Providers
 
 =head1 AUTHOR
 

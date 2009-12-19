@@ -1,18 +1,19 @@
 package Template::TT3::Element::Command::Fill;
 
-use Template::TT3::Class 
+use Template::TT3::Class::Element 
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
-    as         => 'name_expr',
+    parse_expr => 'name',
+    type       => 'fill',
     view       => 'fill',
-    constants  => ':elements ARRAY',
+    constants  => 'ARRAY',
     constant   => {
         SEXPR_FORMAT => "<fill:%s>",
     },
     alias      => {
-        values => \&text,
         value  => \&text,
+        values => \&text,
     };
 
 sub sexpr {

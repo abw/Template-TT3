@@ -23,26 +23,26 @@ use Badger::Factory::Class
 our $PREFIXES = {
     # short names
     op_         => 'operator.',
+    txt_        => 'operator.text.',
+    num_        => 'operator.number.',
+    bool_       => 'operator.boolean.',
     cmd_        => 'command.',
     ctr_        => 'control.',
     con_        => 'construct.',
-    num_        => 'number.',
-    txt_        => 'text.',
     sig_        => 'sigil.',
     var_        => 'variable.',
-    bool_       => 'boolean.',
     html_       => 'HTML.',
 
     # long names
     operator_   => 'operator.',
+    text_       => 'operator.text.',
+    number_     => 'operator.number.',
+    boolean_    => 'operator.boolean.',
     command_    => 'command.',
     control_    => 'control.',
     construct_  => 'construct.',
-    number_     => 'number.',
-    text_       => 'text.',
     sigil_      => 'sigil.',
     variable_   => 'variable.',
-    boolean_    => 'boolean.',
 };
 
 

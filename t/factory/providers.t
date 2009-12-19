@@ -1,8 +1,9 @@
 #============================================================= -*-perl-*-
 #
-# t/provider/providers.t
+# t/factory/providers.t
 #
-# Test the Template::TT3::Providers module.
+# Test the Template::TT3::Providers factory module which loads and 
+# instantiates provider modules.
 #
 # Run with -h option for help.
 #
@@ -13,9 +14,6 @@
 #
 #========================================================================
 
-use lib 
-    '/home/abw/projects/badger/lib';            # testing Badger changes
-    
 use Badger 
     lib        => '../../lib',
     Filesystem => 'Bin';

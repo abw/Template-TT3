@@ -59,6 +59,8 @@ sub view {
 }
 
 
+# TODO: this is being deprecated in favour of dedicated 
+# Template::TT3::Class::Element subclass
 sub as {
     my ($self, $roles) = @_;
     my $base = $self->AS_ROLE;
@@ -146,7 +148,7 @@ sub generate {
 }
 
 
-sub subclass {
+sub OLD_subclass {
     my $self = shift;
     my $base = $self->{ name };
     my $classes = @_ == 1 ? shift : [ @_ ];
@@ -185,6 +187,12 @@ sub subclass {
     }
     
     return $self;
+}
+
+
+sub subclass {
+    my ($self, $name) = @_;
+    class( $self->{ name }.PKG.camel_case($name), ref $self );
 }
 
 
@@ -285,7 +293,7 @@ sub generate_pre_post_ops {
 }
 
 
-sub generate_number_ops {
+sub OLD_generate_number_ops {
     shift->generate_ops(
         { id => 'num', methods => 'text number value values' },
         @_
@@ -293,7 +301,7 @@ sub generate_number_ops {
 }
 
 
-sub generate_number_assign_ops {
+sub OLD_generate_number_assign_ops {
     shift->generate_ops(
         { id => 'num', methods => 'number value values' },
         @_
@@ -301,7 +309,7 @@ sub generate_number_assign_ops {
 }
 
 
-sub generate_text_ops {
+sub OLD_generate_text_ops {
     shift->generate_ops(
         { id => 'txt', methods => 'text value values' },
         @_
@@ -309,7 +317,7 @@ sub generate_text_ops {
 }
 
 
-sub generate_text_assign_ops {
+sub OLD_generate_text_assign_ops {
     shift->generate_ops(
         { id => 'txt', methods => 'value values' },
         @_
@@ -317,7 +325,7 @@ sub generate_text_assign_ops {
 }
 
 
-sub generate_boolean_ops {
+sub OLD_generate_boolean_ops {
     shift->generate_ops(
         { id => 'bool', methods => 'value values' },
         @_

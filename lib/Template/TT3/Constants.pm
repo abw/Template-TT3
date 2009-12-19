@@ -80,8 +80,6 @@ use Badger::Class
                 # some dupliction here - needs sorting out
                 SELF    => '=0',    # zeroth argument is always $self
             },
-
-
             elements  => {
                 # element slots - the first 4 are common to all elements
                 META     => '=0',

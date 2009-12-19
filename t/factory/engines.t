@@ -1,8 +1,9 @@
 #============================================================= -*-perl-*-
 #
-# t/engine/engines.t
+# t/factory/engines.t
 #
-# Test the Template::TT3::Engines module.
+# Test the Template::TT3::Engines factory module which loads and 
+# instantiates engine modules.
 #
 # Run with -h option for help.
 #
@@ -12,10 +13,6 @@
 # under the same terms as Perl itself.
 #
 #========================================================================
-
-use lib 
-    '/home/abw/projects/badger/lib';            # testing Badger changes
-    
 
 use Badger 
     lib     => '../../lib';
@@ -45,6 +42,4 @@ is( ref $engine, 'Template::TT3::Engine::TT3', 'got tt3 engine module' );
 $engine = ENGINES->engine('TT3');
 ok( $engine, 'got TT3 engine' );
 is( ref $engine, 'Template::TT3::Engine::TT3', 'got TT3 engine module' );
-
-
 

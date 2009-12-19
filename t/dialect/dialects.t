@@ -2,9 +2,10 @@
 #
 # t/dialect/dialects.t
 #
-# Test the Template::TT3::Dialects module.
+# Test the Template::TT3::Dialects module, including the ability to 
+# create a custom dialect.
 #
-# Run with -h option for help.
+# Run with the -h option for help.
 #
 # Written by Andy Wardley <abw@wardley.org>
 #
@@ -13,38 +14,60 @@
 #
 #========================================================================
 
-use lib 
-    '/home/abw/projects/badger/lib';            # testing Badger changes
-    
-
 use Badger 
-    lib     => '../../lib';
+    lib => '../../lib';
 
 use Template::TT3::Test 
-    debug   => 'Template::TT3::Dialects',
-    args    => \@ARGV,
-    tests   => 7;
+    debug => 'Template::TT3::Dialects Template::TT3::Dialect',
+    args  => \@ARGV,
+    tests => 12;
 
-use constant 
-    DIALECTS => 'Template::TT3::Dialects';
+
+#-----------------------------------------------------------------------
+# basic tests
+#-----------------------------------------------------------------------
 
 use Template::TT3::Dialects;
-pass( 'loaded Template::TT3::Dialects' );
+use constant DIALECTS => 'Template::TT3::Dialects';
+pass('loaded Template::TT3::Dialects' );
 
-# get default dialect
-my $dialect = DIALECTS->dialect;
-ok( $dialect, 'got default dialect' );
-is( ref $dialect, 'Template::TT3::Dialect::TT3', 'got default TT3 dialect' );
+my $tt3 = DIALECTS->dialect('tt3');
+ok( $tt3, 'got tt3 dialect from class' );
 
-# get specific dialect
-$dialect = DIALECTS->dialect('tt3');
-ok( $dialect, 'got tt3 dialect' );
-is( ref $dialect, 'Template::TT3::Dialect::TT3', 'got tt3 dialect module' );
+is( $tt3->name, 'tt3', 'got dialect name' );
+is( "$tt3", 'tt3', 'got dialect name by auto-stringification' );
 
-# in capitals this time
-$dialect = DIALECTS->dialect('TT3');
-ok( $dialect, 'got TT3 dialect' );
-is( ref $dialect, 'Template::TT3::Dialect::TT3', 'got TT3 dialect module' );
+my $tagset = $tt3->tagset;
+ok( $tagset, 'got tagset' );
 
 
+#-----------------------------------------------------------------------
+# customising an existing dialect
+#-----------------------------------------------------------------------
+
+my $dialects = DIALECTS->new( 
+    dialects => { 
+        tt3 => { 
+            tags => '<* *>',
+        }
+    } 
+);
+ok( $dialects, 'created dialects object');
+
+$tt3 = $dialects->dialect('tt3');
+ok( $tt3, 'got tt3 dialect from object' );
+
+$tagset = $tt3->tagset;
+#print $tagset->dump;
+
+my $scanner = $tt3->scanner;
+ok( $scanner, 'got scanner' );
+
+$tagset = $scanner->tagset;
+ok( $tagset, 'got scanner tagset' );
+
+my $inline = $tagset->tag('inline');
+ok( $inline, 'got inline tag' );
+is( $inline->start, '<*', 'inline start is set to <*' );
+is( $inline->end, '*>', 'inline end is set to *>' );
 

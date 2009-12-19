@@ -30,7 +30,7 @@ our $SYMBOLS  = [
     [ '-'       => num_minus        => 275, 285 ],      # foo - bar, -foo
     [ '*'       => num_multiply     => 280,   0 ],      # foo * bar
     [ '/'       => num_divide       => 280,   0 ],      # foo / bar
-    [ qr/\s%\s/ => num_percent      => 280,   0 ],      # foo % bar
+    [ qr/\s%\s/ => num_modulus      => 280,   0 ],      # foo % bar
     [ div       => num_div_int      => 280,   0 ],      # foo div bar
     [ mod       => num_modulus      => 280,   0 ],      # foo mod bar
     
@@ -66,9 +66,9 @@ our $SYMBOLS  = [
     # TODO: '!!' as a prefix operator:   !!some_var_that_may_be_undefined
     [ '!!'      => bool_nor         => 250,   0 ],      # foo !! bar
 
-    [ '..'      => num_range        => 240,   0 ],      # 1 .. 91
-    [ 'to'      => num_to           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
-    [ 'by'      => num_by           => 240,   0 ],      # 1 to 91 by 10      # TODO: by
+    [ '..'      => op_range         => 240,   0 ],      # 1 .. 91
+    [ 'to'      => op_range         => 240,   0 ],      # 1 to 91 by 10      # TODO: to
+    [ 'by'      => op_step          => 240,   0 ],      # 1 to 91 by 10      # TODO: by
     
     [ '?'       => op_ternary       => 230,   0 ],      # foo ? bar 
 

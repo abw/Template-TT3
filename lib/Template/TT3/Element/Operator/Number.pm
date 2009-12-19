@@ -1,32 +1,23 @@
-package Template::TT3::Element::Number;
+package Template::TT3::Element::Operator::Number;
 
-use Template::TT3::Elements::Operator;
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Literal',
+use Template::TT3::Elements::Operator;          # FIXME
+use Template::TT3::Class::Element
+    version   => 2.69,
+    debug     => 0,
+    base      => 'Template::TT3::Element',      # TODO: +Operator
     import    => 'class',
-    view      => 'number',
-    constants => ':elements',
     constant  => {
-        SEXPR_FORMAT => '<number:%s>', 
-    },
-    alias     => {
-        parse_number => 'self',        # this is already a number op
-#        parse_dotop  => 'advance',
-        number       => 'value',       # our token contains the number
+        SEXPR_FORMAT => '<number:%s>',          # TODO: remove me
     };
 
 
-sub parse_expr {
-    my ($self, $token, $scope, $prec) = @_;
-
-    # advance token
-    $$token = $self->[NEXT];
-    
-    # variables can be followed by postops (postfix and infix operators)
-    return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
+sub variable {
+    # variable operations can be converted to a variable in order to 
+    # perform dotops on it
+    $_[CONTEXT]->use_var( 
+        $_[SELF], $_[SELF]->value( $_[CONTEXT] ) 
+    );
 }
-
 
 sub sexpr {
     sprintf(
@@ -36,32 +27,22 @@ sub sexpr {
 }
 
 
-sub source {
-    $_[SELF]->[TOKEN];
-}
-
-
-sub generate {
-    $_[CONTEXT]->generate_number(
-        $_[SELF]->[TOKEN]
-    );
-}
-
-
-## NOTE: I don't think we should make all the number ops a subclass of 
-## T::Element::Number / Literal.
-
 
 #-----------------------------------------------------------------------
-# Call on generate_number_ops() (in Template::TT3::Class) to create a 
-# bunch of subclasses of Template::TT3::Element::Number.  The first
-# argument is a class name (e.g. pre_inc) which gets CamelCased and 
-# added to the base (e.g. Template::TT3::Element::Number::PreInc). Any
-# subsequent names are operator base classes.  These are also CamelCased 
-# and added to the operator base class name (e.g. 'infix_right' becomes 
-# Template::TT3::Element::Operator::InfixRight).  Then we have a code 
-# reference which implements the value() method for the operator.  For 
-# number operators this is also aliased as values(), number() and text().
+# Use generate_elements() (in Template::TT3::Class::Element) to create
+# a bunch of subclasses of Template::TT3::Element::Operator::Number.
+#
+# The first argument is a class name (e.g. pre_inc) which gets CamelCased 
+# and added to the base class package (e.g. 'pre_inc' is mapped to 
+# Template::TT3::Element::Operator::Number::PreInc). Any subsequent names 
+# are operator base classes.  These are also CamelCased and added to the 
+# operator base class name (e.g. 'infix_right' becomes 
+# Template::TT3::Element::Operator::InfixRight).  
+#
+# Then we have a code reference which implements the value() method for 
+# the operator.  For numerical operators this is also aliased as values(), 
+# number() and text().
+#
 # All operands to numerical operators (e.g. EXPR, LHS and RHS) must 
 # yield numerical values, so we call number() rather than value().  If
 # they are already numerical expressions then we'll get the shortcut to
@@ -71,8 +52,11 @@ sub generate {
 # directly (e.g. $_[SELF]) wherever possible.  
 #-----------------------------------------------------------------------
 
-BEGIN {
-class->generate_number_ops(
+class->generate_elements(
+    {
+        methods => 'text number value values' 
+    },
+
     positive => prefix => sub {                             # +a
         return 
              + $_[SELF]->[RHS]->number($_[CONTEXT]);
@@ -104,14 +88,12 @@ class->generate_number_ops(
              % $_[SELF]->[RHS]->number($_[CONTEXT])
     },
     add => infix_left => sub {                              # a + b
-        return 
-            $_[SELF]->[LHS]->number($_[CONTEXT])
-          + $_[SELF]->[RHS]->number($_[CONTEXT]);
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+             + $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     subtract => infix_left => sub {                         # a - b
-        return 
-            $_[SELF]->[LHS]->number($_[CONTEXT])
-          - $_[SELF]->[RHS]->number($_[CONTEXT]);
+        return $_[SELF]->[LHS]->number($_[CONTEXT])
+             - $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
     equal => infix => sub {                                 # a == b 
         return $_[SELF]->[LHS]->number($_[CONTEXT])
@@ -141,23 +123,36 @@ class->generate_number_ops(
         return $_[SELF]->[LHS]->number($_[CONTEXT])
            <=> $_[SELF]->[RHS]->number($_[CONTEXT]);
     },
-    
-    # TODO: these should be $lhs->variable->set(...)
+
 );
 
+
 #-----------------------------------------------------------------------
-# A call to generate_number_assign_ops() which performs much the same 
-# task as generate_number_ops() but inherits the text() method from the 
-# T::TT3::Element::Operator::Assignment base class instead of aliasing 
-# it to the value() method.
+# Same again, but without aliasing the function to the text() method.  
+# Instead we inherit the text() method from the T~Operator::Assignment 
+# base class which performs the assignment (by calling $self->value()) 
+# but returns an empty list. This is how we silence assignment operators 
+# from generating any output in "text context", e.g. [% a = 10 %]
 #-----------------------------------------------------------------------
 
-class->generate_number_assign_ops(
+class->generate_elements(
+    {   
+        methods => 'number value values' 
+    },
+
     pre_inc => prefix => assignment => sub {                # ++a 
-        return $_[SELF]->[RHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[RHS]->number($_[CONTEXT]) + 1
-        )->value;
+        return 
+            $_[SELF]->[RHS]->assign(
+                $_[CONTEXT], 
+                $_[SELF]->[RHS]->number($_[CONTEXT]) + 1
+            )->value;
+    },
+    pre_dec => prefix => assignment => sub {                # --a
+        return 
+            $_[SELF]->[RHS]->assign(
+                $_[CONTEXT], 
+                $_[SELF]->[RHS]->number($_[CONTEXT]) - 1
+            )->value;
     },
     post_inc => postfix => assignment => sub {              # a++
         my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
@@ -166,12 +161,6 @@ class->generate_number_assign_ops(
             $n + 1
         );
         return $n;
-    },
-    pre_dec => prefix => assignment => sub {                # --a
-        return $_[SELF]->[RHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[RHS]->number($_[CONTEXT]) - 1
-        )->value;
     },
     post_dec => postfix => assignment => sub {              # a--
         my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
@@ -182,39 +171,42 @@ class->generate_number_assign_ops(
         return $n;
     },
     add_set => infix_right => assignment => sub {           # a += b
-        return $_[SELF]->[LHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[LHS]->number($_[CONTEXT])
-          + $_[SELF]->[RHS]->number($_[CONTEXT])
-        )->value;
+        return 
+            $_[SELF]->[LHS]->assign(
+                $_[CONTEXT], 
+                $_[SELF]->[LHS]->number($_[CONTEXT])
+              + $_[SELF]->[RHS]->number($_[CONTEXT])
+            )->value;
     },
     sub_set => infix_right => assignment => sub {           # a -= b
-        return $_[SELF]->[LHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[LHS]->number($_[CONTEXT])
-          - $_[SELF]->[RHS]->number($_[CONTEXT])
-        )->value;
+        return 
+            $_[SELF]->[LHS]->assign(
+                $_[CONTEXT], 
+                $_[SELF]->[LHS]->number($_[CONTEXT])
+              - $_[SELF]->[RHS]->number($_[CONTEXT])
+            )->value;
     },
     mul_set => infix_right => assignment => sub {           # a *= b
-        return $_[SELF]->[LHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[LHS]->number($_[CONTEXT])
-          * $_[SELF]->[RHS]->number($_[CONTEXT])
-        )->value;
+        return 
+            $_[SELF]->[LHS]->assign(
+                $_[CONTEXT], 
+                $_[SELF]->[LHS]->number($_[CONTEXT])
+              * $_[SELF]->[RHS]->number($_[CONTEXT])
+            )->value;
     },
     div_set => infix_right => assignment => sub {           # a /= b
-        return $_[SELF]->[LHS]->assign(
-            $_[CONTEXT], 
-            $_[SELF]->[LHS]->number($_[CONTEXT])
-          / $_[SELF]->[RHS]->number($_[CONTEXT])
-        )->value;
+        return 
+            $_[SELF]->[LHS]->assign(
+                $_[CONTEXT], 
+                $_[SELF]->[LHS]->number($_[CONTEXT])
+              / $_[SELF]->[RHS]->number($_[CONTEXT])
+            )->value;
     },
 );
-}
 
 
 #-----------------------------------------------------------------------
-# Another call to generate_pre_post_ops() which defines operator classes
+# A call to generate_pre_post_ops() which defines operator classes
 # that can be either prefix operators or postfix operators.  e.g. '-'
 # and '+' can be prefix or postfix (infix).
 #
@@ -232,72 +224,15 @@ class->generate_pre_post_ops(
     dec     => ['num_pre_dec',  'num_post_dec'],
     plus    => ['num_positive', 'num_add'],
     minus   => ['num_negative', 'num_subtract'],
-
-# NOTE: We no longer have '%' masquerading as two different operators based
-# on being a prefix operator (hash expansion: %foo) or an infix operator
-# (modulus: a % 10).  Now we have two separate operators, '%' for prefix
-# hash expansion and ' % ' for infix modulus.
-#    percent => ['sig_hash',     'num_modulus'],
 );
 
 
-
 #-----------------------------------------------------------------------
-# range
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Number::Range;
-
-use Template::TT3::Class 
-    version   => 3.00,
-    base      => 'Template::TT3::Element::Operator::Infix
-                  Template::TT3::Element',
-    constants => ':elements BLANK';
-
-sub text {
-    join(BLANK, @{ $_[SELF]->value($_[CONTEXT]) });
-}
-
-sub values {
-    @{ $_[SELF]->value($_[CONTEXT]) };
-}
-
-sub value {
-    [ 
-        $_[SELF]->[LHS]->number($_[CONTEXT])
-     .. $_[SELF]->[RHS]->number($_[CONTEXT])
-    ]
-}
-
-
-
-#-----------------------------------------------------------------------
-# '/' can be used as a filename separator: foo/bar.tt3
+# Tweak: '/' can be used as a filename separator: foo/bar.tt3
 #-----------------------------------------------------------------------
 
-package Template::TT3::Element::Number::Divide;
-
-use Template::TT3::Class 
-    as => 'filename';
-
-
-#-----------------------------------------------------------------------
-# special cases for *, / and % which can be used in places other than as
-# binary operators.
-#-----------------------------------------------------------------------
-
-package Template::TT3::Element::Number::Multiply;
-
-
-package Template::TT3::Element::Number::Percent;
-
-use Template::TT3::Class 
-    base => 'Template::TT3::Element::Number::Modulus';
-
-package Template::TT3::Element::Number::To;
-
-use Template::TT3::Class 
-    base => 'Template::TT3::Element::Number::Range';
+class->subclass('divide')
+     ->roles('filename');
 
 1;
 

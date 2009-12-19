@@ -227,6 +227,12 @@ Probably best to cleave it back into 3 parts like it (well, its predecessor)
 used to be.
 
 
+=head1 Class Modules
+
+These should all be moved to sit under the C<Template::TT3::Class> namespace.
+e.g. C<Template::TT3::Factory::Class> should be
+C<Template::TT3::Class::Factory>.
+
 =head1 Configuration
 
 =head2 Amalgamating Arguments

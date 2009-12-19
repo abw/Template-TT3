@@ -8,6 +8,7 @@ use Template::TT3::Class
     mutators   => 'file line position column element token source decorated';
     
 
+our $TYPE   = 'syntax';
 our $FORMAT = 'TT3 syntax error at line <line> of <file>:<error><advice><source><marker>';
 our $ERROR  = "\n    Error: %s";
 our $SOURCE = "\n   Source: %s";

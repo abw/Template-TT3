@@ -1,6 +1,6 @@
 package Template::TT3::Dialects;
 
-use Template::TT3::Factory::Class
+use Template::TT3::Class::Factory
     version     => 2.71,
     debug       => 0,
     constants   => 'HASH',
@@ -178,6 +178,9 @@ modify it under the same terms as Perl itself.
 
 This module inherits methods from the L<Template::TT3::Factory>,
 L<Template::TT3::Base>, L<Badger::Factory>, and L<Badger::Base> base classes.
+
+It is constructed using the L<Template::TT3::Class::Factory> class 
+metaprogramming module.
 
 It loads modules and instantiates object that are subclasses of
 L<Template::TT3::Dialect>. See L<Template::TT3::Dialect::TT3> for an example.

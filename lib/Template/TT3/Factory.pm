@@ -1,7 +1,7 @@
 package Template::TT3::Factory;
 
 use Template::TT3::Class
-    version   => 2.71,
+    version   => 2.69,
     debug     => 0,
     base      => 'Template::TT3::Base Badger::Factory',
     constants => DEFAULT,
@@ -19,6 +19,7 @@ our $DEFAULT = 'TT3';
 sub init_factory {
     my ($self, $config) = @_;
     # merge all $NAMES definitions into a new 'names'
+    $self->debug("looking for names in ", join(', ', $self->class->heritage)) if DEBUG;
     $config->{ names } = $self->class->hash_vars( NAMES => $config->{ names } );
     return $self->SUPER::init_factory($config);
 }
@@ -39,7 +40,7 @@ Template::TT3::Factory - base class for factory modules
     
     package Template::TT3::Engines;
     
-    use Template::TT3::Factory::Class
+    use Template::TT3::Class::Factory
         version   => 3.00,
         debug     => 0,
         item      => 'engine',
@@ -56,7 +57,7 @@ C<Template::TT3::Factory> is a thin subclass of L<Badger::Factory>.  It
 exists to provide a convenient place to define any functionality or 
 declarations that are common to all TT3 factory modules.
 
-The L<Template::TT3::Factory::Class> module is defined as a thin wrapper
+The L<Template::TT3::Class::Factory> module is defined as a thin wrapper
 around L<Badger::Factory::Class> to aid in the construction of factory
 modules.
 

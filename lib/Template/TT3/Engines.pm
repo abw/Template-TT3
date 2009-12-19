@@ -1,7 +1,7 @@
 package Template::TT3::Engines;
 
-use Template::TT3::Factory::Class
-    version   => 3.00,
+use Template::TT3::Class::Factory
+    version   => 2.69,
     debug     => 0,
     item      => 'engine',
     path      => 'Template(X)::(TT3::|)Engine';
@@ -112,6 +112,9 @@ modify it under the same terms as Perl itself.
 This module inherits methods from the L<Template::TT3::Factory>,
 L<Template::TT3::Base>, L<Badger::Factory>, and L<Badger::Base> base classes.
 
+It is constructed using the L<Template::TT3::Class::Factory> class 
+metaprogramming module.
+
 It loads modules and instantiates object that are subclasses of 
 L<Template::TT3::Engine>.  See L<Template::TT3::Engine::TT2> and 
 L<Template::TT3::Engine::TT3> for examples.
@@ -125,6 +128,3 @@ L<Template::TT3::Engine::TT3> for examples.
 # End:
 #
 # vim: expandtab shiftwidth=4:
-
-
-
