@@ -7,6 +7,7 @@ use Badger::Class
     utils     => 'self_params camel_case',
     constants => 'ARRAY HASH CODE DELIMITER PKG BLANK',
     constant  => {
+        # TODO: change these to use Template::TT3::Modules constants
         CONSTANTS   => 'Template::TT3::Constants',
         MODULES     => 'Template::TT3::Modules',
         PATTERNS    => 'Template::TT3::Patterns',
@@ -61,6 +62,7 @@ sub view {
 
 # TODO: this is being deprecated in favour of dedicated 
 # Template::TT3::Class::Element subclass
+
 sub as {
     my ($self, $roles) = @_;
     my $base = $self->AS_ROLE;
@@ -121,6 +123,8 @@ sub list_vars {
 }
 
 
+# don't think this is used any more
+
 sub generate {
     my $self    = shift;
     my $classes = @_ == 1 && ref $_[0] ? shift : [ @_ ];
@@ -144,48 +148,6 @@ sub generate {
 #        _debug("Generating $pkg as { ", join(', ', @$spec), " }\n");
         class->export($pkg => @$spec);
     }
-    return $self;
-}
-
-
-sub OLD_subclass {
-    my $self = shift;
-    my $base = $self->{ name };
-    my $classes = @_ == 1 ? shift : [ @_ ];
-    my ($pkg, $spec);
-
-    $classes = 
-            ref $classes eq ARRAY ? [ @$classes ]     # a copy we can mutate
-        :   ref $classes eq HASH  ? [ %$classes ]     # flatten hash to list
-        : ! ref $classes          ? [ split(DELIMITER, $classes) ]
-        :   die "Invalid class list specified to generate: $classes\n";
-        
-#    _debug('classes: [', join(', ', @$classes), "]\n");
-
-    while (@$classes) {
-        # first item is a name, followed by optional hash ref of parameters
-        $pkg  = shift @$classes;
-        $spec = @$classes && ref $classes->[0]
-            ? shift @$classes
-            : { };
-        if (ref $spec eq ARRAY) {
-            unshift(@$spec, base => $base);
-        }
-        elsif (ref $spec eq HASH) {
-            $spec = [base => $base, %$spec];
-        }
-        else {
-            die "Invalid subclass specification for $pkg: $spec\n";
-        }
-
-        if ($pkg =~ s/^_//) {
-            $pkg = $self.PKG.$pkg;
-            _debug("found '_' at start, made it $pkg\n");
-        }
-        _debug("Generating subclass $pkg as { ", join(', ', @$spec), " }\n") if DEBUG;
-        $self->generate($pkg => $spec);
-    }
-    
     return $self;
 }
 
@@ -292,45 +254,6 @@ sub generate_pre_post_ops {
     }
 }
 
-
-sub OLD_generate_number_ops {
-    shift->generate_ops(
-        { id => 'num', methods => 'text number value values' },
-        @_
-    );
-}
-
-
-sub OLD_generate_number_assign_ops {
-    shift->generate_ops(
-        { id => 'num', methods => 'number value values' },
-        @_
-    );
-}
-
-
-sub OLD_generate_text_ops {
-    shift->generate_ops(
-        { id => 'txt', methods => 'text value values' },
-        @_
-    );
-}
-
-
-sub OLD_generate_text_assign_ops {
-    shift->generate_ops(
-        { id => 'txt', methods => 'value values' },
-        @_
-    );
-}
-
-
-sub OLD_generate_boolean_ops {
-    shift->generate_ops(
-        { id => 'bool', methods => 'value values' },
-        @_
-    );
-}
 
 
 sub generate_html_commands {

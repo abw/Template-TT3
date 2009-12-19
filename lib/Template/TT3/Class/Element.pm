@@ -14,7 +14,7 @@ use Template::TT3::Class
         parse_expr => \&parse_expr,
     },
     constant   => {
-        BASE_OP     => 'Template::TT3::Element::Operator',
+        BASE_OP => 'Template::TT3::Element::Operator',
     };
 
 
