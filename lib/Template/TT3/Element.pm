@@ -26,7 +26,7 @@ use Template::TT3::Class
         parse_word         => \&null,       # undef (which is all null() does)
         parse_args         => \&null,       # to decline a parse request.
         parse_pair         => \&null,
-        parse_dotop        => \&null,
+#       parse_dotop        => \&null,
         parse_filename     => \&null,
         parse_fragment     => \&null,
         parse_signature    => \&null,
@@ -414,6 +414,18 @@ sub parse_pairs {
     return $self->[META]->[ELEMS]->construct(
         block => $self->[TOKEN], $self->[POS], \@exprs
     );
+}
+
+
+sub parse_dotop {
+    my $self = shift;
+    $self->debug("parse_dotop()") if DEBUG;
+    # keywords, terminators, operators, etc., that are alphanumeric (e.g. 
+    # 'in', 'or', 'and', etc., automatically downgrade themselves to simple 
+    # words when used after a dot
+    return $self->[TOKEN] =~ /^\w+$/
+        ? $self->become('word')->parse_dotop(@_)
+        : undef;
 }
 
 

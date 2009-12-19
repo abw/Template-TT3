@@ -71,6 +71,11 @@ sub value {
     return $_[SELF]->variable($_[CONTEXT])->value($_[SELF]);
 }
 
+sub maybe {
+    $_[SELF]->debug("maybe fetching value()") if DEBUG;
+    return $_[SELF]->variable($_[CONTEXT])->maybe($_[SELF]);
+}
+
 sub variable {
     $_[SELF]->[LHS]->variable($_[CONTEXT])->dot(
         $_[SELF]->[RHS]->value($_[CONTEXT]),

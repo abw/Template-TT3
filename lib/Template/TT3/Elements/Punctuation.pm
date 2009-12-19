@@ -158,10 +158,10 @@ use Template::TT3::Class
         is_terminator => 1,
     },
     alias     => {
-        parse_expr    => 'null',
-        parse_body   => 'null',
-        parse_infix  => 'reject',
-        terminator => 'next_skip_ws',
+        parse_expr  => 'null',
+        parse_body  => 'null',
+        parse_infix => 'reject',
+        terminator  => 'next_skip_ws',
     };
 
 

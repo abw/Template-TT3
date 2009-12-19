@@ -19,7 +19,7 @@ use Template::TT3::Class
 
 
 
-sub parse_dotop {
+sub FIXED_parse_dotop {
     # Operators can't be dotops by default - this is really a nasty quick
     # hack to mask the parse_dotop() method in T::Element::Number which 
     # allows a number to be used as a dotop.  Because all our numeric

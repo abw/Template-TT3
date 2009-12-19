@@ -7,6 +7,7 @@ use Template::TT3::Class
     debug     => 0,
     base      => 'Template::TT3::Element',
     view      => 'block',
+    utils     => 'blessed',
     constants => ':elements BLANK',
     constant  => {
         SEXPR_FORMAT  => "<block:%s>",
@@ -25,6 +26,7 @@ sub text {
         BLANK,
         grep { defined }                # TODO: warn
         map { $_->text($_[1]) } 
+        grep { defined  }
         @{ $_[0]->[EXPR] } 
     );
 }

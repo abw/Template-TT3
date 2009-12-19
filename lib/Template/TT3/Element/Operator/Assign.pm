@@ -53,8 +53,6 @@ sub parse_infix {
 
 
 sub value {
-    $_[SELF]->debug("assign value(): ", $_[SELF]->source) if DEBUG;
-
     $_[SELF]
         ->[LHS]
         ->variable( $_[CONTEXT] )        # fetch LHS as a variable
