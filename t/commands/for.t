@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 20,
+    tests   => 21,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -213,6 +213,18 @@ x: 1
 x: 2
 x: 3
 
+-- test iterator methods --
+%% for x in 11 to 15
+[% loop.count %]: [% x %]
+%% end
+-- expect --
+1: 11
+2: 12
+3: 13
+4: 14
+5: 15
+
+
 -- test mismatched fragment error --
 %% for x in 1 to 3
 x: [% x %]
@@ -229,5 +241,4 @@ TT3 syntax error at line 3 of "mismatched fragment error" test:
 %% for x y fill z;
 -- expect --
 <ERROR:'fill' cannot follow 'for'>
-
 

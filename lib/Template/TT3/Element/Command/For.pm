@@ -1,10 +1,12 @@
 package Template::TT3::Element::Command::For;
 
+use Template::TT3::Iterator;
 use Template::TT3::Class 
     version    => 3.00,
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
     view       => 'for',
+    modules    => 'ITERATOR_MODULE',
     constants  => ':elements ARRAY',
     constant   => {
         ITEM         => 'item',
@@ -119,10 +121,16 @@ sub values {
     }
     
     # repeat for each item
-    # TODO: use an iterator
+    # FIXME: quick hack - don't trample on loop
+    my $iter = $self->ITERATOR_MODULE->new($value);
+    $context->set( loop => $iter );
+    
+    
     foreach my $item (@$value) {
-         $target->set($item);
-         push(@values, $block->values($context));
+        # quick hack
+        $iter->one;
+        $target->set($item);
+        push(@values, $block->values($context));
     }
 
     return @values;
