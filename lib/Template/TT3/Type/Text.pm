@@ -39,29 +39,31 @@
 package Template::TT3::Type::Text;
 
 use Template::TT3::Class
-    version  => 3.00,
-    debug    => 0,
-    base     => 'Template::TT3::Type',
-    utils    => 'blessed md5_hex is_object',
-    patterns => '$LAST_LINE',
-    as_text  => \&text,             # overload stringification operator
-    is_true  => 1,                  # always evaluate true in boolean context
-    overload => {                   # overload comparison ops
-        qw|<=>|  => \&compare,
-        cmp      => \&compare,
+    version     => 3.00,
+    debug       => 0,
+    base        => 'Template::TT3::Type',
+    import      => 'CLASS',
+    utils       => 'blessed md5_hex is_object',
+    constants   => 'DELIMITER ARRAY HASH',
+    patterns    => '$LAST_LINE',
+    as_text     => \&text,          # overload stringification operator
+    is_true     => 1,               # always evaluate true in boolean context
+    overload    => {                # overload comparison ops
+        qw|<=>|     => \&compare,
+        cmp         => \&compare,
     },
-    constant => {                   # define constant subs/methods
-        TEXT => __PACKAGE__,
-        type => 'Text',             # use capitalised name 'Text' instead of 
+    constant    => {                # define constant subs/methods
+        TEXT        => __PACKAGE__,
+        type        => 'Text',      # use capitalised name 'Text' instead of 
     },                              # 'text' 'cos we're a formal type (of sorts) 
-    methods  => {
-        center    => \&centre,     # alias for folk speaking US english
-        tt_expand => \&text,       # special method for TT to use
+    alias       => {
+        center      => \&centre,    # alias for folk speaking US english
+        tt_expand   => \&text,      # special method for TT to use
     },
-    exports  => {
-        any  => 'TEXT Text',        # class name and constructor sub
+    exports     => {
+        any         => 'TEXT Text', # class name and constructor sub
     },
-    vars     => {                   # TODO: move to T::Type::Source
+    vars        => {                # TODO: move to T::Type::Source
         LINE_LENGTH => 72,          # package variable providing defaults
         SHOW_AFTER  => 20,          # for location()/whereabout() methods
         TRIMMED     => '...',
@@ -104,6 +106,8 @@ our $METHODS = {
     'size'     => \&size,
 
     # comparison and pattern matching methods
+    'is'       => \&is,
+    'in'       => \&in,
     'equals'   => \&equals,
     'compare'  => \&compare,
     'before'   => \&before,
@@ -283,6 +287,32 @@ sub after {
 #-----------------------------------------------------------------------
 # pattern matching methods
 #-----------------------------------------------------------------------
+
+
+sub is {
+    my $self = shift;
+    my $text = CORE::ref $self ? $$self : $self;
+    return $text eq $_[0];
+}
+
+
+sub in {
+    my $self = shift;
+    my $text = CORE::ref $self ? $$self : $self;
+    my $vals = @_ && ref $_[0] ? shift : [@_];
+
+    if (ref $vals eq HASH) {
+        return $vals->{ $text } || 0;
+    }
+    elsif (ref $vals eq ARRAY) {
+        return scalar grep { $_ eq $text } @$vals;
+    }
+    else {
+#        CLASS->debug("PLATE OF FAIL");
+        return $self->error_msg( invalid => search => $vals );
+    }
+}
+
 
 sub match {
     my ($self, $pattern, $global) = @_;
