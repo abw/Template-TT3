@@ -20,6 +20,13 @@ I've started working through the element modules to clean them up, thoroughly
 test and documentation them, and generally get things ready for a first
 release.
 
+This is my immediate stack as of Saturday 19th December.
+
+    * T~Element::Class      # dedicated metaclass for elements
+    * T~Element::Literal    # base class
+    * T~Element::Text       # subclass of literal (extract from T~Es~Text)
+    * ...then other elements currently in the T~Elements::* modules
+
 =head1 ELEMENT MODULES
 
 Elements are the basic nodes that comprise a parsed template tree.  They're
