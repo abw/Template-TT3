@@ -5,6 +5,10 @@ Everything is still very much under construction so don't expect anything
 production-ready just yet.  However, most of the important functionality
 is now in place.
 
+See docs/pod/Template/TT3/Status.pod for more information on the current 
+status and docs/pod/Template/TT3/TODO.pod for an incomplete list of things
+still to do.
+
 At present all modules are contained under the Template::TT3 namespace.
 They will eventually become the new Template::* modules and the current 
 TT2 modules will be moved permanently into Template::TT2::*.  But that's
