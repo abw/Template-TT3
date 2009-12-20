@@ -69,6 +69,9 @@ L<Template::TT3::Base> and L<Badger::Base> base classes.
 It is constructed using the L<Template::TT3::Class::Element> class 
 metaprogramming module.
 
+The closely related L<Template::TT3::Class::Dquote> module implements an
+element used to represent "double quoted" strings.
+
 =cut
 
 # Local Variables:

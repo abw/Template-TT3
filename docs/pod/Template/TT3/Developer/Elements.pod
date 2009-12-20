@@ -16,28 +16,66 @@ The hierarchy of elements is as follows:
             Text
             Padding
             String
+                Squote
+                Dquote
         Whitespace
             Comment
+        Delimiter
+            TagEnd
+        Terminator
+            End
+
+There are more... but I haven't cleaned those up yet
+
 
 =head2 Literal Elements
 
-=head2 Template::TT3::Element::Literal
+=head3 Template::TT3::Element::Literal
 
 Base class for all elements that represent a chunk of literal text.
 
-=head2 Template::TT3::Element::Text
+=head3 Template::TT3::Element::Text
 
 An element representing a plain text token.  
 
-=head2 Template::TT3::Element::Whitespace
+=head3 Template::TT3::Element::Padding
+
+An element representing a synthesised padding token.  e.g. the single space
+added around a tag by the C<=> pre/post chomp flags.
+
+=head3 Template::TT3::Element::String
+
+A base class element for quoted strings.
+
+=head3 Template::TT3::Element::Squote
+
+A subclass of L<Template::TT3::Element::String> for 'single quoted' strings.
+
+=head3 Template::TT3::Element::Dquote
+
+A subclass of L<Template::TT3::Element::String> for "double quoted" strings.
+
+=head2 Whitespace and Other Ignorable Elements
+
+=head3 Template::TT3::Element::Whitespace
 
 An element representing an ignorable whitespace token.
 
-=head2 Template::TT3::Element::Comment
+=head3 Template::TT3::Element::Comment
 
-An element representing an ignorable whitespace token.
+A subclass of L<Template::TT3::Element::Whitespace> for ignorable comments.
 
+=head3 Template::TT3::Element::Terminator
 
+An element representing a terminator token.  e.g. the C<end> keyword and
+the C<]>, C<}> and C<)> tokens used to terminate lists, hash arrays and
+parameter lists.
+
+=head3 Template::TT3::Element::End
+
+A thin subclass of L<Template::TT3::Element::Terminator> which acts like a
+keyword when presented via a view (e.g. for the purpose of syntax
+highlighting).
 
 =head1 AUTHOR
 

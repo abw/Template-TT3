@@ -117,6 +117,9 @@ L<Template::TT3::Base> and L<Badger::Base> base classes.
 It is constructed using the L<Template::TT3::Class::Element> class 
 metaprogramming module.
 
+The closely related L<Template::TT3::Class::Squote> module implements an
+element used to represent 'single quoted' strings.
+
 =cut
 
 # Local Variables:
