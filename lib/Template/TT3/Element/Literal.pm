@@ -10,13 +10,14 @@ use Template::TT3::Class::Element
     alias    => {
         parse_expr  => 'advance',
         parse_word  => 'advance',
-        text        => \&token,
-        value       => \&token,
-        values      => \&token,
+        value       => \&text,
+        values      => \&text,
     };
 
 
-sub token {
+sub text {
+    # TODO: find out why this breaks when we alias it to the base class
+    # token() method
     $_[SELF]->[TOKEN];
 }
 
@@ -48,10 +49,10 @@ Template:TT3::Element::Literal - base class element for literal elements
 
 =head1 DESCRIPTION
 
-This module implements a subclass of L<Template::TT3::Element>. It acts as a
-common base class for the L<Template::TT3::Element::Word>,
-L<Template::TT3::Element::Keyword> and L<Template::TT3::Element::Keyword>
-modules.
+This module implements a subclass of L<Template::TT3::Element> to represent
+literal tokens. It acts as a common base class for the
+L<Template::TT3::Element::Text>, L<Template::TT3::Element::Word>,
+L<Template::TT3::Element::Keyword> and various other modules.
 
 =head1 METHODS
 
@@ -64,26 +65,53 @@ base classes.
 This method is an alias to the L<advance()|Template::TT3::Element/advance()>
 method inherited from the L<Template::TT3::Element> base class.
 
+=head2 parse_expr()
+
+This method is an alias to the L<advance()|Template::TT3::Element/advance()>
+method inherited from the L<Template::TT3::Element> base class.
+
 =head2 text()
 
-This method is an alias to the L<token()|Template::TT3::Element/token()>
-method inherited from the L<Template::TT3::Element> base class.  It simply
-returns the literal token text.
+This method simply returns the literal token text.
 
 =head2 value()
 
-An alias as per L<text()>.
+An alias to the L<text()> method.
 
 =head2 values()
 
-An alias as per L<text()>.
+An alias to the L<text()> method.
 
-=head2 name()
+=head2 variable()
 
-An alias as per L<text()>.
+Returns a L<Template::TT3::Variable> object to represent the text.  The 
+variable object can be used to call dotop methods against the literal value.
 
-TODO: I've taken this out... I don't think we're using name() any more...
-let's see what breaks.
+=head2 source()
+
+Returns a canonical representation of the template source expression for this
+element. It uses the C<sprintf()> format returned by the L<SOURCE_FORMAT>
+constant method to render the literal text. In this base class the
+C<SOURCE_FORMAT> is defined to be C<%s>, resulting in a simple pass-through of
+the token text. Subclasses may redefine C<SOURCE_FORMAT> to render a different
+representation of the element.
+
+=head1 CONSTANTS
+
+This module defines the following constant.  Note that constants are 
+implemented in Perl as subroutines that can be called as methods against
+an object.  
+
+    my $format = $self->SOURCE_FORMAT;
+
+This allows a subclass to re-define the C<SOURCE_FORMAT> constant method to
+return a different value.
+
+=head2 SOURCE_FORMAT
+
+This returns a C<sprintf()> string for the L<source()> method to use.  In
+this base class it returns C<%s>.  Subclasses may redefine it to return a
+different format.
 
 =head1 AUTHOR
 
@@ -98,11 +126,16 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Badger::Base>,
-L<Template::TT3::Base>,
-L<Template::TT3::Element>,
-L<Template::TT3::Element::Word>, 
-L<Template::TT3::Element::Keyword>.
+This module inherits methods from the L<Template::TT3::Element>,
+L<Template::TT3::Base> and L<Badger::Base> base classes.
+
+It is constructed using the L<Template::TT3::Class::Element> class 
+metaprogramming module.
+
+It is itself the base class for the L<Template::TT3::Element::Text>,
+L<Template::TT3::Element::Number>, L<Template::TT3::Element::Word>,
+L<Template::TT3::Element::Keyword> and L<Template::TT3::Element::Filename>
+modules.
 
 =cut
 
