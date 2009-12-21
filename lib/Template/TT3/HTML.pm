@@ -2,7 +2,7 @@ package Template::TT3::HTML;
 
 #use Template::TT3;
 use Template::TT3::Type::Text;
-use Template::TT3::Elements::Text;
+use Template::TT3::Element::Text;
 use Template::TT3::Element::Command::Raw;
 use Template::TT3::Class 
     version   => 3.00,

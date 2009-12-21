@@ -1,6 +1,7 @@
 package Template::TT3::Tag::Control;
 
 use Template::TT3::Grammar::Control;
+use Template::TT3::Element::Eof;
 use Template::TT3::Class
     version   => 2.71,
     debug     => 0,

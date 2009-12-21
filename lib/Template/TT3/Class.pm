@@ -153,8 +153,10 @@ sub generate {
 
 
 sub subclass {
-    my ($self, $name) = @_;
-    class( $self->{ name }.PKG.camel_case($name), ref $self );
+    my ($self, $name, @spec) = @_;
+    my $class = class( $self->{ name }.PKG.camel_case($name), ref $self )->base($self);
+    $class->export(\@spec) if @spec;
+    return $class;
 }
 
 

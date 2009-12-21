@@ -14,7 +14,7 @@
 use Badger lib => '../../lib';
 
 use Template::TT3::Test 
-    tests => 55,
+    tests => 53,
     debug => 'Template::TT3::Class',
     args  => \@ARGV;
 
@@ -174,10 +174,14 @@ package Susan;
 use Template::TT3::Class
     base     => 'Template::TT3::Base',
     version  => 42,
-    subclass => 'Tom Dick',
-    subclass => {
-        Larry => { version => 43 },
-    };
+    subclass => 'Tom',
+    subclass => 'Dick',
+    import   => 'class';
+
+# this has changed
+#class->subclass(
+#    Larry => version => 43,
+#);
 
 package main;
 
@@ -185,17 +189,18 @@ my $sue = Susan->new();
 ok( $sue, 'created Susan' );
 is( $sue->VERSION, 42, 'Sue version' );
 
-my $tom = Tom->new();
+my $tom = Susan::Tom->new();
 ok( $tom, 'created Tom' );
 is( $tom->VERSION, 42, 'Tom version' );
 
-my $dick = Dick->new();
+my $dick = Susan::Dick->new();
 ok( $dick, 'created Dick' );
 is( $dick->VERSION, 42, 'Dick version' );
 
-my $wall = Larry->new();
-ok( $wall, 'created Larryt' );
-is( $wall->VERSION, 43, 'Larry version' );
+# this has changed
+#my $wall = Susan::Larry->new();
+#ok( $wall, 'created Larryt' );
+#is( $wall->VERSION, 43, 'Larry version' );
 
 
 #-----------------------------------------------------------------------
