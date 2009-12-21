@@ -11,13 +11,13 @@
 #
 #========================================================================
 
-use lib '/home/abw/projects/badger/lib';
-
-use Badger lib => '../../lib';
+use Badger 
+    lib => '../../lib';
+    
 use Template::TT3::Test 
     debug  => 'Template::TT3::Type::Tree',
     args   => \@ARGV,
-    tests  => 3;
+    tests  => 5;
 
 use Template::TT3::Type::Tree qw(TREE Tree);
 
@@ -27,6 +27,15 @@ is( TREE, 'Template::TT3::Type::Tree', 'got TREE' );
 
 my $tree = Tree( root => 'hello' );
 ok( $tree, 'created Tree' );
+
+
+use Template::TT3::Scanner;
+
+my $tokens = Template::TT3::Scanner->new->scan("Hello [% name %]");
+ok( $tokens, "got scanned tokens: $tokens" );
+
+$tree = $tokens->tree;
+ok( $tree, "got tree: $tree" );
 
 
 __END__

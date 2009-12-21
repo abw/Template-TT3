@@ -1,14 +1,11 @@
 package Template::TT3::Element::Variable::Apply;
 
-use Template::TT3::Class 
+use Template::TT3::Class::Element
     debug     => 0,
     base      => 'Template::TT3::Element::Variable',
     view      => 'apply',
-    constants => ':elements',
     constant  => {
         FINISH        => ')',
-        SEXPR_FORMAT  => "<apply:%s%s>",
-        SEXPR_ARGS    => "<args:%s>",
         SOURCE_FORMAT => '%s(%s)',
     };
 
@@ -111,21 +108,6 @@ sub list_values {
 }
 
 
-sub sexpr {
-    my $self = shift;
-    my $name = $self->[EXPR]->sexpr;
-    my $args = $self->[ARGS]->sexpr( $self->SEXPR_ARGS );
-    for ($name, $args) {
-        s/^/  /gsm;
-    }
-    sprintf(
-        $self->SEXPR_FORMAT,
-        "\n" . $name,
-        "\n" . $args . "\n"
-    );
-}
-
-
 sub source {
     my $self = shift;
     sprintf(
@@ -135,7 +117,8 @@ sub source {
     );
 }
 
-sub TMP_text {
+
+sub OLD_text {
     my $self = shift;
     $self->debug("TEXT");
     return 'Apply->text()';

@@ -1,12 +1,11 @@
 package Template::TT3::Element::Word;
 
-use Template::TT3::Class 
-    version   => 3.00,
+use Template::TT3::Class::Element
+    version   => 2.69,
     debug     => 0,
     base      => 'Template::TT3::Element::Literal',
     view      => 'word',
-    constants => ':elements',
-    as        => 'pair';
+    roles     => 'pair';
 
 
 sub parse_expr {
@@ -21,14 +20,6 @@ sub parse_dotop {
     $self->debug("using $self->[TOKEN] as dotop: $self\n") if DEBUG;
     return $self;
 }
-
-
-sub OLD_generate {
-    $_[1]->generate_word(
-        $_[0]->[TOKEN],
-    );
-}
-
 
 
 1;
@@ -52,7 +43,27 @@ L<Template::TT3::Base> and L<Badger::Base> base classes.
 
 =head2 parse_expr()
 
-=head2 parse_dotop()
+This method is called when a word appears at the start of an expressions.
+It upgrades (re-blesses) the word element to a
+L<variable|Template::TT3::Element::Variable> object and then calls its
+L<parse_expr()|Template::TT3::Element::Variable/parse_expr()> method.
+
+In summary, if you ask a word to be an expression then it silently becomes a
+variable expression.
+
+=head2 parse_dotop($token)
+
+This method is called when a word appears immediately after a dot operator.
+It advances the element referenced by the C<$token> pointer and returns
+C<$self> to indicate that it is a syntactically valid dot operation.
+
+=head2 view($view)
+
+This method is called by a L<Template::TT3::View> object as part of the double
+dispatch process that is used to render views of template elements. It calls
+the C<view_word()> method against the view object passed as the only
+argument, C<$view>. It passes itself as an argument to the C<view_word()>
+method.
 
 =head1 AUTHOR
 
@@ -67,10 +78,12 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Badger::Base>,
-L<Template::TT3::Base>,
-L<Template::TT3::Element>,
-L<Template::TT3::Literal>.
+This module inherits methods from the L<Template::TT3::Element::Literal>,
+L<Template::TT3::Element>, L<Template::TT3::Base> and L<Badger::Base> base
+classes.
+
+It is constructed using the L<Template::TT3::Class::Element> class 
+metaprogramming module.
 
 =cut
 

@@ -1,0 +1,32 @@
+Expect the following tests to fail:
+
+t/dotops/text.t           (Wstat: 0 Tests: 24 Failed: 2)
+  Failed tests:  19, 21
+
+  * work to do on PARAMS
+
+t/expressions/dotops.t    (Wstat: 0 Tests: 15 Failed: 1)
+  Failed test:  8
+
+  * work to do on dotops returning undefined values
+
+t/expressions/hash.t      (Wstat: 0 Tests: 14 Failed: 1)
+  Failed test:  13
+
+  * %var makes a pair from a scalar but possibly shouldn't
+
+t/parser/brackets.t       (Wstat: 0 Tests: 2 Failed: 2)
+  Failed tests:  1-2
+
+  * bugs in sexpr view
+
+t/parser/commands.t       (Wstat: 0 Tests: 7 Failed: 2)
+  Failed tests:  3-4
+
+  * sexpr view is incomplete
+
+t/parser/variables.t      (Wstat: 0 Tests: 11 Failed: 1)
+  Failed test:  11
+
+  * bug in sexpr view
+

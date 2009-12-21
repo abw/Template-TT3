@@ -1,10 +1,8 @@
 package Template::TT3::Element::Operator::Text;
 
-use Template::TT3::Elements::Operator;          # FIXME
 use Template::TT3::Class::Element
     version   => 2.69,
     debug     => 0,
-    base      => 'Template::TT3::Element',      # TODO: +Operator
     import    => 'class';
 
 
@@ -20,7 +18,7 @@ sub variable {
 #-----------------------------------------------------------------------
 # Call on generate_elements() (in Template::TT3::Class::Element) to 
 # create a bunch of subclasses of Template::TT3::Element::Operator::Text.
-# See the comments in Template::TT3::Elements::Operator::Number for 
+# See the comments in Template::TT3::Element::Operator::Number for 
 # further discussion.  For text ops we alias the subroutine specified 
 # as value(), values() and text().
 #-----------------------------------------------------------------------
@@ -70,7 +68,7 @@ class->generate_elements(
 
 #-----------------------------------------------------------------------
 # Same again, but without aliasing the function to the text() method.  
-# Instead we inherit the text() method from the T~Operator::Assignment 
+# Instead we inherit the text() method from the T~Operator::Quiet 
 # base class which performs the assignment (by calling $self->value()) 
 # but returns an empty list. This is how we silence assignment operators 
 # from generating any output in "text context", e.g. [% a = 10 %]
@@ -81,7 +79,7 @@ class->generate_elements(
         methods => 'value values' 
     },
 
-    combine_set => infix_right => assignment => sub {       # a ~= b
+    combine_set => infix_right => quiet => sub {       # a ~= b
         return $_[0]->[LHS]->assign(
             $_[1], 
             $_[0]->[LHS]->text($_[1])

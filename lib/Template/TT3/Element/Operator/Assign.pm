@@ -1,11 +1,10 @@
 package Template::TT3::Element::Operator::Assign;
 
-use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Operator::InfixRight
-                  Template::TT3::Element::Operator::Assignment
+                  Template::TT3::Element::Operator::Quiet
                   Template::TT3::Element',
     import    => 'class',
     as        => 'pair',
@@ -53,6 +52,7 @@ sub parse_infix {
 
 
 sub value {
+#    $_[SELF]->debug("assign value()");
     $_[SELF]
         ->[LHS]
         ->variable( $_[CONTEXT] )        # fetch LHS as a variable
@@ -76,6 +76,11 @@ sub value {
 #    
 #    return $var->value;
 }
+
+
+#sub text {
+#   shift->todo
+#}
 
 
 sub pairs {

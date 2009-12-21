@@ -226,7 +226,7 @@ sub reset {
 sub transform {
     my $self = shift;
     my $text = shift;
-    $self->scan($text)->tree->text(@_);
+    $self->scan($text)->expr->text(@_);
 }
 
 1;

@@ -28,7 +28,9 @@ sub parse_filename {
 
 
 sub filename {
-    $_[SELF]->[EXPR];
+    defined $_[SELF]->[EXPR]
+          ? $_[SELF]->[EXPR]
+          : $_[SELF]->[TOKEN]
 }
 
 

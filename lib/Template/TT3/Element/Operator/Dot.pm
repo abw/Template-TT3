@@ -1,17 +1,14 @@
 package Template::TT3::Element::Operator::Dot;
 
-use Template::TT3::Elements::Operator;
-use Template::TT3::Class 
-    version   => 3.00,
+use Template::TT3::Class::Element
+    version   => 2.68,
     debug     => 0,
     base      => 'Template::TT3::Element::Operator::Binary
                   Template::TT3::Element',
-    as        => 'filename',        # dots allowed in filenames, e.g. foo.tt3
+    roles     => 'filename',        # dots allowed in filenames, e.g. foo.tt3
     view      => 'dot',
     constants => ':elements',
     constant  => {
-        SEXPR_FORMAT  => '<dot:%s%s%s>',
-        SEXPR_ARGS    => "<args:%s>",
         SOURCE_FORMAT => '%s%s%s', 
     };
 
@@ -85,27 +82,6 @@ sub variable {
         $_[SELF],
     );
 }
-
-sub sexpr {
-    my $self = shift;
-    my $lhs  = $self->[LHS]->sexpr;
-    my $rhs  = $self->[RHS]->sexpr;
-    my $args = $self->[ARGS];
-    $args = $args 
-        ? $args->sexpr( $self->SEXPR_ARGS )
-        : '';
-    for ($lhs, $rhs, $args) {
-        next unless length;
-        s/^/  /gsm;
-    }
-    sprintf(
-        $self->SEXPR_FORMAT,
-        "\n" . $lhs,
-        "\n" . $rhs,
-        "\n" . $args . "\n"
-    );
-}
-
 
 sub left_edge {
     $_[SELF]->[LHS]->left_edge;

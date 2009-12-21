@@ -1,14 +1,10 @@
 package Template::TT3::Element::Operator::Number;
 
-use Template::TT3::Elements::Operator;          # FIXME
 use Template::TT3::Class::Element
     version   => 2.69,
     debug     => 0,
     base      => 'Template::TT3::Element',      # TODO: +Operator
-    import    => 'class',
-    constant  => {
-        SEXPR_FORMAT => '<number:%s>',          # TODO: remove me
-    };
+    import    => 'class';
 
 
 sub variable {
@@ -18,14 +14,6 @@ sub variable {
         $_[SELF], $_[SELF]->value( $_[CONTEXT] ) 
     );
 }
-
-sub sexpr {
-    sprintf(
-        $_[SELF]->SEXPR_FORMAT, 
-        $_[SELF]->[TOKEN],
-    );
-}
-
 
 
 #-----------------------------------------------------------------------
@@ -129,7 +117,7 @@ class->generate_elements(
 
 #-----------------------------------------------------------------------
 # Same again, but without aliasing the function to the text() method.  
-# Instead we inherit the text() method from the T~Operator::Assignment 
+# Instead we inherit the text() method from the T~Operator::Quiet 
 # base class which performs the assignment (by calling $self->value()) 
 # but returns an empty list. This is how we silence assignment operators 
 # from generating any output in "text context", e.g. [% a = 10 %]
@@ -140,21 +128,21 @@ class->generate_elements(
         methods => 'number value values' 
     },
 
-    pre_inc => prefix => assignment => sub {                # ++a 
+    pre_inc => prefix => quiet => sub {                # ++a 
         return 
             $_[SELF]->[RHS]->assign(
                 $_[CONTEXT], 
                 $_[SELF]->[RHS]->number($_[CONTEXT]) + 1
             )->value;
     },
-    pre_dec => prefix => assignment => sub {                # --a
+    pre_dec => prefix => quiet => sub {                # --a
         return 
             $_[SELF]->[RHS]->assign(
                 $_[CONTEXT], 
                 $_[SELF]->[RHS]->number($_[CONTEXT]) - 1
             )->value;
     },
-    post_inc => postfix => assignment => sub {              # a++
+    post_inc => postfix => quiet => sub {              # a++
         my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
         $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 
@@ -162,7 +150,7 @@ class->generate_elements(
         );
         return $n;
     },
-    post_dec => postfix => assignment => sub {              # a--
+    post_dec => postfix => quiet => sub {              # a--
         my $n = $_[SELF]->[LHS]->number($_[CONTEXT]);
         $_[SELF]->[LHS]->assign(
             $_[CONTEXT], 
@@ -170,7 +158,7 @@ class->generate_elements(
         );
         return $n;
     },
-    add_set => infix_right => assignment => sub {           # a += b
+    add_set => infix_right => quiet => sub {           # a += b
         return 
             $_[SELF]->[LHS]->assign(
                 $_[CONTEXT], 
@@ -178,7 +166,7 @@ class->generate_elements(
               + $_[SELF]->[RHS]->number($_[CONTEXT])
             )->value;
     },
-    sub_set => infix_right => assignment => sub {           # a -= b
+    sub_set => infix_right => quiet => sub {           # a -= b
         return 
             $_[SELF]->[LHS]->assign(
                 $_[CONTEXT], 
@@ -186,7 +174,7 @@ class->generate_elements(
               - $_[SELF]->[RHS]->number($_[CONTEXT])
             )->value;
     },
-    mul_set => infix_right => assignment => sub {           # a *= b
+    mul_set => infix_right => quiet => sub {           # a *= b
         return 
             $_[SELF]->[LHS]->assign(
                 $_[CONTEXT], 
@@ -194,7 +182,7 @@ class->generate_elements(
               * $_[SELF]->[RHS]->number($_[CONTEXT])
             )->value;
     },
-    div_set => infix_right => assignment => sub {           # a /= b
+    div_set => infix_right => quiet => sub {           # a /= b
         return 
             $_[SELF]->[LHS]->assign(
                 $_[CONTEXT], 

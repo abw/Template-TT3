@@ -128,7 +128,7 @@ EOF
 
 $tokens = $scanner->scan($text);
 ok( $tokens, 'scanned bold/italic text' );
-is( $tokens->tree->text, $expect, 'output matches expected' );
+is( $tokens->expr->text, $expect, 'output matches expected' );
 
 # try the all-in-one transform() method
 my $output = $scanner->transform($text);

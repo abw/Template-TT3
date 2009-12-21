@@ -42,7 +42,9 @@ sub text {
     # otherwise it's a static string in EXPR
     $_[SELF]->[BLOCK] 
         ? $_[SELF]->[BLOCK]->text($_[CONTEXT])
-        : $_[SELF]->[EXPR]
+        : defined $_[SELF]->[EXPR]
+                ? $_[SELF]->[EXPR]
+                : $_[SELF]->[TOKEN]
 }
 
 

@@ -101,10 +101,10 @@ modules.
 =head2 Core Elements
 
     [ ] Template::TT3::Element::Block
-    [ ] Template::TT3::Element::Filename
-    [ ] Template::TT3::Element::Keyword
-    [ ] Template::TT3::Element::Literal
-    [ ] Template::TT3::Element::Word
+    [X] Template::TT3::Element::Filename
+    [X] Template::TT3::Element::Keyword
+    [X] Template::TT3::Element::Literal
+    [X] Template::TT3::Element::Word
     [ ] Template::TT3::Element::Sub
 
 =head2 Text and String Elements

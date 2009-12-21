@@ -569,11 +569,22 @@ sub fetch_template {
 }
 
 
-
-
 #-----------------------------------------------------------------------
 # view / inspection methods
 #-----------------------------------------------------------------------
+
+
+sub tree {
+    my $self = shift;
+    return $self->[META]->[ELEMS]->hub->types->create(
+        tree => { root => $self }
+    );
+}
+
+
+sub sexpr {
+    shift->tree->view_sexpr;
+}
 
 
 sub view_guts {
@@ -797,8 +808,6 @@ sub nan_error {
 
 __END__
 
-sub source  { $_[0]->[TOKEN] }
-sub sexpr   { '<' . $_[0]->type . ':' . $_[0]->text . '>' }
 
 # methods to return the leftmost and rightmost leaf node of a subtree
 *left_edge  = \&self;

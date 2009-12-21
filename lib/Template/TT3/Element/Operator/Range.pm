@@ -1,6 +1,5 @@
 package Template::TT3::Element::Operator::Range;
 
-use Template::TT3::Elements::Operator;
 use Template::TT3::Class::Element
     version   => 2.69,
     debug     => 0,

@@ -1,11 +1,10 @@
 package Template::TT3::Element::Operator::Pair;
 
-use Template::TT3::Elements::Operator;
 use Template::TT3::Class 
     version   => 3.00,
     debug     => 0,
     base      => 'Template::TT3::Element::Operator::InfixRight
-                  Template::TT3::Element::Operator::Assignment
+                  Template::TT3::Element::Operator::Quiet
                   Template::TT3::Element',
     import    => 'class',
     view      => 'pair',

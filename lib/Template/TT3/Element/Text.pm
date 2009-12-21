@@ -4,6 +4,7 @@ use Template::TT3::Class::Element
     version   => 2.69,
     debug     => 0,
     base      => 'Template::TT3::Element::Literal',
+    view      => 'text',
     constant  => {
         SOURCE_FORMAT => '"%s"',
     };

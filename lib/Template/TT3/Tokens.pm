@@ -239,8 +239,13 @@ sub text {
 }
 
 
-sub tree {
+sub expr {
     shift->first->parse(@_);
+}
+
+
+sub tree {
+    shift->expr->tree;
 }
 
 

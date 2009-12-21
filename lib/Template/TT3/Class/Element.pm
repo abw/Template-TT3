@@ -223,7 +223,7 @@ Another current example:
         version   => 3.00,
         debug     => 0,
         base      => 'Template::TT3::Element::Operator::InfixRight
-                      Template::TT3::Element::Operator::Assignment
+                      Template::TT3::Element::Operator::Quiet
                       Template::TT3::Element',
         import    => 'class',
         as        => 'pair',

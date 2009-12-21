@@ -3,10 +3,7 @@ package Template::TT3::Element::Squote;
 use Template::TT3::Class::Element
     version => 2.69,
     base    => 'Template::TT3::Element::String',
-    view    => 'squote',
-    constant => {
-#        SOURCE_FORMAT => "'%s'",
-    };
+    view    => 'squote';
 
 
 1;
@@ -36,21 +33,6 @@ dispatch process that is used to render views of template elements. It calls
 the C<view_squote()> method against the view object passed as the only
 argument, C<$view>. It passes itself as an argument to the C<view_squote()>
 method.
-
-=head1 CONSTANTS
-
-The following constant method is defined:
-
-=head2 SOURCE_FORMAT
-
-This defines a C<sprintf()> format string of C<'%s'> (note that the quotes
-are part of the format).  This is used by the
-L<source()|Template::TT3::Element::Literal> method inherited from 
-L<Template::TT3::Element::Literal> to render a canonical representation 
-of the template source code for this element.
-
-UPDATE: This has been removed.  Perhaps temporarily, perhaps permanently.
-Note sure until I investigate.
 
 =head1 AUTHOR
 

@@ -101,6 +101,7 @@ TT3 undefined data error at line 1 of "undefined middle of a dotop" test:
     Error: Undefined value in 'hash.missing.have': hash.missing
    Source: %% hash.missing.have.you.seen.my.cat
                           ^ here
+
 -- test hash dotop with dollar sigil --
 %% var = 'phi'
 PHI: [% hash.phi %]

@@ -1,15 +1,11 @@
 package Template::TT3::Element::Variable;
 
-use Template::TT3::Class 
-    version   => 3.00,
+use Template::TT3::Class::Element
+    version   => 2.69,
     debug     => 0,
     base      => 'Template::TT3::Element',
     view      => 'variable',
-    as        => 'pair',
-    constants => ':elements',
-    constant  => {
-        SEXPR_FORMAT => '<variable:%s>', 
-    },
+    roles     => 'pair',
     alias => {
         source        => 'token',
         values        => \&value,       # default to scalar context
@@ -158,32 +154,6 @@ sub generate {
     );
 }
 
-
-sub sexpr {
-    return sprintf(
-        $_[SELF]->SEXPR_FORMAT,
-        $_[SELF]->[TOKEN],
-    );
-
-    # TODO: won't need args once we have a 'var_apply' element
-    my $args = $_[SELF]->[ARGS];
-    my $format;
-    
-    if ($args) {
-        $args = $args->sexpr;
-        $args =~ s/^/  /gsm;
-        $format = $_[SELF]->SEXPR_ARGS;
-    }
-    else {
-        $args = '';
-        $format = $_[SELF]->SEXPR_FORMAT;
-    }
-    sprintf(
-        $format,
-        $_[SELF]->[TOKEN],
-        $args
-    );
-}
 
 
 

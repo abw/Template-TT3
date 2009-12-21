@@ -10,7 +10,6 @@ use Template::TT3::Class
     utils     => 'blessed',
     constants => ':elements BLANK',
     constant  => {
-        SEXPR_FORMAT  => "<block:%s>",
         SOURCE_FORMAT => '%s',
         SOURCE_JOINT  => '; ',
     },
@@ -82,22 +81,6 @@ sub expressions {
     wantarray
         ? @{ $_[SELF]->[EXPR] }
         :    $_[SELF]->[EXPR];
-}
-
-
-sub sexpr {
-    my $self   = shift;
-    my $format = shift || $self->SEXPR_FORMAT;
-    my $body   = join(
-        "\n",
-        map { $_->sexpr } 
-        @{ $self->[EXPR] }
-    );
-    $body =~ s/^/  /gsm if $body;
-    sprintf(
-        $format,
-        $body ? ("\n" . $body . "\n") : ''
-    );
 }
 
 
