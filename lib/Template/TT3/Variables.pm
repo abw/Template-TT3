@@ -103,6 +103,10 @@ sub constructors {
             $vtable = $types->try->vtable($type) || { };
             $utable = $cfg->{ methods } || $cfg;
             $methods = { %$vtable, %$utable };
+            $self->debug(
+                "methods for $type: ", 
+                $self->dump_data($methods)
+            ) if DEBUG;
         }
 
         $output->{ $key } = $self->variable($type)->constructor( 

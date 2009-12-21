@@ -59,7 +59,7 @@ ok( ! defined $baz->value, 'baz value is undefined' );
 # text() always requires a defined value
 is( $foo->text, 'hello world', 'got foo text' );
 ok( ! defined $bar->try->text, 'bar text failed' );
-is( $@->info, 'Undefined value returned by expression: bar', 'got undefined data error' );
+is( $@->info, 'Undefined value: bar', 'got undefined data error' );
 ok( ! defined $baz->try->text, 'baz text failed' );
-is( $@->info, 'Missing value from expression: baz', 'got missing data error' );
+is( $@->info, 'Missing value: baz', 'got missing data error' );
 

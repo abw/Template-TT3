@@ -71,7 +71,7 @@ sub value {
     return $_[SELF]->variable($_[CONTEXT])->value($_[SELF]);
 }
 
-sub maybe {
+sub OLD_maybe {
     $_[SELF]->debug("maybe fetching value()") if DEBUG;
     return $_[SELF]->variable($_[CONTEXT])->maybe($_[SELF]);
 }

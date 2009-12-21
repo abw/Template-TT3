@@ -15,14 +15,13 @@
 use Badger 
     lib     => '../../lib';
 
-#use Badger::Debug modules => 'Template::TT3::Variables';
 use Template::TT3::Test 
     tests   => 8,
     debug   => 'Template::TT3::Template Template::TT3::Variables',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
-test_expressions(
+test_expect(
     debug     => $DEBUG,
     variables => callsign,
 );
@@ -31,42 +30,42 @@ test_expressions(
 __DATA__
 
 -- test a.defined --
-a.defined
+%% a.defined
 -- expect --
 1
 
 -- test a.true --
-a.true
+%% a.true
 -- expect --
 alpha
 
 -- test a.false --
-a.false
+%% a.false
 -- expect --
 0
 
 -- test a.hush --
-'[' a.hush ']'
+%% '[' a.hush ']'
 -- expect --
 []
 
 -- test undef.defined --
-undef.defined
+%% undef.defined
 -- expect --
 0
 
 -- test undef.true --
-undef.true
+%% undef.true
 -- expect --
 0
 
 -- test undef.false --
-undef.false
+%% undef.false
 -- expect --
 1
 
 -- test undef.hush --
-'[' undef.hush ']'
+%% '[' undef.hush ']'
 -- expect --
 []
 

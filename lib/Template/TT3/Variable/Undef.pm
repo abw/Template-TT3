@@ -17,6 +17,11 @@ use Template::TT3::Class
 
 sub dot {
     my ($self, $name, $args, $element) = @_;
+    
+    $self->debug(
+        "looking in vmethods for $name: ", 
+        $self->dump_data($self->[META]->[METHODS])
+    ) if DEBUG;
  
     if (my $method = $self->[META]->[METHODS]->{ $name }) {
         $self->debug("undef vmethod: $name") if DEBUG;

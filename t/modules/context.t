@@ -310,7 +310,7 @@ is( $obj->dot('_secret')->value, 'this is secret', 'called secret method' );
 
 my $missing = $context->var('lord_lucan');
 ok(! $missing->try->text, 'could not find Lord Lucan' );
-is( $@->info, '"lord_lucan" is missing', 'Lord Lucan is missing' );
+is( $@->info, 'Missing value: lord_lucan', 'Lord Lucan is missing' );
 
 
 __END__
