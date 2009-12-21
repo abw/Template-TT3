@@ -86,8 +86,9 @@ TT3 undefined data error at line 1 of "undefined lhs of a dotop" test:
                    ^ here
 
 -- test undefined rhs of a dotop --
-%% hash.missing
+%% hash.no_such_var
 -- error --
+# this fails - need to look into why dotop isn't reporting it
 TT3 undefined data error at line 1 of "undefined rhs of a dotop" test:
     Error: Undefined value returned by expression: hash.missing
    Source: %% hash.missing

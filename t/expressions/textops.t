@@ -18,9 +18,9 @@ use Template::TT3::Test
     tests   => 6,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
-test_expressions(
+test_expect(
     debug     => $DEBUG,
     variables => callsign,
 );
@@ -29,32 +29,32 @@ test_expressions(
 __DATA__
 
 -- test string concatenation --
-a ~ b
+%% a ~ b
 -- expect -- 
 alphabravo
 
 -- test chained string concatenation --
-a ~ b ~ c
+%% a ~ b ~ c
 -- expect -- 
 alphabravocharlie
 
 -- test string concatenation onto command --
-a ~ is { d e }
+%% a ~ is { d e }
 -- expect -- 
 alphadeltaecho
 
 -- test string concatenation assignment --
-a ~= b; 'a: ' a
+%% a ~= b; 'a: ' a
 -- expect -- 
 a: alphabravo
 
 -- test string concatenation with single quotes --
-'foo' ~ 'bar'
+%% 'foo' ~ 'bar'
 -- expect --
 foobar
 
 -- test string concatenation with double quotes --
-"$a $b " ~ "$c $d"
+%% "$a $b " ~ "$c $d"
 -- expect --
 alpha bravo charlie delta
 

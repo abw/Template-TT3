@@ -18,9 +18,9 @@ use Template::TT3::Test
     tests   => 4,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
-test_expressions(
+test_expect(
     block     => 1,
     debug     => $DEBUG,
     variables => callsign,
@@ -29,22 +29,22 @@ test_expressions(
 __DATA__
 
 -- test create list using fat arrow --
-arrow = a => 10;
-arrow.join
+%% arrow = a => 10;
+%% arrow.join
 -- expect --
 a 10
 
 -- test create list using fat arrow --
-[a => 10].join
+%% [a => 10].join
 -- expect --
 a 10
 
 -- test multi arrows --
-[a => b => c => 10].join
+%% [a => b => c => 10].join
 -- expect --
 a b c 10
 
 -- test multi arrows with quoted strings --
-['one' => "two" => "three four" => 10].join
+%% ['one' => "two" => "three four" => 10].join
 -- expect --
 one two three four 10

@@ -133,17 +133,20 @@ kilo
 -- test text.in(named_params) --
 %% a.in(bravo=1,alpha=2) ? l : m
 -- expect --
-# *** THIS TEST IS BORKEN BUT I'M NOT SURE WHY ***
+# This test is broken because the in() vmethod doesn't recognise PARAMS
+# We need to re-address the whole PARAMSissue for this reason.
 lima
 
 -- test text.in(named_params) not --
 %% a.in(x=1,y=2) ? l : m
 -- expect --
+# This test passes but for the wrong reason - see above
 mike
 
--- test text.in(named_params) not --
+-- test text.in(named_params) not again --
 %% [l,m,n].item( b.in(alpha=0,bravo=1,charlie=2) )
 -- expect --
+# This test fails - see above
 mike
 
 

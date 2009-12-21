@@ -18,9 +18,9 @@ use Template::TT3::Test
     tests   => 7,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
-test_expressions(
+test_expect(
     debug     => $DEBUG,
     variables => callsign,
 );
@@ -29,45 +29,47 @@ test_expressions(
 __DATA__
 
 -- test a --
-a
+%% a
 -- expect -- 
 alpha
 
 -- test do a --
-do a
+%% do a
 -- expect -- 
 alpha
 
 -- test inline do; a; b; end --
-do; a; b; end
+%% do; a; b; end
 -- expect -- 
 bravo
 
 -- test inline do { c; d } --
-do { c; d; }
+%% do { c; d; }
 -- expect -- 
 delta
 
 -- test inline do { a; b } c; d--
-do { a; b; } c; ;;;   ; d e f
+%% do { a; b; } c; ;;;   ; d e f
 -- expect -- 
 bravocharliedeltaechofoxtrot
 
 
 -- test assign to do --
--- block --
-foo = do;
-  x y 
-end
-foo
+[%
+    foo = do;
+        x y 
+    end
+    foo
+%]
 -- expect --
 yankee
 
 -- test do side-effect --
--- block --
-'y: ' do;
-  x=99 y 
-end
-'  x: ' x
+[%
+    'y: ' do;
+        x=99 y 
+    end
+    '  x: ' x
+%]
 -- expect --
 y: yankee  x: 99

@@ -18,9 +18,9 @@ use Template::TT3::Test
     tests   => 15,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
-test_expressions(
+test_expect(
     debug     => $DEBUG,
     variables => callsign,
 );
@@ -29,76 +29,76 @@ test_expressions(
 __DATA__
 
 -- test boolean comparison && with true LHS --
-a && b
+%% a && b
 -- expect -- 
 bravo
 
 -- test boolean comparison && with zero LHS --
-a = 0; a && b
+%% a = 0; a && b
 -- expect -- 
 0
 
 -- test boolean comparison && with blank LHS --
-a = ''; a && b; c
+%% a = ''; a && b; c
 -- expect -- 
 charlie
 
 -- test boolean comparison || with true LHS --
-a || b
+%% a || b
 -- expect -- 
 alpha
 
 -- test boolean comparison || with false LHS --
-a = 0; a || b
+%% a = 0; a || b
 -- expect -- 
 bravo
 
 -- test boolean comparison !! with true LHS --
-a !! b
+%% a !! b
 -- expect -- 
 alpha
 
 -- test boolean comparison !! with false LHS --
-a = 0; a !! b
+%% a = 0; a !! b
 -- expect -- 
 0
 
 -- test boolean comparison !! with undef LHS --
-nothing !! b
+%% nothing !! b
 -- expect -- 
 bravo
 
 -- test boolean assignment &&= with true LHS--
-a &&= b; 'a: '; a;
+%% a &&= b; 'a: '; a;
 -- expect --
 a: bravo
 
 -- test boolean assignment &&= with false LHS--
-a = 0; a &&= b; 'a: '; a;
+%% a = 0; a &&= b; 'a: '; a;
 -- expect --
 a: 0
 
 -- test boolean assignment ||= with true LHS --
-a ||= b; 'a: '; a;
+%% a ||= b; 'a: '; a;
 -- expect --
 a: alpha
 
 -- test boolean assignment ||= with false LHS --
-a = 0; a ||= b; 'a: '; a;
+%% a = 0; a ||= b; 'a: '; a;
 -- expect --
 a: bravo
 
 -- test boolean assignment !!= with true LHS --
-a !!= b; 'a: '; a;
+%% a !!= b; 'a: '; a;
 -- expect --
 a: alpha
 
 -- test boolean assignment ||= with false LHS --
-a = 0; a !!= b; 'a: '; a;
+%% a = 0; a !!= b; 'a: '; a;
 -- expect --
 a: 0
 
 -- test boolean assignment ||= with undef LHS --
-zip !!= b; 'zip: '; zip;
+%% zip !!= b; 'zip: '; zip;
 -- expect --
 zip: bravo

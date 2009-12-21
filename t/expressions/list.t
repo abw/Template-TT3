@@ -18,9 +18,9 @@ use Template::TT3::Test
     tests   => 14,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
-test_expressions(
+test_expect(
     debug     => $DEBUG,
     variables => callsign,
 );
@@ -28,62 +28,62 @@ test_expressions(
 __DATA__
 
 -- test empty list --
-[].join
+%% [].join
 -- expect --
 
 -- test list creator --
-list = [a, b, c]; list.join
+%% list = [a, b, c]; list.join
 -- expect --
 alpha bravo charlie
 
 -- test inline list creator --
-[a, b, c].join
+%% [a, b, c].join
 -- expect --
 alpha bravo charlie
 
 -- test list join --
-list = [a, b, c]; list.join(', ')
+%% list = [a, b, c]; list.join(', ')
 -- expect --
 alpha, bravo, charlie
 
 
 -- test list.first  --
-list = [a, b, c]; list.first
+%% list = [a, b, c]; list.first
 -- expect --
 alpha
 
 -- test inline [a,b,c].first  --
-[a, b, c].first
+%% [a, b, c].first
 -- expect --
 alpha
 
 -- test inline list.last  --
-[a, b, c].last
+%% [a, b, c].last
 -- expect --
 charlie
 
 -- test inline list.1  --
-[a, b, c].1
+%% [a, b, c].1
 -- expect --
 bravo
 
 -- test inline nested list  --
-[a, b, [c, d]].last.last
+%% [a, b, [c, d]].last.last
 -- expect --
 delta
 
 -- test inline nested if block  --
-[a, b, if 0; c; end].last
+%% [a, b, if 0; c; end].last
 -- expect --
 bravo
 
 -- test inline nested if false --
-[a, b, c if 0].join
+%% [a, b, c if 0].join
 -- expect --
 alpha bravo
 
 -- test inline nested if true  --
-[a, b, c if 1].join
+%% [a, b, c if 1].join
 -- expect --
 alpha bravo charlie
 
@@ -93,12 +93,12 @@ alpha bravo charlie
 #-----------------------------------------------------------------------
 
 -- test merge two lists --
-one = [1,2,3];two = [4,5,6]; three = [@one, @two]; three.size '/' three.join
+%% one = [1,2,3];two = [4,5,6]; three = [@one, @two]; three.size '/' three.join
 -- expect --
 6/1 2 3 4 5 6
 
 -- test merge two non-lists --
-list = [@a, @b]; list.size '/' list.join
+%% list = [@a, @b]; list.size '/' list.join
 -- expect --
 2/alpha bravo
 

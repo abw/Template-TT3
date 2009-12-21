@@ -7,7 +7,7 @@ use Template::TT3::Class
     base      => 'Badger::Test',
 #    debug     => 0,
     utils     => 'params',
-    import    => 'class',
+    import    => 'class CLASS',
     constants => 'HASH CODE',
     modules   => 'ENGINES_MODULE',
     constant => {
@@ -154,6 +154,9 @@ sub test_expect {
         my $result = &$handler($test, $config);
         chomp $result;
 
+        unless (defined $result && defined $test->{ expect }) {
+            CLASS->debug("** [$result] [$test->{expect}]");
+        }
         if ($result eq $test->{ expect }) {
             ok(1, $test->{ name });
         }
@@ -222,6 +225,9 @@ sub test_handler {
             $result = "<ERROR:$error>";
         }
     }
+    elsif ($test->{ error }) {
+        $test->{ expect } = "EXPECTED ERROR:\n$test->{ error }";
+    }
     elsif ($DEBUG) {
         manager->debug('OUTPUT: ', $result);
     }
@@ -235,6 +241,8 @@ sub test_handler {
     return $result;
 }
 
+
+# this is old - being replaced
 
 sub test_parser {
     my $config = params(@_);
@@ -289,69 +297,6 @@ sub test_parser {
                 my $error = ref($@) ? $@->info : $@;
                 $result = "<ERROR:$error>";
             }
-            $output .= "$result\n";
-        }
-        chomp $output;
-        return $output;
-    };
-
-    test_expect($config);
-}
-
-
-sub test_expressions {
-    my $config   = params(@_);
-    my $tclass   = $config->{ template  } || $TEMPLATE;
-    my $vars     = $config->{ variables };
-    my $mkvars   = ref $vars eq CODE ? $vars : sub { $vars || () };
-    my $debug    = $config->{ debug } || 0;
-
-    my $block_mode = defined $config->{ block } 
-        ? $config->{ block } 
-        : 0;
-    
-    $config->{ handler } = sub {
-        my $test   = shift;
-        my $output = '';
-        my @lines;
-        
-        local $DEBUG = $test->{ inflag }->{ debug } ? 1 : $debug;
-
-        # -- block -- flag indicates one single test, otherwise we 
-        # split the block into separate lines and feed them to the
-        # parser/generator one by one.  $block_mode can also be set
-        if ($block_mode || $test->{ inflag }->{ block }) {
-            @lines = $test->{ input };
-        }
-        else {
-            @lines  = split(/\n/, $test->{ input });
-        }
-        
-        if ($test->{ exflag }->{ collapse }) {
-            # collapse any whitespace in expected output
-            $test->{ expect } =~ s/\n\s*//sg;
-        }
-
-        foreach my $line (@lines) {
-            my $result = eval {
-                manager->debug(' INPUT: ', $line) if $DEBUG;
-                my $template = $tclass->new( text => '[% ' . $line . ' %]' );
-
-                manager->debug("TOKENS:\n", $template->tokens->view_debug) 
-                    if $config->{ dump_tokens }
-                    || $test->{ inflag }->{ dump_tokens }; #$DEBUG;
-
-                $template->fill( $mkvars->() );
-            };
-            if ($@) {
-                my $error = ref($@) ? $@->info : $@;
-                manager->debug(' ERROR: ', $error) if $DEBUG;
-                $result = "<ERROR:$error>";
-            }
-            elsif ($DEBUG) {
-                manager->debug('OUTPUT: ', $result);
-            }
-
             $output .= "$result\n";
         }
         chomp $output;

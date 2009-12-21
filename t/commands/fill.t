@@ -134,21 +134,19 @@ Hello Mushroom!
 Hello Snake!
 
 -- test fill foo .tt3 --
--- skip this is broken... or perhaps works as it should --
 %% fill foo .tt3
--- expect -- 
-# Note that the test_expressions() function automatically add '[%' and '%]'
-# around the input text.  That's why we've got an additional '%]' at the end
-<ERROR:unparsed tokens: .tt3 %]>
+-- error -- 
+TT3 resource error at line 1 of "fill foo .tt3" test:
+    Error: Requested template resource not found: foo
+   Source: %% fill foo .tt3
+                   ^ here
 
-# ALSO NOTE: this is broken because we now do parse_infx() on the right of 
+# NOTE: this is broken because we now do parse_infix() on the right of 
 # the 'fill'.  This is required for us to be able to write: fill foo with x=10
 # However, the dotop consumes <fill foo> as the expression on the left,
 # then tries to make it a variable and do a literal .tt3 on it.  Need to
 # have a lhs_can_dotop() assertion that the dotop calls on the LHS.  Similar
 # to the way assignment must work, I guess.
-
-
 
 
 -- test fill $a --

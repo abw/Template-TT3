@@ -18,7 +18,7 @@ use Template::TT3::Test
     tests   => 23,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
-    import  => 'test_expressions callsign';
+    import  => 'test_expect callsign';
 
 use Template::TT3::Type::Params 'PARAMS';
 use Template::TT3::Utils 'tt_args hashlike';
@@ -63,7 +63,7 @@ our $vars = {
     },
 };
 
-test_expressions(
+test_expect(
     block     => 1,
     debug     => $DEBUG,
     variables => $vars,
@@ -72,12 +72,12 @@ test_expressions(
 __DATA__
 
 -- test code type --
-listsub.type
+%% listsub.type
 -- expect --
 Code
 
 -- test explicit function call to dotop --
-listsub().join
+%% listsub().join
 -- expect --
 10 20 30 ARGS-> PARAMS->
 
@@ -87,27 +87,27 @@ listsub().join
 #-----------------------------------------------------------------------
 
 -- test perl positional with arguments --
-perl_posit(a, 10, b, 20)
+%% perl_posit(a, 10, b, 20)
 -- expect --
 [ alpha, 10, bravo, 20 ]
 
 -- test perl positional with arrows --
-perl_posit(a => 10, b => 20)
+%% perl_posit(a => 10, b => 20)
 -- expect --
 [ a, 10, b, 20 ]
 
 -- test perl positional with equals --
-perl_posit(a = 10, b = 20)
+%% perl_posit(a = 10, b = 20)
 -- expect --
 [ { a => 10, b => 20 } ]
 
 -- test perl positional with hashed arrows --
-perl_posit({ a => 10, b => 20 })
+%% perl_posit({ a => 10, b => 20 })
 -- expect --
 [ { a => 10, b => 20 } ]
 
 -- test perl positional with hashed equals --
-perl_posit({ a = 10, b = 20 })
+%% perl_posit({ a = 10, b = 20 })
 -- expect --
 [ { a => 10, b => 20 } ]
 
@@ -117,28 +117,28 @@ perl_posit({ a = 10, b = 20 })
 #-----------------------------------------------------------------------
 
 -- test perl named with arguments --
-perl_named(a, 10, b, 20)
+%% perl_named(a, 10, b, 20)
 -- expect --
 { alpha => 10, bravo => 20 }
 
 -- test perl named with arrows --
-perl_named(a => 10, b => 20)
+%% perl_named(a => 10, b => 20)
 -- expect --
 { a => 10, b => 20 }
 
 -- test perl named with equals --
 -- skip doesn't work when params are blessed object --
-perl_named(a = 10, b = 20)
+%% perl_named(a = 10, b = 20)
 -- expect --
 { a => 10, b => 20 }
 
 -- test perl named with hashed arrows --
-perl_named({ a => 10, b => 20 })
+%% perl_named({ a => 10, b => 20 })
 -- expect --
 { a => 10, b => 20 }
 
 -- test perl named with hashed equals --
-perl_named({ a = 10, b = 20 })
+%% perl_named({ a = 10, b = 20 })
 -- expect --
 { a => 10, b => 20 }
 
@@ -148,27 +148,27 @@ perl_named({ a = 10, b = 20 })
 #-----------------------------------------------------------------------
 
 -- test perl tt params with arguments --
-perl_tt(a, 10, b, 20)
+%% perl_tt(a, 10, b, 20)
 -- expect --
 { alpha => 10, bravo => 20 }
 
 -- test perl tt params with arrows --
-perl_tt(a => 10, b => 20)
+%% perl_tt(a => 10, b => 20)
 -- expect --
 { a => 10, b => 20 }
 
 -- test perl tt params with equals --
-perl_tt(a = 10, b = 20)
+%% perl_tt(a = 10, b = 20)
 -- expect --
 { a => 10, b => 20 }
 
 -- test perl tt params with hashed arrows --
-perl_tt({ a => 10, b => 20 })
+%% perl_tt({ a => 10, b => 20 })
 -- expect --
 { a => 10, b => 20 }
 
 -- test perl tt params with hashed equals --
-perl_tt({ a = 10, b = 20 })
+%% perl_tt({ a = 10, b = 20 })
 -- expect --
 { a => 10, b => 20 }
 
@@ -179,32 +179,32 @@ perl_tt({ a = 10, b = 20 })
 #-----------------------------------------------------------------------
 
 -- test fat arrow --
-[ 'merged' @listsub( a => 50 ) ].join
+%% [ 'merged' @listsub( a => 50 ) ].join
 -- expect --
 merged 10 20 30 ARGS-> a 50 PARAMS->
 
 -- test assignment arrow --
-[ 'merged' @listsub( a = 50 ) ].join
+%% [ 'merged' @listsub( a = 50 ) ].join
 -- expect --
 merged 10 20 30 ARGS-> PARAMS-> { a => 50 }
 
 -- test merge list without parens --
-[ 'merged' @listsub ].join
+%% [ 'merged' @listsub ].join
 -- expect --
 merged 10 20 30 ARGS-> PARAMS->
 
 -- test merge list with parens --
-[ 'merged' @listsub() ].join
+%% [ 'merged' @listsub() ].join
 -- expect --
 merged 10 20 30 ARGS-> PARAMS->
 
 -- test merge list with extra arguments --
-[ 'merged' @listsub(40 50) ].join
+%% [ 'merged' @listsub(40 50) ].join
 -- expect --
 merged 10 20 30 ARGS-> 40 50 PARAMS->
 
 -- test merge list with fat arrow --
-[ 'merged' @listsub( a => 50 ) ].join
+%% [ 'merged' @listsub( a => 50 ) ].join
 -- expect --
 merged 10 20 30 ARGS-> a 50 PARAMS->
 
