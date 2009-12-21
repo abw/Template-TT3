@@ -467,6 +467,11 @@ sub in_signature {
 # evaluation methods
 #-----------------------------------------------------------------------
 
+sub name {
+    # TODO: raise a proper error
+    shift->not_implemented('in element base class (TODO)');
+}
+
 sub text {
     shift->value(@_);
 }

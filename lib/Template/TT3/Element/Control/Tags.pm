@@ -16,7 +16,7 @@ use Template::TT3::Class
         values => \&value,
     },
     messages => {
-        tags_undef => 'Undefined value returned by %s expression: %s',
+#        tags_undef => 'Undefined value returned by %s expression: %s',
         no_scanner => 'Scanner is not accessible to %s control.',
     };
 
@@ -53,7 +53,7 @@ sub value {
     my $expr = $self->[RHS];
     my $tags = $expr->value($context);
     
-    return $self->error_msg( tags_undef => $self->[TOKEN], $expr->source )
+    return $self->fail( data_undef_for => $self->[TOKEN], $expr->source )
         unless defined $tags;
 
     # If we had a dotted name after the TAGS, e.g. TAGS.comment then the 

@@ -22,6 +22,8 @@ use Template::TT3::Class
         syntax_dot_set => "You cannot set '%s.%s' to '%s'",
         data_undef     => "Undefined value: %s",
         data_missing   => "Missing value: %s",
+        data_undef_for => 'Undefined value for %s: %s',
+
     };
 
 

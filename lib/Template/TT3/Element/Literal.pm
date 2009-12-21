@@ -10,6 +10,7 @@ use Template::TT3::Class::Element
     alias    => {
         parse_expr  => 'advance',
         parse_word  => 'advance',
+        name        => \&text,
         value       => \&text,
         values      => \&text,
     };

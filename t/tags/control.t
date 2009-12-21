@@ -56,5 +56,5 @@ Hello World
 Hello [? wibble -?]
 World
 -- expect --
-<ERROR:Undefined value returned by expression: wibble>
+<ERROR:Missing value: wibble>
 

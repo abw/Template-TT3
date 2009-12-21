@@ -97,8 +97,8 @@ Hello World!
 -- test into with undefined variable --
 %%  "Hello Badger" into wrapper/message.tt3
 -- error --
-TT3 undefined data error at line 1 of wrapper/message.tt3:
-    Error: Undefined value returned by expression: status
+TT3 data error at line 1 of wrapper/message.tt3:
+    Error: Missing value: status
    Source: <div class="message [% status %]">
                                   ^ here
 -- test into with status defined --
