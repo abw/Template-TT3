@@ -6,11 +6,8 @@ use Template::TT3::Class
     base      => 'Template::TT3::Variable',
     constants => ':type_slots',
     constant  => {
-        type  => 'undef',
-    },
-    alias     => {
-        text   => \&value,
-        values => \&value,
+        type    => 'undef',
+        defined => 0,
     },
     messages  => {
         # this is backup in case we don't have an $element passed to us
@@ -39,18 +36,23 @@ sub dot {
 }
 
 
-sub value {
+sub text {
     my ($self, $element) = @_;
+
+    $self->debug(
+        "undef value() for $self->[NAME], ",
+        "element is $element, ",
+        "context is $self->[CONTEXT]"
+    ) if DEBUG;
 
     # If we were passed an element reference then we raise the error 
     # against that so that it can decorate the exception with line 
     # number, source code, etc.  Otherwise we just throw a plain error.
-    $self->debug("undef value() for $self->[NAME], element is $element, context is $self->[CONTEXT]") if DEBUG;
+    
+    # TODO: use the new approach... er... whatever that is...
     return $element
         ? $element->fail_undef_data #( $self->fullname )
         : $self->error_msg( undefined => $self->fullname );
 }
 
-
-    
 1;

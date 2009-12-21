@@ -53,6 +53,8 @@ our $COMPONENTS = {
     sitemaps   => SITEMAPS_MODULE,
     store      => STORE_MODULE,
     templates  => TEMPLATES_MODULE,
+    types      => TYPES_MODULE,
+    variables  => VARIABLES_MODULE,
     views      => VIEWS_MODULE,
 };
 
@@ -73,6 +75,7 @@ our $DELEGATES  = {
     service    => 'services',
     sitemap    => 'sitemaps',
     template   => 'templates',
+    vtables    => 'types',
 };
 
 

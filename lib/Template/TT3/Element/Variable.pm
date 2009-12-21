@@ -26,14 +26,6 @@ sub parse_expr {
     # TODO ask scope to lookup variable from the symbol table
 
     return $$token->parse_postfix($self, $token, $scope, $prec);
-    
-    #$self->[ARGS] = $$token->parse_args($token, $scope);
-    
-    # TODO: allow () [] {} following variable word
-    #return $$token->parse_postfix($self, $token, $scope, $prec);
-    
-    # variables can be followed by postops (postfix and infix operators)
-    #return $$token->skip_ws->parse_infix($self, $token, $scope, $prec);
 }
 
 
@@ -41,6 +33,7 @@ sub as_lvalue {
     # my ($self, $op, $rhs, $scope) = @_;
     # nothing special here, but other elements may modify/wrap either
     # the LHS or RHS before stuffing them into $op
+    # TODO: this whole concept needs reworking
     return $_[1];
 }
 

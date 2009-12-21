@@ -68,8 +68,8 @@ that are used by the L<Badger::Factory> base class.
 =head2 $ITEM
 
 This is the name of the item that the factory module returns, and implicitly
-the name of the method by which . In this case it is defined as
-C<exception_type>.
+the name of the method by which exception objects can be created. In this case
+it is defined as C<exception_type>.
 
 =head2 $PATH
 

@@ -1,5 +1,139 @@
 package Template::TT3::Variables;
 
+use Template::TT3::Class::Factory
+    version     => 2.69,
+    debug       => 0,
+    item        => 'variable',
+    path        => 'Template(X)::(TT3::|)Variable',
+    utils       => 'params',
+    import      => 'CLASS',
+    constants   => 'HASH',
+    names       => {                    # NOTE: this defines $VARIABLE_NAMES
+        # There are the types returned by Perl's ref()
+        SCALAR  => 'code',
+        ARRAY   => 'list',
+        HASH    => 'hash',
+        CODE    => 'code',
+#       GLOB    => 'glob',
+
+        # These are the internal names we use for everything else
+        map { $_ => $_ }
+        qw( text list hash code object undef missing )
+#       PARAMS  => 'params',
+    },
+    messages => {
+        bad_type => 'Invalid type specification for %s: %s',
+    };
+
+
+sub preload {
+    my $self   = shift->prototype;
+    my $types  = $VARIABLE_NAMES;       # Defined by 'names' hook above
+    my $loads  = { };
+
+    $self->debug("preload() types: ", $self->dump_data($types)) if DEBUG;
+    
+    foreach my $type (keys %$types) {
+        $loads->{ $type } = $self->variable($type);
+        $self->debug("preload $type => ", $loads->{ $type }) if DEBUG;
+    }
+    
+    return $loads;
+}
+
+
+sub constructors {
+    my $self    = shift->prototype;
+    my $builtin = $self->preload;            # TODO: other types too
+    my $userdef = params(@_);
+    my $types   = $self->hub->types;
+
+    $self->debug(
+        "constructors() types:\nBUILTIN:", 
+        $self->dump_data($builtin), "\n",
+        "USERDEF: ", $self->dump_data($userdef)
+    ) if DEBUG;
+    
+    my $input = { 
+        # we're not interested in the class names that are in the $builtin
+        # values, we just want a mapping from key to key, e.g. undef => undef
+        (   
+            map { $_ => $_ }
+            keys %$builtin
+        ),
+        # then we allow the user-defined types to over-ride them and/or add 
+        # to them, e.g. undef => blank, My::Class => { ... }, etc.
+        %$userdef 
+    };
+    
+    $self->debug(
+        "combined:", 
+        $self->dump_data($input), "\n",
+    ) if DEBUG;
+    
+    my $output = { };
+    
+    foreach (keys %$input) {
+        my $key = $_;
+        my $cfg = $input->{ $key }; 
+        my ($type, $vtable, $utable, $methods);
+
+        # TODO: allow methods to be set to 0: text => { methods => 0 }
+        # or as a short-cut, text => 0.  I don't think we can allow any 
+        # false value to skip the type altogether as that would allow the 
+        # user to disable the text, hash, list or other inbuilt types which
+        # would probably cause TT to fail.
+
+        if (! $cfg) {
+            $type = $builtin->{ $key } && $key      # a builtin type
+                 || 'object';                       # or an object type
+            $methods = { };
+        }
+        elsif (ref $cfg eq HASH) {
+            $type = $cfg->{ type }                  # declared type
+                 || $builtin->{ $key } && $key      # or a builtin type
+                 || 'object';                       # or an object type
+        }
+        elsif (ref $cfg) {
+            return $self->error_msg( bad_type => $key, $cfg );
+        }
+        else {
+            $type = $cfg;
+            $cfg = { };
+        }
+
+        unless ($methods) {
+            # merge inbuilt virtual methods with any user-supplied ones
+            $vtable = $types->try->vtable($type) || { };
+            $utable = $cfg->{ methods } || $cfg;
+            $methods = { %$vtable, %$utable };
+        }
+
+        $output->{ $key } = $self->variable($type)->constructor( 
+            methods => $methods
+        );
+        
+        $self->debug(
+            "$key => $type => ", 
+            $self->dump_data($methods)
+        ) if DEBUG
+    }
+
+    return $output;
+}
+
+
+sub found {
+    my ($self, $type, $module) = @_;
+    return $module;
+}
+
+
+1;
+
+__END__
+package Template::TT3::Variables;
+
 use Template::TT3::Class
     version   => 0.01,
     debug     => 0,
@@ -70,43 +204,6 @@ sub init_variables {
     return $self;
 }
 
-
-sub variable {
-    my ($self, $name, $value, $parent, $args, @more) = @_;
-    my $ctor;
-
-    TYPE_SWITCH: {
-        $self->debug("var($name, $value)\n") if DEBUG;
-        
-        if (! defined $value) {
-            $ctor = $self->{ type }->{ UNDEF }
-                || return $self->error_msg( bad_type => $name, 'undef' );
-        }
-        elsif ($args && ref $value eq CODE) {
-            $value = $value->(@$args);
-            $self->debug(
-                "evaluated CODE with args ", 
-                $self->dump_data($args), 
-                " => $value"
-            ) if DEBUG;
-            $args = undef;
-            redo TYPE_SWITCH;
-        }
-        elsif (ref $value) {
-            $ctor = $self->{ type }->{ ref $value } 
-                 || $self->{ type }->{ OBJECT }
-                 || return $self->error_msg( bad_type => $name, ref $value );
-        }
-        else {
-            $ctor = $self->{ type }->{ TEXT }
-                 || return $self->error_msg( bad_type => $name, 'value' );
-        }
-    }
-
-    return $ctor->($name, $value, $parent, $args, @more);
-}
-
-
 sub types {
     shift->prototype->{ types };
 }
@@ -116,14 +213,6 @@ sub constructors {
 }
 
 
-# tmp hack to try out automatically resolved data
-
-sub auto {
-    my ($self, $handler) = @_;
-    $self->{ auto } = $handler;
-}
-
-    
 1;
 
 

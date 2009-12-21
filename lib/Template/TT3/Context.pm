@@ -1,6 +1,5 @@
 package Template::TT3::Context;
 
-use Template::TT3::Variables;
 use Template::TT3::Class
     version     => 3.00,
     debug       => 0,
@@ -10,7 +9,6 @@ use Template::TT3::Class
     utils       => 'self_params',
     constants   => 'HASH CODE',
     constant    => {
-        VARIABLES => 'Template::TT3::Variables',
         VISIT     => 'Template::TT3::Context::Visit',
     },
     alias       => {
@@ -28,27 +26,25 @@ sub init {
 
     $self->init_hub($config);
 
-    my $vars = $self->VARIABLES->new($config);
-
-#    $self->{ VARS  } = $vars;
-    # TODO: merge in these last few methods or otherwise jiggle them about
-    $self->{ types } = $vars->types;
-    $self->{ type  } = $vars->constructors;
-    $self->{ data  } = $config->{ data } || { };
-    
-    $self->debug("context init: ", $self->dump_data($self)) if DEBUG;
-    
-#    $self->{ variables } = $self->VARIABLES->new( 
-#        data => $config->{ variables },
-#    );
+    $self->{ data } = $config->{ data } || { };
+    $self->{ type } = $self->hub->variables->constructors( 
+        $config->{ types } || { }
+    );
     
     $self->{ templates } = $config->{ templates };
     $self->{ scanner   } = $config->{ scanner };
     $self->{ scope     } = $config->{ scope };
     $self->{ visiting  } = [ ];
+
+    $self->debug(
+        "context init: ", 
+        $self->dump_data($self)
+    ) if DEBUG;
     
     return $self;
 }
+
+
 
 
 sub child {
@@ -158,7 +154,7 @@ sub use_var {
         if (! defined $value) {
             $self->debug("value is undefined") if DEBUG;
             
-            $ctor = $self->{ type }->{ UNDEF }
+            $ctor = $self->{ type }->{ undef }
                 || return $self->error_msg( bad_type => $name, 'undef' );
         }
         elsif ($args && ref $value eq CODE) {
@@ -178,14 +174,14 @@ sub use_var {
             $self->debug("value is a ", ref($value), " reference") if DEBUG;
 
             $ctor = $self->{ type }->{ ref $value } 
-                 || $self->{ type }->{ OBJECT }
+                 || $self->{ type }->{ object }
                  || return $self->error_msg( bad_type => $name, ref $value );
         }
         else {
             $self->debug("value is text") if DEBUG;
             
-            $ctor = $self->{ type }->{ TEXT }
-                 || return $self->error_msg( bad_type => $name, 'value' );
+            $ctor = $self->{ type }->{ text }
+                 || return $self->error_msg( bad_type => $name, 'text' );
         }
     }
 
@@ -195,6 +191,8 @@ sub use_var {
 
 sub no_var {
     my ($self, $name) = @_;
+    my $ctor = $self->{ type }->{ missing }
+        || return $self->error_msg( bad_type => $name, 'missing' );
     return $self->use_var( $name => undef );
 }
 

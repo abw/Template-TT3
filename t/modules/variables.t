@@ -11,16 +11,49 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
+use Badger 
+    lib => '../../lib';
+    
 use Template::TT3::Test 
-    skip  => 'Functionality has (mostly) moved to Template::TT3::Context',
-    tests => 37,
+#    skip  => 'Functionality has (mostly) moved to Template::TT3::Context',
     debug => 'Template::TT3::Variables',
-    args  => \@ARGV;
+    args  => \@ARGV,
+    tests => 37;
 
+use Badger::Debug ':all';
 use Template::TT3::Variables;
 use constant VARS => 'Template::TT3::Variables';
 
+my $ctors = VARS->constructors;
+ok( $ctors, 'got constructors' );
+
+#main->debug("ctors: ", main->dump_data($ctors));
+
+$ctors = VARS->constructors(
+    undef => 'missing',
+    text => {
+        foo => sub { 'FOO' },
+        bar => sub { 'BAR' },
+    },
+    'Wiz::Bang' => {
+        '*'   => 0,
+        'foo' => 1,
+        'bar' => sub { 'PRETENDING TO BE BAR' },
+    }
+);
+
+ok( $ctors, 'got constructors with custom types' );
+my $text = $ctors->{'Wiz::Bang'};
+ok( $text, 'got custom Wiz::Bang type' );
+
+
+#main->debug("ctors: ", main->dump_data($ctors));
+
+#my $hash = VARS->variable( HASH => { x => 10 } );
+#ok( $hash, 'got hash var ' . $hash );
+#is( $hash->dot('x')->value, 10, 'got value x=10 from hash' );
+
+__END__
 my $data = {
     a => 10,
     b => {

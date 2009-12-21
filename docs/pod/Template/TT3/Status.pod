@@ -107,22 +107,22 @@ modules.
 
 =head2 Text and String Elements
     
-    [ ] Template::TT3::Element::Text
-    [ ] Template::TT3::Element::String;
-    [ ] Template::TT3::Element::Squote;
-    [ ] Template::TT3::Element::Dquote;
+    [X] Template::TT3::Element::Text
+    [X] Template::TT3::Element::String;
+    [X] Template::TT3::Element::Squote;
+    [X] Template::TT3::Element::Dquote;
 
 =head2 Whitespace and Punctuation Elements
     
-    [ ] Template::TT3::Element::Comment;
-    [ ] Template::TT3::Element::Delimiter;
-    [ ] Template::TT3::Element::Eof;
-    [ ] Template::TT3::Element::Padding;
-    [ ] Template::TT3::Element::Separator;
-    [ ] Template::TT3::Element::TagStart;
-    [ ] Template::TT3::Element::TagEnd;
-    [ ] Template::TT3::Element::Terminator;
-    [ ] Template::TT3::Element::Whitespace;
+    [X] Template::TT3::Element::Comment;
+    [X] Template::TT3::Element::Delimiter;
+    [X] Template::TT3::Element::Eof;
+    [X] Template::TT3::Element::Padding;
+    [X] Template::TT3::Element::Separator;
+    [X] Template::TT3::Element::TagStart;
+    [X] Template::TT3::Element::TagEnd;
+    [X] Template::TT3::Element::Terminator;
+    [X] Template::TT3::Element::Whitespace;
 
 =head2 Variable Elements
 

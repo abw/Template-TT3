@@ -55,6 +55,8 @@ A subclass of L<Template::TT3::Element::String> for 'single quoted' strings.
 
 A subclass of L<Template::TT3::Element::String> for "double quoted" strings.
 
+
+
 =head2 Whitespace and Other Ignorable Elements
 
 =head3 Template::TT3::Element::Whitespace
@@ -64,6 +66,20 @@ An element representing an ignorable whitespace token.
 =head3 Template::TT3::Element::Comment
 
 A subclass of L<Template::TT3::Element::Whitespace> for ignorable comments.
+
+
+=head2 Separator, Delimiter and Terminator Tokens
+
+=head3 Template::TT3::Element::Delimiter
+
+An element representing am expression delimiter.  This includes the semi-colon,
+C<;>, and the end of tag tokens (e.g. C<%]>, C<?]>, etc) represented by the
+L<Template::TT3::Element::TagEnd> subclass.
+
+=head3 Template::TT3::Element::TagEnd
+
+A thin subclass of L<Template::TT3::Element::Delimiter> for representing
+end of tag tokens (e.g. C<%]>, C<?]>, etc)
 
 =head3 Template::TT3::Element::Terminator
 
@@ -76,6 +92,10 @@ parameter lists.
 A thin subclass of L<Template::TT3::Element::Terminator> which acts like a
 keyword when presented via a view (e.g. for the purpose of syntax
 highlighting).
+
+=head3 Template::TT3::Element::Eof
+
+A synthesised  element used to represent the end of file.
 
 =head1 AUTHOR
 

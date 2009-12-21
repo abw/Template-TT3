@@ -7,7 +7,7 @@ use Template::TT3::Class
         # Badger modules we use directly
         FILESYSTEM_MODULE => 'Badger::Filesystem',
 
-        # TT3 modules
+        # TT3 modules - TODO: auto-generate these / load on demand / factory
         CACHE_MODULE        => 'Template::TT3::Cache',
         CONTEXT_MODULE      => 'Template::TT3::Context',
         SERVICES_MODULE     => 'Template::TT3::Services',
@@ -30,6 +30,8 @@ use Template::TT3::Class
         TAGSET_MODULE       => 'Template::TT3::Tagset',
         TEMPLATE_MODULE     => 'Template::TT3::Template',
         TEMPLATES_MODULE    => 'Template::TT3::Templates',
+        TYPES_MODULE        => 'Template::TT3::Types',
+        VARIABLES_MODULE    => 'Template::TT3::Variables',
         VIEWS_MODULE        => 'Template::TT3::Views',
 
         # other modules
@@ -45,7 +47,7 @@ use Template::TT3::Class
             hub => 'FILESYSTEM_MODULE DIALECTS_MODULE TEMPLATES_MODULE 
                     CACHE_MODULE STORE_MODULE PROVIDERS_MODULE PLUGINS_MODULE
                     VIEWS_MODULE CONTEXT_MODULE SERVICES_MODULE 
-                    SITEMAPS_MODULE CODECS_MODULE',
+                    SITEMAPS_MODULE CODECS_MODULE TYPES_MODULE VARIABLES_MODULE',
         },
     };
 

@@ -12,6 +12,7 @@ use Template::TT3::Class
     constants => ':type_slots BLANK',
     constant  => {
         VARIABLES => 'Template::TT3::Variables',
+        defined   => 1,
     },
     alias     => {
         list      => \&get,
@@ -51,7 +52,7 @@ sub constructor {
     my $config  = $self->configuration($params);
 #    my $vars    = $config->{ variables } 
 #               || class( $self->VARIABLES )->load->name->prototype;
-    my $vars = 'TODO: VARS SLOT IS DEPRECATED';
+    my $vars = '** TODO: VARS slot is deprecated in Template::TT3::Variable **';
     
     # TODO: shouldn't we be asking the types for our vmethods?
     my $methods = $self->class->hash_vars( METHODS => $config->{ methods } );
@@ -111,7 +112,7 @@ sub text {
     # handled by T::TT3::Variable::Undef.  What about values that have been
     # set via set()?
     
-    if (defined $value) {
+    if (CORE::defined $value) {
         # TODO: check for non-text values, refs, etc
         return $value;
     }
@@ -135,6 +136,7 @@ sub pairs {
 sub dot {
     shift->not_implemented;
 }
+
 
 sub dot_set {
     my ($self, $name, $value, $element) = @_;

@@ -18,9 +18,21 @@ our $DEFAULT = 'TT3';
 
 sub init_factory {
     my ($self, $config) = @_;
+
+    # attach factory to the hub that create it, or the default prototype hub
+    $self->init_hub($config);
+
+    $self->debug(
+        "looking for names in ", 
+        join(', ', $self->class->heritage)
+    ) if DEBUG;
+    
     # merge all $NAMES definitions into a new 'names'
-    $self->debug("looking for names in ", join(', ', $self->class->heritage)) if DEBUG;
-    $config->{ names } = $self->class->hash_vars( NAMES => $config->{ names } );
+    $config->{ names } = $self->class->hash_vars( 
+        NAMES => $config->{ names } 
+    );
+
+    # let the base class factory initialiser have a go
     return $self->SUPER::init_factory($config);
 }
 

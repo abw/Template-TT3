@@ -21,13 +21,11 @@ use Badger
 use Template::TT3::Test 
     debug => 'Badger::Factory Template::TT3::Types',
     args  => \@ARGV,
-    tests => 48;
+    tests => 47;
 
 use Template::TT3::Types;
 use constant TYPES => 'Template::TT3::Types';
 use Badger::Debug ':all';
-
-ok( TYPES->preload, 'preload' );
 
 
 #------------------------------------------------------------------------
@@ -85,8 +83,8 @@ is( $hash->{ bar }, 30, 'bar item is 30' );
 # should be able to use aliases for all those
 #-----------------------------------------------------------------------
 
-ok( TYPES->type('UNDEF'), 'got UNDEF type' );
-ok( TYPES->type('TEXT'), 'got TEXT type' );
+ok( TYPES->type('undef'), 'got undef type' );
+ok( TYPES->type('text'), 'got text type' );
 ok( TYPES->type('CODE'), 'got CODE type' );
 ok( TYPES->type('HASH'), 'got HASH type' );
 ok( TYPES->type('ARRAY'), 'got ARRAY type' );
@@ -143,7 +141,7 @@ is( $types->error->info, "type not found: hash", 'no hash error' );
 # get the vtables info - NOTE: this is going to be moved out
 #-----------------------------------------------------------------------
 
-my $vtables = TYPES->vtables;
+my $vtables = TYPES->vtables('text list hash ARRAY HASH');
 
 # make sure we got vtables
 ok( $vtables->{ text }, 'got text vtable' );
