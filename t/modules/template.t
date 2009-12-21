@@ -43,7 +43,7 @@ my $tokens = $template->tokens;
 
 #$template = TEMPLATE->new( text => '[% 4 + 20; 5 + 8 * 2; 5 + 5 %]' );
 $template = TEMPLATE->new( text => 'How about a nice [% a.b.first + 20 %]?' );
-my $sexpr = $template->sexpr;
+#my $sexpr = $template->sexpr;
 
 my $output = $template->fill( a => { b => [400] } );
 is( $output, 'How about a nice 420?', 'got template output' );
