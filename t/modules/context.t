@@ -19,7 +19,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template::TT3::Context',
     args  => \@ARGV,
-    tests => 63;
+    tests => 65;
 
 use Template::TT3::Context;
 use constant CONTEXT => 'Template::TT3::Context';
@@ -264,7 +264,7 @@ $context = CONTEXT->new(
     data  => $data,
     types => {
         Object1 => {
-            module   => 'Template::TT3::Variable::Object',
+#           module   => 'Template::TT3::Variable::Object',
             methods  => {
                 '*'      => 0,
                 '_'      => 1,
@@ -302,6 +302,15 @@ is( $obj->reason->info, 'Access denied to object method: obj.bar', 'denied error
 
 is( $obj->dot('_secret')->value, 'this is secret', 'called secret method' ); 
 
+
+
+#-----------------------------------------------------------------------
+# undefined and missing values
+#-----------------------------------------------------------------------
+
+my $missing = $context->var('lord_lucan');
+ok(! $missing->try->text, 'could not find Lord Lucan' );
+is( $@->info, '"lord_lucan" is missing', 'Lord Lucan is missing' );
 
 
 __END__

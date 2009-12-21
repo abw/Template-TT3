@@ -71,7 +71,7 @@ sub var {
 
 
 sub get_var {
-    my ($self, $name, $context) = @_;
+    my ($self, $name, $context, @args) = @_;
     my ($var, $value);
 
     # If we need to lookup a variable in a parent context then we pass the
@@ -118,7 +118,7 @@ sub get_var {
     }
     else {
         $self->debug("$self $name is missing") if DEBUG;
-        return $self->no_var($name);
+        return $context->no_var($name, @args);
     }
 }
 
@@ -190,10 +190,10 @@ sub use_var {
 
 
 sub no_var {
-    my ($self, $name) = @_;
+    my ($self, $name, @args) = @_;
     my $ctor = $self->{ type }->{ missing }
         || return $self->error_msg( bad_type => $name, 'missing' );
-    return $self->use_var( $name => undef );
+    return $ctor->($self, $name, undef, @args);
 }
 
 

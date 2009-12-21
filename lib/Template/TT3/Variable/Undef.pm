@@ -48,11 +48,14 @@ sub text {
     # If we were passed an element reference then we raise the error 
     # against that so that it can decorate the exception with line 
     # number, source code, etc.  Otherwise we just throw a plain error.
+
+    return ($element || $self)
+        ->fail( data_undef => $self->fullname );
     
     # TODO: use the new approach... er... whatever that is...
-    return $element
-        ? $element->fail_undef_data #( $self->fullname )
-        : $self->error_msg( undefined => $self->fullname );
+#    return $element
+#        ? $element->fail_undef_data #( $self->fullname )
+#        : $self->error_msg( undefined => $self->fullname );
 }
 
 1;

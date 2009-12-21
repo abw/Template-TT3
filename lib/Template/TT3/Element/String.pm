@@ -5,9 +5,10 @@ use Template::TT3::Class::Element
     base      => 'Template::TT3::Element::Literal',
     view      => 'string',
     constant  => {
-        SOURCE_FORMAT => '"%s"',
+        SOURCE_FORMAT => '%s',
     },
     alias     => {
+        name           => \&text,
         value          => \&text,
         values         => \&text,
         parse_filename => \&parse_expr,

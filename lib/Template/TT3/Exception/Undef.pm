@@ -1,3 +1,5 @@
+# NOTE: this is being replaced by Template::TT3::Exception::Data
+
 package Template::TT3::Exception::Undef;
 
 use Template::TT3::Class

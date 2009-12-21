@@ -5,7 +5,7 @@ use Template::TT3::Class::Element
     base    => 'Template::TT3::Element::String',
     view    => 'squote',
     constant => {
-        SOURCE_FORMAT => "'%s'",
+#        SOURCE_FORMAT => "'%s'",
     };
 
 
@@ -48,6 +48,9 @@ are part of the format).  This is used by the
 L<source()|Template::TT3::Element::Literal> method inherited from 
 L<Template::TT3::Element::Literal> to render a canonical representation 
 of the template source code for this element.
+
+UPDATE: This has been removed.  Perhaps temporarily, perhaps permanently.
+Note sure until I investigate.
 
 =head1 AUTHOR
 

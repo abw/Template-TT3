@@ -19,7 +19,7 @@ use Badger
 use Template::TT3::Test 
     debug => 'Template::TT3::Element::Variable',
     args  => \@ARGV,
-    tests => 7;
+    tests => 17;
 
 use Template::TT3::Elements;
 use Template::TT3::Context;
@@ -59,10 +59,10 @@ is( $foo->text($context), 'hello world', 'got foo text' );
 # bar should yield undef for value() and throw an error for text()
 ok( ! defined $bar->value($context), 'bar is not defined' );
 ok( ! $bar->try->text($context), 'bar text threw error' );
-is( $@,'blah blah error', 'got error for undefined value' );
+like( $@, qr/Undefined value returned by expression: bar/, 'got error for undefined value' );
 
 # baz should yield undef for value() and throw a different error for text()
 ok( ! defined $baz->value($context), 'baz is not defined' );
 ok( ! $baz->try->text($context), 'baz text threw error' );
-is( $@,'blah blah error', 'got error for missing value' );
+like( $@, qr/Missing value from expression: baz/, 'got error for missing value' );
 
