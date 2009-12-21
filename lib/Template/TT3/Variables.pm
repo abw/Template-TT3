@@ -19,23 +19,25 @@ use Template::TT3::Class::Factory
         # These are the internal names we use for everything else
         map { $_ => $_ }
         qw( text list hash code object undef missing )
-#       PARAMS  => 'params',
+#       params,         # TODO: decide what we're doing with this
     },
     messages => {
         bad_type => 'Invalid type specification for %s: %s',
     };
 
 
-sub preload {
+sub builtin {
     my $self   = shift->prototype;
     my $types  = $VARIABLE_NAMES;       # Defined by 'names' hook above
     my $loads  = { };
 
-    $self->debug("preload() types: ", $self->dump_data($types)) if DEBUG;
+    $self->debug(
+        "builtin() types: ", 
+        $self->dump_data($types)
+    ) if DEBUG;
     
     foreach my $type (keys %$types) {
         $loads->{ $type } = $self->variable($type);
-        $self->debug("preload $type => ", $loads->{ $type }) if DEBUG;
     }
     
     return $loads;
@@ -44,16 +46,10 @@ sub preload {
 
 sub constructors {
     my $self    = shift->prototype;
-    my $builtin = $self->preload;            # TODO: other types too
+    my $builtin = $self->builtin;
     my $userdef = params(@_);
     my $types   = $self->hub->types;
 
-    $self->debug(
-        "constructors() types:\nBUILTIN:", 
-        $self->dump_data($builtin), "\n",
-        "USERDEF: ", $self->dump_data($userdef)
-    ) if DEBUG;
-    
     my $input = { 
         # we're not interested in the class names that are in the $builtin
         # values, we just want a mapping from key to key, e.g. undef => undef
@@ -67,7 +63,7 @@ sub constructors {
     };
     
     $self->debug(
-        "combined:", 
+        "merged variable types:", 
         $self->dump_data($input), "\n",
     ) if DEBUG;
     
@@ -114,7 +110,7 @@ sub constructors {
         );
         
         $self->debug(
-            "$key => $type => ", 
+            "variable type: $key => $type => ", 
             $self->dump_data($methods)
         ) if DEBUG
     }
@@ -132,118 +128,162 @@ sub found {
 1;
 
 __END__
-package Template::TT3::Variables;
-
-use Template::TT3::Class
-    version   => 0.01,
-    debug     => 0,
-    import    => 'class',
-    base      => 'Template::TT3::Base Badger::Prototype',
-    utils     => 'self_params',
-    constants => 'HASH CODE',
-    messages  => {
-        bad_type  => 'Invalid variable type for %s: %s',
-        no_module => 'No module defined for variable type: %s',
-    },
-    constant  => {
-        TYPES => 'Template::TT3::Types',
-    },
-    alias     => {
-        init  => \&init_variables,
-    };
-
-use Template::TT3::Types;
-our $TYPES = {
-    UNDEF  => 'Template::TT3::Variable::Undef',
-    TEXT   => 'Template::TT3::Variable::Text',
-    HASH   => 'Template::TT3::Variable::Hash',
-    ARRAY  => 'Template::TT3::Variable::List',
-    CODE   => 'Template::TT3::Variable::Code',
-    OBJECT => 'Template::TT3::Variable::Object',
-#    'Template::TT3::Type::Params' => 'Template::TT3::Variable::Hash',
-};
-
-
-sub init_variables {
-    my ($self, $config) = @_;
-    my $types    = $self->class->hash_vars( TYPES => $config->{ types } );
-    my $vmethods = $self->TYPES->vtables;
-    my $ctors    = { 
-        map {
-            # load each module and call the constructor() method to generate
-            # a typed variable constructor which we can call (in use_var()) 
-            # to create variable instances of different types
-            my $module = $types->{ $_ };
-            my $config;
-            
-            $self->debug("$_ => $module") if DEBUG;
-            
-            if (ref $module eq HASH) {
-                $config = $module;
-                $module = $config->{ module }
-                    || return $self->error_msg( no_module => $_ );
-            }
-            else {
-                $config = { };
-            }
-
-            $_ => class($module)->load->name->constructor(
-#               variables => $self,
-                methods   => $vmethods->{ $_ },
-                %$config,
-            );
-        } 
-        keys %$types
-    };
-
-    $self->{ types } = $types;
-    $self->{ type  } = $ctors;
-    
-#    $self->{ data  } = $config->{ data } || { };
-#    $self->{ vars  } = { };
-    return $self;
-}
-
-sub types {
-    shift->prototype->{ types };
-}
-
-sub constructors {
-    shift->prototype->{ type };
-}
-
-
-1;
-
 
 =head1 NAME
 
-Template::TT3::Variables - factory for template variable objects
+Template::TT3::Variables - factory module for loading variable modules
 
-=head1 NOTE
+=head1 SYNOPSIS
 
-The functionality for this module has been (mostly) moved into 
-L<Template::TT3::Context>.  Once the final few bits have been merged
-this module will be deprecated.
-
-I<OR> this will become the variable managing base class for 
-L<Template::TT3::Context>.  I haven't quite decided yet.
+    use Template::TT3::Variables;
+    
+    my $types = Template::TT3::Variables->constructors(
+        undef => 'missing',                 # map data types
+        text  => {                          # add virtual methods
+            foo => sub { ... },
+            bar => sub { ... },
+        },
+        'Wiz::Bang' => {                    # define object maps
+            '*'   => 0,                     # don't call methods by default
+            'foo' => 1,                     # do call foo() method
+            'bar' => sub { ... },           # virtual method
+        }
+    );
 
 =head1 DESCRIPTION
 
-The C<Template::TT3::Variables> module defines a factory for creating 
-template variable objects.  Variable objects are subclasses of 
-L<Template::TT3::Variable> which acts as small, lightweight wrappers
-around data values.  They implement the additional behaviours that make
-TT variables different from basic Perl variables.
+This module is a subclass of L<Template::TT3::Factory> for locating and
+loading template variable modules. Variable objects are subclasses of
+L<Template::TT3::Variable> which acts as small, lightweight wrappers around
+data values. They implement the additional behaviours that make TT variables
+different from basic Perl variables.
 
-For example, the following template fragment:
+It searches for variable modules in the following places:
 
-    [% user.name.length %]
+    Template::TT3::Variable
+    Template::Variable
+    TemplateX::TT3::Variable
+    TemplateX::Variable
 
-Can be implemented in Perl like so:
+For example, the C<text> variable type is mapped to the 
+L<Template::TT3::Varaible::Text> object.
 
-    $vars->dot('user')->dot('name')->dot('length')->get;
+=head1 METHODS
 
-Here C<$root> is a C<Template::TT3::Variables> object.
+The following methods are implemented or automatically added by the 
+L<Template::TT3::Class::Factory> metaprogramming module in addition to 
+those inherited from the L<Template::TT3::Factory>,
+L<Template::TT3::Base>, L<Badger::Factory> and L<Badger::Base> base classes.
+
+=head2 variable($type)
+
+Locates and loads a variable module and returns the class name. This is
+created as an alias to the L<item()|Badger::Factory/item()> method in
+L<Badger::Factory>. 
+
+Note that the method doesn't automatically create a new variable object as
+most factory modules do. TT uses this module to define constructor functions
+(via the L<constructors()> method) which create objectm but not for creating
+instances of the variable objects directly.
+
+=head2 variables()
+
+Method for inspecting or modifying the variable type that the factory module 
+manages.  This is created as an alias to the L<items()|Badger::Factory/items()> 
+method in L<Badger::Factory>.
+
+=head2 constructors(\%types)
+
+Returns a reference to a hash array containing constructor functions for the
+variables types specified as argument(s), along with any L<builtin()> variable
+types.
+
+    # default set of constructors
+    my $ctors = Template::TT3::Variables->constructors;
+
+    # customised set
+    my $ctors = Template::TT3::Variables->constructors(
+        undef => 'missing',                 # map data types
+        text  => {                          # add virtual methods
+            foo => sub { ... },             # to inbuilt data types
+            bar => sub { ... },
+        },
+        'Wiz::Bang' => {                    # define custom object maps
+            '*'   => 0,                     # don't call methods by default
+            'foo' => 1,                     # do call foo() method
+            'bar' => sub { ... },           # virtual method
+        }
+    );
+
+=head1 INTERNAL METHODS
+
+=head2 builtin()
+
+This method loads all the builtin variable types and returns a reference
+to a hash array mapping their internal names (e.g. C<text>, C<list>, etc)
+to their external module names (e.g. L<Template::TT3::Variable::Text>,
+L<Template::TT3::Variable::List>, etc).
+    
+=head2 found($type,$module)
+
+This replaces the default method inherited from the L<Badger::Factory> base
+class. Instead of automatically creating an object when the L<variable()>
+method is called, it instead returns the class name of the module implementing
+it.
+
+=head1 PACKAGE VARIABLES
+
+This module defines the following package variables.  These are declarations
+that are used by the L<Badger::Factory> base class.
+
+=head2 $ITEM
+
+This is the name of the item that the factory module returns. In this case it
+is defined as C<variable>.
+
+=head2 $PATH
+
+This defines the module search path for the factory.  In this case it is 
+defined as a list of the following values;
+
+    Template::TT3::Variable
+    Template::Variable
+    TemplateX::TT3::Variable
+    TemplateX::Variable
+
+=head1 AUTHOR
+
+Andy Wardley  L<http://wardley.org/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 1996-2009 Andy Wardley.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO.
+
+This module inherits methods from the L<Template::TT3::Factory>,
+L<Template::TT3::Base>, L<Badger::Factory>, and L<Badger::Base> base classes.
+
+It is constructed using the L<Template::TT3::Class::Factory> class 
+metaprogramming module.
+
+It loads modules and instantiates object that are subclasses of
+L<Template::TT3::Variable>. See L<Template::TT3::Variable::Text>,
+L<Template::TT3::Variable::List> and L<Template::TT3::Variable::Hash> for
+examples.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# perl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# vim: expandtab shiftwidth=4:
+
+=head1 DESCRIPTION
 

@@ -61,6 +61,8 @@ I'm in the process of migrating Template::TT3::Factory::Class to T~Class::Factor
     [X] Template::TT3::Exceptions
     [X] Template::TT3::Dialects
     [X] Template::TT3::Providers
+    [X] Template::TT3::Types
+    [X] Template::TT3::Variables
 
     [ ] Template::TT3::Elements                 ** UP NEXT **
     [ ] Template::TT3::Services
