@@ -20,8 +20,8 @@ use Template::TT3::Class
     messages  => {
         no_hub         => '%s object is not attached to a hub',
         syntax_dot_set => "You cannot set '%s.%s' to '%s'",
-        data_undef     => "Undefined value returned by expression: %s",
-        data_missing   => "Missing value from expression: %s",
+        data_undef     => "Undefined value: %s",
+        data_missing   => "Missing value: %s",
     };
 
 

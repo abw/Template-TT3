@@ -289,7 +289,7 @@ sub token_constructor {
     my $token = shift;
     
     # NOTE: we should be able to shortcut the constructor function if instead 
-    # we store the $class returned by $self->element_class() somewhere along 
+    # we store the $class returned by $self->element() somewhere along 
     # with the $meta data returned by $class->init_meta().  Then we can cut 
     # out another middle-man method in match_keyword() and match_nonword() by 
     # performing a direct: bless [$meta, $token, $pos], $class;
@@ -323,7 +323,7 @@ sub token_constructor {
         return $self->error_msg( invalid => symbol => $token )
             unless $symbol;
 
-        $self->element_class($symbol->[ELEMENT])->constructor(
+        $self->element($symbol->[ELEMENT])->constructor(
             elements => $self,
             lprec    => $symbol->[LPREC],
             rprec    => $symbol->[RPREC],

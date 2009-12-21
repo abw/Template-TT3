@@ -37,6 +37,6 @@ is( $literal->text, 'hello', 'got literal text()');
 is( $literal->value, 'hello', 'got literal value()');
 is( $literal->values, 'hello', 'got literal values()');
 
-$literal = ELEMENTS->prototype->construct( literal => 'world' );
+$literal = ELEMENTS->prototype->create( literal => 'world' );
 ok( $literal, 'constructed literal element via element factory' );
 is( $literal->text, 'world', 'got literal text(): world');

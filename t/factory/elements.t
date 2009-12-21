@@ -27,25 +27,31 @@ ok( 1, 'loaded elements' );
 my $elems = ELEMS->new;
 ok( $elems, 'created elements object' );
 
+#my $a = ELEMS->element('text');
+#print "a: $a\n";
+#print "token: ", $a->token;
+#exit;
+
+
 my $op = $elems->constructor('number')->(10);
 ok( $op, 'got number op' );
 is( $op->value, 10, 'op value is 10' );
 
-my $n1 = $elems->construct( number => 42 );
+my $n1 = $elems->create( number => 42 );
 is( $n1->value, 42, 'n1 value is 42' );
 
-my $n2 = $elems->construct( number => 69 );
+my $n2 = $elems->create( number => 69 );
 is( $n2->value, 69, 'n2 value is 69' );
 
-my $add = $elems->construct('number.add' => '+', 3, $n1, $n2 );
+my $add = $elems->create('operator.number.add' => '+', 3, $n1, $n2 );
 is( $add->value, 111, 'addition: 42 + 69 = 111' );
 
-my $sub = $elems->construct('number.subtract' => '-', 4, $n2, $n1 );
+my $sub = $elems->create('operator.number.subtract' => '-', 4, $n2, $n1 );
 is( $sub->value, 27, 'subtraction: 69 - 42 = 27' );
 
 # test aliases 
-$sub = $elems->construct( num_subtract => '-', 4, $n2, $n1 );
+$sub = $elems->create( num_subtract => '-', 4, $n2, $n1 );
 is( $sub->value, 27, 'num_subtract subtraction: 69 - 42 = 27' );
 
-$sub = $elems->construct( number_subtract => '-', 4, $n2, $n1 );
+$sub = $elems->create( number_subtract => '-', 4, $n2, $n1 );
 is( $sub->value, 27, 'number_subtract subtraction: 69 - 42 = 27' );

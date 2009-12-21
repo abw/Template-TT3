@@ -17,15 +17,20 @@ use Badger
     lib => '../../lib';
 
 use Template::TT3::Test
-    tests  => 6,
     debug  => 'Template::TT3::Scanner Template::TT3::Tag',
     args   => \@ARGV,
+    tests  => 7,
     import => 'test_expect callsign';
+
+my $vars = {
+    %{ callsign() },
+    null => undef,
+};
 
 test_expect(
     verbose    => 1,
     debug      => $DEBUG,
-    variables  => callsign,
+    variables  => $vars,
 );
 
 __DATA__
@@ -59,23 +64,31 @@ TT3 syntax error at line 3 of "multi-line statement" test:
 -- test error at start of string --
 [% "$oops" %]
 -- error --
-TT3 undefined data error at line 1 of "error at start of string" test:
-    Error: Undefined value returned by expression: oops
+TT3 data error at line 1 of "error at start of string" test:
+    Error: Missing value: oops
    Source: [% "$oops" %]
                 ^ here
 
 -- test error in string --
 [% "blah$oops" %]
 -- error --
-TT3 undefined data error at line 1 of "error in string" test:
-    Error: Undefined value returned by expression: oops
+TT3 data error at line 1 of "error in string" test:
+    Error: Missing value: oops
    Source: [% "blah$oops" %]
                     ^ here
 
 -- test error at end of string --
 [% "blah $a $b $c $a.length $b.length $yak" %]
 -- error --
-TT3 undefined data error at line 1 of "error at end of string" test:
-    Error: Undefined value returned by expression: yak
+TT3 data error at line 1 of "error at end of string" test:
+    Error: Missing value: yak
    Source: [% "blah $a $b $c $a.length $b.length $yak" %]
                                                   ^ here
+
+-- test undefined data --
+%% null
+-- error --
+TT3 data error at line 1 of "undefined data" test:
+    Error: Undefined value: null
+   Source: %% null
+              ^ here

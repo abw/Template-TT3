@@ -37,6 +37,6 @@ is( $text->text, 'hello', 'got text text()');
 is( $text->value, 'hello', 'got text value()');
 is( $text->values, 'hello', 'got text values()');
 
-$text = ELEMENTS->prototype->construct( text => 'world' );
+$text = ELEMENTS->create( text => 'world' );
 ok( $text, 'constructed text element via element factory' );
 is( $text->text, 'world', 'got text: world');

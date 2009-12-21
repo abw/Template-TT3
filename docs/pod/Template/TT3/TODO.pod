@@ -226,6 +226,10 @@ Badger::Factory needs a cleanup and refactor to simplify what it does.
 Probably best to cleave it back into 3 parts like it (well, its predecessor)
 used to be.
 
+Some factory modules (types, variables) implement the L<create()> method.
+Others (elements) implement a L<construct()> method.  Choose one and apply
+it universally.  UPDATE: changed Template::TT3::Elements to use create()
+but there may be others lurking out there...
 
 =head1 Class Modules
 

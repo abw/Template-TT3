@@ -168,6 +168,68 @@ It searches for variable modules in the following places:
 For example, the C<text> variable type is mapped to the 
 L<Template::TT3::Varaible::Text> object.
 
+=head1 CONFIGURATION OPTIONS
+
+The following configuration options are defined in addition to those inherited
+from the L<Template::TT3::Factory>, L<Template::TT3::Base>, L<Badger::Factory>
+and L<Badger::Base> base classes.
+
+They should be specified as a list or reference to a hash array of named 
+parameters when the factory object is created.
+
+    # either a list of named parameters...
+    
+    my $variables = Template::TT3::Variables->new(
+        variable_path => [
+            'My::Variable', 'Template::TT3::Variable'
+        ],
+    );
+
+    # ...or a reference to a hash array
+    
+    my $variables = Template::TT3::Variables->new({
+        variable_path => [
+            'My::Variable', 'Template::TT3::Variable'
+        ],
+    });
+
+=head2 variables
+
+A reference to a hash array explicitly mapping internal variable names to
+external Perl modules. This can be used to override and/or augment the variable
+modules that the factory would normally be able to locate automatically.
+
+    my $variables = Template::TT3::Variables->new(
+        variables => {
+            foo => 'Some::Other::Variable::Foo',
+            bar => 'Yet::Another::Variable::Bar'
+        },
+    );
+
+=head2 variable_path / path
+
+A reference to a list of module namespaces that the factory should search
+to locate variable modules.  The default path is defined by the L<$PATH>
+package variable.
+
+    my $variables = Template::TT3::Variables->new(
+        variable_path => [
+            'My::Variable', 'Template::TT3::Variable'
+        ],
+    );
+
+=head2 variable_names / names
+
+A reference to a hash array providing aliases for variable names.
+
+    my $variables = Template::TT3::Variables->new(
+        variable_names => {
+            FOO => 'foo',
+            bar => 'foo',
+        },
+    );
+
+
 =head1 METHODS
 
 The following methods are implemented or automatically added by the 

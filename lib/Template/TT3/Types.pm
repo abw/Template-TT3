@@ -113,6 +113,67 @@ L<Template::TT3::Type::List> object.
 
     my $list = Template::TT3::Types->create( list => \@data );
 
+=head1 CONFIGURATION OPTIONS
+
+The following configuration options are defined in addition to those inherited
+from the L<Template::TT3::Factory>, L<Template::TT3::Base>, L<Badger::Factory>
+and L<Badger::Base> base classes.
+
+They should be specified as a list or reference to a hash array of named 
+parameters when the factory object is created.
+
+    # either a list of named parameters...
+    
+    my $types = Template::TT3::Types->new(
+        type_path => [
+            'My::Type', 'Template::TT3::Type'
+        ],
+    );
+
+    # ...or a reference to a hash array
+    
+    my $types = Template::TT3::Types->new({
+        type_path => [
+            'My::Type', 'Template::TT3::Type'
+        ],
+    });
+
+=head2 types
+
+A reference to a hash array explicitly mapping internal type names to
+external Perl modules. This can be used to override and/or augment the type
+modules that the factory would normally be able to locate automatically.
+
+    my $types = Template::TT3::Types->new(
+        types => {
+            foo => 'Some::Other::Type::Foo',
+            bar => 'Yet::Another::Type::Bar'
+        },
+    );
+
+=head2 type_path / path
+
+A reference to a list of module namespaces that the factory should search
+to locate type modules.  The default path is defined by the L<$PATH>
+package variable.
+
+    my $types = Template::TT3::Types->new(
+        type_path => [
+            'My::Type', 'Template::TT3::Type'
+        ],
+    );
+
+=head2 type_names / names
+
+A reference to a hash array providing aliases for type names.
+
+    my $types = Template::TT3::Types->new(
+        type_names => {
+            FOO => 'foo',
+            bar => 'foo',
+        },
+    );
+
 =head1 METHODS
 
 The following methods are implemented or automatically added by the 
@@ -133,7 +194,7 @@ instances of the data type objects. See L<create()> for a method that does.
 
 =head2 types()
 
-Method for inspecting or modifying the data type that the factory module 
+Method for inspecting or modifying the data types that the factory module 
 manages.  This is created as an alias to the L<items()|Badger::Factory/items()> 
 method in L<Badger::Factory>.
 

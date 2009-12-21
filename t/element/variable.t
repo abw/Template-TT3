@@ -33,9 +33,9 @@ pass( 'loaded ' . ELEMENTS );
 my $elements = ELEMENTS->new;
 ok( $elements, 'created elements factory' );
 
-my $foo = $elements->construct( variable => 'foo' );
-my $bar = $elements->construct( variable => 'bar' );
-my $baz = $elements->construct( variable => 'baz' );
+my $foo = $elements->create( variable => 'foo' );
+my $bar = $elements->create( variable => 'bar' );
+my $baz = $elements->create( variable => 'baz' );
 
 ok( $foo, 'created foo variable' );
 is( $foo->token, 'foo', 'got foo token' );
@@ -59,10 +59,10 @@ is( $foo->text($context), 'hello world', 'got foo text' );
 # bar should yield undef for value() and throw an error for text()
 ok( ! defined $bar->value($context), 'bar is not defined' );
 ok( ! $bar->try->text($context), 'bar text threw error' );
-like( $@, qr/Undefined value returned by expression: bar/, 'got error for undefined value' );
+like( $@, qr/Undefined value: bar/, 'got error for undefined value' );
 
 # baz should yield undef for value() and throw a different error for text()
 ok( ! defined $baz->value($context), 'baz is not defined' );
 ok( ! $baz->try->text($context), 'baz text threw error' );
-like( $@, qr/Missing value from expression: baz/, 'got error for missing value' );
+like( $@, qr/Missing value: baz/, 'got error for missing value' );
 

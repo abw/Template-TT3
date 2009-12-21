@@ -40,6 +40,68 @@ specified are forwarded to the exception constructor method.
 
     my $error = Template::TT3::Exceptions->item( syntax => @args );
 
+=head1 CONFIGURATION OPTIONS
+
+The following configuration options are defined in addition to those inherited
+from the L<Template::TT3::Factory>, L<Template::TT3::Base>, L<Badger::Factory>
+and L<Badger::Base> base classes.
+
+They should be specified as a list or reference to a hash array of named 
+parameters when the factory object is created.
+
+    # either a list of named parameters...
+    
+    my $exceptions = Template::TT3::Exceptions->new(
+        exception_type_path => [
+            'My::Exception', 'Template::TT3::Exception'
+        ],
+    );
+
+    # ...or a reference to a hash array
+    
+    my $exceptions = Template::TT3::Exceptions->new({
+        exception_type_path => [
+            'My::Exception', 'Template::TT3::Exception'
+        ],
+    });
+
+=head2 exception_types
+
+A reference to a hash array explicitly mapping internal exception type names
+to external Perl modules. This can be used to override and/or augment the
+exception type modules that the factory would normally be able to locate
+automatically.
+
+    my $exceptions = Template::TT3::Exceptions->new(
+        exception_types => {
+            foo => 'Some::Other::Exception::Foo',
+            bar => 'Yet::Another::Exception::Bar'
+        },
+    );
+
+=head2 exception_type_path / path
+
+A reference to a list of module namespaces that the factory should search
+to locate exception_type modules.  The default path is defined by the L<$PATH>
+package variable.
+
+    my $exceptions = Template::TT3::Exceptions->new(
+        exception_type_path => [
+            'My::Exception', 'Template::TT3::Exception'
+        ],
+    );
+
+=head2 exception_type_names / names
+
+A reference to a hash array providing aliases for exception_type names.
+
+    my $exceptions = Template::TT3::Exceptions->new(
+        exception_type_names => {
+            FOO => 'foo',
+            bar => 'foo',
+        },
+    );
+
 =head1 METHODS
 
 This module inherits all methods from the L<Template::TT3::Factory>,
@@ -54,7 +116,7 @@ alias to the L<item()|Badger::Factory/item()> method in L<Badger::Factory>.
 Note that we have to use this clumsy name to avoid clashing with the
 L<exception()|Badger::Base/exception()> method inherited from L<Badger::Base>.
 
-=head2 exceptions()
+=head2 exception_types()
 
 Method for inspecting or modifying the exceptions that the factory module 
 manages.  This is created as an alias to the L<items()|Badger::Factory/items()> 

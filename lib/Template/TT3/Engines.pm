@@ -58,6 +58,67 @@ object.
     my $engine = Template::TT3::Engines->engine;
     my $engine = Template::TT3::Engines->engine('default');     # same thing
 
+=head1 CONFIGURATION OPTIONS
+
+The following configuration options are defined in addition to those inherited
+from the L<Template::TT3::Factory>, L<Template::TT3::Base>, L<Badger::Factory>
+and L<Badger::Base> base classes.
+
+They should be specified as a list or reference to a hash array of named 
+parameters when the factory object is created.
+
+    # either a list of named parameters...
+    
+    my $engines = Template::TT3::Engines->new(
+        engine_path => [
+            'My::Engine', 'Template::TT3::Engine'
+        ],
+    );
+
+    # ...or a reference to a hash array
+    
+    my $engines = Template::TT3::Engines->new({
+        engine_path => [
+            'My::Engine', 'Template::TT3::Engine'
+        ],
+    });
+
+=head2 engines
+
+A reference to a hash array explicitly mapping internal engine names to
+external Perl modules. This can be used to override and/or augment the engine
+modules that the factory would normally be able to locate automatically.
+
+    my $engines = Template::TT3::Engines->new(
+        engines => {
+            foo => 'Some::Other::Engine::Foo',
+            bar => 'Yet::Another::Engine::Bar'
+        },
+    );
+
+=head2 engine_path / path
+
+A reference to a list of module namespaces that the factory should search
+to locate engine modules.  The default path is defined by the L<$PATH>
+package variable.
+
+    my $engines = Template::TT3::Engines->new(
+        engine_path => [
+            'My::Engine', 'Template::TT3::Engine'
+        ],
+    );
+
+=head2 engine_names / names
+
+A reference to a hash array providing aliases for engine names.
+
+    my $engines = Template::TT3::Engines->new(
+        engine_names => {
+            FOO => 'foo',
+            bar => 'foo',
+        },
+    );
+
 =head1 METHODS
 
 This module inherits all methods from the L<Template::TT3::Factory>,

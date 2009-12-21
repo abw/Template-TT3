@@ -51,11 +51,11 @@ sub parse_infix {
 sub as_pair {
     my $self = shift;
     my $elems = $self->[META]->[ELEMS];
-    my $name  = $elems->construct(
+    my $name  = $elems->create(
         word => $self->[RHS]->name, $self->[POS]
     );
     $self->debug("Creating pair from dotop: $name") if DEBUG;
-    return $elems->construct(
+    return $elems->create(
         op_pair => "[=>]", $self->[POS], $name, $self
     );
 }

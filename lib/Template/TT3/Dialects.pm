@@ -115,6 +115,68 @@ L<Template::TT3::Dialect::TT3> object.
     my $dialect = Template::TT3::Dialects->dialect;
     my $dialect = Template::TT3::Dialects->dialect('default');     # same thing
 
+=head1 CONFIGURATION OPTIONS
+
+The following configuration options are defined in addition to those inherited
+from the L<Template::TT3::Factory>, L<Template::TT3::Base>, L<Badger::Factory>
+and L<Badger::Base> base classes.
+
+They should be specified as a list or reference to a hash array of named 
+parameters when the factory object is created.
+
+    # either a list of named parameters...
+    
+    my $dialects = Template::TT3::Dialects->new(
+        dialect_path => [
+            'My::Dialect', 'Template::TT3::Dialect'
+        ],
+    );
+
+    # ...or a reference to a hash array
+    
+    my $dialects = Template::TT3::Dialects->new({
+        dialect_path => [
+            'My::Dialect', 'Template::TT3::Dialect'
+        ],
+    });
+
+=head2 dialects
+
+A reference to a hash array explicitly mapping internal dialect names to
+external Perl modules. This can be used to override and/or augment the dialect
+modules that the factory would normally be able to locate automatically.
+
+    my $dialects = Template::TT3::Dialects->new(
+        dialects => {
+            foo => 'Some::Other::Dialect::Foo',
+            bar => 'Yet::Another::Dialect::Bar'
+        },
+    );
+
+=head2 dialect_path / path
+
+A reference to a list of module namespaces that the factory should search
+to locate dialect modules.  The default path is defined by the L<$PATH>
+package variable.
+
+    my $dialects = Template::TT3::Dialects->new(
+        dialect_path => [
+            'My::Dialect', 'Template::TT3::Dialect'
+        ],
+    );
+
+=head2 dialect_names / names
+
+A reference to a hash array providing aliases for dialect names.
+
+    my $dialects = Template::TT3::Dialects->new(
+        dialect_names => {
+            FOO => 'foo',
+            bar => 'foo',
+        },
+    );
+
+
 =head1 METHODS
 
 This module implements the following methods in addition to those inherited

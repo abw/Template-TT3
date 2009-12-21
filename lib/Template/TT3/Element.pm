@@ -121,7 +121,7 @@ sub configuration {
 
 sub become {
     my ($self, $type) = @_;
-    my $class = $self->[META]->[ELEMS]->element_class($type)
+    my $class = $self->[META]->[ELEMS]->element($type)
         || return $self->error_msg( invalid => element => $type );
     bless $self, $class;
 }
@@ -136,7 +136,7 @@ sub append {
         $self->debug("adding passed element to branch: $element") if DEBUG;
     }
     else {
-        $element = $self->[META]->[ELEMS]->construct(@_);
+        $element = $self->[META]->[ELEMS]->create(@_);
     }
         
     $self->[NEXT] = $element;
@@ -159,7 +159,7 @@ sub branch {
         $self->debug("adding passed element to branch: $element") if DEBUG;
     }
     else {
-        $element = $self->[META]->[ELEMS]->construct(@_);
+        $element = $self->[META]->[ELEMS]->create(@_);
     }
         
     # chase down the last node in any existing branch
@@ -383,7 +383,7 @@ sub parse_block {
     my $self  = shift;
     my $exprs = $self->parse_exprs(@_) || return;
 
-    return $self->[META]->[ELEMS]->construct(
+    return $self->[META]->[ELEMS]->create(
         block => $self->[TOKEN], $self->[POS], $exprs
     );
 }
@@ -411,7 +411,7 @@ sub parse_pairs {
     return undef
         unless @exprs || $force;
 
-    return $self->[META]->[ELEMS]->construct(
+    return $self->[META]->[ELEMS]->create(
         block => $self->[TOKEN], $self->[POS], \@exprs
     );
 }

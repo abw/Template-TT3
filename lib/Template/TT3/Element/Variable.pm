@@ -43,11 +43,11 @@ sub as_lvalue {
 sub as_pair {
     my $self = shift;
     my $elems = $self->[META]->[ELEMS];
-    my $name  = $elems->construct(
+    my $name  = $elems->create(
         word => $self->[TOKEN], $self->[POS]
     );
     $self->debug("Creating pair from variable") if DEBUG;
-    return $elems->construct(
+    return $elems->create(
         op_pair => "[=>]", $self->[POS], $name, $self
     );
 }

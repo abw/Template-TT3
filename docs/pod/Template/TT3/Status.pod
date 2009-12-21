@@ -63,8 +63,8 @@ I'm in the process of migrating Template::TT3::Factory::Class to T~Class::Factor
     [X] Template::TT3::Providers
     [X] Template::TT3::Types
     [X] Template::TT3::Variables
+    [X] Template::TT3::Elements
 
-    [ ] Template::TT3::Elements                 ** UP NEXT **
     [ ] Template::TT3::Services
     [ ] Template::TT3::Tags
     [ ] Template::TT3::Views

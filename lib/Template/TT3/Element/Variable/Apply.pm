@@ -42,7 +42,7 @@ sub as_lvalue  {
     # without the args) and RHS contains a lazy subroutine with a signature
     # extracted from out args
     $op->[LHS] = $self->[EXPR];
-    $op->[RHS] = $self->[META]->[ELEMS]->construct(
+    $op->[RHS] = $self->[META]->[ELEMS]->create(
         sub => '<sub: ' . $self->[ARGS]->source . '>', 
             $self->[POS] + 1,       # POS   - skip past '(' 
             $self,                  # EXPR  - this element is sub name(args)

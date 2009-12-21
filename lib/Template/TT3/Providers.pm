@@ -64,6 +64,67 @@ location.
     my $provider = $providers->provider('cwd');         # same thing
     my $provider = $providers->provider('default');     # same thing
 
+=head1 CONFIGURATION OPTIONS
+
+The following configuration options are defined in addition to those inherited
+from the L<Template::TT3::Factory>, L<Template::TT3::Base>, L<Badger::Factory>
+and L<Badger::Base> base classes.
+
+They should be specified as a list or reference to a hash array of named 
+parameters when the factory object is created.
+
+    # either a list of named parameters...
+    
+    my $providers = Template::TT3::Providers->new(
+        provider_path => [
+            'My::Provider', 'Template::TT3::Provider'
+        ],
+    );
+
+    # ...or a reference to a hash array
+    
+    my $providers = Template::TT3::Providers->new({
+        provider_path => [
+            'My::Provider', 'Template::TT3::Provider'
+        ],
+    });
+
+=head2 providers
+
+A reference to a hash array explicitly mapping internal provider names to
+external Perl modules. This can be used to override and/or augment the provider
+modules that the factory would normally be able to locate automatically.
+
+    my $providers = Template::TT3::Providers->new(
+        providers => {
+            foo => 'Some::Other::Provider::Foo',
+            bar => 'Yet::Another::Provider::Bar'
+        },
+    );
+
+=head2 provider_path / path
+
+A reference to a list of module namespaces that the factory should search
+to locate provider modules.  The default path is defined by the L<$PATH>
+package variable.
+
+    my $providers = Template::TT3::Providers->new(
+        provider_path => [
+            'My::Provider', 'Template::TT3::Provider'
+        ],
+    );
+
+=head2 provider_names / names
+
+A reference to a hash array providing aliases for provider names.
+
+    my $providers = Template::TT3::Providers->new(
+        provider_names => {
+            FOO => 'foo',
+            bar => 'foo',
+        },
+    );
+
 =head1 METHODS
 
 This module inherits all methods from the L<Template::TT3::Factory>,
