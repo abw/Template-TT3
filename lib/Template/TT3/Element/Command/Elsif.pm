@@ -14,7 +14,8 @@ use Template::TT3::Class
         },
     },
     alias      => {
-        value  => \&text,
+        parse_expr => 'null',
+        value      => \&text,
     };
 
 

@@ -25,7 +25,10 @@ sub parse_body {
     
     $parent ||= $self;
 
-    $self->debug("parse_body(), parent is $parent->[TOKEN]") if DEBUG;
+    $self->debug(
+        "parse_body(), parent is $parent->[TOKEN], follow is",
+        $self->dump_data($follow)
+    ) if DEBUG;
  
     # skip past token any whitespace, then parse expressions
     my $block = $$token->next_skip_ws($token)->parse_block($token, $scope)

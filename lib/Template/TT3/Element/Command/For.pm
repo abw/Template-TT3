@@ -102,7 +102,7 @@ sub values {
     
     $value = [ $value ] 
         unless ref $value eq ARRAY;
-    
+
     return $self->else_values($context)
         unless @$value;
 

@@ -7,7 +7,8 @@ use Template::TT3::Class
     view       => 'else',
     constants  => ':elements',
     alias      => {
-        value  => \&text,
+        parse_expr => 'null',
+        value      => \&text,
     };
 
 
