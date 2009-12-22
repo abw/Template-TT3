@@ -5,11 +5,6 @@ t/dotops/text.t           (Wstat: 0 Tests: 24 Failed: 2)
 
   * work to do on PARAMS
 
-t/expressions/dotops.t    (Wstat: 0 Tests: 15 Failed: 1)
-  Failed test:  8
-
-  * work to do on dotops returning undefined values
-
 t/expressions/hash.t      (Wstat: 0 Tests: 14 Failed: 1)
   Failed test:  13
 

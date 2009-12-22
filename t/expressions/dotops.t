@@ -28,6 +28,7 @@ our $vars  = {
         e    => 2.718,
         pi   => 3.142,
         fill => 'FILLED',
+        null => undef,
     },
 };
 
@@ -65,7 +66,6 @@ TT3 syntax error at line 1 of "list.**" test:
 -- expect --
 FILLED
 
-
 -- test hash  .fill --
 # should be OK to have spaces before (but not after) the dotop
 %% hash    .fill
@@ -75,30 +75,30 @@ FILLED
 -- test hash.keys.sort.join(', ') --
 %% hash.keys.sort.join(', ')
 -- expect --
-e, fill, phi, pi
+e, fill, null, phi, pi
+
 
 -- test undefined lhs of a dotop --
 %% undef.length
 -- error --
-TT3 undefined data error at line 1 of "undefined lhs of a dotop" test:
-    Error: Undefined value in 'undef.length': undef
+TT3 data error at line 1 of "undefined lhs of a dotop" test:
+    Error: Undefined value: undef
    Source: %% undef.length
                    ^ here
 
 -- test undefined rhs of a dotop --
-%% hash.no_such_var
+%% hash.missing
 -- error --
-# this fails - need to look into why dotop isn't reporting it
-TT3 undefined data error at line 1 of "undefined rhs of a dotop" test:
-    Error: Undefined value returned by expression: hash.missing
+TT3 data error at line 1 of "undefined rhs of a dotop" test:
+    Error: Undefined value: hash.missing
    Source: %% hash.missing
                   ^ here
 
 -- test undefined middle of a dotop --
 %% hash.missing.have.you.seen.my.cat
 -- error --
-TT3 undefined data error at line 1 of "undefined middle of a dotop" test:
-    Error: Undefined value in 'hash.missing.have': hash.missing
+TT3 data error at line 1 of "undefined middle of a dotop" test:
+    Error: Undefined value: hash.missing
    Source: %% hash.missing.have.you.seen.my.cat
                           ^ here
 

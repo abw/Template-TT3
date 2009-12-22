@@ -76,21 +76,26 @@ sub hush {
     return '';
 }
 
+
 sub def {
     CORE::defined $_[0] ? $_[0] : '';
 }
+
 
 sub defined {
     CORE::defined $_[0] ? TRUE : FALSE;
 }
 
+
 sub undefined {
     CORE::defined $_[0] ? FALSE : TRUE;
 }
 
+
 sub true {
     $_[0] ? $_[0] : FALSE;
 }
+
 
 sub false {
     $_[0] ? FALSE : TRUE;

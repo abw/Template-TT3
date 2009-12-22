@@ -57,6 +57,7 @@ sub as_pair {
     );
 }
 
+
 sub as_lvalue {
     my ($self, $op, $rhs, $scope) = @_;
     return $op;
@@ -64,28 +65,36 @@ sub as_lvalue {
 
 
 sub value {
-    $_[SELF]->debug("fetching value()") if DEBUG;
-    return $_[SELF]->variable($_[CONTEXT])->value($_[SELF]);
+    $_[SELF]
+        ->variable( $_[CONTEXT] )
+        ->value( $_[SELF] );
 }
 
-sub OLD_maybe {
-    $_[SELF]->debug("maybe fetching value()") if DEBUG;
-    return $_[SELF]->variable($_[CONTEXT])->maybe($_[SELF]);
+
+sub text {
+    $_[SELF]
+        ->variable( $_[CONTEXT] )
+        ->text( $_[SELF] );
 }
+
 
 sub variable {
-    $_[SELF]->[LHS]->variable($_[CONTEXT])->dot(
-        $_[SELF]->[RHS]->value($_[CONTEXT]),
-        $_[SELF]->[ARGS]
-            ? [$_[SELF]->[ARGS]->values($_[CONTEXT])]
-            : undef,
-        $_[SELF],
-    );
+    $_[SELF]->[LHS]
+        ->variable( $_[CONTEXT] )
+        ->dot(
+            $_[SELF]->[RHS]->value( $_[CONTEXT] ),
+            $_[SELF]->[ARGS]
+                ? [ $_[SELF]->[ARGS]->values( $_[CONTEXT] ) ]
+                : undef,
+            $_[SELF],
+        )
 }
+
 
 sub left_edge {
     $_[SELF]->[LHS]->left_edge;
 }
+
 
 sub right_edge {
     $_[SELF]->[RHS]->right_edge;

@@ -25,7 +25,7 @@ use Template::TT3::Class
         
         data_missing    => "Missing value: %s",
         data_undef      => "Undefined value: %s",
-        data_undef_in   => "Undefined value in %s: %s",
+#       data_undef_in   => "Undefined value in %s: %s",
         data_undef_for  => 'Undefined value for %s: %s',
         data_vmethod    => 'Invalid %s method: %s.%s', 
 

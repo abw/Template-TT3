@@ -30,7 +30,7 @@ sub dot {
     }
  
     return ($element || $self)
-        ->fail( data_undef_in => $self->fullname.DOT.$name, $name );
+        ->fail( data_undef => $self->fullname );
 }
 
 
