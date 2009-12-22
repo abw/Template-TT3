@@ -52,8 +52,8 @@ this/is/foo
 
 -- test foo.mushroom --
 %% foo.mushroom
--- expect --
-<ERROR:"mushroom" is not a valid text method in "foo.mushroom">
+-- error --
+Invalid text method: foo.mushroom
 
 -- test 'snake'.length --
 %% 'snake'.length
@@ -62,8 +62,8 @@ this/is/foo
 
 -- test 'snake'.mushroom --
 %% 'snake'.mushroom
--- expect --
-<ERROR:"mushroom" is not a valid text method in "'snake'.mushroom">
+-- error --
+Invalid text method: 'snake'.mushroom
 
 -- test text.trim --
 %% '  hello  '.trim

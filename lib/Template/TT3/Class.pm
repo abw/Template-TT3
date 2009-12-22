@@ -1,9 +1,11 @@
 package Template::TT3::Class;
 
+use Badger::Debug ':all';
 use Badger::Class
     version   => 3.00,
     debug     => 0,
     uber      => 'Badger::Class',
+    base      => 'Badger::Base',
     utils     => 'self_params camel_case',
     constants => 'ARRAY HASH CODE DELIMITER PKG BLANK',
     constant  => {

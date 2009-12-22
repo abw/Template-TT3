@@ -4,38 +4,38 @@ use Template::TT3::Class
     version   => 2.7,
     debug     => 0,
     base      => 'Template::TT3::View::Tree',
-    auto_can  => 'can_view',
+#    auto_can  => 'can_view',
     constants => ':elements',
     constant  => {
-        APPLY_FORMAT    => "<apply:%s%s>",
-        ARGS_FORMAT     => "<args:%s>",
-        BINARY_FORMAT   => '<binary:<op:%s>%s%s>', 
-        BLOCK_FORMAT    => '<block:%s>',
-        DOT_FORMAT      => '<dot:%s%s%s>',
-        DQUOTE_FORMAT   => '<dquote:%s>',
-        ELEMENT_FORMAT  => "<%s%s>%s</%s>",
-        FILENAME_FORMAT => '<filename:%s>',
-        KEYWORD_FORMAT  => '<keyword:%s>',
-        NUMBER_FORMAT   => '<number:%s>',
-        POSTFIX_FORMAT  => '<postfix:<op:%s>%s>', 
-        PREFIX_FORMAT   => '<prefix:<op:%s>%s>', 
-        SQUOTE_FORMAT   => '<squote:%s>',
-        TEXT_FORMAT     => '<text:%s>',
-        UNARY_FORMAT    => '<unary:<op:%s>%s>', 
-        VARIABLE_FORMAT => '<variable:%s>', 
-        WORD_FORMAT     => '<word:%s>',
+        # core elements
+        APPLY_FORMAT        => "<apply:%s%s>",
+        ARGS_FORMAT         => "<args:%s>",
+        BINARY_FORMAT       => '<binary:<op:%s>%s%s>', 
+        BLOCK_FORMAT        => '<block:%s>',
+        DOT_FORMAT          => '<dot:%s%s%s>',
+        DQUOTE_FORMAT       => '<dquote:%s>',
+        ELEMENT_FORMAT      => "<%s%s>%s</%s>",
+        FILENAME_FORMAT     => '<filename:%s>',
+        HASH_FORMAT         => "<hash:%s>",
+        KEYWORD_FORMAT      => '<keyword:%s>',
+        NUMBER_FORMAT       => '<number:%s>',
+        PARENS_FORMAT       => "<parens:%s>",
+        POSTFIX_FORMAT      => '<postfix:<op:%s>%s>', 
+        PREFIX_FORMAT       => '<prefix:<op:%s>%s>', 
+        SQUOTE_FORMAT       => '<squote:%s>',
+        TEXT_FORMAT         => '<text:%s>',
+        UNARY_FORMAT        => '<unary:<op:%s>%s>', 
+        VARIABLE_FORMAT     => '<variable:%s>', 
+        WORD_FORMAT         => '<word:%s>',
+        
+        # commands
+        EXPR_BLOCK_FORMAT   => "<%s:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
     };
 
 
-sub OLD_construct {
-    my ($self, $type, $elem) = @_;
-    sprintf(
-        '<%s:%s>',
-        $type,
-        $elem->[EXPR]->view($self)
-    );
-}
-
+#-----------------------------------------------------------------------
+# core elements
+#-----------------------------------------------------------------------
 
 sub view_number {
     my ($self, $number) = @_;
@@ -211,14 +211,13 @@ sub view_binary {
 }
 
 
-
 sub view_dot {
     my ($self, $dot) = @_;
     my $lhs  = $dot->[LHS]->view($self);
     my $rhs  = $dot->[RHS]->view($self);
     my $args = $dot->[ARGS];
     $args = $args 
-        ? $self->view_args($args)
+        ? $args->view($self)
         : '<args:>';
     for ($lhs, $rhs, $args) {
         next unless length;
@@ -233,12 +232,78 @@ sub view_dot {
 }
 
 
+sub view_parens {
+    my ($self, $parens) = @_;
+    sprintf(
+        $self->PARENS_FORMAT,
+        $parens->[EXPR]->view($self)
+    )
+}
+
+
+#-----------------------------------------------------------------------
+# commands
+#-----------------------------------------------------------------------
+
+sub view_expr_block {
+    my $self    = shift;
+    my $element = shift;
+    my $format  = shift || $self->EXPR_BLOCK_FORMAT;
+    my $expr    = $element->[LHS]->sexpr;
+    my $body    = $element->[RHS]->sexpr;
+    for ($expr, $body) {
+        s/\n/\n    /gsm;
+    }
+    sprintf(
+        $format,
+        $element->[TOKEN],
+        $expr,
+        $body
+    );
+}
+
+sub view_if {
+    shift->view_expr_block(@_);         # TODO: else branch ??
+}
+
+
+sub view_for {
+    shift->view_expr_block(@_);         # TODO: else branch ??
+}
+
+
+
+
+sub NOT_view_construct {
+    my ($self, $construct, $type, $format) = @_;
+    $format ||= $self->CONSTRUCT_FORMAT;
+    $self->todo;
+#    $construct->[EXPR]->sexpr(
+#        shift || $self->SEXPR_FORMAT
+#    );
+
+}
+
+sub OLD_construct {
+    my ($self, $type, $elem) = @_;
+    sprintf(
+        '<%s:%s>',
+        $type,
+        $elem->[EXPR]->view($self)
+    );
+}
 
 
 
 
 
+
+
+
+
+1;
     
+__END__
 sub view_list {
     $_[SELF]->construct( list => $_[1] );
 }
@@ -248,9 +313,9 @@ sub view_hash {
     $_[SELF]->construct( hash => $_[1] );
 }
 
-sub view_parens {
-    $_[SELF]->construct( hash => $_[1] );
-}
+#sub view_parens {
+#    $_[SELF]->construct( hash => $_[1] );
+#}
 
 
 sub block_sexpr_TODO {

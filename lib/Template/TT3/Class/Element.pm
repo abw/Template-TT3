@@ -7,10 +7,12 @@ use Template::TT3::Class
     uber       => 'Template::TT3::Class',
     modules    => 'ELEMENT_MODULE ELEMENT_ROLE_MODULE',
     constants  => 'ARRAY HASH CODE DELIMITER PKG DOT BLANK',
-    utils      => 'camel_case',
+    utils      => 'camel_case text_list_hash',
     hooks      => {
         type       => \&type,
         roles      => \&roles,
+        follow     => \&follow,
+        source     => \&source,
         parse_expr => \&parse_expr,
     },
     constant   => {
@@ -94,6 +96,23 @@ sub type_role {
 sub parse_expr {
     shift->type_role( expr => @_ );
 }
+
+
+sub follow {
+    my $self   = shift;
+    my $follow = text_list_hash(@_)
+        || return $self->error_msg( invalid => follow => @_ );
+    $self->method( FOLLOW => sub() { $follow } );
+    return $self;
+}
+
+
+sub source {
+    my ($self, $format) = @_;
+    $self->method( SOURCE_FORMAT => sub() { $format } );
+    return $self;
+}
+
 
 sub generate_elements {
     my $self = shift;

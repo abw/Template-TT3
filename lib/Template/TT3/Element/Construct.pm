@@ -35,13 +35,6 @@ sub variable {
 }
 
 
-sub sexpr {
-    my $self = shift;
-    $self->[EXPR]->sexpr(
-        shift || $self->SEXPR_FORMAT
-    );
-}
-
 
 sub source {
     my $self = shift;

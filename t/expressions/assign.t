@@ -15,7 +15,7 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 9,
+    tests   => 13,
     debug   => 'Template::TT3::Context',
     args    => \@ARGV,
     import  => 'test_expect callsign';
@@ -102,6 +102,33 @@ pi is 3.14
 %]
 -- expect --
 [two x="10"|Hello World]
+
+#-----------------------------------------------------------------------
+# assignment should be quiet when evaluated in text context (i.e. printed)
+#-----------------------------------------------------------------------
+
+-- test quiet assignment --
+%% x = 10
+x: [% x %]
+-- expect --
+x: 10
+
+-- test quiet assignment in block --
+%% block foo { x = 20; "x is $x" }; fill foo
+-- expect --
+x is 20
+
+-- test quiet assignment in if --
+%% if a { x = 30; "x is $x" }
+-- expect --
+x is 30
+
+-- test quiet assignment in for --
+%% for y in 40 to 41 { x = y+1; "x is $x\n" }
+-- expect --
+x is 41
+x is 42
+
 
 
 __END__

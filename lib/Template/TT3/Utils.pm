@@ -4,13 +4,13 @@ use Badger::Class
     version   => 0.01,
     debug     => 0,
     base      => 'Badger::Utils',
-    constants => 'HASH',
+    constants => 'HASH ARRAY DELIMITER',
     constant  => {
 #        PARAMS => 'Template::TT3::Type::Params',   # causes too many problems
         PARAMS => 'HASH',
     },
     exports   => {
-        any   => 'tt_params tt_args tt_self_args random_advice hashlike'
+        any   => 'tt_params tt_args tt_self_args random_advice hashlike text_list_hash'
     };
 
 
@@ -109,6 +109,23 @@ sub tt_params {
     }
     
     return $vars;
+}
+
+
+sub text_list_hash {
+    my $data = shift;
+
+    # split a string into words: 'a b c' ==> ['a', 'b', 'c']
+    $data = [ split(DELIMITER, $data) ]
+        unless ref $data;
+
+    # map list to a hash: ['a', 'b', 'c'] ==> { a => 1, b => 1, c => 1 }
+    $data = { map { $_ => 1 } @$data }
+        if ref $data eq ARRAY;
+    
+    return ref $data eq HASH
+        ? $data
+        : undef;
 }
 
 

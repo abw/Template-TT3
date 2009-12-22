@@ -18,11 +18,18 @@ use Template::TT3::Class
         fail    => 'error_msg',         # some modules may re-define
     },
     messages  => {
-        no_hub         => '%s object is not attached to a hub',
-        syntax_dot_set => "You cannot set '%s.%s' to '%s'",
-        data_undef     => "Undefined value: %s",
-        data_missing   => "Missing value: %s",
-        data_undef_for => 'Undefined value for %s: %s',
+        no_hub          => '%s object is not attached to a hub',
+        bad_method      => 'Invalid %s method specified: %s',
+        
+        syntax_dot_set  => "You cannot set '%s.%s' to '%s'",
+        
+        data_missing    => "Missing value: %s",
+        data_undef      => "Undefined value: %s",
+        data_undef_in   => "Undefined value in %s: %s",
+        data_undef_for  => 'Undefined value for %s: %s',
+        data_vmethod    => 'Invalid %s method: %s.%s', 
+
+        # OLD_no_vmethod => '"<2>" is not a valid <1> method in "<3>.<2>"', 
 
     };
 

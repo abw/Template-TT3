@@ -15,9 +15,9 @@ use Badger
     lib     => '../../lib';
 
 use Template::TT3::Test 
-    tests   => 21,
     debug   => 'Template::TT3::Template',
     args    => \@ARGV,
+    tests   => 22,
     import  => 'test_expect callsign';
 
 use Template::TT3::Element::Command::For;
@@ -26,6 +26,7 @@ my $vars = callsign;
 $vars->{ foo } = 10;
 $vars->{ bar } = 20;
 $vars->{ wiz } = { waz => undef };
+$vars->{ soz } = "I'm sorry Dave, I'm afraid I can't do that.",
 
 test_expect(
     block     => 1,
@@ -124,17 +125,21 @@ item: alpha  item: bravo  done
 -- test undefined value --
 %% for failage yak
 -- error --
-TT3 undefined data error at line 1 of "undefined value" test:
-    Error: Undefined value returned by expression: failage
+TT3 data error at line 1 of "undefined value" test:
+    Error: Undefined value: failage
    Source: %% for failage yak
                   ^ here
 
+-- test undefined value is ok with else --
+%% for failage yak else soz
+-- expect --
+I'm sorry Dave, I'm afraid I can't do that.
 
 -- test undefined dotted value --
 %% for wiz.waz yak
 -- error --
-TT3 undefined data error at line 1 of "undefined dotted value" test:
-    Error: Undefined value returned by expression: wiz.waz
+TT3 data error at line 1 of "undefined dotted value" test:
+    Error: Undefined value: wiz.waz
    Source: %% for wiz.waz yak
                      ^ here
 

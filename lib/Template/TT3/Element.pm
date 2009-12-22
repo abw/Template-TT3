@@ -43,6 +43,9 @@ use Template::TT3::Class
 
 
 our $MESSAGES = {
+    # NOTE: these are being moved into Template::TT3::Base and a new 
+    # error reporting mechansim (fail()) being put in place.
+    
     # syntax errors
     missing_for     => "Missing %s for '%s'.  Got '%s'",
     missing_for_eof => "Missing %s for '%s'.  End of file reached.",
@@ -55,8 +58,8 @@ our $MESSAGES = {
     # runtime data errors
     undef_data      => "Undefined value returned by expression: <1>",
     undef_expr      => "Undefined value in '<2>': <1>",
-    undef_dot       => "Undefined value in '<1>.<2>': <1>",
-    undef_method    => '"<2>" is not a valid <1> method in "<3>.<2>"', 
+#    undef_dot       => "Undefined value in '<1>.<2>': <1>",
+#    undef_method    => '"<2>" is not a valid <1> method in "<3>.<2>"', 
     nan             => "Non-numerical value '<2>' returned by expression: <1>",
 
     pairs_odd       => 'Cannot make pairs from an odd number (<2>) of items: <1>',
@@ -645,9 +648,9 @@ sub finish {
 }
 
 
+
 #-----------------------------------------------------------------------
-# Error handling - see also methods in Template::TT3::Base
-# TODO: clean all this up.  There are too many confusing methods.
+# new error handling methods
 #-----------------------------------------------------------------------
 
 sub fail {
@@ -658,6 +661,32 @@ sub fail {
     my $posn = $self->pos;
     return $self->token_error( $type, $self, $text);
 }
+
+
+sub fail_src {
+    my $self = shift;
+    return $self->fail(@_, $self->source);
+}
+
+
+sub fail_data { 
+    my $self = shift;
+    my $name = 'data_' . shift;
+    $self->fail($name, @_);
+}
+
+
+sub fail_data_undef { 
+    my $self = shift;
+    $self->fail( data_undef => $self->source );
+}
+
+
+#-----------------------------------------------------------------------
+# Older error handling method - see also methods in Template::TT3::Base
+# TODO: clean all this up.  There are too many confusing methods.
+#-----------------------------------------------------------------------
+
 
 sub fail_missing {
     my ($self, $what, $token) = @_;
@@ -672,15 +701,6 @@ sub fail_missing {
 }
 
 
-
-sub fail_undef { 
-    my ($self, $what, $source, @args) = @_;
-    
-    return $self->undef_error_msg(
-        $self,
-        "undef_$what" => $source || $self->source, @args
-    );
-}
 
 
 sub fail_pairs { 
@@ -712,24 +732,6 @@ sub fail_resource {
     );
 }
 
-
-sub fail_undef_data {
-    shift->fail_undef( data => @_ );
-}
-
-
-sub fail_undef_expr { 
-    shift->fail_undef( expr => @_ );
-}
-
-
-sub fail_undef_dot { 
-    shift->fail_undef( dot => @_ );
-}
-
-sub fail_undef_method { 
-    shift->fail_undef( method => @_ );
-}
 
 sub fail_syntax { 
     my $self = shift;

@@ -4,14 +4,10 @@ use Template::TT3::Class
     version   => 0.01,
     debug     => 0,
     base      => 'Template::TT3::Variable',
-    constants => ':type_slots',
+    constants => ':type_slots DOT',
     constant  => {
         type    => 'undef',
         defined => 0,
-    },
-    messages  => {
-        # this is backup in case we don't have an $element passed to us
-        bad_dot => 'Invalid dot operation: <1>.<2> (<1> is undefined)',
     };
 
 
@@ -33,11 +29,8 @@ sub dot {
         );
     }
  
-    return $element
-        ? $element->fail_undef_dot( $self->fullname, $name )
-        : $self->error_msg( bad_dot => $self->fullname, $name );
-
-#    return $self->error_msg( bad_dot => $self->fullname, $name );
+    return ($element || $self)
+        ->fail( data_undef_in => $self->fullname.DOT.$name, $name );
 }
 
 
@@ -56,11 +49,6 @@ sub text {
 
     return ($element || $self)
         ->fail( data_undef => $self->fullname );
-    
-    # TODO: use the new approach... er... whatever that is...
-#    return $element
-#        ? $element->fail_undef_data #( $self->fullname )
-#        : $self->error_msg( undefined => $self->fullname );
 }
 
 1;

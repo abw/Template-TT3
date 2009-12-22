@@ -1,37 +1,15 @@
 package Template::TT3::Element::Command::If;
 
-use Template::TT3::Class 
-    version    => 3.00,
+use Template::TT3::Class::Element
+    version    => 2.68,
     debug      => 0,
     base       => 'Template::TT3::Element::Keyword',
     view       => 'if',
-    constants  => ':elements',
-    constant   => {
-        SEXPR_FORMAT => "<if:\n  <expr:\n    %s\n  >\n  <body:\n    %s\n  >\n>",
-        FOLLOW       => {
-            map { $_ => 1 }
-            qw( elsif else )
-        },
-    },
+    follow     => 'elsif else',
+    source     => '%s %s { %s }',
     alias      => {
         value  => \&text,
-#        values => \&text,
     };
-
-sub sexpr {
-    my $self   = shift;
-    my $format = shift || $self->SEXPR_FORMAT;
-    my $expr   = $self->[LHS]->sexpr;
-    my $body   = $self->[RHS]->sexpr;
-    for ($expr, $body) {
-        s/\n/\n    /gsm;
-    }
-    sprintf(
-        $format,
-        $expr,
-        $body
-    );
-}
 
 
 sub parse_expr {
@@ -98,13 +76,13 @@ sub true {
 
 
 sub text {
-    # TODO: should we have a true()/truth() method in elements?
     return $_[SELF]->true($_[CONTEXT])
          ? $_[SELF]->[RHS]->text($_[CONTEXT])
          : $_[SELF]->[BRANCH]
             ? $_[SELF]->[BRANCH]->text($_[CONTEXT])
             : ();
 }
+
 
 sub values {
     return $_[SELF]->true($_[CONTEXT])
@@ -126,9 +104,13 @@ sub pairs {
 
 sub source {
     my $self = shift;
-    my $expr = $self->[LHS]->source;
-    my $body = $self->[RHS]->source;
-    return "if $expr { $body }";
+    sprintf(
+        $self->SOURCE_FORMAT,
+        $self->[TOKEN],
+        $self->[LHS]->source,
+        $self->[RHS]->source,
+    );
 }
+
 
 1;

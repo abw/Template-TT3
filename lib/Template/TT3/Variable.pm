@@ -23,7 +23,7 @@ use Template::TT3::Class
     },
     messages  => {
         undefined  => '"%s" is undefined',
-        no_vmethod => '"<2>" is not a valid <1> method in "<3>.<2>"', 
+#        no_vmethod => '"<2>" is not a valid <1> method in "<3>.<2>"', 
         bad_pairs  => 'Cannot make pairs from variable expression: %s',
     };
         
@@ -217,9 +217,8 @@ sub method_names {
 
 sub no_method {
     my ($self, $name, $element) = @_;
-    return $element
-        ? $element->fail_undef_method( $self->type, $name, $self->fullname )
-        : $self->error_msg( no_vmethod => $self->type => $name => $self->fullname );
+    return ($element || $self)
+        ->fail( data_vmethod => $self->type, $self->fullname, $name );
 }
 
 

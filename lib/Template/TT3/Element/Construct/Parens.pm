@@ -7,7 +7,6 @@ use Template::TT3::Class
     constants => ':elements',
     constant  => {
         FINISH        => ')',
-        SEXPR_FORMAT  => "<parens:%s>",
         SOURCE_FORMAT => '( %s )',
     };
 

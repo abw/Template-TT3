@@ -7,7 +7,6 @@ use Template::TT3::Class
     constants => ':elements',
     constant  => {
         FINISH        => '}',
-        SEXPR_FORMAT  => "<hash:%s>",
         SOURCE_FORMAT => '{ %s }',
     },
     alias     => {
