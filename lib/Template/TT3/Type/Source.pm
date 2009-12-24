@@ -31,8 +31,12 @@ use Template::TT3::Class
         any   => 'SOURCE Source',    # class name and constructor sub
     },
     vars      => {
-        LINE_LENGTH => 72,          # package variable providing defaults
-        SHOW_AFTER  => 20,          # for location()/whereabout() methods
+# TODO: If we trim the line then we need to adjust the column marker so 
+# that the "^ here" lines up when we output an error message.  But for
+# now I'm just going to bump the value up a bit.
+#       LINE_LENGTH =>  72,          # package variable providing defaults
+        LINE_LENGTH => 132,          # package variable providing defaults
+        SHOW_AFTER  =>  20,          # for location()/whereabout() methods
         TRIMMED     => '...',
     };
 

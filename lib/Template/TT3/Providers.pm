@@ -132,12 +132,12 @@ L<Template::TT3::Base>, L<Badger::Factory> and L<Badger::Base> base classes.
 The following methods are automatically provided by the L<Badger::Factory>
 base class.
 
-=head1 provider($type)
+=head2 provider($type)
 
 Locates, loads and instantiates a provider module.  This is created as an 
 alias to the L<item()|Badger::Factory/item()> method in L<Badger::Factory>.
 
-=head1 providers()
+=head2 providers()
 
 Method for inspecting or modifying the providers that the factory module 
 manages.  This is created as an alias to the L<items()|Badger::Factory/items()> 

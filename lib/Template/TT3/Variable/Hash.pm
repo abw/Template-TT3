@@ -42,8 +42,9 @@ sub dot {
     # data resolve first and provide an explicit operator other than '.'
     # to resolve vmethods.  I'm not sure what the right thing to do is.
     
+    my $method;
     
-    if (my $method = $self->[META]->[METHODS]->{ $name }) {
+    if (! exists $self->[VALUE]->{ $name } && ($method = $self->[META]->[METHODS]->{ $name })) {
         $self->debug("hash vmethod: $name") if DEBUG;
         return $self->[CONTEXT]->use_var( 
             $name,

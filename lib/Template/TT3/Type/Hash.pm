@@ -507,10 +507,10 @@ Returns a reference to a list containing the Hash object as a single item.
 
 Returns a text representation of the hash array.  One or two optional 
 arguments can be provided.  The first is used to define a delimiter to 
-be used between key/value pairs.  The default value is C<< S< =E<gt> > >>.
+be used between key/value pairs.  The default value is C< =E<gt> >.
 The second argument can be used to provide an alternate delimiter to be
 used between successive pairs of items.  The default value is
-C<< S<, > >>.
+C<, >.
 
 =head3 keys()
 

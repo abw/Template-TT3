@@ -660,7 +660,6 @@ TODO
 
 TODO
 
---
 =head3 MORE METHODS TODO
 
 =head1 AUTHOR
@@ -671,7 +670,7 @@ Andy Wardley  E<lt>abw@wardley.orgE<gt>
 
 sort() and nsort() should take named parameters.
 
-[% list.sort(field => 'name') %] rather than [% list.sort('name') %]
+    [% list.sort(field => 'name') %] rather than [% list.sort('name') %]
 
 =head1 VERSION
 
