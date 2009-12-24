@@ -82,6 +82,12 @@ sub init {
     # database) in rapid succession when the chances of a file changing are
     # very slim.
     $self->{ lookup } = { };
+    
+    $self->{ extensions } = $self->class->hash_vars( 
+        EXTENSIONS => $config->{ extensions }
+    );
+#    $self->debug("got file extension map: ", $self->dump_data($self->{ extensions }))
+#        if $self->{ extensions };
 
     return $self;
 }
@@ -144,6 +150,7 @@ sub init_path {
         # merge the path-specific options with the general config 
         # TODO: check that this doesn't cause conflicts...
         push(@paths, { %$tconfig, %$args } );
+        $self->debug("path config: ", $self->dump_data($paths[-1])) if DEBUG;
     }
 
     $self->{ path } = @paths
@@ -192,6 +199,7 @@ sub init_providers {
 
         # Create a provider for the specified (or default) type
         $type = $item->{ type } ||= $item->{ scheme } || $default;
+#        $self->debug("creating $type provider: ", $self->dump_data($item));
         $provider = $pfactory->provider( $type => $item );
         
         # Add provider to the list of all providers
@@ -388,7 +396,7 @@ sub template_type {
         # delete and ignore lookup entry if it's gone stale
         if (time > $lookup->[EXPIRES]) {
             $self->debug("$uri lookup data has expired\n") if DEBUG;
-            $self->debug("expired at $lookup->[EXPIRES], time is now ", time);
+            $self->debug("expired at $lookup->[EXPIRES], time is now ", time) if DEBUG;
             delete $self->{ lookup }->{ $uri };
             last ID_LOOKUP;                                 # STALE PATH
         }
