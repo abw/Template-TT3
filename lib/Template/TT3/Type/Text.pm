@@ -43,7 +43,7 @@ use Template::TT3::Class
     debug       => 0,
     base        => 'Template::TT3::Type',
     import      => 'CLASS',
-    utils       => 'blessed md5_hex is_object',
+    utils       => 'blessed md5_hex is_object numlike',
     constants   => 'DELIMITER ARRAY HASH',
     patterns    => '$LAST_LINE',
     as_text     => \&text,          # overload stringification operator
@@ -131,6 +131,7 @@ our $METHODS = {
     'chop'     => \&chop,
     'chomp'    => \&chomp,
     'collapse' => \&collapse,
+    'indent'   => \&indent,
     'trim'     => \&trim,
     'truncate' => \&truncate,
     'repeat'   => \&text_repeat,
@@ -514,6 +515,18 @@ sub trim {
         s/\s+$//; 
     }
     return $text;    
+}
+
+
+sub indent {
+    my $self = shift;
+    my $text = CORE::ref $self ? $$self : $self;
+    my $pad  = shift;
+    $pad = 4 unless defined $pad;
+    $pad = ' ' x $pad if numlike $pad;
+    $text = '' unless defined $text;
+    $text =~ s/^/$pad/mg;
+    return $text;
 }
 
 
