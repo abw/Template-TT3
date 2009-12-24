@@ -1,0 +1,4 @@
+=head1 Pod Template
+
+This is a Pod Template.  TT3 can parse it as a native template and
+construct a template element tree from it.

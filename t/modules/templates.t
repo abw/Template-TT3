@@ -22,7 +22,7 @@ use Badger
 use Template::TT3::Test 
     args  => \@ARGV,
     debug => 'Template::TT3::Templates',
-    tests => 25;
+    tests => 27;
 
 use Template::TT3::Templates;
 use constant TEMPLATES => 'Template::TT3::Templates';
@@ -108,7 +108,6 @@ chomp $output;
 is( $output, 'Hello Weasel!', $output );
 
 
-
 #-----------------------------------------------------------------------
 # missing templates
 #-----------------------------------------------------------------------
@@ -116,6 +115,25 @@ is( $output, 'Hello Weasel!', $output );
 $template = $templates->template('missing.tt3');
 ok( ! $template, 'no template called missing.tt3' );
 is( $templates->reason, 'Template not found: missing.tt3', 'not found message' );
+
+
+#-----------------------------------------------------------------------
+# file extensions
+#-----------------------------------------------------------------------
+
+$templates = TEMPLATES->new( 
+    template_path => Bin->dir('templates'),
+    path_expires  => 5,
+    extensions    => {
+        'pod' => {
+            dialect => 'pod',
+        }
+    },
+);
+ok( $templates, 'got templates object with file extension map' );
+my $pod = $templates->template('test.pod');
+ok( $pod, 'got pod template' );
+
 
 __DATA__
 Good-day [% name %]

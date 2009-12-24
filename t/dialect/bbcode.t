@@ -7,6 +7,8 @@
 # meant to be illustrative and does not implement the full BBCode 
 # specification in any shape or form.
 #
+# Run with -h option for help.
+#
 # Written by Andy Wardley <abw@wardley.org>
 #
 # This is free software; you can redistribute it and/or modify it
@@ -19,9 +21,9 @@ use Badger
     Filesystem => 'Bin';
 
 use Template::TT3::Test 
-    tests   => 3,
     debug   => 'Template::TT3::Templates',
-    args    => \@ARGV;
+    args    => \@ARGV,
+    tests   => 3;
 
 my $tdir = Bin->dir('templates');
 

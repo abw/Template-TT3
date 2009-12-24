@@ -1,0 +1,53 @@
+=head1 A POD Template
+
+This is a regular POD file.  The L<Template::TT3::Dialect::Pod> module
+implements a POD template dialect which can parse POD files (with the 
+help of L<Template::TT3::Scanner::Pod>) and generate a template element 
+tree to represent it.
+
+=head2 Why This is Shiny
+
+This is Shiny because you can then treat POD files like any other template.
+You can inspect the parsed tokens, the generated expression tree, and do
+all the other interesting things that you can do to poke around in TT3 
+templates.
+
+Here's an example:
+
+    my $tt3 = Template3->new(
+        template_path => '/path/to/pod',
+        dialect       => 'pod',
+    );
+    
+    my $template = $tt3->template('example.pod');
+    print $template->tree->view_HTML;
+
+That generates an HTML page showing the parsed expression tree for a POD
+document.
+
+When you C<fill> a POD template, it renders each element in the POD
+document via a template.  But I haven't quite worked that bit out yet.
+
+=head2 I Like Ponies
+
+I like ponies because
+
+=over
+
+=item They're Cute
+
+=item They're Short
+
+They're not as big as a real horse
+
+=item They've Got Long Ears
+
+=back
+
+=head1 Back to a Level 1 Heading
+
+This is the last paragraph.
+
+=cut
+
+This comes after
