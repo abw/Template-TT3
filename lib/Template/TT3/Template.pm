@@ -327,6 +327,7 @@ sub _block {
 
 sub _parse {
     my $self = shift;
+    # TODO: fails if template is empty - first token is EOF
     $self->_tokens->first->parse(
         $self->scope
     );

@@ -8,8 +8,9 @@ use Template::TT3::Class
     base      => 'Template::TT3::Base',
     import    => 'class',
     vars      => 'AUTOLOAD',
+    utils     => 'is_object',
     accessors => 'tokens',
-    modules   => 'VIEWS_MODULE',
+    modules   => 'VIEWS_MODULE ELEMENT_MODULE',
     constants => ':elements HASH ARRAY',
     constant  => {
         ELEMENTS => 'Template::TT3::Elements',
@@ -198,9 +199,17 @@ sub token_method {
 
 
 sub token {
-    my ($self, $token) = @_;
+    my $self   = shift;
+    my $token  = shift;
     my $tokens = $self->{ tokens };
-
+    
+    unless (is_object(ELEMENT_MODULE, $token)) {
+        my $elem = $self->token_element($token) 
+            || return return $self->error_msg( invalid => token => $token );
+        $token = $elem->(@_);
+        $self->debug("created token: $token") if DEBUG;
+    };
+        
     # add the NEXT link from the preceding token if there is one
     $tokens->[-1]->[NEXT] = $token
         if @$tokens;
@@ -267,7 +276,7 @@ sub AUTOLOAD {
     my $method;
 
     $self->debug("AUTOLOAD $name\n") if DEBUG;
-
+    
     # give the can() method a chance to generate a component or delegate
     # method for us
     if ($method = $self->can($name, @args)) {

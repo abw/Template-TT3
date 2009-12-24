@@ -4,15 +4,16 @@ die "Template::TT3::Elements::Operator is deprecated\n";
 
 __END__
 
+
 =head1 Binary Infix Operators
 
-The C<Template::TT3::Element::Operator::Binary> module defines a base mixin
+The L<Template::TT3::Element::Operator::Binary> module defines a base mixin
 class for all binary operators.  Note that this is I<not> a subclass of 
-C<Template::TT3::Element>, or any other class for that matter.  The 
+L<Template::TT3::Element>, or any other class for that matter.  The 
 operator class are designed to be used as mixin base classes.  So they 
 only define the one or two methods that are related specifically to it
 
-C<Template::TT3::Element::Operator::Infix> defines a base class for all
+L<Template::TT3::Element::Operator::Infix> defines a base class for all
 non-chaining binary operators (NOTE: the non-chaining bit doesn't work at
 present - it behaves just like the regular chaining infix left operator - I
 need to look at this). It defines the C<parse_infix()> method which subclasses

@@ -21,8 +21,8 @@ L<Template::TT3::Type::Undef> used in conjunction with
 L<Template::TT3::Variable::Missing> for representing undefined values.
 
 TODO: Undefined value are those where a variable exists and is explicitly 
-set to C<undef>, e.g. 'foo' in { foo => undef }.  Missing values are those
-where the variable doesn't exists, e.g. 'foo' in { bar => 10 }
+set to C<undef>, e.g. 'foo' in { foo =E<gt> undef }.  Missing values are those
+where the variable doesn't exists, e.g. 'foo' in { bar =E<gt> 10 }
 
 It inherits everything from the L<Template::TT3::Type> base class, including
 methods like L<defined()|Template::TT3::Type/defined()> and

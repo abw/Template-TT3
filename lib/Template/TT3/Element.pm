@@ -36,6 +36,8 @@ use Template::TT3::Class
         skip_separator     => \&accept,     # only separators skip here
         skip_delimiter     => \&accept,     # ditto for delimiters
         
+        whitespace         => \&null,
+        
         left_edge          => \&self,
         right_edge         => \&self,
         source             => 'token',
@@ -315,8 +317,9 @@ sub skip_ws {
 
 sub parse {
     my $self    = shift;
+    my $scope   = shift;
     my $token   = \$self;
-    my $block   = $self->parse_block($token, @_);
+    my $block   = $self->parse_block($token, $scope, 0, 1);
     $$token->finish;
     return $block;
 }
@@ -370,11 +373,26 @@ sub parse_exprs {
 
 # Do we ever get called without args?  
 #   $token ||= do { my $this = $self; \$this };
+
+    $self->debug(
+        ">> parse_expr() starting, first token is $$token: ", 
+        $$token->source
+    ) if DEBUG;
  
     while ($expr = $$token->skip_delimiter($token)
                           ->parse_expr($token, $scope, $prec)) {
         push(@exprs, $expr);
+
+        $self->debug(
+            "++ parsed expr: $expr  ==> ", 
+            $expr->source
+        ) if DEBUG;
     }
+
+    $self->debug(
+        "<< parse_expr() ended, next token is $$token: ", 
+        $$token->[TOKEN]
+    ) if DEBUG;
 
     return @exprs || $force
         ? \@exprs

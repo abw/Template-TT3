@@ -56,12 +56,13 @@ sub view_block {
 }
 
 sub view_text {
-    my ($self, $elem) = @_;
+    my ($self, $elem, $type) = @_;
+    $type ||= 'text';
     $self->div(
-        "text element",
+        "$type element",
         $self->div(
             head => 
-            $self->span( "info type" => 'text' ),
+            $self->span( "info type" => $type ),
             $self->span( "info posn" => '@' . $elem->[POS] ),
             $self->span( source => $self->tidy_text( encode($elem->[TOKEN]) ) ),
 #            $self->span( source => '&laquo;' . $self->tidy_text( $elem->[TOKEN] ) . '&raquo;'),
@@ -358,7 +359,24 @@ class->methods(
     qw( keyword number variable word )
 );
 
-    
+
+#-----------------------------------------------------------------------
+# pod
+#-----------------------------------------------------------------------
+
+sub view_pod_verbatim {
+    my ($self, $elem) = @_;
+    $self->view_text($elem, 'verbatim text');
+}
+
+sub view_pod_format_start {
+    my ($self, $elem) = @_;
+    $self->element( 
+        "pod $elem->[TOKEN] format operator" => $elem,
+        $elem->[ARGS]->view($self) 
+    );
+}
+
 1;
 
 __END__

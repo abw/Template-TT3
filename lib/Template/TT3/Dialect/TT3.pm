@@ -1,9 +1,9 @@
 package Template::TT3::Dialect::TT3;
 
-use Template::TT3::Dialect::Class
+use Template::TT3::Class::Dialect
     version  => 3.00,
     debug    => 0,
-#    base     => 'Template::TT3::Dialect',
+#   base     => 'Template::TT3::Dialect',
     tagset   => 'Template::TT3::Tagset::TT3';
 
 

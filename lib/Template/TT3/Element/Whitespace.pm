@@ -5,8 +5,11 @@ use Template::TT3::Class::Element
     debug     => 0,
     base      => 'Template::TT3::Element',
     view      => 'whitespace',
+    constant  => {
+    },
     alias     => {
-        skip_ws => 'next_skip_ws',
+        skip_ws    => 'next_skip_ws',
+        whitespace => 'self',
     };
 
 

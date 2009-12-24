@@ -151,3 +151,19 @@ sub reset {
 
     
 1;
+
+=head1 TODO
+
+=head1 PACKAGE VARIABLES
+
+The following package variable are used to configure the dialect.
+You can define these package variables in a subclass of L<Template::TT3::Dialect>
+and they will be used to configure the base class dialect.
+
+=head2 $SCANNER
+
+=head2 $SCANNER_MODULE
+
+=head2 $TAGSET
+
+=head2 $TAGSET_MODULE

@@ -89,7 +89,7 @@ class->methods(
         text comment padding html element terminator string
         literal word keyword number filename unary binary prefix
         postfix squote dquote parens list hash pair variable dot filename
-        apply fragment
+        apply fragment pod_verbatim pod_format_start pod_format_end pod_blank
     )
 );
 
