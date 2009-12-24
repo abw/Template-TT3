@@ -45,7 +45,7 @@ sub accept_file {
         Page => $page,
     };
     my $env = {
-        input  => $infile,
+        input  => $infile->path,
         output => $outfile,
         data   => $data,
     };
@@ -248,7 +248,7 @@ has ignored the directory to any L<reporter> defined.
 This method is used by various other methods to raise a report with any
 L<reporter> object defined. If none is defined then it silently returns.
 
-=head summary()
+=head2 summary()
 
 Fetches a text summary of the build activity from any L<reporter> object
 defined. If none is defined then it returns C<undef>.

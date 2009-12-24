@@ -68,7 +68,7 @@ sub page {
         # /foo/bar/baz + ./wiz => foo/bar/wiz
         if ($uri =~ s[^\./][]) {
             $base =~ s{/?[^/]*$}{};
-            $self->debug("relative page: [$base] [$uri]\n") if DEBUG;
+            $self->debug("relative page: [$base] [$uri]\n") if DEBUG or 1;
         }
         $base =~ s[/$][];
         $uri = "$base/$uri";
@@ -99,12 +99,20 @@ sub url {
 }
 
 sub title {
-    'TODO';
+    my $self = shift;
+    if (@_) {
+        $self->{ page }->{ title } = join('', @_);
+    }
+    return $self->{ page }->{ title } 
+        || $self->{ page }->{ name  } 
+        || $self->{ uri };
 }
 
-sub about {
-    'about';
-}
+
+#sub about {
+#    'TODO: page.about()';
+#}
+
 
 sub input_file {
     my $self = shift;
@@ -230,7 +238,9 @@ sub AUTOLOAD {
     my ($name) = ($AUTOLOAD =~ /([^:]+)$/ );
     return if $name eq 'DESTROY';
     $self->debug("asked page for $name");
-    return "TODO: Page.AUTOLOAD($name)";
+    return $self->{ page }->{ $name };
+#   if (exists $self->{ page }->{ $name }) {
+#   }
 }
 
 
@@ -426,15 +436,6 @@ sub NOT_AUTOLOAD {
 # some special cases
 #-----------------------------------------------------------------------
 
-sub title {
-    my $self = shift;
-    if (@_) {
-        $self->{ page }->{ title } = join('', @_);
-    }
-    return $self->{ page }->{ title } 
-        || $self->{ page }->{ name  } 
-        || $self->{ uri };
-}
 
 
 1;
