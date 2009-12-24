@@ -20,12 +20,14 @@ sub init {
     my $path = $config->{ path } || $config->{ root }
         || return $self->error_msg('no_path');
         
-    $self->{ VFS } = VFS->new( root => $path );
+    $self->{ root } = VFS->new( root => $path );
 
     $self->debug("Created virtual filesystem for $path : $self->{ VFS }")
         if DEBUG;
 
     $self->{ config } = $config;
+
+#    $self->debug("** EXTENSIONS **\n", $self->dump_data($config->{ extensions }));
 
     return $self;
 }
@@ -33,32 +35,49 @@ sub init {
     
 sub fetch {
     my ($self, $path) = @_;
+    my $file = $self->{ root }->file($path);
 
-    $self->debug("file provider looking for $path")
-        if DEBUG;
+    return $file->exists
+        ? $self->found($file)
+        : $self->not_found($path);
+}
 
-    my $file = $self->{ VFS }->file($path);
 
-    return $self->decline( not_found => File => $path )
-        unless $file->exists;
-
+sub found {
+    my ($self, $file) = @_;
     my $config = $self->{ config };
+    my $exts   = $config->{ extensions };
+    my $ext    = $file->extension;
 
     $self->debug("file provider returning file $file")
         if DEBUG;
 
+    if ($exts && $ext && ($ext = $exts->{ $ext })) {
+        $config = { %$config, %$ext };
+        $self->debug(
+            "added extension-specific configuration ", 
+            $self->dump_data($ext)
+        ) if DEBUG;
+    }
+
     return {
+        %$config,
         file     => $file, 
         id       => FILE_SCHEME.COLON.$file->definitive,
         path     => $file->absolute,
-        dialect  => $config->{ dialect },
-#        loaded   => time,
-#        modified => $file->modified,
+#       loaded   => time,
+#       modified => $file->modified,
         # TODO: add other options.
         # TODO: add url as definitive path
     };
 }
 
+sub not_found {
+    shift->decline( not_found => File => @_ );
+}
+
+
+    
 
 1;
 
