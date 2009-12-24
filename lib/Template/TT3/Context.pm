@@ -7,7 +7,7 @@ use Template::TT3::Class
     import      => 'class',
     accessors   => 'variables scanner parent visiting',
     utils       => 'self_params',
-    constants   => 'HASH CODE',
+    constants   => 'HASH CODE SLASH',
     constant    => {
         VISIT     => 'Template::TT3::Context::Visit',
     },
@@ -275,6 +275,7 @@ sub fill {
 }
 
 
+
 sub template {
     shift->templates->template(@_);
 }
@@ -319,6 +320,26 @@ sub lookup {
     return $self->hub->$item;
 }
     
+
+sub show {
+    my ($self, $type, $data) = @_;
+
+    # quick hack to get something working
+    $type = join(SLASH, split(/\W+/, $type));
+    
+    $self->debug(
+        "showing $type with data: ", 
+        $self->dump_data($data)
+    ) if DEBUG;
+    
+    return $self
+        ->any_template($type)
+        ->fill_in(
+            $self->with($data)
+        );
+    #$self->todo("show $type");
+}
+
 
 sub scope {
     my $self = shift;

@@ -48,10 +48,12 @@ use Badger::Class
         # flags used by elements
         FORCE               => 1,   # used to override operator precedence
 
+        # misc stuff
+        SLASH               => '/',
         
     },
     exports => {
-        any  => 'FORCE CMD_ELEMENT',
+        any  => 'FORCE CMD_ELEMENT SLASH',
         tags => {
             chomp        => 'CHOMP_NONE CHOMP_ONE CHOMP_ALL CHOMP_SPACE
                              CHOMP_TAG PRE_CHOMP_FLAGS POST_CHOMP_FLAGS',
