@@ -221,7 +221,7 @@ sub reset {
 
 __END__
 
-=pod
+=head1 METHODS
 
 =head2 init_tagset()
 
@@ -243,26 +243,26 @@ array contents).
 In those cases it's better to be explicit and specify the tags using a list
 reference. That avoids any ambiguity.
 
-   $TAGS = [ inline => { ... }, outline => { ... } ]
+    $TAGS = [ inline => { ... }, outline => { ... } ]
 
 Subsequent entries will not be added to the order. However, the values they
 define will replace those of the earlier occurence. For example:
 
-   $TAGS = [ 
-      inline  => { ... }, 
-      outline => { ... } 
-      inline  => 0,
-   ]
+    $TAGS = [ 
+        inline  => { ... }, 
+        outline => { ... } 
+        inline  => 0,
+    ]
 
 The above ends up being equivalent to:
 
-   $TAGS = [ 
-      inline  => 0, 
-      outline => { ... } 
-   ]
+    $TAGS = [ 
+        inline  => 0, 
+        outline => { ... } 
+    ]
 
 The original order is preserved, but the latter value supersedes the earlier
 one. In this example, the end result is that the inline tag has been disabled.
 Note that we construct the $TAGS list from a number of sources. So the module
 may define the first 'inline' tags, but the user supersedes it by passing the
-'inline => 0' parameter.
+'inline =E<gt> 0' parameter.

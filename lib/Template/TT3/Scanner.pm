@@ -111,6 +111,8 @@ sub scan {
     # create a T::Tokens object to collect output if we weren't passed one
     $output ||= $self->{ tokens }->new($self->{ config });
 
+    $self->debug("scan($text, $output, $scope)") if DEBUG;
+
     $self->reset
         if $self->{ dirty };
 

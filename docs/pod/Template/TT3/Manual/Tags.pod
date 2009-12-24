@@ -141,8 +141,8 @@ compile time). TT3 has a new tag style specifically for compile time
 directives. They use C<[?> and C<?]> as delimiters. We call these the "control
 tags".
 
-So to change the inline tag style to use the C<E<lt>*> and C<*E<gt>>
-delimiters, you would write:
+So to change the inline tag style to use different delimiters, you would
+write:
 
     [? TAGS '<* *>' ?]
 
@@ -281,8 +281,8 @@ NOTE: The name of the change_tags() method is subject to change (no pun
 intended).
 
 Custom tags can be particularly useful for doing compile time transformations.
-For example, you can define a tag that starts with C<E<lt>pic:>, ends with
-C<E<gt>> and expects a filename in the middle:
+For example, you can define a tag that starts with "E<lt>pic:", ends with
+"E<gt>" and expects a filename in the middle:
 
     <pic:badger.jpg>
 
@@ -304,10 +304,10 @@ Of course you could always do something like this in TT2:
     [% pic('badger.jpg') %]
 
 The nice thing about tags is that they are (initially) processed when the
-template is compiled. So the <pic:XXX> tag can be expanded when the template
-is compiled and there's no further runtime overhead involved.  Also, by 
-allowing you to define your own syntax for the tag you can keep the tags
-simpler to read and write. 
+template is compiled. So the E<lt>pic:XXXE<gt> tag can be expanded when the
+template is compiled and there's no further runtime overhead involved. Also,
+by allowing you to define your own syntax for the tag you can keep the tags
+simpler to read and write.
 
     <pic:badger.jpg>                # compile time custom tag
 

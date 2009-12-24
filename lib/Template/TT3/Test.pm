@@ -624,7 +624,7 @@ then you can set the C<has_srm> variable to C<0> or C<1>.
         }
     );
 
-Then your tests can use the <only has_srm> guard clause:
+Then your tests can use the C<only has_srm> guard clause:
 
     -- test Some::Random::Module --
     -- only has_srm --

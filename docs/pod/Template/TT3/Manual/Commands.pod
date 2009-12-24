@@ -340,7 +340,7 @@ This does the opposite of encode.
        ...
     [% end %]
 
-=head dot
+=head2 dot
 
 This implements a low-precedence, block oriented form of the dot operator.
 
@@ -417,11 +417,7 @@ inner 'for'.  Ho hum.  This is a good example of why a flexible language
 can be a bad thing.  Flexibility == ambiguity.  I can image things like that 
 tripping people up often, myself included.
 
-Solutions:
-
-=over
-
-=item *
+Possible solutions:
 
 Don't add 'elsif' and 'else' to 'for'.  People aren't expecting 'for' to
 have them, so the natural expectation is that 'elsif' binds to 'if'.  That's
@@ -430,14 +426,10 @@ to 'for' then the above would work because 'for' would reject the 'elsif'
 terminator, consider itself finished and pass control back to 'if' to pick
 up the 'elsif'
 
-=item *
-
 Don't allow follow-on keywords after single expressions.
 
     if x y;                 # OK
     if x y; else z;         # NOT OK 
-
-=item *
 
 Don't allow follow-on keywords after single expressions unless they follow
 immediately, without any terminator.

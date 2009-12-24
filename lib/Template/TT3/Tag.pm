@@ -604,8 +604,6 @@ sub unexpected {
 
 __END__
 
-=pod
-
 =head1 METHODS
 
 =head2 sub tokenise_string($input, $output, $scope, $token, $pos, $content, $delim)
@@ -631,12 +629,13 @@ original chunks. We don't want to inject these into the normal output stream
 because it would then look like they were read from the source, messing up any
 regeneration. So we hang them off the $token->[BRANCH] pointer.
 
-    +-------------------+  BRANCH   +-------------+
-    | dquote:"foo $bar" |---------->| text:"foo " |
-    +-------------------+           +-------------+
-              |                            |  NEXT
-             \|/                          \|/
-             TBA                    +--------------+
-                                    | word:bar     |
-                                    +--------------+
-
+      +-------------------+  BRANCH   +-------------+
+      | dquote:"foo $bar" |---------->| text:"foo " |
+      +-------------------+           +-------------+
+                |                            |  NEXT
+               \|/                          \|/
+               TBA                    +--------------+
+                                      | word:bar     |
+                                      +--------------+
+  
+  

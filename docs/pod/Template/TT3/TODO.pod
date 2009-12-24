@@ -89,7 +89,7 @@ Figure out what non-chaining infix operators should do.
 =head2 Elements Not Being Loaded
 
 Figure out why element classes aren't being loaded.  e.g. declaring 
-[ TAGS => ctr_tags => 0, 0 ] should load T::TT3::Element::Control::Tags
+[ TAGS =E<gt> ctr_tags =E<gt> 0, 0 ] should load T::TT3::Element::Control::Tags
 and fail if it doesn't exists.  The find() method appears to be returning
 the class name without checking to see if it can be loaded.  (may be fixed?)
 
@@ -116,7 +116,7 @@ and default values (e.g. foo(bar=10) ).
 
 The element base class has evolved a large and complicated set of error 
 method (well, quick hacks to get things working) that need to be cleaned
-up.  The new way is to call $element->fail(), e.g.
+up.  The new way is to call $element-E<gt>fail(), e.g.
 
     $element->fail( syntax_on_fire => $a, $b, $c );
 
@@ -189,7 +189,7 @@ be.  Well, it works for now.
 =head2 Preceding Text
 
 Change the scanner to push the preceding text onto the output tokens before
-calling the tag.  The tag can inspect $output->last if it want to do any 
+calling the tag.  The tag can inspect $output-E<gt>last if it want to do any 
 pre-chomping (see the way the comment tag now works for an example).
 
 =head1 Grammar
