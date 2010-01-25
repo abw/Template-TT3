@@ -1,6 +1,6 @@
 package Template::TT3::Views;
 
-use Template::TT3::Factory::Class
+use Template::TT3::Class::Factory
     version => 3.00,
     debug   => 0,
     item    => 'view',

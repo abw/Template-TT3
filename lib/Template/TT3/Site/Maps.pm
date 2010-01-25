@@ -1,6 +1,6 @@
 package Template::TT3::Site::Maps;
 
-use Template::TT3::Factory::Class
+use Template::TT3::Class::Factory
     version   => 2.71,
     debug     => 0,
     item      => 'map',
