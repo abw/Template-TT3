@@ -11,14 +11,19 @@
 #
 #========================================================================
 
-use Badger lib => '../../lib';
-use Template::TT3::Test 
-    debug  => 'Template::TT3::Type::Source',
-    args   => \@ARGV,
-    tests  => 49;
+use Badger 
+    lib     => '../../lib';
 
-use Template::TT3::Type::Source 'SOURCE Source';
-use constant SourceType => 'Template::TT3::Type::Source';
+use Template::TT3::Test 
+    debug   => 'Template::TT3::Type::Source',
+    args    => \@ARGV,
+    tests   => 49;
+
+use Template::TT3::Type::Source 
+    'SOURCE Source';
+
+use constant 
+    SourceType => 'Template::TT3::Type::Source';
 
 pass('loaded Template::TT3::Type::Source');
 

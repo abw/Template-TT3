@@ -532,7 +532,7 @@ eval "use Template::TT3::Type::Hash 'parp'";
 
 like( 
     $@, 
-    qr/template.tt3.type.hash error - Invalid hash function specified to import: parp/,
+    qr/hash error - Invalid hash function specified to import: parp/,
     'Invalid hash import'
 );
     
