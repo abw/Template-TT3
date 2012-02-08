@@ -19,8 +19,7 @@ use Badger
 
 use Template::TT3::Test 
     debug   => 'Template::TT3::Engine::TT2 Template::TT2',
-    args    => \@ARGV,
-    tests   => 7;
+    args    => \@ARGV;
 
 # first check to see if Template::TT2 is installed.
 BEGIN {
@@ -28,6 +27,7 @@ BEGIN {
     skip_all('Template::TT2 not installed') if $@;
 }
 
+plan(7);
 
 use Template3 'TT2';
 pass( 'loaded Template3 with TT2 engine' );

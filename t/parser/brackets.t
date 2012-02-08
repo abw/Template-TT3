@@ -17,7 +17,7 @@ use Badger
     lib => '../../lib';
     
 use Template::TT3::Test
-    tests  => 2,
+    tests  => 3,
     debug  => 'Template::TT3::Tag Template::TT3::Element',
     args   => \@ARGV,
     import => 'test_parser';
@@ -53,6 +53,14 @@ __DATA__
   >
 >
 
+
+-- test curly braces --
+{ a=10, b=20 }
+-- expect -- 
+<hash:
+  <binary:<op:=><variable:a><number:10>>
+  <binary:<op:=><variable:b><number:20>>
+>
 
 __END__
 

@@ -23,10 +23,8 @@ use Template::TT3::Test
     args  => \@ARGV;
 
 use Template::TT3::Tokens;
-use Template::TT3::Generator;
 use constant {
     TOKENS    => 'Template::TT3::Tokens',
-    GENERATOR => 'Template::TT3::Generator',
 };
 
 
@@ -62,27 +60,4 @@ $token = $token->next_skip_ws;
 is( $token->text, 'this is some more text', 'second non-whitespace token' );
 
 ok( ! $token->next_skip_ws, 'no more non-whitespace tokens' );
-
-__END__
-
-while ($token) {
-    print "NON-WS: ", $token->generate($gen), "\n";
-    $token = $token->next_skip_ws;
-}
-
-
-my $gen = GENERATOR->new;
-print $tlist->generate($gen), "\n\n";
-
-# Now that we have a single linked list of tokens, we can always fetch
-# the next token following the current one.  We can give each token type
-# a skip_ws() method that Does The Right Thing (for whitespace return the
-# next token, for non-whitespace return $self)
-
-my $token = $tlist->first->skip_ws;
-
-while ($token) {
-    print "NON-WS: ", $token->generate($gen), "\n";
-    $token = $token->next_skip_ws;
-}
 
