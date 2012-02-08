@@ -6,6 +6,9 @@ my %opts = (
     'VERSION'      => 3.00,
 #    'VERSION_FROM' => 'lib/Template/TT3.pm',
     'PMLIBDIRS'    => [ 'lib' ], 
+    'PREREQ_PM'    => {
+        Badger     => 0.09,
+    },
     'dist'         => {
         'COMPRESS' => 'gzip',
         'SUFFIX'   => 'gz',

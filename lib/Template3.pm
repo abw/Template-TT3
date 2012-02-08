@@ -1,6 +1,6 @@
 package Template3;
 
-use 5.6.1;
+use 5.008;
 use Template::TT3::Class
     version  => 2.71,
     debug    => 0,

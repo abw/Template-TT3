@@ -2,3 +2,5 @@
 /blib
 /pm_to_blib
 /t/engine/output/*.tmp
+MYMETA.json
+MYMETA.yml

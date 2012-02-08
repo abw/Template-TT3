@@ -97,6 +97,18 @@ the class name without checking to see if it can be loaded.  (may be fixed?)
 
 Add name(), pair() and pairs() methods to all elements that require them.
 
+=head2 %scalar expansion to (scalar => scalar)
+
+At present the '%' prefix operator when applied to a scalar variable will 
+return a hash containing the name of the variable and it's value. e.g.
+
+    hash = { %wibble }          # this has the same effect
+    hash = { wibble=wibble }    # as this
+
+I'm a bit wary about this.  It fell out of the parser naturally but I think
+it might be dangerous.  In which case we need to fix the parser/element to 
+not do what it thinks is the right thing.
+
 =head2 list_values() / items() methods
 
 Change element 'list_values()' to 'items()', or figure out how to map it
@@ -210,6 +222,7 @@ compiler.
 Figure out what to do with PARAMS.  They don't get recognised as HASH vars
 so they don't get the same behaviours that it has.  e.g. "a(%b) = c(%b)".
 Here the '%b' isn't expanded as a hash because it's a PARAMS not a HASH.
+See the failing tests in t/vmethods/test.t
 
 =head2 template_path
 

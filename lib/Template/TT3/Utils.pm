@@ -21,7 +21,7 @@ our @ADVICE = (
     'Did you read the documentation?',
     'Eat more fruit and vegetables.',
     'Chew your food properly before swallowing.',
-    'Get lots of excercise.',
+    'Get lots of exercise.',
     "Don't run with scissors.",
     'Never look a gift horse in the mouth.',
     "Don't give a badger vodka to drink.  They prefer beer.",
