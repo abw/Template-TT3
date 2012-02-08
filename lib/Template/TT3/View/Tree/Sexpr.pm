@@ -18,6 +18,8 @@ use Template::TT3::Class
         FILENAME_FORMAT     => '<filename:%s>',
         HASH_FORMAT         => "<hash:%s>",
         KEYWORD_FORMAT      => '<keyword:%s>',
+        LIST_FORMAT         => '<list:%s>',
+        HASH_FORMAT         => '<hash:%s>',
         NUMBER_FORMAT       => '<number:%s>',
         PARENS_FORMAT       => "<parens:%s>",
         POSTFIX_FORMAT      => '<postfix:<op:%s>%s>', 
@@ -217,7 +219,7 @@ sub view_dot {
     my $rhs  = $dot->[RHS]->view($self);
     my $args = $dot->[ARGS];
     $args = $args 
-        ? $args->view($self)
+        ? $self->view_args($args->[EXPR])
         : '<args:>';
     for ($lhs, $rhs, $args) {
         next unless length;
@@ -238,6 +240,19 @@ sub view_parens {
         $self->PARENS_FORMAT,
         $parens->[EXPR]->view($self)
     )
+}
+
+
+sub view_list {
+    my ($self, $list) = @_;
+    return $self->view_block( $list->[EXPR], $self->LIST_FORMAT );
+
+}
+
+
+sub view_hash {
+    my ($self, $hash) = @_;
+    return $self->view_block( $hash->[EXPR], $self->HASH_FORMAT );
 }
 
 

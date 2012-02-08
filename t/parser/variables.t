@@ -148,7 +148,7 @@ list.join(', ')
 -- expect --
 <dot:
   <variable:list>
-  <literal:join>
+  <word:join>
   <args:
     <squote:', '>
   >
